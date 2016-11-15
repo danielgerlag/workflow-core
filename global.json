@@ -1,0 +1,6 @@
+{
+  "projects": [ "src", "test", "src/providers" ],
+  "sdk": {
+    "version": "1.0.0-preview2-003131"
+  }
+}
