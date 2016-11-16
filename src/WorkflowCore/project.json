@@ -1,5 +1,7 @@
 {
+  "title": "Workflow Core",
   "version": "1.0.0-*",
+  "authors": [ "Daniel Gerlag" ],
 
   "dependencies": {
     "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0",
@@ -13,6 +15,19 @@
   "frameworks": {
     "netstandard1.6": {
       "imports": "dnxcore50"
+    }
+  },
+
+  "packOptions": {
+    "summary": "Workflow Core is a light weight workflow engine targeting .NET Standard 1.6.  It supports pluggable persistence and concurrency providers to allow for multi-node clusters.",
+    "tags": [ "workflow", ".NET", "Core", "state machine" ],
+    "owners": [ "Daniel Gerlag" ],
+    "projectUrl": "https://github.com/danielgerlag/workflow-core",
+    "licenseUrl": "https://github.com/danielgerlag/workflow-core/blob/master/LICENSE.md",
+    "requireLicenseAcceptance": false,
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/danielgerlag/workflow-core.git"
     }
   }
 }

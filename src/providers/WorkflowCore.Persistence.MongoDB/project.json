@@ -1,4 +1,6 @@
 {
+  "title": "Workflow Core MongoDB Persistence Provider",
+  "authors": [ "Daniel Gerlag" ],
   "version": "1.0.0-*",
 
   "dependencies": {
@@ -12,6 +14,19 @@
   "frameworks": {
     "netstandard1.6": {
       "imports": "dnxcore50"
+    }
+  },
+
+  "packOptions": {
+    "summary": "A persistence provider for WorkflowCore using MongoDB",
+    "tags": [ "workflow", ".NET", "Core", "state machine", "WorkflowCore", "MongoDB", "Mongo" ],
+    "owners": [ "Daniel Gerlag" ],
+    "projectUrl": "https://github.com/danielgerlag/workflow-core",
+    "licenseUrl": "https://github.com/danielgerlag/workflow-core/blob/master/LICENSE.md",
+    "requireLicenseAcceptance": false,
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/danielgerlag/workflow-core.git"
     }
   }
 }
