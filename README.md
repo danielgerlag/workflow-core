@@ -2,6 +2,15 @@
 
 Workflow Core is a light weight workflow engine targeting .NET Standard 1.6.  It supports pluggable persistence and concurrency providers to allow for multi-node clusters.
 
+## Installing
+
+Install the NuGet package "WorkflowCore"
+
+```
+Install-Package WorkflowCore -Pre
+```
+
+
 ## Basic Concepts
 
 A workflow consists of a series of connected steps.  Each step produces an outcome value and subsequent steps are triggered by subscribing to a particular outcome of a preceeding step.  The default outcome of *null* can be used for a basic linear workflow.
@@ -30,17 +39,31 @@ public class HelloWorldWorkflow : IWorkflow
         builder
             .StartWith<HelloWorld>()
             .Then<GoodbyeWorld>();
-    }
+    }  
+    ...
+}
+```
 
-    public string Id
+or define your steps inline
+
+```C#
+public class HelloWorldWorkflow : IWorkflow
+{
+    public void Build(IWorkflowBuilder<object> builder)
     {
-        get { return "HelloWorld"; }
+        builder
+            .StartWith(context =>
+            {
+                Console.WriteLine("Hello world");
+                return new ExecutionResult(null);
+            })
+            .Then(context =>
+            {
+                Console.WriteLine("Goodbye world");
+                return new ExecutionResult(null);
+            })
     }
-
-    public int Version 
-    { 
-        get { return 1; }
-    }        
+    ...
 }
 ```
 
