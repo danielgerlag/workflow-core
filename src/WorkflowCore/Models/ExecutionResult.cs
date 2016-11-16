@@ -11,7 +11,7 @@ namespace WorkflowCore.Models
 
         public object OutcomeValue { get; set; }
 
-        public DateTime? SleepUntil { get; set; }
+        public TimeSpan? SleepFor { get; set; }
 
         public object PersistenceData { get; set; }
 

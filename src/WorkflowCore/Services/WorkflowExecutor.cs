@@ -30,7 +30,7 @@ namespace WorkflowCore.Services
 
         public async Task Execute(WorkflowInstance workflow, WorkflowOptions options)
         {
-            List<ExecutionPointer> exePointers = new List<ExecutionPointer>(workflow.ExecutionPointers.Where(x => x.Active));
+            List<ExecutionPointer> exePointers = new List<ExecutionPointer>(workflow.ExecutionPointers.Where(x => x.Active && (!x.SleepUntil.HasValue || x.SleepUntil < DateTime.Now.ToUniversalTime())));
             var def = _registry.GetDefinition(workflow.WorkflowDefinitionId, workflow.Version);
             if (def == null)
             {
@@ -79,7 +79,7 @@ namespace WorkflowCore.Services
                             if (body == null)
                             {
                                 _logger.LogError("Unable to construct step body {0}", step.BodyType.ToString());
-                                pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(options.errorRetryInterval);
+                                pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(options.ErrorRetryInterval);
                                 pointer.Errors.Add(new ExecutionError()
                                 {
                                     ErrorTime = DateTime.Now.ToUniversalTime(),
@@ -135,13 +135,14 @@ namespace WorkflowCore.Services
                         else
                         {
                             pointer.PersistenceData = result.PersistenceData;
-                            pointer.SleepUntil = result.SleepUntil;
+                            if (result.SleepFor.HasValue)
+                                pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(result.SleepFor.Value);
                         }
                     }
                     catch (Exception ex)
                     {
                         _logger.LogError("Workflow {0} raised error on step {1} Message: {2}", workflow.Id, pointer.StepId, ex.Message);
-                        pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(options.errorRetryInterval);
+                        pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(options.ErrorRetryInterval);
                         pointer.Errors.Add(new ExecutionError()
                         {
                             ErrorTime = DateTime.Now.ToUniversalTime(),
@@ -154,7 +155,7 @@ namespace WorkflowCore.Services
                 else
                 {
                     _logger.LogError("Unable to find step {0} in workflow definition", pointer.StepId);
-                    pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(options.errorRetryInterval);
+                    pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(options.ErrorRetryInterval);
                     pointer.Errors.Add(new ExecutionError()
                     {
                         ErrorTime = DateTime.Now.ToUniversalTime(),

@@ -35,7 +35,7 @@ namespace WorkflowCore.Models
             {
                 Proceed = false,
                 PersistenceData = persistenceData,
-                SleepUntil = DateTime.Now.ToUniversalTime().Add(sleep)
+                SleepFor = sleep
             };
         }
 

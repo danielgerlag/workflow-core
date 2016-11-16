@@ -10,37 +10,37 @@ namespace WorkflowCore.Models
     public class WorkflowOptions
     {
 
-        internal Func<IServiceProvider, IPersistenceProvider> persistanceFactory;
-        internal Func<IServiceProvider, IConcurrencyProvider> concurrencyFactory;
-        internal int threadCount;
-        internal TimeSpan pollInterval;
-        internal TimeSpan idleTime;
-        internal TimeSpan errorRetryInterval;
+        internal Func<IServiceProvider, IPersistenceProvider> PersistanceFactory;
+        internal Func<IServiceProvider, IConcurrencyProvider> ConcurrencyFactory;
+        internal int ThreadCount;
+        internal TimeSpan PollInterval;
+        internal TimeSpan IdleTime;
+        internal TimeSpan ErrorRetryInterval;
 
         public WorkflowOptions()
         {
             //set defaults
-            threadCount = 1; // Environment.ProcessorCount;
-            pollInterval = TimeSpan.FromSeconds(10);
-            idleTime = TimeSpan.FromMilliseconds(500);
-            errorRetryInterval = TimeSpan.FromSeconds(10);
+            ThreadCount = Environment.ProcessorCount;
+            PollInterval = TimeSpan.FromSeconds(10);
+            IdleTime = TimeSpan.FromMilliseconds(500);
+            ErrorRetryInterval = TimeSpan.FromSeconds(60);
 
-            concurrencyFactory = new Func<IServiceProvider, IConcurrencyProvider>(sp => new SingleNodeConcurrencyProvider());
+            ConcurrencyFactory = new Func<IServiceProvider, IConcurrencyProvider>(sp => new SingleNodeConcurrencyProvider());
         }
 
         public void UsePersistence(Func<IServiceProvider, IPersistenceProvider> factory)
         {
-            persistanceFactory = factory;
+            PersistanceFactory = factory;
         }
 
         public void UseThreads(int count)
         {
-            threadCount = count;
+            ThreadCount = count;
         }
 
         public void UsePollInterval(TimeSpan interval)
         {
-            pollInterval = interval;
+            PollInterval = interval;
         }
 
     }

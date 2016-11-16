@@ -7,22 +7,26 @@ using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Services;
 
-namespace WorkflowCore.Sample01
+
+namespace WorkflowCore.Sample03
 {
     public class Program
     {
-        
         public static void Main(string[] args)
         {
             IServiceProvider serviceProvider = ConfigureServices();
 
             //start the workflow runtime
-            var runtime = serviceProvider.GetService<IWorkflowRuntime>();            
-            runtime.RegisterWorkflow<HelloWorldWorkflow>();
+            var runtime = serviceProvider.GetService<IWorkflowRuntime>();
+            runtime.RegisterWorkflow<PassingDataWorkflow, MyDataClass>();
             runtime.StartRuntime();
 
-            runtime.StartWorkflow("HelloWorld", 1, null);
-            
+            var initialData = new MyDataClass();
+            initialData.Value1 = 2;
+            initialData.Value2 = 3;
+
+            runtime.StartWorkflow("PassingDataWorkflow", 1, initialData);
+
             Console.ReadLine();
             runtime.StopRuntime();
         }
@@ -40,11 +44,9 @@ namespace WorkflowCore.Sample01
             var serviceProvider = services.BuildServiceProvider();
 
             //config logging
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();            
+            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             loggerFactory.AddDebug();
             return serviceProvider;
         }
-
-
     }
 }

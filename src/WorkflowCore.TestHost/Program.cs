@@ -39,17 +39,20 @@ namespace WorkflowCore.TestHost
 
             //start the workflow runtime
             var runtime = serviceProvider.GetService<IWorkflowRuntime>();
-            var registry = serviceProvider.GetService<IWorkflowRegistry>();
-            
-            registry.RegisterWorkflow(new SimpleDecisionWorkflow());
-            registry.RegisterWorkflow(new PassingDataWorkflow());
-            registry.RegisterWorkflow(new EventSampleWorkflow());
+            //var registry = serviceProvider.GetService<IWorkflowRegistry>();
+
+            //runtime.RegisterWorkflow<SimpleDecisionWorkflow>();
+            runtime.RegisterWorkflow<PassingDataWorkflow, MyDataClass>();
+
+            //registry.RegisterWorkflow(new SimpleDecisionWorkflow());
+            //registry.RegisterWorkflow(new PassingDataWorkflow());
+            //registry.RegisterWorkflow(new EventSampleWorkflow());
             runtime.StartRuntime();
 
             //HelloWorldWorkflow(registry, runtime);
             //SimpleDecisionWorkflow(registry, runtime);
             //PassingDataSample(registry, runtime);
-            EventSample(registry, runtime);
+            //EventSample(registry, runtime);
 
             runtime.StopRuntime();
         }

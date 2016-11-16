@@ -4,13 +4,34 @@ using System.Linq;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
-using WorkflowCore.TestHost.CustomData;
-using WorkflowCore.TestHost.CustomSteps;
+using WorkflowCore.Sample03.Steps;
 
-namespace WorkflowCore.TestHost.Workflows
+namespace WorkflowCore.Sample03
 {
     public class PassingDataWorkflow : IWorkflow<MyDataClass>
-    {
+    {  
+        public void Build(IWorkflowBuilder<MyDataClass> builder)
+        {
+            builder
+                .StartWith(context =>
+                {
+                    Console.WriteLine("Starting workflow...");
+                    return new ExecutionResult(null);
+                })
+                .Then<AddNumbers>()
+                    .Input(step => step.Input1, data => data.Value1)
+                    .Input(step => step.Input2, data => data.Value2)
+                    .Output(data => data.Value3, step => step.Output)
+                .Then<CustomMessage>()
+                    .Name("Print custom message")
+                    .Input(step => step.Message, data => "The answer is " + data.Value3.ToString())
+                .Then(context =>
+                    {
+                        Console.WriteLine("Workflow comeplete");
+                        return new ExecutionResult(null);
+                    });
+        }
+
         public string Id
         {
             get
@@ -25,28 +46,6 @@ namespace WorkflowCore.TestHost.Workflows
             {
                 return 1;
             }
-        }
-
-        public void Build(IWorkflowBuilder<MyDataClass> builder)
-        {
-            builder
-                .StartWith(context =>
-                {
-                    Console.WriteLine("start 123");
-                    return new ExecutionResult(null);
-                })
-                .Then<AddNumbers>()
-                    .Input(step => step.Input1, data => data.Value1)
-                    .Input(step => step.Input2, data => data.Value2)
-                    .Output(data => data.Value3, step => step.Output)
-                .Then<CustomMessage>()
-                    .Name("Print custom message")
-                    .Input(step => step.Message, data => "The answer is " + data.Value3.ToString())
-                .Then(context =>
-                    {
-                        Console.WriteLine("from inline step");
-                        return new ExecutionResult(null);
-                    });
         }
     }
 }

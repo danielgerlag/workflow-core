@@ -38,6 +38,7 @@ namespace WorkflowCore.Services
         }
 
         public void RegisterWorkflow<TData>(IWorkflow<TData> workflow)
+            where TData : new()
         {
             if (_registry.Any(x => x.Item1 == workflow.Id && x.Item2 == workflow.Version))
                 throw new Exception(String.Format("Workflow {0} version {1} is already registed", workflow.Id, workflow.Version));

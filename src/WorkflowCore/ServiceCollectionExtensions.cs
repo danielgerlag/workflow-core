@@ -16,8 +16,8 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             WorkflowOptions options = new WorkflowOptions();
             setupAction.Invoke(options);
-            services.AddSingleton<IPersistenceProvider>(options.persistanceFactory);
-            services.AddSingleton<IConcurrencyProvider>(options.concurrencyFactory);
+            services.AddSingleton<IPersistenceProvider>(options.PersistanceFactory);
+            services.AddSingleton<IConcurrencyProvider>(options.ConcurrencyFactory);
             services.AddSingleton<IWorkflowRegistry, WorkflowRegistry>();
 
             services.AddSingleton<IWorkflowRuntime, WorkflowRuntime>(sp => 

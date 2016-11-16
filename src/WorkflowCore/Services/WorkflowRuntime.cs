@@ -59,7 +59,7 @@ namespace WorkflowCore.Services
         public void StartRuntime()
         {
             _shutdown = false;
-            for (int i = 0; i < _options.threadCount; i++)
+            for (int i = 0; i < _options.ThreadCount; i++)
             {
                 _logger.LogInformation("Starting worker thread #{0}", i);
                 Thread thread = new Thread(RunWorkflows);
@@ -72,7 +72,7 @@ namespace WorkflowCore.Services
             _threads.Add(pubThread);
             pubThread.Start();
 
-            _pollTimer = new Timer(new TimerCallback(PollRunnables), null, TimeSpan.FromSeconds(0), _options.pollInterval);
+            _pollTimer = new Timer(new TimerCallback(PollRunnables), null, TimeSpan.FromSeconds(0), _options.PollInterval);
         }
 
         public void StopRuntime()
@@ -161,7 +161,7 @@ namespace WorkflowCore.Services
                     }
                     else
                     {
-                        Thread.Sleep(_options.idleTime); //no work
+                        Thread.Sleep(_options.IdleTime); //no work
                     }
 
                 }
@@ -223,7 +223,7 @@ namespace WorkflowCore.Services
                     }
                     else
                     {
-                        Thread.Sleep(_options.idleTime); //no work
+                        Thread.Sleep(_options.IdleTime); //no work
                     }
 
                 }
@@ -242,6 +242,7 @@ namespace WorkflowCore.Services
                 var runnables = _persistenceStore.GetRunnableInstances().Result;
                 foreach (var item in runnables)
                 {
+                    _logger.LogDebug("Got runnable instance {0}", item);
                     _concurrencyProvider.EnqueueForProcessing(item);
                 }
             }
@@ -251,5 +252,19 @@ namespace WorkflowCore.Services
             }
         }
 
+        public void RegisterWorkflow<TWorkflow>() 
+            where TWorkflow : IWorkflow, new()
+        {
+            TWorkflow wf = new TWorkflow();
+            _registry.RegisterWorkflow(wf);
+        }
+
+        public void RegisterWorkflow<TWorkflow, TData>() 
+            where TWorkflow : IWorkflow<TData>, new()
+            where TData : new()
+        {
+            TWorkflow wf = new TWorkflow();
+            _registry.RegisterWorkflow<TData>(wf);
+        }
     }
 }

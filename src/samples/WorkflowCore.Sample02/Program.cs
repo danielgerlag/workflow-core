@@ -7,22 +7,22 @@ using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Services;
 
-namespace WorkflowCore.Sample01
+
+namespace WorkflowCore.Sample02
 {
     public class Program
     {
-        
         public static void Main(string[] args)
         {
             IServiceProvider serviceProvider = ConfigureServices();
 
             //start the workflow runtime
-            var runtime = serviceProvider.GetService<IWorkflowRuntime>();            
-            runtime.RegisterWorkflow<HelloWorldWorkflow>();
+            var runtime = serviceProvider.GetService<IWorkflowRuntime>();
+            runtime.RegisterWorkflow<SimpleDecisionWorkflow>();
             runtime.StartRuntime();
 
-            runtime.StartWorkflow("HelloWorld", 1, null);
-            
+            runtime.StartWorkflow("Simple Decision Workflow", 1, null);
+
             Console.ReadLine();
             runtime.StopRuntime();
         }
@@ -40,11 +40,9 @@ namespace WorkflowCore.Sample01
             var serviceProvider = services.BuildServiceProvider();
 
             //config logging
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();            
+            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             loggerFactory.AddDebug();
             return serviceProvider;
         }
-
-
     }
 }

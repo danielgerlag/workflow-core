@@ -3,26 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
-using WorkflowCore.TestHost.CustomSteps;
+using WorkflowCore.Sample02.Steps;
 
-namespace WorkflowCore.TestHost.Workflows
+namespace WorkflowCore.Sample02
 {
     public class SimpleDecisionWorkflow : IWorkflow
     {
         public string Id
         {
-            get
-            {
-                return "Simple Decision Workflow";
-            }
+            get { return "Simple Decision Workflow"; }
         }
 
         public int Version
         {
-            get
-            {
-                return 1;
-            }
+            get { return 1; }
         }
 
         public void Build(IWorkflowBuilder<object> builder)
@@ -35,12 +29,12 @@ namespace WorkflowCore.TestHost.Workflows
                         .Then<CustomMessage>(cm =>
                         {
                             cm.Name("Print custom message");
-                            cm.Input(step => step.Message, data => "BOO!!!");
+                            cm.Input(step => step.Message, data => "Looping back....");
                         })
                         .Then(randomOutput);  //loop back to randomOutput
 
                     randomOutput.When(1)
-                        .Then<HelloWorld>();
+                        .Then<GoodbyeWorld>();
                 });
         }
     }

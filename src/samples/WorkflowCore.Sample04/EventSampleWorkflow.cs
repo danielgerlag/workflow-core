@@ -4,10 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
-using WorkflowCore.TestHost.CustomData;
-using WorkflowCore.TestHost.CustomSteps;
+using WorkflowCore.Sample04.Steps;
 
-namespace WorkflowCore.TestHost.Workflows
+namespace WorkflowCore.Sample04
 {
     public class EventSampleWorkflow : IWorkflow<MyDataClass>
     {
@@ -32,17 +31,16 @@ namespace WorkflowCore.TestHost.Workflows
             builder
                 .StartWith(context =>
                 {
-                    Console.WriteLine("start 123");
                     return new ExecutionResult(null);
                 })
                 .WaitFor("MyEvent", "0")
                     .Output(data => data.StrValue, step => step.EventData)
                 .Then<CustomMessage>()
                     .Name("Print custom message")
-                    .Input(step => step.Message, data => "The answer is " + data.StrValue)
+                    .Input(step => step.Message, data => "The data from the event is " + data.StrValue)
                 .Then(context =>
                 {
-                    Console.WriteLine("from inline step");
+                    Console.WriteLine("workflow complete");
                     return new ExecutionResult(null);
                 });
         }

@@ -1,28 +1,34 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
+using WorkflowCore.Persistence.MongoDB.Services;
 using WorkflowCore.Services;
 
-namespace WorkflowCore.Sample01
+namespace WorkflowCore.Sample04
 {
     public class Program
     {
-        
         public static void Main(string[] args)
         {
             IServiceProvider serviceProvider = ConfigureServices();
 
             //start the workflow runtime
-            var runtime = serviceProvider.GetService<IWorkflowRuntime>();            
-            runtime.RegisterWorkflow<HelloWorldWorkflow>();
+            var runtime = serviceProvider.GetService<IWorkflowRuntime>();
+            runtime.RegisterWorkflow<EventSampleWorkflow, MyDataClass>();
             runtime.StartRuntime();
 
-            runtime.StartWorkflow("HelloWorld", 1, null);
-            
+            var initialData = new MyDataClass();
+            runtime.StartWorkflow("EventSampleWorkflow", 1, initialData);
+
+            Console.WriteLine("Enter value to publish");
+            string value = Console.ReadLine();
+            runtime.PublishEvent("MyEvent", "0", value);
+
             Console.ReadLine();
             runtime.StopRuntime();
         }
@@ -37,14 +43,25 @@ namespace WorkflowCore.Sample01
                 wf.UsePersistence(sp => new MemoryPersistenceProvider());
                 wf.UseThreads(1);
             });
+
+            //services.AddWorkflow(wf =>
+            //{
+            //    wf.UseThreads(1);
+            //    wf.UsePersistence(sp =>
+            //    {
+            //        var client = new MongoClient(@"mongodb://localhost:27017");
+            //        var db = client.GetDatabase("workflow");
+            //        return new MongoPersistenceProvider(db);
+            //    });
+            //});
+        
+
             var serviceProvider = services.BuildServiceProvider();
 
             //config logging
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();            
+            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             loggerFactory.AddDebug();
             return serviceProvider;
         }
-
-
     }
 }
