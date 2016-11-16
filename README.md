@@ -39,17 +39,31 @@ public class HelloWorldWorkflow : IWorkflow
         builder
             .StartWith<HelloWorld>()
             .Then<GoodbyeWorld>();
-    }
+    }  
+    ...
+}
+```
 
-    public string Id
+or define your steps inline
+
+```C#
+public class HelloWorldWorkflow : IWorkflow
+{
+    public void Build(IWorkflowBuilder<object> builder)
     {
-        get { return "HelloWorld"; }
+        builder
+            .StartWith(context =>
+            {
+                Console.WriteLine("Hello world");
+                return new ExecutionResult(null);
+            })
+            .Then(context =>
+            {
+                Console.WriteLine("Goodbye world");
+                return new ExecutionResult(null);
+            })
     }
-
-    public int Version 
-    { 
-        get { return 1; }
-    }        
+    ...
 }
 ```
 
