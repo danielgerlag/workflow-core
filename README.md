@@ -195,9 +195,13 @@ runtime.StopRuntime();
 ## Samples
 
 [Hello World](src/samples/WorkflowCore.Sample01)
+
 [Multiple outcomes & looping](src/samples/WorkflowCore.Sample02)
+
 [Passing Data](src/samples/WorkflowCore.Sample03)
+
 [Events](src/samples/WorkflowCore.Sample04)
+
 [Deferred execution & re-entrant steps](src/samples/WorkflowCore.Sample05)
 
 
