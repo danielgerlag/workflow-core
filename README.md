@@ -168,7 +168,24 @@ runtime.PublishEvent("MyEvent", "0", "hello");
 
 ### Runtime
 
-*todo*
+The workflow runtime is the service responsible for executing workflows.  It does this by polling the persistence provider for workflow instances that are ready to run, executes them and then passes them back to the persistence provider to by stored for the next time they are run.  It is also responsible for publishing events to any workflows that may be waiting on one.
+
+#### Setup
+
+Use the *AddWorkflow* extension method for *IServiceCollection* to configure the workflow runtime upon startup of your application.
+
+```C#
+services.AddWorkflow(wf =>
+{
+    wf.UsePersistence(sp => new MemoryPersistenceProvider());
+    wf.UseThreads(1);
+});
+```
+
+#### Usage
+
+When your application starts, grab the runtime from the built-in dependency injection framework *IServiceProvider*.  Make sure you call *RegisterWorkflow*, so that the runtime knows about all your workflows, and then call *StartRuntime()* to fire up the thread pool that executes workflows.  Use the *StartWorkflow* method to initiate a new instance of a particular workflow.
+
 
 ```C#
 var runtime = serviceProvider.GetService<IWorkflowRuntime>();            
