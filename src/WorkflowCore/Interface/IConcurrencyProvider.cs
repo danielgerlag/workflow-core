@@ -27,6 +27,8 @@ namespace WorkflowCore.Interface
 
         Task EnqueueForPublishing(EventPublication item);
 
+        Task EnqueueForDeferredPublishing(EventPublication item);
+
         Task<EventPublication> DequeueForPublishing();
 
     }

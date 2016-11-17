@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -16,16 +17,21 @@ namespace WorkflowCore.Services
                 
         private ConcurrentQueue<string> _runQueue = new ConcurrentQueue<string>();
         private ConcurrentQueue<EventPublication> _publishQueue = new ConcurrentQueue<EventPublication>();
+        private ConcurrentQueue<EventPublication> _deferredPublishQueue = new ConcurrentQueue<EventPublication>();
         private List<string> _locks = new List<string>();
+        private Timer _flushTimer;
 
         public void StartupNode()
         {
-            //read persisted publish queue from disk
+            //todo: read persisted publish queue from disk
+            _flushTimer = new Timer(new TimerCallback(FlushDeferredPublications), null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
         }
 
         public void ShutdownNode()
         {
-            //persist publish queue to disk
+            _flushTimer.Dispose();
+            FlushDeferredPublications(null);
+            //todo: persist publish queue to disk            
         }
 
         public async Task EnqueueForProcessing(string Id)
@@ -68,6 +74,11 @@ namespace WorkflowCore.Services
             _publishQueue.Enqueue(item);
         }
 
+        public async Task EnqueueForDeferredPublishing(EventPublication item)
+        {
+            _deferredPublishQueue.Enqueue(item);
+        }        
+
         public async Task<EventPublication> DequeueForPublishing()
         {
             EventPublication item;
@@ -78,6 +89,13 @@ namespace WorkflowCore.Services
             return null;
         }
 
+
+        private void FlushDeferredPublications(object state)
+        {
+            EventPublication pub;
+            while (_deferredPublishQueue.TryDequeue(out pub))
+                _publishQueue.Enqueue(pub);
+        }
 
     }
 }

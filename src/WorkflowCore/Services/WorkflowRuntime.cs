@@ -58,6 +58,7 @@ namespace WorkflowCore.Services
 
         public void StartRuntime()
         {
+            _concurrencyProvider.StartupNode();
             _shutdown = false;
             for (int i = 0; i < _options.ThreadCount; i++)
             {
@@ -90,11 +91,13 @@ namespace WorkflowCore.Services
                 th.Join();
 
             _logger.LogInformation("Worker threads stopped");
+            _concurrencyProvider.ShutdownNode();
         }
 
 
         public async Task SubscribeEvent(string workflowId, int stepId, string eventName, string eventKey)
         {
+            _logger.LogDebug("Subscribing to event {0} {1} for workflow {2} step {3}", eventName, eventKey, workflowId, stepId);
             EventSubscription subscription = new EventSubscription();
             subscription.WorkflowId = workflowId;
             subscription.StepId = stepId;
@@ -106,6 +109,7 @@ namespace WorkflowCore.Services
 
         public async Task PublishEvent(string eventName, string eventKey, object eventData)
         {
+            _logger.LogDebug("Publishing event {0} {1}", eventName, eventKey);
             var subs = await _persistenceStore.GetSubcriptions(eventName, eventKey);
             foreach (var sub in subs.ToList())
             {
@@ -201,9 +205,7 @@ namespace WorkflowCore.Services
                                 catch (Exception ex)
                                 {
                                     _logger.LogError(ex.Message);
-                                    _concurrencyProvider.EnqueueForPublishing(pub);
-                                    // todo: this is not good
-                                    // need to park failed items
+                                    _concurrencyProvider.EnqueueForDeferredPublishing(pub); //retry later                                    
                                 }
                                 finally
                                 {
@@ -214,6 +216,7 @@ namespace WorkflowCore.Services
                             else
                             {
                                 _logger.LogInformation("Workflow locked {0}", pub.WorkflowId);
+                                _concurrencyProvider.EnqueueForDeferredPublishing(pub); //retry later
                             }
                         }
                         catch (Exception ex)

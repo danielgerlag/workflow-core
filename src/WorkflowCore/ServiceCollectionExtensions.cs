@@ -12,11 +12,12 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        public static void AddWorkflow(this IServiceCollection services, Action<WorkflowOptions> setupAction)
+        public static void AddWorkflow(this IServiceCollection services, Action<WorkflowOptions> setupAction = null)
         {
             WorkflowOptions options = new WorkflowOptions();
-            setupAction.Invoke(options);
-            services.AddSingleton<IPersistenceProvider>(options.PersistanceFactory);
+            if (setupAction != null)
+                setupAction.Invoke(options);
+            services.AddTransient<IPersistenceProvider>(options.PersistanceFactory);
             services.AddSingleton<IConcurrencyProvider>(options.ConcurrencyFactory);
             services.AddSingleton<IWorkflowRegistry, WorkflowRegistry>();
 
@@ -30,8 +31,6 @@ namespace Microsoft.Extensions.DependencyInjection
             );
             services.AddTransient<IWorkflowExecutor, WorkflowExecutor>();
             services.AddTransient<IWorkflowBuilder, WorkflowBuilder>();
-
-
         }
     }
 }

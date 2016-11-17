@@ -36,11 +36,7 @@ namespace WorkflowCore.Sample03
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
-            services.AddWorkflow(wf =>
-            {
-                wf.UsePersistence(sp => new MemoryPersistenceProvider());
-                wf.UseThreads(1);
-            });
+            services.AddWorkflow();
             var serviceProvider = services.BuildServiceProvider();
 
             //config logging

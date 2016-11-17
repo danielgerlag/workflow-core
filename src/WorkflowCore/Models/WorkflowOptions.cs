@@ -9,7 +9,6 @@ namespace WorkflowCore.Models
 {
     public class WorkflowOptions
     {
-
         internal Func<IServiceProvider, IPersistenceProvider> PersistanceFactory;
         internal Func<IServiceProvider, IConcurrencyProvider> ConcurrencyFactory;
         internal int ThreadCount;
@@ -26,6 +25,7 @@ namespace WorkflowCore.Models
             ErrorRetryInterval = TimeSpan.FromSeconds(60);
 
             ConcurrencyFactory = new Func<IServiceProvider, IConcurrencyProvider>(sp => new SingleNodeConcurrencyProvider());
+            PersistanceFactory = new Func<IServiceProvider, IPersistenceProvider>(sp => new MemoryPersistenceProvider());
         }
 
         public void UsePersistence(Func<IServiceProvider, IPersistenceProvider> factory)

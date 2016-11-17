@@ -14,8 +14,8 @@ namespace WorkflowCore.Services
     public class MemoryPersistenceProvider : IPersistenceProvider
     {
 
-        private List<WorkflowInstance> _instances = new List<WorkflowInstance>();
-        private List<EventSubscription> _subscriptions = new List<EventSubscription>();
+        private static List<WorkflowInstance> _instances = new List<WorkflowInstance>();
+        private static List<EventSubscription> _subscriptions = new List<EventSubscription>();
         
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
         {

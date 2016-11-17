@@ -38,15 +38,10 @@ namespace WorkflowCore.Sample04
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
-            services.AddWorkflow(wf =>
-            {
-                wf.UsePersistence(sp => new MemoryPersistenceProvider());
-                wf.UseThreads(1);
-            });
+            services.AddWorkflow();
 
             //services.AddWorkflow(wf =>
             //{
-            //    wf.UseThreads(1);
             //    wf.UsePersistence(sp =>
             //    {
             //        var client = new MongoClient(@"mongodb://localhost:27017");
@@ -54,7 +49,7 @@ namespace WorkflowCore.Sample04
             //        return new MongoPersistenceProvider(db);
             //    });
             //});
-        
+
 
             var serviceProvider = services.BuildServiceProvider();
 

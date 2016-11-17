@@ -173,13 +173,10 @@ The workflow runtime is the service responsible for executing workflows.  It doe
 #### Setup
 
 Use the *AddWorkflow* extension method for *IServiceCollection* to configure the workflow runtime upon startup of your application.
+By default, it is configured with *MemoryPersistenceProvider* and *SingleNodeConcurrencyProvider* for testing purposes.  You can also configure a DB persistence provider at this point.
 
 ```C#
-services.AddWorkflow(wf =>
-{
-    wf.UsePersistence(sp => new MemoryPersistenceProvider());
-    wf.UseThreads(1);
-});
+services.AddWorkflow();
 ```
 
 #### Usage

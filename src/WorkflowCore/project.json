@@ -1,6 +1,6 @@
 {
   "title": "Workflow Core",
-  "version": "1.0.0-*",
+  "version": "1.0.0-beta2",
   "authors": [ "Daniel Gerlag" ],
 
   "dependencies": {
