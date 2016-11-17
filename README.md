@@ -126,23 +126,13 @@ public class PassingDataWorkflow : IWorkflow<MyDataClass>
 {  
     public void Build(IWorkflowBuilder<MyDataClass> builder)
     {
-        builder
-            .StartWith(context =>
-            {
-                Console.WriteLine("Starting workflow...");
-                return new ExecutionResult(null);
-            })
-            .Then<AddNumbers>()
+        builder            
+            .StartWith<AddNumbers>()
                 .Input(step => step.Input1, data => data.Value1)
                 .Input(step => step.Input2, data => data.Value2)
                 .Output(data => data.Value3, step => step.Output)
             .Then<CustomMessage>()
-                .Input(step => step.Message, data => "The answer is " + data.Value3.ToString())
-            .Then(context =>
-                {
-                    Console.WriteLine("Workflow comeplete");
-                    return new ExecutionResult(null);
-                });
+                .Input(step => step.Message, data => "The answer is " + data.Value3.ToString());
     }
     ...
 }
@@ -161,17 +151,13 @@ public class EventSampleWorkflow : IWorkflow<MyDataClass>
         builder
             .StartWith(context =>
             {
+                Console.WriteLine("workflow started");
                 return new ExecutionResult(null);
             })
             .WaitFor("MyEvent", "0")
-                .Output(data => data.StrValue, step => step.EventData)
+                .Output(data => data.Value, step => step.EventData)
             .Then<CustomMessage>()
-                .Input(step => step.Message, data => "The data from the event is " + data.StrValue)
-            .Then(context =>
-            {
-                Console.WriteLine("workflow complete");
-                return new ExecutionResult(null);
-            });
+                .Input(step => step.Message, data => "The data from the event is " + data.Value);
     }
 }
 ...
@@ -208,7 +194,12 @@ runtime.StopRuntime();
 
 ## Samples
 
-*todo*
+[Hello World](src/samples/WorkflowCore.Sample01)
+[Multiple outcomes & looping](src/samples/WorkflowCore.Sample02)
+[Passing Data](src/samples/WorkflowCore.Sample03)
+[Events](src/samples/WorkflowCore.Sample04)
+[Deferred execution & re-entrant steps](src/samples/WorkflowCore.Sample05)
+
 
 ## Authors
 
