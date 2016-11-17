@@ -29,6 +29,7 @@ namespace WorkflowCore.Interface
 
         Task TerminateSubscription(string eventSubscriptionId);
 
+        void EnsureStoreExists();
 
     }
 }

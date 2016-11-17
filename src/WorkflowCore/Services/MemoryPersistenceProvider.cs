@@ -61,6 +61,9 @@ namespace WorkflowCore.Services
             var sub = _subscriptions.Single(x => x.Id == eventSubscriptionId);
             _subscriptions.Remove(sub);
         }
-        
+
+        public void EnsureStoreExists()
+        {            
+        }
     }
 }

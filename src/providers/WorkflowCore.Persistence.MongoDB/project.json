@@ -7,7 +7,7 @@
     "MongoDB.Driver": "2.3.0",
     "NETStandard.Library": "1.6.0",
     "System.Linq.Dynamic.Core": "1.0.6.8",
-    "System.Reflection": "4.1.0",
+    "System.Reflection": "4.3.0",
     "WorkflowCore": "1.0.0-*"
   },
 

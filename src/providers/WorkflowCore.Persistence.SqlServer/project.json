@@ -1,15 +1,13 @@
 {
-  "title": "Workflow Core",
-  "version": "1.0.0-beta2",
+  "title": "Workflow Core SQL Server Persistence Provider",
   "authors": [ "Daniel Gerlag" ],
+  "version": "1.0.0-beta3",
 
   "dependencies": {
-    "Microsoft.Extensions.DependencyInjection.Abstractions": "1.1.0",
-    "Microsoft.Extensions.Logging": "1.1.0",
+    "Microsoft.EntityFrameworkCore.SqlServer": "1.1.0",
     "NETStandard.Library": "1.6.0",
-    "System.Reflection": "4.3.0",
-    "System.Reflection.TypeExtensions": "4.3.0",
-    "System.Threading.Thread": "4.3.0"
+    "WorkflowCore": "1.0.0-*",
+    "WorkflowCore.Persistence.EntityFramework": "1.0.0-beta3"
   },
 
   "frameworks": {
@@ -19,8 +17,8 @@
   },
 
   "packOptions": {
-    "summary": "Workflow Core is a light weight workflow engine targeting .NET Standard 1.6.  It supports pluggable persistence and concurrency providers to allow for multi-node clusters.",
-    "tags": [ "workflow", ".NET", "Core", "state machine" ],
+    "summary": "A persistence provider for WorkflowCore using SQL Server",
+    "tags": [ "workflow", ".NET", "Core", "state machine", "WorkflowCore" ],
     "owners": [ "Daniel Gerlag" ],
     "projectUrl": "https://github.com/danielgerlag/workflow-core",
     "licenseUrl": "https://github.com/danielgerlag/workflow-core/blob/master/LICENSE.md",

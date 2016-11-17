@@ -13,22 +13,20 @@ namespace WorkflowCore.Services
     public class WorkflowExecutor : IWorkflowExecutor
     {
 
-        protected readonly IWorkflowRuntime _runtime;
-        protected readonly IPersistenceProvider _persistenceStore;
+        protected readonly IWorkflowRuntime _runtime;        
         protected readonly IWorkflowRegistry _registry;
         protected readonly IServiceProvider _serviceProvider;
         protected readonly ILogger _logger;
 
-        public WorkflowExecutor(IWorkflowRuntime runtime, IPersistenceProvider persistenceStore, IWorkflowRegistry registry, IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
+        public WorkflowExecutor(IWorkflowRuntime runtime, IWorkflowRegistry registry, IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
-            _runtime = runtime;
-            _persistenceStore = persistenceStore;
+            _runtime = runtime;            
             _serviceProvider = serviceProvider;
             _registry = registry;
             _logger = loggerFactory.CreateLogger<WorkflowExecutor>();
         }
 
-        public async Task Execute(WorkflowInstance workflow, WorkflowOptions options)
+        public async Task Execute(WorkflowInstance workflow, IPersistenceProvider persistenceStore, WorkflowOptions options)
         {
             List<ExecutionPointer> exePointers = new List<ExecutionPointer>(workflow.ExecutionPointers.Where(x => x.Active && (!x.SleepUntil.HasValue || x.SleepUntil < DateTime.Now.ToUniversalTime())));
             var def = _registry.GetDefinition(workflow.WorkflowDefinitionId, workflow.Version);
@@ -50,7 +48,7 @@ namespace WorkflowCore.Services
                             pointer.EventKey = (step as ISubscriptionStep).EventKey;
                             pointer.EventName = (step as ISubscriptionStep).EventName;
                             pointer.Active = false;
-                            await _persistenceStore.PersistWorkflow(workflow);
+                            await persistenceStore.PersistWorkflow(workflow);
                             await _runtime.SubscribeEvent(workflow.Id, pointer.StepId, pointer.EventName, pointer.EventKey);
                             continue;
                         }
@@ -150,7 +148,7 @@ namespace WorkflowCore.Services
                         });
                     }
 
-                    await _persistenceStore.PersistWorkflow(workflow);
+                    await persistenceStore.PersistWorkflow(workflow);
                 }
                 else
                 {
@@ -165,7 +163,7 @@ namespace WorkflowCore.Services
 
             }
             DetermineNextExecutionTime(workflow);
-            await _persistenceStore.PersistWorkflow(workflow);
+            await persistenceStore.PersistWorkflow(workflow);
         }
 
 

@@ -34,18 +34,8 @@ namespace WorkflowCore.Sample05
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
             services.AddWorkflow();
-
-            //services.AddWorkflow(wf =>
-            //{
-            //    wf.UsePersistence(sp =>
-            //    {
-            //        var client = new MongoClient(@"mongodb://localhost:27017");
-            //        var db = client.GetDatabase("workflow");
-            //        return new MongoPersistenceProvider(db);
-            //    });
-            //});
-
-
+            //services.AddWorkflow(x => x.UseSqlServer(@"Server=.;Database=WorkflowCore;Trusted_Connection=True;"));
+            
             var serviceProvider = services.BuildServiceProvider();
 
             //config logging

@@ -120,5 +120,9 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             await EventSubscriptions.DeleteOneAsync(x => x.Id == eventSubscriptionId);
         }
 
+        public void EnsureStoreExists()
+        {
+            
+        }
     }
 }

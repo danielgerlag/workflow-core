@@ -31,6 +31,7 @@ namespace WorkflowCore.Services
             _logger = loggerFactory.CreateLogger<WorkflowRuntime>();
             _serviceProvider = serviceProvider;
             _registry = registry;
+            persistenceStore.EnsureStoreExists();
         }
 
         public async Task<string> StartWorkflow(string workflowId, int version, object data)
@@ -130,6 +131,7 @@ namespace WorkflowCore.Services
         private void RunWorkflows()
         {
             IWorkflowExecutor workflowExecutor = _serviceProvider.GetService<IWorkflowExecutor>();
+            IPersistenceProvider persistenceStore = _serviceProvider.GetService<IPersistenceProvider>();
             while (!_shutdown)
             {
                 try
@@ -141,10 +143,10 @@ namespace WorkflowCore.Services
                         {
                             if (_concurrencyProvider.AcquireLock(workflowId).Result)
                             {
-                                var workflow = _persistenceStore.GetWorkflowInstance(workflowId).Result;
+                                var workflow = persistenceStore.GetWorkflowInstance(workflowId).Result;
                                 try
                                 {                                    
-                                    workflowExecutor.Execute(workflow, _options);
+                                    workflowExecutor.Execute(workflow, persistenceStore, _options);
                                 }
                                 finally
                                 {
@@ -177,7 +179,8 @@ namespace WorkflowCore.Services
         }
 
         private void RunPublications()
-        {            
+        {
+            IPersistenceProvider persistenceStore = _serviceProvider.GetService<IPersistenceProvider>();
             while (!_shutdown)
             {
                 try
@@ -191,7 +194,7 @@ namespace WorkflowCore.Services
                             {                                
                                 try
                                 {
-                                    var workflow = _persistenceStore.GetWorkflowInstance(pub.WorkflowId).Result;
+                                    var workflow = persistenceStore.GetWorkflowInstance(pub.WorkflowId).Result;
                                     var pointers = workflow.ExecutionPointers.Where(p => p.EventName == pub.EventName && p.EventKey == p.EventKey && !p.EventPublished);
                                     foreach (var p in pointers)
                                     {
@@ -200,7 +203,7 @@ namespace WorkflowCore.Services
                                         p.Active = true;
                                     }
                                     workflow.NextExecution = 0;
-                                    _persistenceStore.PersistWorkflow(workflow);
+                                    persistenceStore.PersistWorkflow(workflow);
                                 }
                                 catch (Exception ex)
                                 {
@@ -242,7 +245,8 @@ namespace WorkflowCore.Services
             try
             {
                 _logger.LogInformation("Polling for runnable workflows");
-                var runnables = _persistenceStore.GetRunnableInstances().Result;
+                IPersistenceProvider persistenceStore = _serviceProvider.GetService<IPersistenceProvider>();
+                var runnables = persistenceStore.GetRunnableInstances().Result;
                 foreach (var item in runnables)
                 {
                     _logger.LogDebug("Got runnable instance {0}", item);
