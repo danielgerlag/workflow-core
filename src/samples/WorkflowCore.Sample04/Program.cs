@@ -41,7 +41,8 @@ namespace WorkflowCore.Sample04
             services.AddWorkflow();
             //services.AddWorkflow(x => x.UseMongoDB(@"mongodb://localhost:27017", "workflow"));
             //services.AddWorkflow(x => x.UseSqlServer(@"Server=.;Database=WorkflowCore;Trusted_Connection=True;"));
-            
+            //services.AddWorkflow(x => x.UsePostgreSQL(@"Server=127.0.0.1;Port=5432;Database=workflow;User Id=postgres;Password=password;"));
+
             var serviceProvider = services.BuildServiceProvider();
 
             //config logging
