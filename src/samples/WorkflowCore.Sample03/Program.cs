@@ -16,19 +16,19 @@ namespace WorkflowCore.Sample03
         {
             IServiceProvider serviceProvider = ConfigureServices();
 
-            //start the workflow runtime
-            var runtime = serviceProvider.GetService<IWorkflowRuntime>();
-            runtime.RegisterWorkflow<PassingDataWorkflow, MyDataClass>();
-            runtime.StartRuntime();
+            //start the workflow host
+            var host = serviceProvider.GetService<IWorkflowHost>();
+            host.RegisterWorkflow<PassingDataWorkflow, MyDataClass>();
+            host.Start();
 
             var initialData = new MyDataClass();
             initialData.Value1 = 2;
             initialData.Value2 = 3;
 
-            runtime.StartWorkflow("PassingDataWorkflow", 1, initialData);
+            host.StartWorkflow("PassingDataWorkflow", 1, initialData);
 
             Console.ReadLine();
-            runtime.StopRuntime();
+            host.Stop();
         }
 
         private static IServiceProvider ConfigureServices()

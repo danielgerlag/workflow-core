@@ -16,15 +16,15 @@ namespace WorkflowCore.Sample01
         {
             IServiceProvider serviceProvider = ConfigureServices();
 
-            //start the workflow runtime
-            var runtime = serviceProvider.GetService<IWorkflowRuntime>();            
-            runtime.RegisterWorkflow<HelloWorldWorkflow>();
-            runtime.StartRuntime();
+            //start the workflow host
+            var host = serviceProvider.GetService<IWorkflowHost>();
+            host.RegisterWorkflow<HelloWorldWorkflow>();
+            host.Start();
 
-            runtime.StartWorkflow("HelloWorld", 1, null);
+            host.StartWorkflow("HelloWorld", 1, null);
             
             Console.ReadLine();
-            runtime.StopRuntime();
+            host.Stop();
         }
 
         private static IServiceProvider ConfigureServices()

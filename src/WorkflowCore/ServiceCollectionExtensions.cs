@@ -22,8 +22,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IDistributedLockProvider>(options.LockFactory);
             services.AddSingleton<IWorkflowRegistry, WorkflowRegistry>();
 
-            services.AddSingleton<IWorkflowRuntime, WorkflowRuntime>(sp => 
-                new WorkflowRuntime(sp.GetService<IPersistenceProvider>(),
+            services.AddSingleton<IWorkflowHost, WorkflowHost>(sp => 
+                new WorkflowHost(sp.GetService<IPersistenceProvider>(),
                     sp.GetService<IQueueProvider>(),
                     options,
                     sp.GetService<ILoggerFactory>(),

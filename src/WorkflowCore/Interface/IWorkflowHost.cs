@@ -6,10 +6,10 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Interface
 {
-    public interface IWorkflowRuntime
+    public interface IWorkflowHost
     {
-        void StartRuntime();
-        void StopRuntime();
+        void Start();
+        void Stop();
         Task<string> StartWorkflow(string workflowId, int version, object data);
         Task<string> StartWorkflow<TData>(string workflowId, int version, TData data);
         Task SubscribeEvent(string workflowId, int stepId, string eventName, string eventKey);

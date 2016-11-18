@@ -16,15 +16,15 @@ namespace WorkflowCore.Sample02
         {
             IServiceProvider serviceProvider = ConfigureServices();
 
-            //start the workflow runtime
-            var runtime = serviceProvider.GetService<IWorkflowRuntime>();
-            runtime.RegisterWorkflow<SimpleDecisionWorkflow>();
-            runtime.StartRuntime();
+            //start the workflow host
+            var host = serviceProvider.GetService<IWorkflowHost>();
+            host.RegisterWorkflow<SimpleDecisionWorkflow>();
+            host.Start();
 
-            runtime.StartWorkflow("Simple Decision Workflow", 1, null);
+            host.StartWorkflow("Simple Decision Workflow", 1, null);
 
             Console.ReadLine();
-            runtime.StopRuntime();
+            host.Stop();
         }
 
         private static IServiceProvider ConfigureServices()

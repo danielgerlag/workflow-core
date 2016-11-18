@@ -13,14 +13,14 @@ namespace WorkflowCore.Services
     public class WorkflowExecutor : IWorkflowExecutor
     {
 
-        protected readonly IWorkflowRuntime _runtime;        
+        protected readonly IWorkflowHost _host;        
         protected readonly IWorkflowRegistry _registry;
         protected readonly IServiceProvider _serviceProvider;
         protected readonly ILogger _logger;
 
-        public WorkflowExecutor(IWorkflowRuntime runtime, IWorkflowRegistry registry, IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
+        public WorkflowExecutor(IWorkflowHost host, IWorkflowRegistry registry, IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
-            _runtime = runtime;            
+            _host = host;            
             _serviceProvider = serviceProvider;
             _registry = registry;
             _logger = loggerFactory.CreateLogger<WorkflowExecutor>();
@@ -49,7 +49,7 @@ namespace WorkflowCore.Services
                             pointer.EventName = (step as ISubscriptionStep).EventName;
                             pointer.Active = false;
                             await persistenceStore.PersistWorkflow(workflow);
-                            await _runtime.SubscribeEvent(workflow.Id, pointer.StepId, pointer.EventName, pointer.EventKey);
+                            await _host.SubscribeEvent(workflow.Id, pointer.StepId, pointer.EventName, pointer.EventKey);
                             continue;
                         }
 

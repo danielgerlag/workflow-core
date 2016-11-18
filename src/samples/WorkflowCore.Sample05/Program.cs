@@ -17,15 +17,15 @@ namespace WorkflowCore.Sample05
         {
             IServiceProvider serviceProvider = ConfigureServices();
 
-            //start the workflow runtime
-            var runtime = serviceProvider.GetService<IWorkflowRuntime>();
-            runtime.RegisterWorkflow<DeferSampleWorkflow>();
-            runtime.StartRuntime();
+            //start the workflow host
+            var host = serviceProvider.GetService<IWorkflowHost>();
+            host.RegisterWorkflow<DeferSampleWorkflow>();
+            host.Start();
 
-            runtime.StartWorkflow("DeferSampleWorkflow", 1, null);
+            host.StartWorkflow("DeferSampleWorkflow", 1, null);
                         
             Console.ReadLine();
-            runtime.StopRuntime();
+            host.Stop();
         }
 
         private static IServiceProvider ConfigureServices()

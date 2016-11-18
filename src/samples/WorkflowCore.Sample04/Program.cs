@@ -17,20 +17,20 @@ namespace WorkflowCore.Sample04
         {
             IServiceProvider serviceProvider = ConfigureServices();
 
-            //start the workflow runtime
-            var runtime = serviceProvider.GetService<IWorkflowRuntime>();
-            runtime.RegisterWorkflow<EventSampleWorkflow, MyDataClass>();
-            runtime.StartRuntime();
+            //start the workflow host
+            var host = serviceProvider.GetService<IWorkflowHost>();
+            host.RegisterWorkflow<EventSampleWorkflow, MyDataClass>();
+            host.Start();
 
             var initialData = new MyDataClass();
-            runtime.StartWorkflow("EventSampleWorkflow", 1, initialData);
+            host.StartWorkflow("EventSampleWorkflow", 1, initialData);
 
             Console.WriteLine("Enter value to publish");
             string value = Console.ReadLine();
-            runtime.PublishEvent("MyEvent", "0", value);
+            host.PublishEvent("MyEvent", "0", value);
 
             Console.ReadLine();
-            runtime.StopRuntime();
+            host.Stop();
         }
 
         private static IServiceProvider ConfigureServices()

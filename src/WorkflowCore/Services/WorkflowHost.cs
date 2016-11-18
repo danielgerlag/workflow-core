@@ -10,7 +10,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services
 {
-    public class WorkflowRuntime : IWorkflowRuntime
+    public class WorkflowHost : IWorkflowHost
     {
 
         protected readonly IPersistenceProvider _persistenceStore;
@@ -24,12 +24,12 @@ namespace WorkflowCore.Services
         protected IServiceProvider _serviceProvider;
         protected Timer _pollTimer;
 
-        public WorkflowRuntime(IPersistenceProvider persistenceStore, IQueueProvider concurrencyProvider, WorkflowOptions options, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider)
+        public WorkflowHost(IPersistenceProvider persistenceStore, IQueueProvider concurrencyProvider, WorkflowOptions options, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider)
         {
             _persistenceStore = persistenceStore;
             _queueProvider = concurrencyProvider;
             _options = options;
-            _logger = loggerFactory.CreateLogger<WorkflowRuntime>();
+            _logger = loggerFactory.CreateLogger<WorkflowHost>();
             _serviceProvider = serviceProvider;
             _registry = registry;
             _lockProvider = lockProvider;
@@ -59,7 +59,7 @@ namespace WorkflowCore.Services
             return id;
         }
 
-        public void StartRuntime()
+        public void Start()
         {            
             _shutdown = false;
             for (int i = 0; i < _options.ThreadCount; i++)
@@ -78,7 +78,7 @@ namespace WorkflowCore.Services
             _pollTimer = new Timer(new TimerCallback(PollRunnables), null, TimeSpan.FromSeconds(0), _options.PollInterval);
         }
 
-        public void StopRuntime()
+        public void Stop()
         {
             _shutdown = true;
 
