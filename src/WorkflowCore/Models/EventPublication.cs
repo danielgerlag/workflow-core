@@ -8,6 +8,8 @@ namespace WorkflowCore.Models
 {
     public class EventPublication
     {
+        public Guid Id { get; set; }
+
         public string WorkflowId { get; set; }
 
         public int StepId { get; set; }

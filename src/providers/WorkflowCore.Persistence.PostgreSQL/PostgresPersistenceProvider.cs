@@ -35,6 +35,12 @@ namespace WorkflowCore.Persistence.PostgreSQL
             builder.ForNpgsqlToTable("Workflow", "wfc");
             builder.Property(x => x.ClusterKey).ValueGeneratedOnAdd();
         }
+        
+        protected override void ConfigurePublicationStorage(EntityTypeBuilder<PersistedPublication> builder)
+        {
+            builder.ForNpgsqlToTable("UnpublishedEvent", "wfc");
+            builder.Property(x => x.ClusterKey).ValueGeneratedOnAdd();
+        }
 
         public override void EnsureStoreExists()
         {

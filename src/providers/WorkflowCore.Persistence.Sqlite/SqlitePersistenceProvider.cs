@@ -33,6 +33,11 @@ namespace WorkflowCore.Persistence.Sqlite
         {
             builder.ForSqliteToTable("Workflow");
         }
+        
+        protected override void ConfigurePublicationStorage(EntityTypeBuilder<PersistedPublication> builder)
+        {
+            builder.ForSqliteToTable("UnpublishedEvent");
+        }
 
         public override void EnsureStoreExists()
         {

@@ -38,6 +38,19 @@ namespace WorkflowCore.Persistence.EntityFramework
             return result;
         }
 
+        internal static PersistedPublication ToPersistable(this EventPublication instance)
+        {
+            PersistedPublication result = new PersistedPublication();
+            result.PublicationId = instance.Id;
+            result.EventKey = instance.EventKey;
+            result.EventName = instance.EventName;
+            result.StepId = instance.StepId;
+            result.WorkflowId = instance.WorkflowId;
+            result.EventData = JsonConvert.SerializeObject(instance.EventData, SerializerSettings);
+
+            return result;
+        }
+
         internal static WorkflowInstance ToWorkflowInstance(this PersistedWorkflow instance)
         {
             WorkflowInstance result = new WorkflowInstance();
@@ -60,6 +73,19 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.EventName = instance.EventName;
             result.StepId = instance.StepId;
             result.WorkflowId = instance.WorkflowId;
+
+            return result;
+        }
+
+        internal static EventPublication ToEventPublication(this PersistedPublication instance)
+        {
+            EventPublication result = new EventPublication();
+            result.Id = instance.PublicationId;
+            result.EventKey = instance.EventKey;
+            result.EventName = instance.EventName;
+            result.StepId = instance.StepId;
+            result.WorkflowId = instance.WorkflowId;
+            result.EventData = JsonConvert.DeserializeObject(instance.EventData, SerializerSettings);
 
             return result;
         }

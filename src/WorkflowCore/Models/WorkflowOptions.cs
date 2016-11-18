@@ -10,7 +10,8 @@ namespace WorkflowCore.Models
     public class WorkflowOptions
     {
         internal Func<IServiceProvider, IPersistenceProvider> PersistanceFactory;
-        internal Func<IServiceProvider, IConcurrencyProvider> ConcurrencyFactory;
+        internal Func<IServiceProvider, IQueueProvider> QueueFactory;
+        internal Func<IServiceProvider, IDistributedLockProvider> LockFactory;
         internal int ThreadCount;
         internal TimeSpan PollInterval;
         internal TimeSpan IdleTime;
@@ -24,7 +25,8 @@ namespace WorkflowCore.Models
             IdleTime = TimeSpan.FromMilliseconds(500);
             ErrorRetryInterval = TimeSpan.FromSeconds(60);
 
-            ConcurrencyFactory = new Func<IServiceProvider, IConcurrencyProvider>(sp => new SingleNodeConcurrencyProvider());
+            QueueFactory = new Func<IServiceProvider, IQueueProvider>(sp => new SingleNodeQueueProvider());
+            LockFactory = new Func<IServiceProvider, IDistributedLockProvider>(sp => new SingleNodeLockProvider());
             PersistanceFactory = new Func<IServiceProvider, IPersistenceProvider>(sp => new MemoryPersistenceProvider());
         }
 

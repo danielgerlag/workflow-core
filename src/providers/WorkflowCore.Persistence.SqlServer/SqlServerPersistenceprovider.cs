@@ -38,6 +38,12 @@ namespace WorkflowCore.Persistence.SqlServer
             builder.ForSqlServerToTable("Workflow", "wfc");
             builder.Property(x => x.ClusterKey).UseSqlServerIdentityColumn();
         }
+        
+        protected override void ConfigurePublicationStorage(EntityTypeBuilder<PersistedPublication> builder)
+        {
+            builder.ForSqlServerToTable("UnpublishedEvent", "wfc");
+            builder.Property(x => x.ClusterKey).UseSqlServerIdentityColumn();
+        }
 
         public override void EnsureStoreExists()
         {

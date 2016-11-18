@@ -14,7 +14,6 @@ namespace WorkflowCore.Interface
     /// </remarks>
     public interface IPersistenceProvider
     {
-
         Task<string> CreateNewWorkflow(WorkflowInstance workflow);
 
         Task PersistWorkflow(WorkflowInstance workflow);
@@ -28,6 +27,12 @@ namespace WorkflowCore.Interface
         Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey);
 
         Task TerminateSubscription(string eventSubscriptionId);
+
+        Task CreateUnpublishedEvent(EventPublication publication);
+
+        Task<IEnumerable<EventPublication>> GetUnpublishedEvents();
+
+        Task RemoveUnpublishedEvent(Guid id);
 
         void EnsureStoreExists();
 

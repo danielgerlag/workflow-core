@@ -16,7 +16,8 @@ namespace WorkflowCore.Services
 
         private static List<WorkflowInstance> _instances = new List<WorkflowInstance>();
         private static List<EventSubscription> _subscriptions = new List<EventSubscription>();
-        
+        private static List<EventPublication> _unpublishedEvents = new List<EventPublication>();
+
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
         {
             workflow.Id = Guid.NewGuid().ToString();
@@ -64,6 +65,23 @@ namespace WorkflowCore.Services
 
         public void EnsureStoreExists()
         {            
+        }
+
+        public async Task CreateUnpublishedEvent(EventPublication publication)
+        {            
+            _unpublishedEvents.Add(publication);
+        }
+
+        public async Task RemoveUnpublishedEvent(Guid id)
+        {
+            var evt = _unpublishedEvents.FirstOrDefault(x => x.Id == id);
+            if (evt != null)
+                _unpublishedEvents.Remove(evt);
+        }
+
+        public async Task<IEnumerable<EventPublication>> GetUnpublishedEvents()
+        {
+            return _unpublishedEvents;
         }
     }
 }

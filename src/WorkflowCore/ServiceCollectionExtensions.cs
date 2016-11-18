@@ -18,16 +18,18 @@ namespace Microsoft.Extensions.DependencyInjection
             if (setupAction != null)
                 setupAction.Invoke(options);
             services.AddTransient<IPersistenceProvider>(options.PersistanceFactory);
-            services.AddSingleton<IConcurrencyProvider>(options.ConcurrencyFactory);
+            services.AddSingleton<IQueueProvider>(options.QueueFactory);
+            services.AddSingleton<IDistributedLockProvider>(options.LockFactory);
             services.AddSingleton<IWorkflowRegistry, WorkflowRegistry>();
 
             services.AddSingleton<IWorkflowRuntime, WorkflowRuntime>(sp => 
                 new WorkflowRuntime(sp.GetService<IPersistenceProvider>(),
-                    sp.GetService<IConcurrencyProvider>(),
+                    sp.GetService<IQueueProvider>(),
                     options,
                     sp.GetService<ILoggerFactory>(),
                     sp,
-                    sp.GetService<IWorkflowRegistry>())
+                    sp.GetService<IWorkflowRegistry>(),
+                    sp.GetService<IDistributedLockProvider>())
             );
             services.AddTransient<IWorkflowExecutor, WorkflowExecutor>();
             services.AddTransient<IWorkflowBuilder, WorkflowBuilder>();

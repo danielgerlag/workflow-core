@@ -56,7 +56,7 @@ namespace WorkflowCore.Services
                         if (!pointer.StartTime.HasValue)
                             pointer.StartTime = DateTime.Now;
 
-                        _logger.LogDebug("Starting step {0}", step.Name);
+                        _logger.LogDebug("Starting step {0} on workflow {1}", step.Name, workflow.Id);
 
                         IStepBody body;
 

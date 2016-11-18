@@ -12,9 +12,10 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
 {
     public abstract class EntityFrameworkPersistenceProvider : DbContext, IPersistenceProvider
     {
-
         protected abstract void ConfigureWorkflowStorage(EntityTypeBuilder<PersistedWorkflow> builder);
         protected abstract void ConfigureSubscriptionStorage(EntityTypeBuilder<PersistedSubscription> builder);
+        protected abstract void ConfigurePublicationStorage(EntityTypeBuilder<PersistedPublication> builder);
+        public abstract void EnsureStoreExists();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -28,17 +29,19 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             subscriptions.HasIndex(x => x.EventName);
             subscriptions.HasIndex(x => x.EventKey);
 
+            var publications = modelBuilder.Entity<PersistedPublication>();
+            publications.HasIndex(x => x.PublicationId).IsUnique();
+
             ConfigureWorkflowStorage(workflows);
             ConfigureSubscriptionStorage(subscriptions);
+            ConfigurePublicationStorage(publications);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-        }
-
-        public abstract void EnsureStoreExists();
+        }        
 
         public async Task<string> CreateEventSubscription(EventSubscription subscription)
         {
@@ -116,7 +119,31 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             Set<PersistedSubscription>().Remove(existing);
             SaveChanges();
         }
-        
-        
+
+        public async Task CreateUnpublishedEvent(EventPublication publication)
+        {
+            var persistable = publication.ToPersistable();
+            var result = Set<PersistedPublication>().Add(persistable);
+            SaveChanges();
+            Entry(persistable).State = EntityState.Detached;
+        }
+
+        public async Task<IEnumerable<EventPublication>> GetUnpublishedEvents()
+        {
+            var raw = Set<PersistedPublication>().ToList();
+
+            List<EventPublication> result = new List<EventPublication>();
+            foreach (var item in raw)
+                result.Add(item.ToEventPublication());
+
+            return result;
+        }
+
+        public async Task RemoveUnpublishedEvent(Guid id)
+        {           
+            var existing = Set<PersistedPublication>().First(x => x.PublicationId == id);
+            Set<PersistedPublication>().Remove(existing);
+            SaveChanges();
+        }
     }
 }

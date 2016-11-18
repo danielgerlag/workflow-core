@@ -80,6 +80,14 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             }
         }
 
+        private IMongoCollection<EventPublication> UnpublishedEvents
+        {
+            get
+            {
+                return _database.GetCollection<EventPublication>("wfc.unpublishedEvents");
+            }
+        }
+
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
         {
             await WorkflowInstances.InsertOneAsync(workflow);
@@ -123,6 +131,21 @@ namespace WorkflowCore.Persistence.MongoDB.Services
         public void EnsureStoreExists()
         {
             
+        }
+
+        public async Task CreateUnpublishedEvent(EventPublication publication)
+        {
+            await UnpublishedEvents.InsertOneAsync(publication);
+        }
+
+        public async Task<IEnumerable<EventPublication>> GetUnpublishedEvents()
+        {
+            return await UnpublishedEvents.AsQueryable().ToListAsync();
+        }
+
+        public async Task RemoveUnpublishedEvent(Guid id)
+        {
+            await UnpublishedEvents.DeleteOneAsync(x => x.Id == id);
         }
     }
 }
