@@ -29,10 +29,7 @@ namespace WorkflowCore.Sample04
         public void Build(IWorkflowBuilder<MyDataClass> builder)
         {
             builder
-                .StartWith(context =>
-                {
-                    return new ExecutionResult(null);
-                })
+                .StartWith(context => new ExecutionResult(null))
                 .WaitFor("MyEvent", "0")
                     .Output(data => data.StrValue, step => step.EventData)
                 .Then<CustomMessage>()

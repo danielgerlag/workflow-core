@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,6 +44,9 @@ namespace WorkflowCore.Sample04
             //services.AddWorkflow(x => x.UseSqlServer(@"Server=.;Database=WorkflowCore;Trusted_Connection=True;"));
             //services.AddWorkflow(x => x.UsePostgreSQL(@"Server=127.0.0.1;Port=5432;Database=workflow;User Id=postgres;Password=password;"));
             //services.AddWorkflow(x => x.UseSqlite(@"Data Source=database.db;"));
+            //redis = ConnectionMultiplexer.Connect("192.168.99.100");
+            //services.AddWorkflow(x => x.UseRedlock(redis));
+
 
             var serviceProvider = services.BuildServiceProvider();
 
@@ -51,5 +55,7 @@ namespace WorkflowCore.Sample04
             loggerFactory.AddDebug();
             return serviceProvider;
         }
+
+        private static IConnectionMultiplexer redis;
     }
 }

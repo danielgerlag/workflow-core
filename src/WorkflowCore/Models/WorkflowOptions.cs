@@ -35,6 +35,11 @@ namespace WorkflowCore.Models
             PersistanceFactory = factory;
         }
 
+        public void UseDistributedLockManager(Func<IServiceProvider, IDistributedLockProvider> factory)
+        {
+            LockFactory = factory;
+        }
+
         public void UseThreads(int count)
         {
             ThreadCount = count;
