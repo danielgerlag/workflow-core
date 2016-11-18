@@ -1,42 +1,37 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WorkflowCore.Persistence.EntityFramework.Models;
 using WorkflowCore.Persistence.EntityFramework.Services;
 
-namespace WorkflowCore.Persistence.SqlServer
+namespace WorkflowCore.Persistence.Sqlite
 {
-    public class SqlServerPersistenceProvider : EntityFrameworkPersistenceProvider
+    public class SqlitePersistenceProvider : EntityFrameworkPersistenceProvider
     {
         private readonly string _connectionString;
 
-        public SqlServerPersistenceProvider(string connectionString)
+        public SqlitePersistenceProvider(string connectionString)
         {
-            if (!connectionString.Contains("MultipleActiveResultSets"))
-                connectionString += ";MultipleActiveResultSets=True";
-
             _connectionString = connectionString;
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-            optionsBuilder.UseSqlServer(_connectionString);
+            optionsBuilder.UseSqlite(_connectionString);
         }
 
         protected override void ConfigureSubscriptionStorage(EntityTypeBuilder<PersistedSubscription> builder)
         {
-            builder.ForSqlServerToTable("Subscription", "wfc");
-            builder.Property(x => x.ClusterKey).UseSqlServerIdentityColumn();
+            builder.ForSqliteToTable("Subscription");            
         }
 
         protected override void ConfigureWorkflowStorage(EntityTypeBuilder<PersistedWorkflow> builder)
         {
-            builder.ForSqlServerToTable("Workflow", "wfc");
-            builder.Property(x => x.ClusterKey).UseSqlServerIdentityColumn();
+            builder.ForSqliteToTable("Workflow");
         }
 
         public override void EnsureStoreExists()

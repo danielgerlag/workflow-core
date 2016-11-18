@@ -30,7 +30,6 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
 
             ConfigureWorkflowStorage(workflows);
             ConfigureSubscriptionStorage(subscriptions);
-
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -39,10 +38,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         }
 
-        public void EnsureStoreExists()
-        {
-            Database.EnsureCreated();
-        }
+        public abstract void EnsureStoreExists();
 
         public async Task<string> CreateEventSubscription(EventSubscription subscription)
         {

@@ -6,8 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace WorkflowCore.Persistence.EntityFramework.Models
-{
-    [Table("Subscription", Schema = "wfc")]
+{    
     public class PersistedSubscription
     {
         [Key]

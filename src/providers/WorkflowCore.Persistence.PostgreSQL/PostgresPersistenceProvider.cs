@@ -26,12 +26,19 @@ namespace WorkflowCore.Persistence.PostgreSQL
 
         protected override void ConfigureSubscriptionStorage(EntityTypeBuilder<PersistedSubscription> builder)
         {
+            builder.ForNpgsqlToTable("Subscription", "wfc");
             builder.Property(x => x.ClusterKey).ValueGeneratedOnAdd();
         }
 
         protected override void ConfigureWorkflowStorage(EntityTypeBuilder<PersistedWorkflow> builder)
         {
+            builder.ForNpgsqlToTable("Workflow", "wfc");
             builder.Property(x => x.ClusterKey).ValueGeneratedOnAdd();
+        }
+
+        public override void EnsureStoreExists()
+        {
+            Database.EnsureCreated();
         }
     }
 }
