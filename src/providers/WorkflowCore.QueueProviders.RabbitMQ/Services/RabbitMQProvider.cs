@@ -14,17 +14,18 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
     public class RabbitMQProvider : IQueueProvider
     {
         private readonly IConnectionFactory _connectionFactory;
+        private readonly IConnection _connection;
         private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
 
         public RabbitMQProvider(IConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory;
+            _connection = _connectionFactory.CreateConnection("Workflow-Core");
         }
 
         public async Task<string> DequeueForProcessing()
-        {
-            using (var connection = _connectionFactory.CreateConnection())
-            using (var channel = connection.CreateModel())
+        {            
+            using (var channel = _connection.CreateModel())
             {
                 channel.QueueDeclare(queue: "wfc.process_queue",
                                      durable: true,
@@ -46,9 +47,8 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
         }
 
         public async Task<EventPublication> DequeueForPublishing()
-        {
-            using (var connection = _connectionFactory.CreateConnection())
-            using (var channel = connection.CreateModel())
+        {            
+            using (var channel = _connection.CreateModel())
             {
                 channel.QueueDeclare(queue: "wfc.publish_queue",
                                      durable: true,
@@ -71,9 +71,8 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
         }
 
         public async Task QueueForProcessing(string Id)
-        {
-            using (var connection = _connectionFactory.CreateConnection())
-            using (var channel = connection.CreateModel())
+        {            
+            using (var channel = _connection.CreateModel())
             {
                 channel.QueueDeclare(queue: "wfc.process_queue", durable: true, exclusive: false, autoDelete: false, arguments: null);
                 var body = Encoding.UTF8.GetBytes(Id);
@@ -82,14 +81,18 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
         }
 
         public async Task QueueForPublishing(EventPublication item)
-        {
-            using (var connection = _connectionFactory.CreateConnection())
-            using (var channel = connection.CreateModel())
+        {            
+            using (var channel = _connection.CreateModel())
             {
                 channel.QueueDeclare(queue: "wfc.publish_queue", durable: true, exclusive: false, autoDelete: false, arguments: null);
                 var body = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(item, SerializerSettings));
                 channel.BasicPublish(exchange: "", routingKey: "wfc.publish_queue", basicProperties: null, body: body);
             }
         }
-    }
+
+        ~RabbitMQProvider()
+        {
+            _connection.Close();            
+        }
+    }    
 }

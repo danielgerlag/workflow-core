@@ -4,8 +4,8 @@
   "version": "1.0.0-beta3",
 
   "dependencies": {
+    "NETStandard.Library": "1.6.1",
     "Microsoft.EntityFrameworkCore.SqlServer": "1.1.0",
-    "NETStandard.Library": "1.6.0",
     "WorkflowCore": "1.0.0-*",
     "WorkflowCore.Persistence.EntityFramework": "1.0.0-beta3"
   },

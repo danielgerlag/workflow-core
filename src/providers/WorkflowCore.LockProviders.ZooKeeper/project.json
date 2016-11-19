@@ -4,7 +4,7 @@
   "version": "1.0.0-beta3",
 
   "dependencies": {
-    "NETStandard.Library": "1.6.0",
+    "NETStandard.Library": "1.6.1",
     "WorkflowCore": "1.0.0-*",
     "ZooKeeperNetEx": "3.4.9.1",
     "ZooKeeperNetEx.Recipes": "3.4.9.1"
