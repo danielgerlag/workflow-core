@@ -276,7 +276,7 @@ namespace WorkflowCore.Services
 
                     _logger.LogInformation("Polling for unpublished events");
                     IPersistenceProvider persistenceStore = _serviceProvider.GetService<IPersistenceProvider>();
-                    var events = persistenceStore.GetUnpublishedEvents().Result;
+                    var events = persistenceStore.GetUnpublishedEvents().Result.ToList();
                     foreach (var item in events)
                     {
                         _logger.LogDebug("Got unpublished event {0} {1}", item.EventName, item.EventKey);
