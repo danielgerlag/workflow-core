@@ -49,7 +49,7 @@ namespace WorkflowCore.Sample04
             services.AddWorkflow(x => 
             {
                 x.UseMongoDB(@"mongodb://localhost:27017", "workflow");
-                x.UseZooKeeperLocks("127.0.0.1:2181");
+                x.UseZooKeeperLocks("127.0.0.1:2181/app");
             });
 
 

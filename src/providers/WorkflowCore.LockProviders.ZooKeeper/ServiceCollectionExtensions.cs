@@ -11,8 +11,9 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static WorkflowOptions UseZooKeeperLocks(this WorkflowOptions options, string connectionString)
         {
-            options.UseDistributedLockManager(sp => new ZooKeeperLockProvider(connectionString));
-            return options;
+            throw new NotImplementedException();
+            //options.UseDistributedLockManager(sp => new ZooKeeperLockProvider(connectionString));
+            //return options;
         }
     }
 }

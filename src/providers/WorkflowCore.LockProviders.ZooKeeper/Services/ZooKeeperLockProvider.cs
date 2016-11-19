@@ -1,4 +1,5 @@
-﻿using org.apache.zookeeper;
+﻿using Microsoft.Extensions.Logging;
+using org.apache.zookeeper;
 using org.apache.zookeeper.recipes.@lock;
 using System;
 using System.Collections.Generic;
@@ -11,13 +12,17 @@ namespace WorkflowCore.LockProviders.ZooKeeper.Services
     public class ZooKeeperLockProvider : IDistributedLockProvider
     {
         private readonly string _connectionString;
+        private readonly ILogger _logger;
         private Dictionary<int, org.apache.zookeeper.ZooKeeper> _sessions = new Dictionary<int, org.apache.zookeeper.ZooKeeper>();
         private List<WriteLock> _managedLocks = new List<WriteLock>();
 
-        public ZooKeeperLockProvider(string connectionString)
+        public ZooKeeperLockProvider(string connectionString, ILoggerFactory loggerFactory)
         {
+            throw new NotImplementedException();
+
+            _logger = loggerFactory.CreateLogger<ZooKeeperLockProvider>();
             _connectionString = connectionString;
-            WriteLock wl = new WriteLock(GetSession(), @"/_workflow_locks", null);
+            WriteLock wl = new WriteLock(GetSession(), @"/workflow_locks", null);
             //try
             //{
             //    //todo: clean this up
@@ -34,7 +39,7 @@ namespace WorkflowCore.LockProviders.ZooKeeper.Services
             {
                 lock (_managedLocks)
                 {
-                    WriteLock wl = new WriteLock(GetSession(), @"/_workflow_locks/" + Id, null);
+                    WriteLock wl = new WriteLock(GetSession(), @"/workflow_locks/" + Id, null);
                     if (wl.Lock().Result)
                     {
                         _managedLocks.Add(wl);
@@ -58,7 +63,7 @@ namespace WorkflowCore.LockProviders.ZooKeeper.Services
         {
             lock (_managedLocks)
             {
-                string lockId = @"/_workflow_locks/" + Id;
+                string lockId = @"/workflow_locks/" + Id;
                 var list = _managedLocks.Where(x => x.Dir == lockId).ToList();
                 foreach (var item in list)
                 {
