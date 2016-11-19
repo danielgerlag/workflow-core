@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using RabbitMQ.Client;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -39,18 +40,18 @@ namespace WorkflowCore.Sample04
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
-            //services.AddWorkflow();
+            services.AddWorkflow();
             //services.AddWorkflow(x => x.UseMongoDB(@"mongodb://localhost:27017", "workflow"));
             //services.AddWorkflow(x => x.UseSqlServer(@"Server=.;Database=WorkflowCore;Trusted_Connection=True;"));
             //services.AddWorkflow(x => x.UsePostgreSQL(@"Server=127.0.0.1;Port=5432;Database=workflow;User Id=postgres;Password=password;"));
             //services.AddWorkflow(x => x.UseSqlite(@"Data Source=database.db;"));
             //redis = ConnectionMultiplexer.Connect("192.168.99.100");
             //services.AddWorkflow(x => x.UseRedlock(redis));
-            services.AddWorkflow(x => 
-            {
-                x.UseMongoDB(@"mongodb://localhost:27017", "workflow");
-                x.UseZooKeeperLocks("127.0.0.1:2181/app");
-            });
+            //services.AddWorkflow(x => 
+            //{
+            //    x.UseMongoDB(@"mongodb://localhost:27017", "workflow");
+            //    x.UseRabbitMQ(new ConnectionFactory() { HostName = "localhost" });
+            //});
 
 
             var serviceProvider = services.BuildServiceProvider();

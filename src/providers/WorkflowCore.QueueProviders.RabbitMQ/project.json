@@ -1,0 +1,31 @@
+﻿{
+  "title": "Workflow Core RabbitMQ queue provider",
+  "authors": [ "Daniel Gerlag" ],
+  "version": "1.0.0-beta3",
+
+  "dependencies": {
+    "NETStandard.Library": "1.6.0",
+    "Newtonsoft.Json": "9.0.1",
+    "RabbitMQ.Client": "4.1.1",
+    "WorkflowCore": "1.0.0-*"
+  },
+
+  "frameworks": {
+    "netstandard1.6": {
+      "imports": "dnxcore50"
+    }
+  },
+
+  "packOptions": {
+    "summary": "A queue provider for WorkflowCore using RabbitMQ",
+    "tags": [ "workflow", ".NET", "Core", "state machine", "WorkflowCore", "RabbitMQ" ],
+    "owners": [ "Daniel Gerlag" ],
+    "projectUrl": "https://github.com/danielgerlag/workflow-core",
+    "licenseUrl": "https://github.com/danielgerlag/workflow-core/blob/master/LICENSE.md",
+    "requireLicenseAcceptance": false,
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/danielgerlag/workflow-core.git"
+    }
+  }
+}

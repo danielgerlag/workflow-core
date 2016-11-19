@@ -40,6 +40,11 @@ namespace WorkflowCore.Models
             LockFactory = factory;
         }
 
+        public void UseQueueProvider(Func<IServiceProvider, IQueueProvider> factory)
+        {
+            QueueFactory = factory;
+        }
+
         public void UseThreads(int count)
         {
             ThreadCount = count;

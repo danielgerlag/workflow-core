@@ -17,11 +17,11 @@
     },
     "WorkflowCore": "1.0.0-*",
     "WorkflowCore.LockProviders.Redlock": "1.0.0-beta3",
-    "WorkflowCore.LockProviders.ZooKeeper": "1.0.0-beta3",
     "WorkflowCore.Persistence.MongoDB": "1.0.0-*",
     "WorkflowCore.Persistence.PostgreSQL": "1.0.0-beta3",
     "WorkflowCore.Persistence.Sqlite": "1.0.0-beta3",
-    "WorkflowCore.Persistence.SqlServer": "1.0.0-beta3"
+    "WorkflowCore.Persistence.SqlServer": "1.0.0-beta3",
+    "WorkflowCore.QueueProviders.RabbitMQ": "1.0.0-beta3"
   },
 
   "frameworks": {
