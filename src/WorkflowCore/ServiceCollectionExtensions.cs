@@ -18,7 +18,7 @@ namespace Microsoft.Extensions.DependencyInjection
             if (setupAction != null)
                 setupAction.Invoke(options);
             services.AddTransient<IPersistenceProvider>(options.PersistanceFactory);
-            services.AddSingleton<IQueueProvider>(options.QueueFactory);
+            services.AddTransient<IQueueProvider>(options.QueueFactory);
             services.AddSingleton<IDistributedLockProvider>(options.LockFactory);
             services.AddSingleton<IWorkflowRegistry, WorkflowRegistry>();
 

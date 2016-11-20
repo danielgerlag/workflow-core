@@ -10,7 +10,7 @@ namespace WorkflowCore.Interface
     /// The implemention of this interface will be responsible for
     /// providing a (distributed) queueing mechanism to manage in flight workflows    
     /// </remarks>
-    public interface IQueueProvider
+    public interface IQueueProvider : IDisposable
     {
 
         /// <summary>
@@ -35,6 +35,9 @@ namespace WorkflowCore.Interface
         /// </summary>
         /// <returns></returns>
         Task<EventPublication> DequeueForPublishing();
+
+        void Start();
+        void Stop();
 
     }
 }

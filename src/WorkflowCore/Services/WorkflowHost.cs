@@ -13,21 +13,21 @@ namespace WorkflowCore.Services
     public class WorkflowHost : IWorkflowHost
     {
 
-        protected readonly IPersistenceProvider _persistenceStore;
-        protected readonly IQueueProvider _queueProvider;
+        protected readonly IPersistenceProvider _persistenceStore;        
         protected readonly IDistributedLockProvider _lockProvider;
         protected readonly IWorkflowRegistry _registry;
         protected readonly WorkflowOptions _options;
+        protected readonly IQueueProvider _queueProvider;
         protected List<Thread> _threads = new List<Thread>();
         protected bool _shutdown = true;
         protected ILogger _logger;
         protected IServiceProvider _serviceProvider;
         protected Timer _pollTimer;
 
-        public WorkflowHost(IPersistenceProvider persistenceStore, IQueueProvider concurrencyProvider, WorkflowOptions options, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider)
+        public WorkflowHost(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, WorkflowOptions options, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider)
         {
             _persistenceStore = persistenceStore;
-            _queueProvider = concurrencyProvider;
+            _queueProvider = queueProvider;
             _options = options;
             _logger = loggerFactory.CreateLogger<WorkflowHost>();
             _serviceProvider = serviceProvider;
@@ -43,6 +43,9 @@ namespace WorkflowCore.Services
 
         public async Task<string> StartWorkflow<TData>(string workflowId, int version, TData data)
         {
+            if (_shutdown)
+                throw new Exception("Host is not running");
+
             var def = _registry.GetDefinition(workflowId, version);
             if (def == null)
                 throw new Exception(String.Format("Workflow {0} version {1} is not registered", workflowId, version));
@@ -62,6 +65,7 @@ namespace WorkflowCore.Services
         public void Start()
         {            
             _shutdown = false;
+            _queueProvider.Start();
             for (int i = 0; i < _options.ThreadCount; i++)
             {
                 _logger.LogInformation("Starting worker thread #{0}", i);
@@ -94,8 +98,8 @@ namespace WorkflowCore.Services
             foreach (Thread th in _threads)
                 th.Join();
             _logger.LogInformation("Worker threads stopped");
-
             stashTask.Wait();
+            _queueProvider.Stop();
         }
 
 
@@ -298,11 +302,14 @@ namespace WorkflowCore.Services
 
         private async Task StashUnpublishedEvents()
         {
-            var pub = await _queueProvider.DequeueForPublishing();
-            while (pub != null)
+            if (!_shutdown)
             {
-                await _persistenceStore.CreateUnpublishedEvent(pub);
-                pub = await _queueProvider.DequeueForPublishing();
+                var pub = await _queueProvider.DequeueForPublishing();
+                while (pub != null)
+                {
+                    await _persistenceStore.CreateUnpublishedEvent(pub);
+                    pub = await _queueProvider.DequeueForPublishing();
+                }
             }
         }
 

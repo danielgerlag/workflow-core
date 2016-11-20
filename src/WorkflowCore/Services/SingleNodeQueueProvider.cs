@@ -47,7 +47,20 @@ namespace WorkflowCore.Services
                 return item;
             }
             return null;
-        }        
+        }
+
+        public void Start()
+        {
+        }
+
+        public void Stop()
+        {
+        }
+
+        public void Dispose()
+        {            
+        }
+
         
     }
 }

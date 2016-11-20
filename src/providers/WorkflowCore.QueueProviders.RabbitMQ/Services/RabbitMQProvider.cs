@@ -14,17 +14,19 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
     public class RabbitMQProvider : IQueueProvider
     {
         private readonly IConnectionFactory _connectionFactory;
-        private readonly IConnection _connection;
+        private IConnection _connection = null;
         private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
 
         public RabbitMQProvider(IConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory;
-            _connection = _connectionFactory.CreateConnection("Workflow-Core");
         }
 
         public async Task<string> DequeueForProcessing()
-        {            
+        {
+            if (_connection == null)
+                throw new Exception("RabbitMQ provider not running");
+
             using (var channel = _connection.CreateModel())
             {
                 channel.QueueDeclare(queue: "wfc.process_queue",
@@ -47,7 +49,10 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
         }
 
         public async Task<EventPublication> DequeueForPublishing()
-        {            
+        {
+            if (_connection == null)
+                throw new Exception("RabbitMQ provider not running");
+
             using (var channel = _connection.CreateModel())
             {
                 channel.QueueDeclare(queue: "wfc.publish_queue",
@@ -71,7 +76,10 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
         }
 
         public async Task QueueForProcessing(string Id)
-        {            
+        {
+            if (_connection == null)
+                throw new Exception("RabbitMQ provider not running");
+
             using (var channel = _connection.CreateModel())
             {
                 channel.QueueDeclare(queue: "wfc.process_queue", durable: true, exclusive: false, autoDelete: false, arguments: null);
@@ -81,7 +89,10 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
         }
 
         public async Task QueueForPublishing(EventPublication item)
-        {            
+        {
+            if (_connection == null)
+                throw new Exception("RabbitMQ provider not running");
+
             using (var channel = _connection.CreateModel())
             {
                 channel.QueueDeclare(queue: "wfc.publish_queue", durable: true, exclusive: false, autoDelete: false, arguments: null);
@@ -90,9 +101,27 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
             }
         }
 
-        ~RabbitMQProvider()
+        public void Dispose()
         {
-            _connection.Close();            
+            if (_connection != null)
+            {
+                if (_connection.IsOpen)
+                    _connection.Close();
+            }
+        }
+
+        public void Start()
+        {
+            _connection = _connectionFactory.CreateConnection("Workflow-Core");
+        }
+
+        public void Stop()
+        {
+            if (_connection != null)
+            {
+                _connection.Close();
+                _connection = null;
+            }
         }
     }    
 }
