@@ -102,5 +102,37 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
+        public IStepBuilder<TData, TStep> End<TStep>(string name) where TStep : IStepBody
+        {
+            var ancestor = IterateParents(Step.Id, name);
+
+            if (ancestor == null)
+                throw new Exception(String.Format("Parent step of name {0} not found", name));
+
+            if (!(ancestor is WorkflowStep<TStep>))
+                throw new Exception(String.Format("Parent step of name {0} is not of type {1}", name, typeof(TStep)));
+
+            return new StepBuilder<TData, TStep>(_workflowBuilder, (ancestor as WorkflowStep<TStep>));
+        }
+
+        private WorkflowStep IterateParents(int id, string name)
+        {
+            //todo: filter out circular paths
+            var upstream = _workflowBuilder.GetUpstreamSteps(id);
+            foreach (var parent in upstream)
+            {
+                if (parent.Name == name)
+                    return parent;
+            }
+
+            foreach (var parent in upstream)
+            {
+                var result = IterateParents(parent.Id, name);
+                if (result != null)
+                    return result;
+            }
+            return null;
+        }
+
     }
 }

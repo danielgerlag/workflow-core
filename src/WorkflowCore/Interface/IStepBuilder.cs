@@ -72,5 +72,7 @@ namespace WorkflowCore.Interface
         /// <param name="eventKey"></param>
         /// <returns></returns>
         IStepBuilder<TData, SubscriptionStepBody> WaitFor(string eventName, string eventKey);
+
+        IStepBuilder<TData, TStep> End<TStep>(string name) where TStep : IStepBody;
     }
 }

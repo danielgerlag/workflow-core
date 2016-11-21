@@ -19,7 +19,6 @@ namespace WorkflowCore.Services
             result.InitialStep = this.InitialStep;            
             return result;
         }
-
         
 
         public WorkflowDefinition Build(string id, int version)
@@ -70,6 +69,11 @@ namespace WorkflowCore.Services
             AddStep(newStep);
             this.InitialStep = newStep.Id;
             return stepBuilder;
+        }
+
+        public IEnumerable<WorkflowStep> GetUpstreamSteps(int id)
+        {
+            return Steps.Where(x => x.Outcomes.Any(y => y.NextStep == id)).ToList();
         }
     }
         
