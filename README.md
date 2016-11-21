@@ -73,7 +73,7 @@ public class HelloWorldWorkflow : IWorkflow
 
 Each running workflow is persisted to the chosen persistence provider between each step, where it can be picked up at a later point in time to continue execution.  The outcome result of your step can instruct the workflow runtime to defer further execution of the workflow until a future point in time or in response to an external event.
 
-The first time a particular step within the workflow is called, the PersistenceData property on the context object is *null*.  The ExecutionResult produced by the Run method can either cause the workflow to proceed to the next step by providing an outcome value, instruct the workflow to sleep for a defined period or simply not move the workflow forward.  If no outcome value is produced, then the step becomes re-entrant by setting PersistenceData, so the workflow runtime will call this step again in the future buy will popluate the PersistenceData with it's previous value.
+The first time a particular step within the workflow is called, the PersistenceData property on the context object is *null*.  The ExecutionResult produced by the Run method can either cause the workflow to proceed to the next step by providing an outcome value, instruct the workflow to sleep for a defined period or simply not move the workflow forward.  If no outcome value is produced, then the step becomes re-entrant by setting PersistenceData, so the workflow host will call this step again in the future buy will popluate the PersistenceData with it's previous value.
 
 For example, this step will initially run with *null* PersistenceData and put the workflow to sleep for 12 hours, while setting the PersistenceData to *new Object()*.  12 hours later, the step will be called again but context.PersistenceData will now contain the object constructed in the previous iteration, and will now produce an outcome value of *null*, causing the workflow to move forward.
 
@@ -166,9 +166,9 @@ public class EventSampleWorkflow : IWorkflow<MyDataClass>
 runtime.PublishEvent("MyEvent", "0", "hello");
 ```
 
-### Runtime
+### Host
 
-The workflow runtime is the service responsible for executing workflows.  It does this by polling the persistence provider for workflow instances that are ready to run, executes them and then passes them back to the persistence provider to by stored for the next time they are run.  It is also responsible for publishing events to any workflows that may be waiting on one.
+The workflow host is the service responsible for executing workflows.  It does this by polling the persistence provider for workflow instances that are ready to run, executes them and then passes them back to the persistence provider to by stored for the next time they are run.  It is also responsible for publishing events to any workflows that may be waiting on one.
 
 #### Setup
 
@@ -181,18 +181,18 @@ services.AddWorkflow();
 
 #### Usage
 
-When your application starts, grab the runtime from the built-in dependency injection framework *IServiceProvider*.  Make sure you call *RegisterWorkflow*, so that the runtime knows about all your workflows, and then call *StartRuntime()* to fire up the thread pool that executes workflows.  Use the *StartWorkflow* method to initiate a new instance of a particular workflow.
+When your application starts, grab the runtime from the built-in dependency injection framework *IServiceProvider*.  Make sure you call *RegisterWorkflow*, so that the workflow host knows about all your workflows, and then call *Start()* to fire up the thread pool that executes workflows.  Use the *StartWorkflow* method to initiate a new instance of a particular workflow.
 
 
 ```C#
-var runtime = serviceProvider.GetService<IWorkflowRuntime>();            
-runtime.RegisterWorkflow<HelloWorldWorkflow>();
-runtime.StartRuntime();
+var host = serviceProvider.GetService<IWorkflowHost>();            
+host.RegisterWorkflow<HelloWorldWorkflow>();
+host.Start();
 
-runtime.StartWorkflow("HelloWorld", 1, null);
+host.StartWorkflow("HelloWorld", 1, null);
 
 Console.ReadLine();
-runtime.StopRuntime();
+host.Stop();
 ```
 
 
@@ -210,13 +210,15 @@ runtime.StopRuntime();
 
 [Hello World](src/samples/WorkflowCore.Sample01)
 
-[Multiple outcomes & looping](src/samples/WorkflowCore.Sample02)
+[Multiple outcomes](src/samples/WorkflowCore.Sample06)
 
 [Passing Data](src/samples/WorkflowCore.Sample03)
 
 [Events](src/samples/WorkflowCore.Sample04)
 
 [Deferred execution & re-entrant steps](src/samples/WorkflowCore.Sample05)
+
+[Looping](src/samples/WorkflowCore.Sample02)
 
 
 ## Authors
