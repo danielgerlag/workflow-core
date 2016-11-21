@@ -13,7 +13,8 @@ namespace WorkflowCore.Persistence.Sqlite
     {
         private readonly string _connectionString;
 
-        public SqlitePersistenceProvider(string connectionString)
+        public SqlitePersistenceProvider(string connectionString, bool canCreateDB)
+            : base(canCreateDB, false)
         {
             _connectionString = connectionString;
         }
@@ -38,10 +39,6 @@ namespace WorkflowCore.Persistence.Sqlite
         {
             builder.ForSqliteToTable("UnpublishedEvent");
         }
-
-        public override void EnsureStoreExists()
-        {
-            Database.EnsureCreated();
-        }
+        
     }
 }

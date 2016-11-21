@@ -7,7 +7,12 @@
     "NETStandard.Library": "1.6.1",
     "Microsoft.EntityFrameworkCore.SqlServer": "1.1.0",
     "WorkflowCore": "1.0.0-*",
-    "WorkflowCore.Persistence.EntityFramework": "1.0.0-beta3"
+    "WorkflowCore.Persistence.EntityFramework": "1.0.0-beta3",
+    "Microsoft.EntityFrameworkCore.Tools": {
+      "version": "1.1.0-preview4-final",
+      "type": "build"
+    },
+    "Microsoft.EntityFrameworkCore.Design": "1.1.0"
   },
 
   "frameworks": {
@@ -15,6 +20,11 @@
       "imports": "dnxcore50"
     }
   },
+
+  "tools": {
+    "Microsoft.EntityFrameworkCore.Tools": "1.1.0-preview4-final"
+  },
+
 
   "packOptions": {
     "summary": "A persistence provider for WorkflowCore using SQL Server",

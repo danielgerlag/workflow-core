@@ -13,7 +13,8 @@ namespace WorkflowCore.Persistence.PostgreSQL
     {
         private readonly string _connectionString;
 
-        public PostgresPersistenceProvider(string connectionString)
+        public PostgresPersistenceProvider(string connectionString, bool canCreateDB, bool canMigrateDB)
+            :base(canCreateDB, canMigrateDB)
         {   
             _connectionString = connectionString;
         }
@@ -41,11 +42,7 @@ namespace WorkflowCore.Persistence.PostgreSQL
             builder.ForNpgsqlToTable("UnpublishedEvent", "wfc");
             builder.Property(x => x.ClusterKey).ValueGeneratedOnAdd();
         }
-
-        public override void EnsureStoreExists()
-        {
-            Database.EnsureCreated();
-        }
+                
     }
 }
 

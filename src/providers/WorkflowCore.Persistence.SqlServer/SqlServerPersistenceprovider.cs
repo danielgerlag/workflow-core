@@ -13,7 +13,8 @@ namespace WorkflowCore.Persistence.SqlServer
     {
         private readonly string _connectionString;
 
-        public SqlServerPersistenceProvider(string connectionString)
+        public SqlServerPersistenceProvider(string connectionString, bool canCreateDB, bool canMigrateDB)
+            : base(canCreateDB, canMigrateDB)
         {
             if (!connectionString.Contains("MultipleActiveResultSets"))
                 connectionString += ";MultipleActiveResultSets=True";
@@ -44,10 +45,6 @@ namespace WorkflowCore.Persistence.SqlServer
             builder.ForSqlServerToTable("UnpublishedEvent", "wfc");
             builder.Property(x => x.ClusterKey).UseSqlServerIdentityColumn();
         }
-
-        public override void EnsureStoreExists()
-        {
-            Database.EnsureCreated();
-        }
+                
     }
 }

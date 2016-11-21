@@ -34,7 +34,7 @@ namespace WorkflowCore.Sample06
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
             services.AddWorkflow();
-            //services.AddWorkflow(x => x.UseSqlServer(@"Server=.;Database=WorkflowCore;Trusted_Connection=True;"));
+            //services.AddWorkflow(x => x.UseSqlServer(@"Server=.;Database=Test3;Trusted_Connection=True;", true, true));            
 
             var serviceProvider = services.BuildServiceProvider();
 

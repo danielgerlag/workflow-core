@@ -12,11 +12,19 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
 {
     public abstract class EntityFrameworkPersistenceProvider : DbContext, IPersistenceProvider
     {
+        protected readonly bool _canCreateDB;
+        protected readonly bool _canMigrateDB;
+
+        public EntityFrameworkPersistenceProvider(bool canCreateDB, bool canMigrateDB)
+        {
+            _canCreateDB = canCreateDB;
+            _canMigrateDB = canMigrateDB;
+        }
+
         protected abstract void ConfigureWorkflowStorage(EntityTypeBuilder<PersistedWorkflow> builder);
         protected abstract void ConfigureSubscriptionStorage(EntityTypeBuilder<PersistedSubscription> builder);
         protected abstract void ConfigurePublicationStorage(EntityTypeBuilder<PersistedPublication> builder);
-        public abstract void EnsureStoreExists();
-
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -144,6 +152,21 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             var existing = Set<PersistedPublication>().First(x => x.PublicationId == id);
             Set<PersistedPublication>().Remove(existing);
             SaveChanges();
+        }
+
+        public virtual void EnsureStoreExists()
+        {
+            if (_canCreateDB && !_canMigrateDB)
+            {
+                Database.EnsureCreated();
+                return;
+            }
+
+            if (_canMigrateDB)
+            {
+                Database.Migrate();
+                return;
+            }
         }
     }
 }

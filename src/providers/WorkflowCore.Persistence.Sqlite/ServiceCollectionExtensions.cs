@@ -9,9 +9,9 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        public static WorkflowOptions UseSqlite(this WorkflowOptions options, string connectionString)
+        public static WorkflowOptions UseSqlite(this WorkflowOptions options, string connectionString, bool canCreateDB)
         {
-            options.UsePersistence(sp => new SqlitePersistenceProvider(connectionString));
+            options.UsePersistence(sp => new SqlitePersistenceProvider(connectionString, canCreateDB));
             return options;
         }
     }
