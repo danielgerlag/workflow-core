@@ -18,7 +18,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
         public EntityFrameworkPersistenceProvider(bool canCreateDB, bool canMigrateDB)
         {
             _canCreateDB = canCreateDB;
-            _canMigrateDB = canMigrateDB;
+            _canMigrateDB = canMigrateDB;            
         }
 
         protected abstract void ConfigureWorkflowStorage(EntityTypeBuilder<PersistedWorkflow> builder);
@@ -76,7 +76,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             var now = DateTime.Now.ToUniversalTime().Ticks;
             var raw = Set<PersistedWorkflow>()
                 .Where(x => x.NextExecution.HasValue && x.NextExecution <= now)
-                .Select(x => x.InstanceId)                
+                .Select(x => x.InstanceId)
                 .ToList();
 
             List<string> result = new List<string>();

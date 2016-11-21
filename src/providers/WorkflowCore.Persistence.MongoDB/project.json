@@ -1,14 +1,14 @@
 {
   "title": "Workflow Core MongoDB Persistence Provider",
   "authors": [ "Daniel Gerlag" ],
-  "version": "1.0.0-beta2",
+  "version": "1.0.0-beta4",
 
   "dependencies": {
     "MongoDB.Driver": "2.3.0",
-    "NETStandard.Library": "1.6.1",
+    "NETStandard.Library": "1.6.0",
     "System.Linq.Dynamic.Core": "1.0.6.8",
     "System.Reflection": "4.3.0",
-    "WorkflowCore": "1.0.0-*"
+    "WorkflowCore": "1.0.0-beta4"
   },
 
   "frameworks": {
