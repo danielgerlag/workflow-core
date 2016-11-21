@@ -1,18 +1,18 @@
 ﻿{
   "title": "Workflow Core EntityFramework Core Persistence Provider",
   "authors": [ "Daniel Gerlag" ],
-  "version": "1.0.0-beta5",
+  "version": "1.0.0-beta6",
 
   "dependencies": {
     "Microsoft.EntityFrameworkCore": "1.1.0",
     "Microsoft.EntityFrameworkCore.Relational": "1.0.1",
     "NETStandard.Library": "1.6.0",
     "Newtonsoft.Json": "9.0.1",
-    "WorkflowCore": "1.0.0-beta4"
+    "WorkflowCore": "1.0.0-beta6"
   },
 
   "frameworks": {
-    "netstandard1.6": {
+    "netstandard1.3": {
       "imports": "dnxcore50"
     }
   },

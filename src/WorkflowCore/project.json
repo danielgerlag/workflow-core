@@ -1,6 +1,6 @@
 {
   "title": "Workflow Core",
-  "version": "1.0.0-beta4",
+  "version": "1.0.0-beta6",
   "authors": [ "Daniel Gerlag" ],
 
   "dependencies": {
@@ -13,7 +13,7 @@
   },
 
   "frameworks": {
-    "netstandard1.6": {
+    "netstandard1.3": {
       "imports": "dnxcore50"
     }
   },

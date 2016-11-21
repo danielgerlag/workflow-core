@@ -1,17 +1,17 @@
 ﻿{
   "title": "Workflow Core Sqlite Persistence Provider",
   "authors": [ "Daniel Gerlag" ],
-  "version": "1.0.0-beta5",
+  "version": "1.0.0-beta6",
 
   "dependencies": {
     "NETStandard.Library": "1.6.0",
     "Microsoft.EntityFrameworkCore.Sqlite": "1.1.0",
-    "WorkflowCore": "1.0.0-beta4",
-    "WorkflowCore.Persistence.EntityFramework": "1.0.0-beta5"
+    "WorkflowCore": "1.0.0-beta6",
+    "WorkflowCore.Persistence.EntityFramework": "1.0.0-beta6"
   },
 
   "frameworks": {
-    "netstandard1.6": {
+    "netstandard1.3": {
       "imports": "dnxcore50"
     }
   },

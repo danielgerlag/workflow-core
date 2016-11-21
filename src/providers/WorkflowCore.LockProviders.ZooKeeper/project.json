@@ -1,17 +1,17 @@
 {
   "title": "Workflow Core ZooKeeper distributed lock manager",
   "authors": [ "Daniel Gerlag" ],
-  "version": "1.0.0-beta4",
+  "version": "1.0.0-beta6",
 
   "dependencies": {
     "NETStandard.Library": "1.6.0",
-    "WorkflowCore": "1.0.0-beta4",
+    "WorkflowCore": "1.0.0-beta6",
     "ZooKeeperNetEx": "3.4.9.1",
     "ZooKeeperNetEx.Recipes": "3.4.9.1"
   },
 
   "frameworks": {
-    "netstandard1.6": {
+    "netstandard1.3": {
       "imports": "dnxcore50"
     }
   },

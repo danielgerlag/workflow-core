@@ -16,7 +16,7 @@
       "version": "1.0.1"
     },
     "WorkflowCore": "1.0.0-*",
-    "WorkflowCore.Persistence.SqlServer": "1.0.0-beta3"
+    "WorkflowCore.Persistence.SqlServer": "1.0.0-beta6"
   },
 
   "frameworks": {
