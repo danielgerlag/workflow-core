@@ -30,7 +30,7 @@ public class HelloWorld : StepBody
     }
 }
 ```
-*The StepBody class implementations are constructed by the workflow runtime which first tries to use IServiceProvider from the built-in dependency injection of .NET Core, if it can't construct it with this method, it will search for a parameterless constructor*
+*The StepBody class implementations are constructed by the workflow host which first tries to use IServiceProvider from the built-in dependency injection of .NET Core, if it can't construct it with this method, it will search for a parameterless constructor*
 
 Then we define the workflow structure by composing a chain of steps.  The is done by implementing the IWorkflow interface.
 
@@ -46,7 +46,7 @@ public class HelloWorldWorkflow : IWorkflow
     ...
 }
 ```
-The *IWorkflow* interface also has a readonly Id property and readonly Version property.  These are generally static and are used by the workflow runtime to identify a workflow definition.
+The *IWorkflow* interface also has a readonly Id property and readonly Version property.  These are generally static and are used by the workflow host to identify a workflow definition.
 
 You can also define your steps inline
 
@@ -71,7 +71,7 @@ public class HelloWorldWorkflow : IWorkflow
 }
 ```
 
-Each running workflow is persisted to the chosen persistence provider between each step, where it can be picked up at a later point in time to continue execution.  The outcome result of your step can instruct the workflow runtime to defer further execution of the workflow until a future point in time or in response to an external event.
+Each running workflow is persisted to the chosen persistence provider between each step, where it can be picked up at a later point in time to continue execution.  The outcome result of your step can instruct the workflow host to defer further execution of the workflow until a future point in time or in response to an external event.
 
 The first time a particular step within the workflow is called, the PersistenceData property on the context object is *null*.  The ExecutionResult produced by the Run method can either cause the workflow to proceed to the next step by providing an outcome value, instruct the workflow to sleep for a defined period or simply not move the workflow forward.  If no outcome value is produced, then the step becomes re-entrant by setting PersistenceData, so the workflow host will call this step again in the future buy will popluate the PersistenceData with it's previous value.
 
@@ -161,9 +161,9 @@ public class EventSampleWorkflow : IWorkflow<MyDataClass>
     }
 }
 ...
-//External events are published via the runtime
+//External events are published via the host
 //All workflows that have subscribed to MyEvent 0, will be passed "hello"
-runtime.PublishEvent("MyEvent", "0", "hello");
+host.PublishEvent("MyEvent", "0", "hello");
 ```
 
 ### Host
@@ -172,7 +172,7 @@ The workflow host is the service responsible for executing workflows.  It does t
 
 #### Setup
 
-Use the *AddWorkflow* extension method for *IServiceCollection* to configure the workflow runtime upon startup of your application.
+Use the *AddWorkflow* extension method for *IServiceCollection* to configure the workflow host upon startup of your application.
 By default, it is configured with *MemoryPersistenceProvider* and *SingleNodeConcurrencyProvider* for testing purposes.  You can also configure a DB persistence provider at this point.
 
 ```C#
@@ -181,7 +181,7 @@ services.AddWorkflow();
 
 #### Usage
 
-When your application starts, grab the runtime from the built-in dependency injection framework *IServiceProvider*.  Make sure you call *RegisterWorkflow*, so that the workflow host knows about all your workflows, and then call *Start()* to fire up the thread pool that executes workflows.  Use the *StartWorkflow* method to initiate a new instance of a particular workflow.
+When your application starts, grab the workflow host from the built-in dependency injection framework *IServiceProvider*.  Make sure you call *RegisterWorkflow*, so that the workflow host knows about all your workflows, and then call *Start()* to fire up the thread pool that executes workflows.  Use the *StartWorkflow* method to initiate a new instance of a particular workflow.
 
 
 ```C#
