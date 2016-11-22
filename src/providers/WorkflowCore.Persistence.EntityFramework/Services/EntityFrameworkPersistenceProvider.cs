@@ -75,7 +75,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
         {
             var now = DateTime.Now.ToUniversalTime().Ticks;
             var raw = Set<PersistedWorkflow>()
-                .Where(x => x.NextExecution.HasValue && x.NextExecution <= now)
+                .Where(x => x.NextExecution.HasValue && (x.NextExecution <= now) && (x.Status == WorkflowStatus.Runnable))
                 .Select(x => x.InstanceId)
                 .ToList();
 

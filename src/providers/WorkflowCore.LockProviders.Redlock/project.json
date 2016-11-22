@@ -1,12 +1,11 @@
 ﻿{
   "title": "Workflow Core Redlock distributed lock manager",
-  "authors": [ "Daniel Gerlag" ],
-  "version": "1.0.0-beta6",
-
+  "authors": [ "Daniel Gerlag" ],  
+  "version": "1.0.1-*",
   "dependencies": {
     "NETStandard.Library": "1.6.0",
     "StackExchange.Redis": "1.1.608",
-    "WorkflowCore": "1.0.0-beta6"
+    "WorkflowCore": "1.0.1-*"
   },
 
   "frameworks": {

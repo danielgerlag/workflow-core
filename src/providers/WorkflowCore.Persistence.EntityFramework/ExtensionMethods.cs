@@ -21,6 +21,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.NextExecution = instance.NextExecution;
             result.Version = instance.Version;
             result.WorkflowDefinitionId = instance.WorkflowDefinitionId;
+            result.Status = instance.Status;
             result.ExecutionPointers = JsonConvert.SerializeObject(instance.ExecutionPointers, SerializerSettings);
 
             return result;
@@ -60,6 +61,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.NextExecution = instance.NextExecution;
             result.Version = instance.Version;
             result.WorkflowDefinitionId = instance.WorkflowDefinitionId;
+            result.Status = instance.Status;
             result.ExecutionPointers = JsonConvert.DeserializeObject<List<ExecutionPointer>>(instance.ExecutionPointers, SerializerSettings);
 
             return result;

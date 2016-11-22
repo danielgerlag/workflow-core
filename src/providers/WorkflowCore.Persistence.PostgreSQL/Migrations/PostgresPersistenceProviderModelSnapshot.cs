@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using WorkflowCore.Persistence.PostgreSQL;
+using WorkflowCore.Models;
 
 namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 {
@@ -13,6 +14,7 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
                 .HasAnnotation("ProductVersion", "1.1.0-rtm-22752");
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedPublication", b =>
@@ -98,6 +100,8 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                         .HasMaxLength(200);
 
                     b.Property<long?>("NextExecution");
+
+                    b.Property<int>("Status");
 
                     b.Property<int>("Version");
 

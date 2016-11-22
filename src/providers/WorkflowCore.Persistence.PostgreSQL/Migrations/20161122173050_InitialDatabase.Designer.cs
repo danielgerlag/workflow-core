@@ -3,25 +3,25 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using WorkflowCore.Persistence.SqlServer;
+using WorkflowCore.Persistence.PostgreSQL;
+using WorkflowCore.Models;
 
-namespace WorkflowCore.Persistence.SqlServer.Migrations
+namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 {
-    [DbContext(typeof(SqlServerPersistenceProvider))]
-    [Migration("20161121195301_InitialDatabase")]
+    [DbContext(typeof(PostgresPersistenceProvider))]
+    [Migration("20161122173050_InitialDatabase")]
     partial class InitialDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
-                .HasAnnotation("ProductVersion", "1.1.0-rtm-22752")
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
+                .HasAnnotation("ProductVersion", "1.1.0-rtm-22752");
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedPublication", b =>
                 {
                     b.Property<long>("ClusterKey")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("EventData");
 
@@ -45,16 +45,15 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
                     b.ToTable("PersistedPublication");
 
-                    b.HasAnnotation("SqlServer:Schema", "wfc");
+                    b.HasAnnotation("Npgsql:Schema", "wfc");
 
-                    b.HasAnnotation("SqlServer:TableName", "UnpublishedEvent");
+                    b.HasAnnotation("Npgsql:TableName", "UnpublishedEvent");
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedSubscription", b =>
                 {
                     b.Property<long>("ClusterKey")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("EventKey")
                         .HasMaxLength(200);
@@ -81,16 +80,15 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
                     b.ToTable("PersistedSubscription");
 
-                    b.HasAnnotation("SqlServer:Schema", "wfc");
+                    b.HasAnnotation("Npgsql:Schema", "wfc");
 
-                    b.HasAnnotation("SqlServer:TableName", "Subscription");
+                    b.HasAnnotation("Npgsql:TableName", "Subscription");
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedWorkflow", b =>
                 {
                     b.Property<long>("ClusterKey")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("Data");
 
@@ -103,6 +101,8 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                         .HasMaxLength(200);
 
                     b.Property<long?>("NextExecution");
+
+                    b.Property<int>("Status");
 
                     b.Property<int>("Version");
 
@@ -118,9 +118,9 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
                     b.ToTable("PersistedWorkflow");
 
-                    b.HasAnnotation("SqlServer:Schema", "wfc");
+                    b.HasAnnotation("Npgsql:Schema", "wfc");
 
-                    b.HasAnnotation("SqlServer:TableName", "Workflow");
+                    b.HasAnnotation("Npgsql:TableName", "Workflow");
                 });
         }
     }

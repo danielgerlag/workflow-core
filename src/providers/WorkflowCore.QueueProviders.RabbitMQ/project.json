@@ -1,13 +1,13 @@
 ﻿{
   "title": "Workflow Core RabbitMQ queue provider",
   "authors": [ "Daniel Gerlag" ],
-  "version": "1.0.0-beta6",
+  "version": "1.0.1-*",
 
   "dependencies": {
     "NETStandard.Library": "1.6.0",
     "Newtonsoft.Json": "9.0.1",
     "RabbitMQ.Client": "4.1.1",
-    "WorkflowCore": "1.0.0-beta6"
+    "WorkflowCore": "1.0.1-*"
   },
 
   "frameworks": {
