@@ -228,6 +228,10 @@ There are several persistence providers available as seperate Nuget packages.
 [Looping](src/samples/WorkflowCore.Sample02)
 
 
+## Status
+
+![status](https://ci.appveyor.com/api/projects/status/github/danielgerlag/workflow-core)
+
 ## Authors
 
 * **Daniel Gerlag** - *Initial work*
