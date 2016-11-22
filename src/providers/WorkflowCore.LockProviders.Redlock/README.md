@@ -20,3 +20,5 @@ Use the .UseRedlock extension method when building your service provider.
 redis = ConnectionMultiplexer.Connect("127.0.0.1");
 services.AddWorkflow(x => x.UseRedlock(redis));
 ```
+
+*Adapted from https://github.com/KidFashion/redlock-cs*
