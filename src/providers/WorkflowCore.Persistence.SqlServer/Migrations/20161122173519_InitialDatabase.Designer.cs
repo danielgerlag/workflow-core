@@ -9,8 +9,8 @@ using WorkflowCore.Models;
 namespace WorkflowCore.Persistence.SqlServer.Migrations
 {
     [DbContext(typeof(SqlServerPersistenceProvider))]
-    [Migration("20161122161252_WorkflowStatus")]
-    partial class WorkflowStatus
+    [Migration("20161122173519_InitialDatabase")]
+    partial class InitialDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

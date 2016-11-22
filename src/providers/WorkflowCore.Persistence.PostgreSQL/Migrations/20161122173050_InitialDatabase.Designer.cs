@@ -9,8 +9,8 @@ using WorkflowCore.Models;
 namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 {
     [DbContext(typeof(PostgresPersistenceProvider))]
-    [Migration("20161122161201_WorkflowStatus")]
-    partial class WorkflowStatus
+    [Migration("20161122173050_InitialDatabase")]
+    partial class InitialDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

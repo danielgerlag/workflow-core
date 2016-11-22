@@ -31,10 +31,11 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             //BsonSerializer.RegisterSerializer(new DataMappingSerializer());
 
             BsonClassMap.RegisterClassMap<WorkflowInstance>(x =>
-            {
+            {                
                 x.MapIdProperty(y => y.Id)                    
                     .SetIdGenerator(new StringObjectIdGenerator());
-                x.MapProperty(y => y.Data);
+                x.MapProperty(y => y.Data)
+                    .SetSerializer(new DataObjectSerializer());
                 x.MapProperty(y => y.Description);
                 x.MapProperty(y => y.WorkflowDefinitionId);
                 x.MapProperty(y => y.Version);
@@ -103,7 +104,9 @@ namespace WorkflowCore.Persistence.MongoDB.Services
         public async Task<IEnumerable<string>> GetRunnableInstances()
         {
             var now = DateTime.Now.ToUniversalTime().Ticks;
-            return WorkflowInstances.AsQueryable().Where(x => x.NextExecution.HasValue && x.NextExecution <= now).Select(x => x.Id).ToList();
+            return WorkflowInstances.AsQueryable()
+                .Where(x => x.NextExecution.HasValue && (x.NextExecution <= now) && (x.Status == WorkflowStatus.Runnable))
+                .Select(x => x.Id).ToList();
         }
 
         public async Task<WorkflowInstance> GetWorkflowInstance(string Id)

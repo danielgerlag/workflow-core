@@ -56,6 +56,7 @@ namespace WorkflowCore.Services
             wf.Data = data;
             wf.Description = def.Description;
             wf.NextExecution = 0;
+            wf.Status = WorkflowStatus.Runnable;
             wf.ExecutionPointers.Add(new ExecutionPointer() { StepId = def.InitialStep, Active = true });
             string id = await _persistenceStore.CreateNewWorkflow(wf);
             await _queueProvider.QueueForProcessing(id);
@@ -154,16 +155,21 @@ namespace WorkflowCore.Services
                         {
                             if (_lockProvider.AcquireLock(workflowId).Result)
                             {
-                                var workflow = persistenceStore.GetWorkflowInstance(workflowId).Result;
+                                WorkflowInstance workflow = null;
                                 try
-                                {                                    
-                                    workflowExecutor.Execute(workflow, persistenceStore, _options);
+                                {
+                                    workflow = persistenceStore.GetWorkflowInstance(workflowId).Result;
+                                    if (workflow.Status == WorkflowStatus.Runnable)
+                                        workflowExecutor.Execute(workflow, persistenceStore, _options);
                                 }
                                 finally
                                 {
                                     _lockProvider.ReleaseLock(workflowId);
-                                    if (workflow.NextExecution.HasValue && workflow.NextExecution.Value < DateTime.Now.ToUniversalTime().Ticks)
-                                        _queueProvider.QueueForProcessing(workflowId);
+                                    if (workflow != null)
+                                    {
+                                        if ((workflow.Status == WorkflowStatus.Runnable) && workflow.NextExecution.HasValue && workflow.NextExecution.Value < DateTime.Now.ToUniversalTime().Ticks)
+                                            _queueProvider.QueueForProcessing(workflowId);
+                                    }
                                 }
                             }
                             else
@@ -328,19 +334,70 @@ namespace WorkflowCore.Services
             _registry.RegisterWorkflow<TData>(wf);
         }
 
-        public Task<bool> SuspendWorkflow(string workflowId)
+        public async Task<bool> SuspendWorkflow(string workflowId)
         {
-            throw new NotImplementedException();
+            if (_lockProvider.AcquireLock(workflowId).Result)
+            {
+                try
+                {
+                    var wf = await _persistenceStore.GetWorkflowInstance(workflowId);
+                    if (wf.Status == WorkflowStatus.Runnable)
+                    {
+                        wf.Status = WorkflowStatus.Suspended;
+                        await _persistenceStore.PersistWorkflow(wf);
+                        return true;
+                    }
+                    return false;
+                }
+                finally
+                {
+                    await _lockProvider.ReleaseLock(workflowId);
+                }
+            }
+            return false;
         }
 
-        public Task<bool> ResumeWorkflow(string workflowId)
+        public async Task<bool> ResumeWorkflow(string workflowId)
         {
-            throw new NotImplementedException();
+            if (_lockProvider.AcquireLock(workflowId).Result)
+            {
+                try
+                {
+                    var wf = await _persistenceStore.GetWorkflowInstance(workflowId);
+                    if (wf.Status == WorkflowStatus.Suspended)
+                    {
+                        wf.Status = WorkflowStatus.Runnable;
+                        await _persistenceStore.PersistWorkflow(wf);
+                        await _queueProvider.QueueForProcessing(workflowId);
+                        return true;
+                    }
+                    return false;
+                }
+                finally
+                {
+                    await _lockProvider.ReleaseLock(workflowId);
+                }
+            }
+            return false;
         }
 
-        public Task<bool> TerminateWorkflow(string workflowId)
+        public async Task<bool> TerminateWorkflow(string workflowId)
         {
-            throw new NotImplementedException();
+            if (_lockProvider.AcquireLock(workflowId).Result)
+            {
+                try
+                {
+                    var wf = await _persistenceStore.GetWorkflowInstance(workflowId);                    
+                    wf.Status = WorkflowStatus.Terminated;
+                    await _persistenceStore.PersistWorkflow(wf);
+                    return true;                    
+                }
+                finally
+                {
+                    await _lockProvider.ReleaseLock(workflowId);
+                }
+            }
+            return false;
         }
     }
 }
