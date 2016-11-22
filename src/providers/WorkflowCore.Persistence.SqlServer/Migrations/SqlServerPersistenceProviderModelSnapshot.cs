@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using WorkflowCore.Persistence.SqlServer;
+using WorkflowCore.Models;
 
 namespace WorkflowCore.Persistence.SqlServer.Migrations
 {
@@ -102,6 +103,8 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                         .HasMaxLength(200);
 
                     b.Property<long?>("NextExecution");
+
+                    b.Property<int>("Status");
 
                     b.Property<int>("Version");
 

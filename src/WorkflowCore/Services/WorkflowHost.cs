@@ -327,5 +327,20 @@ namespace WorkflowCore.Services
             TWorkflow wf = new TWorkflow();
             _registry.RegisterWorkflow<TData>(wf);
         }
+
+        public Task<bool> SuspendWorkflow(string workflowId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> ResumeWorkflow(string workflowId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> TerminateWorkflow(string workflowId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

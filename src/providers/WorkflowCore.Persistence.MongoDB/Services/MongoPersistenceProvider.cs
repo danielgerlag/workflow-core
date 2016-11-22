@@ -39,6 +39,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                 x.MapProperty(y => y.WorkflowDefinitionId);
                 x.MapProperty(y => y.Version);
                 x.MapProperty(y => y.NextExecution);
+                x.MapProperty(y => y.Status);
                 x.MapProperty(y => y.ExecutionPointers);
             });
 

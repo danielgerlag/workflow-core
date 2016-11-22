@@ -17,5 +17,9 @@ namespace WorkflowCore.Interface
         void RegisterWorkflow<TWorkflow>() where TWorkflow : IWorkflow, new();
         void RegisterWorkflow<TWorkflow, TData>() where TWorkflow : IWorkflow<TData>, new() where TData : new();
 
+        Task<bool> SuspendWorkflow(string workflowId);
+        Task<bool> ResumeWorkflow(string workflowId);
+        Task<bool> TerminateWorkflow(string workflowId);
+
     }
 }
