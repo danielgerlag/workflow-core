@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0-*",
+  "testRunner": "mspec",
+  "dependencies": {
+    "dotnet-test-mspec": "0.2.0",
+    "FluentAssertions": "4.17.0",
+    "Machine.Fakes": "2.8.0-beta3",
+    "Machine.Specifications": "0.11.0",
+    "Machine.Specifications.Should": "0.11.0",
+    "Microsoft.Extensions.DependencyInjection": "1.1.0",
+    "Microsoft.Extensions.Logging.Debug": "1.1.0",
+    "NETStandard.Library": "1.6.0",
+    "WorkflowCore": "1.0.1-*",
+    "WorkflowCore.TestAssets": "1.0.0-*"
+  },
+
+  "frameworks": {
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.0"
+        }
+      }
+    }
+  }
+}
