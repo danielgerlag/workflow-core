@@ -45,6 +45,12 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.QueueProviders
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.Sample06", "src\samples\WorkflowCore.Sample06\WorkflowCore.Sample06.xproj", "{8FEAFD74-C304-4F75-BA38-4686BE55C891}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.UnitTests", "test\WorkflowCore.UnitTests\WorkflowCore.UnitTests.xproj", "{37B598A8-B054-4ABA-884D-96AEF2511600}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.TestAssets", "test\WorkflowCore.TestAssets\WorkflowCore.TestAssets.xproj", "{17C270A8-EC88-4883-9318-74BB28EFF508}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -111,6 +117,14 @@ Global
 		{8FEAFD74-C304-4F75-BA38-4686BE55C891}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8FEAFD74-C304-4F75-BA38-4686BE55C891}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8FEAFD74-C304-4F75-BA38-4686BE55C891}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37B598A8-B054-4ABA-884D-96AEF2511600}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37B598A8-B054-4ABA-884D-96AEF2511600}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37B598A8-B054-4ABA-884D-96AEF2511600}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37B598A8-B054-4ABA-884D-96AEF2511600}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17C270A8-EC88-4883-9318-74BB28EFF508}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17C270A8-EC88-4883-9318-74BB28EFF508}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17C270A8-EC88-4883-9318-74BB28EFF508}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17C270A8-EC88-4883-9318-74BB28EFF508}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -133,5 +147,7 @@ Global
 		{3BBA51EE-765A-4772-A940-7F853E1010FC} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
 		{AFAD87C7-B2EE-451E-BA7E-3F5A91358C48} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
 		{8FEAFD74-C304-4F75-BA38-4686BE55C891} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
+		{37B598A8-B054-4ABA-884D-96AEF2511600} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
+		{17C270A8-EC88-4883-9318-74BB28EFF508} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
 	EndGlobalSection
 EndGlobal
