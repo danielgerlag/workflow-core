@@ -242,7 +242,7 @@ By default, the WorkflowHost service will run as a single node using the built-i
 * Apache ZooKeeper *(coming soon...)*
 * 0MQ *(coming soon...)*
 
-### Distributed lock managers
+#### Distributed lock managers
 
 * SingleNodeLockProvider *(Default built-in provider)*
 * [Redis Redlock](src/providers/WorkflowCore.LockProviders.Redlock)
