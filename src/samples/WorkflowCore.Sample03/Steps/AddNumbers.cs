@@ -19,7 +19,7 @@ namespace WorkflowCore.Sample03.Steps
         public override ExecutionResult Run(IStepExecutionContext context)
         {
             Output = (Input1 + Input2);
-            return OutcomeResult(null);
+            return ExecutionResult.Next();
         }
     }
 }

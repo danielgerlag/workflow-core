@@ -25,5 +25,42 @@ namespace WorkflowCore.Models
             OutcomeValue = outcome;
         }
 
+        public static ExecutionResult Outcome(object value)
+        {
+            return new ExecutionResult()
+            {
+                Proceed = true,
+                OutcomeValue = value
+            };
+        }
+
+        public static ExecutionResult Next()
+        {
+            return new ExecutionResult()
+            {
+                Proceed = true,
+                OutcomeValue = null
+            };
+        }
+
+        public static ExecutionResult Persist(object value)
+        {
+            return new ExecutionResult()
+            {
+                Proceed = false,
+                OutcomeValue = value
+            };
+        }
+
+        public static ExecutionResult Sleep(TimeSpan duration, object value)
+        {
+            return new ExecutionResult()
+            {
+                Proceed = false,
+                SleepFor = duration,
+                OutcomeValue = value
+            };
+        }
+
     }
 }

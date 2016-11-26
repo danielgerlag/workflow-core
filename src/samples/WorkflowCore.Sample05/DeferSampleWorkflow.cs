@@ -31,15 +31,15 @@ namespace WorkflowCore.Sample05
             builder
                 .StartWith(context =>
                 {
-                    Console.WriteLine("Workflow started");                    
-                    return new ExecutionResult(null);
+                    Console.WriteLine("Workflow started");
+                    return ExecutionResult.Next();
                 })
                 .Then<SleepStep>()
                     .Input(step => step.Period, data => TimeSpan.FromSeconds(20))
                 .Then(context =>
                 {
                     Console.WriteLine("workflow complete");
-                    return new ExecutionResult(null);
+                    return ExecutionResult.Next();
                 });
         }
     }

@@ -11,9 +11,9 @@ public class SleepStep : StepBody
     public override ExecutionResult Run(IStepExecutionContext context)
     {
         if (context.PersistenceData == null)
-            return SleepResult(new Object(), Period);
+            return ExecutionResult.Sleep(Period, new object());
         else
-            return OutcomeResult(null);
+            return ExecutionResult.Next();
     }
 }
 ```
@@ -27,14 +27,14 @@ public class DeferSampleWorkflow : IWorkflow
             .StartWith(context =>
             {
                 Console.WriteLine("Workflow started");                    
-                return new ExecutionResult(null);
+                return ExecutionResult.Next();
             })
             .Then<SleepStep>()
                 .Input(step => step.Period, data => TimeSpan.FromSeconds(20))
             .Then(context =>
             {
                 Console.WriteLine("workflow complete");
-                return new ExecutionResult(null);
+                return ExecutionResult.Next();
             });
     }
 	...

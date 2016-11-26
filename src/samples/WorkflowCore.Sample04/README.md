@@ -9,7 +9,7 @@ public class EventSampleWorkflow : IWorkflow<MyDataClass>
     public void Build(IWorkflowBuilder<MyDataClass> builder)
     {
         builder
-            .StartWith(context => new ExecutionResult(null))
+            .StartWith(context => ExecutionResult.Next())
             .WaitFor("MyEvent", "0")
                 .Output(data => data.StrValue, step => step.EventData)
             .Then<CustomMessage>() 
@@ -17,7 +17,7 @@ public class EventSampleWorkflow : IWorkflow<MyDataClass>
             .Then(context =>
             {
                 Console.WriteLine("workflow complete");
-                return new ExecutionResult(null);
+                return ExecutionResult.Next();
             });
     }
 }

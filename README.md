@@ -26,7 +26,7 @@ public class HelloWorld : StepBody
     public override ExecutionResult Run(IStepExecutionContext context)
     {
         Console.WriteLine("Hello world");
-        return OutcomeResult(null);
+        return ExecutionResult.Next();
     }
 }
 ```
@@ -59,12 +59,12 @@ public class HelloWorldWorkflow : IWorkflow
             .StartWith(context =>
             {
                 Console.WriteLine("Hello world");
-                return new ExecutionResult(null);
+                return ExecutionResult.Next();
             })
             .Then(context =>
             {
                 Console.WriteLine("Goodbye world");
-                return new ExecutionResult(null);
+                return ExecutionResult.Next();
             })
     }
     ...
@@ -83,9 +83,9 @@ public class SleepStep : StepBody
     public override ExecutionResult Run(IStepExecutionContext context)
     {
         if (context.PersistenceData == null)
-            return SleepResult(new Object(), Timespan.FromHours(12));
+            return ExecutionResult.Sleep(Timespan.FromHours(12), new Object());
         else
-            return OutcomeResult(null);
+            return ExecutionResult.Next();
     }
 }
 ```
@@ -109,7 +109,7 @@ public class AddNumbers : StepBody
     public override ExecutionResult Run(IStepExecutionContext context)
     {
         Output = (Input1 + Input2);
-        return OutcomeResult(null);
+        return ExecutionResult.Next();
     }
 }
 
@@ -175,7 +175,7 @@ public class EventSampleWorkflow : IWorkflow<MyDataClass>
             .StartWith(context =>
             {
                 Console.WriteLine("workflow started");
-                return new ExecutionResult(null);
+                return ExecutionResult.Next();
             })
             .WaitFor("MyEvent", "0")
                 .Output(data => data.Value, step => step.EventData)

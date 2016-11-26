@@ -15,7 +15,7 @@ namespace WorkflowCore.Sample03.Steps
         public override ExecutionResult Run(IStepExecutionContext context)
         {
             Console.WriteLine(Message);
-            return OutcomeResult(null);
+            return ExecutionResult.Next();
         }
     }
 }

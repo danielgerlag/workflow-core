@@ -15,9 +15,9 @@ namespace WorkflowCore.Sample05.Steps
         public override ExecutionResult Run(IStepExecutionContext context)
         {
             if (context.PersistenceData == null)
-                return SleepResult(new Object(), Period);
+                return ExecutionResult.Sleep(Period, new object());
             else
-                return OutcomeResult(null);
+                return ExecutionResult.Next();
         }
     }
 }

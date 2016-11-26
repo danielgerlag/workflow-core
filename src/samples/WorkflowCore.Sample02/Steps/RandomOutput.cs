@@ -14,7 +14,7 @@ namespace WorkflowCore.Sample02.Steps
             Random rnd = new Random();
             int value = rnd.Next(2);
             Console.WriteLine("Generated random value {0}", value);
-            return OutcomeResult(value);
+            return ExecutionResult.Outcome(value);
         }
     }
 }

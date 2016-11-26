@@ -12,7 +12,7 @@ namespace WorkflowCore.Sample06.Steps
         public override ExecutionResult Run(IStepExecutionContext context)
         {
             Console.WriteLine("Doing Task D");
-            return OutcomeResult(null);
+            return ExecutionResult.Next();
         }
     }
 }

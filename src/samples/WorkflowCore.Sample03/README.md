@@ -23,7 +23,7 @@ public class AddNumbers : StepBody
     public override ExecutionResult Run(IStepExecutionContext context)
     {
         Output = (Input1 + Input2);
-        return OutcomeResult(null);
+        return ExecutionResult.Next();
     }
 }
 ```
@@ -39,7 +39,7 @@ public class PassingDataWorkflow : IWorkflow<MyDataClass>
             .StartWith(context =>
             {
                 Console.WriteLine("Starting workflow...");
-                return new ExecutionResult(null);
+                return ExecutionResult.Next();
             })
             .Then<AddNumbers>()
                 .Input(step => step.Input1, data => data.Value1)
@@ -51,7 +51,7 @@ public class PassingDataWorkflow : IWorkflow<MyDataClass>
             .Then(context =>
                 {
                     Console.WriteLine("Workflow comeplete");
-                    return new ExecutionResult(null);
+                    return ExecutionResult.Next();
                 });
     }
 	...

@@ -16,7 +16,7 @@ namespace WorkflowCore.Sample03
                 .StartWith(context =>
                 {
                     Console.WriteLine("Starting workflow...");
-                    return new ExecutionResult(null);
+                    return ExecutionResult.Next();
                 })
                 .Then<AddNumbers>()
                     .Input(step => step.Input1, data => data.Value1)
@@ -28,7 +28,7 @@ namespace WorkflowCore.Sample03
                 .Then(context =>
                     {
                         Console.WriteLine("Workflow comeplete");
-                        return new ExecutionResult(null);
+                        return ExecutionResult.Next();
                     });
         }
 

@@ -12,7 +12,7 @@ namespace WorkflowCore.Sample01.Steps
         public override ExecutionResult Run(IStepExecutionContext context)
         {
             Console.WriteLine("Hello world");
-            return OutcomeResult(null);
+            return ExecutionResult.Next();
         }
     }
 }
