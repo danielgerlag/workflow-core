@@ -27,6 +27,10 @@ namespace WorkflowCore.Models
 
         public object EventData { get; set; }
 
+        public int ConcurrentFork { get; set; }
+
+        public bool PathTerminator { get; set; }
+
         public List<ExecutionError> Errors { get; set; } = new List<ExecutionError>();
     }
 }

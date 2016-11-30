@@ -120,15 +120,20 @@ namespace WorkflowCore.Services
                         {
                             pointer.Active = false;
                             pointer.EndTime = DateTime.Now;
-                            
+                            int forkCounter = 1;
+                            bool noOutcomes = true;
                             foreach (var outcome in step.Outcomes.Where(x => object.Equals(x.Value, result.OutcomeValue)))
                             {
                                 workflow.ExecutionPointers.Add(new ExecutionPointer()
                                 {
                                     StepId = outcome.NextStep,
-                                    Active = true
+                                    Active = true,
+                                    ConcurrentFork = (forkCounter * pointer.ConcurrentFork)
                                 });
+                                noOutcomes = false;
+                                forkCounter++;
                             }
+                            pointer.PathTerminator = noOutcomes;
                         }
                         else
                         {
@@ -181,6 +186,20 @@ namespace WorkflowCore.Services
 
                 long pointerSleep = pointer.SleepUntil.Value.ToUniversalTime().Ticks;
                 workflow.NextExecution = Math.Min(pointerSleep, workflow.NextExecution ?? pointerSleep);
+            }
+
+            if (workflow.NextExecution == null)
+            {
+                int forks = 1;
+                int terminals = 0;
+                foreach (var pointer in workflow.ExecutionPointers)
+                {
+                    forks = Math.Max(pointer.ConcurrentFork, forks);
+                    if (pointer.PathTerminator)
+                        terminals++;
+                }
+                if (forks <= terminals)
+                    workflow.Status = WorkflowStatus.Complete;
             }
         }
 

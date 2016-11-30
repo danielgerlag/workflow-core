@@ -57,7 +57,7 @@ namespace WorkflowCore.Services
             wf.Description = def.Description;
             wf.NextExecution = 0;
             wf.Status = WorkflowStatus.Runnable;
-            wf.ExecutionPointers.Add(new ExecutionPointer() { StepId = def.InitialStep, Active = true });
+            wf.ExecutionPointers.Add(new ExecutionPointer() { StepId = def.InitialStep, Active = true, ConcurrentFork = 1 });
             string id = await _persistenceStore.CreateNewWorkflow(wf);
             await _queueProvider.QueueForProcessing(id);
             return id;
