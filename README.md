@@ -1,4 +1,4 @@
-# Workflow Core
+# Workflow Core ![status](https://ci.appveyor.com/api/projects/status/github/danielgerlag/workflow-core)
 
 Workflow Core is a light weight workflow engine targeting .NET Standard.  It supports pluggable persistence and concurrency providers to allow for multi-node clusters.
 
@@ -263,10 +263,6 @@ By default, the WorkflowHost service will run as a single node using the built-i
 
 [Looping](src/samples/WorkflowCore.Sample02)
 
-
-## Status
-
-![status](https://ci.appveyor.com/api/projects/status/github/danielgerlag/workflow-core)
 
 ## Authors
 
