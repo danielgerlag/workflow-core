@@ -1,6 +1,6 @@
 # Workflow Core
 
-Workflow Core is a light weight workflow engine targeting .NET Standard 1.6.  It supports pluggable persistence and concurrency providers to allow for multi-node clusters.
+Workflow Core is a light weight workflow engine targeting .NET Standard.  It supports pluggable persistence and concurrency providers to allow for multi-node clusters.
 
 ## Installing
 
