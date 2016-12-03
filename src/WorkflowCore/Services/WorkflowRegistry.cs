@@ -18,18 +18,29 @@ namespace WorkflowCore.Services
             _serviceProvider = serviceProvider;
         }
 
-        public WorkflowDefinition GetDefinition(string workflowId, int version)
+        public WorkflowDefinition GetDefinition(string workflowId, int? version = null)
         {
-            var entry = _registry.FirstOrDefault(x => x.Item1 == workflowId && x.Item2 == version);
-            if (entry == null)
-                return null;
-            return entry.Item3;
+            if (version.HasValue)
+            {
+                var entry = _registry.FirstOrDefault(x => x.Item1 == workflowId && x.Item2 == version.Value);
+                if (entry == null)
+                    return null;
+                return entry.Item3;
+            }
+            else
+            {
+                int maxVersion = _registry.Where(x => x.Item1 == workflowId).Max(x => x.Item2);
+                var entry = _registry.FirstOrDefault(x => x.Item1 == workflowId && x.Item2 == maxVersion);
+                if (entry == null)
+                    return null;
+                return entry.Item3;
+            }
         }
 
         public void RegisterWorkflow(IWorkflow workflow)
         {
             if (_registry.Any(x => x.Item1 == workflow.Id && x.Item2 == workflow.Version))
-                throw new Exception(String.Format("Workflow {0} version {1} is already registed", workflow.Id, workflow.Version));
+                throw new Exception(String.Format("Workflow {0} version {1} is already registered", workflow.Id, workflow.Version));
 
             var builder = (_serviceProvider.GetService(typeof(IWorkflowBuilder)) as IWorkflowBuilder).UseData<object>();            
             workflow.Build(builder);

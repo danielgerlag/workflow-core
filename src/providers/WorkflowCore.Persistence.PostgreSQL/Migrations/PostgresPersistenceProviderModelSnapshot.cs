@@ -89,6 +89,10 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                     b.Property<long>("ClusterKey")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<DateTime?>("CompleteTime");
+
+                    b.Property<DateTime>("CreateTime");
+
                     b.Property<string>("Data");
 
                     b.Property<string>("Description")

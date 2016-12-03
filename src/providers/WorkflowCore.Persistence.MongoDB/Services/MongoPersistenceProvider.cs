@@ -41,6 +41,8 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                 x.MapProperty(y => y.Version);
                 x.MapProperty(y => y.NextExecution);
                 x.MapProperty(y => y.Status);
+                x.MapProperty(y => y.CreateTime);
+                x.MapProperty(y => y.CompleteTime);
                 x.MapProperty(y => y.ExecutionPointers);
             });
 
@@ -113,7 +115,25 @@ namespace WorkflowCore.Persistence.MongoDB.Services
         {
             return WorkflowInstances.AsQueryable().First(x => x.Id == Id);
         }
+        
+        public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take)
+        {
+            IQueryable<WorkflowInstance> result = WorkflowInstances.AsQueryable();
 
+            if (status.HasValue)
+                result = result.Where(x => x.Status == status.Value);
+
+            if (!String.IsNullOrEmpty(type))
+                result = result.Where(x => x.WorkflowDefinitionId == type);
+
+            if (createdFrom.HasValue)
+                result = result.Where(x => x.CreateTime >= createdFrom.Value);
+
+            if (createdTo.HasValue)
+                result = result.Where(x => x.CreateTime <= createdTo.Value);
+
+            return result.Skip(skip).Take(take).ToList();
+        }
 
         public async Task<string> CreateEventSubscription(EventSubscription subscription)
         {

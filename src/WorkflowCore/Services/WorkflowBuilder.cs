@@ -16,17 +16,18 @@ namespace WorkflowCore.Services
         public IWorkflowBuilder<T> UseData<T>()
         {
             IWorkflowBuilder<T> result = new WorkflowBuilder<T>(Steps);
-            result.InitialStep = this.InitialStep;            
+            result.InitialStep = this.InitialStep;
             return result;
         }
         
 
-        public WorkflowDefinition Build(string id, int version)
+        public virtual WorkflowDefinition Build(string id, int version)
         {
             WorkflowDefinition result = new WorkflowDefinition();
             result.Id = id;
             result.Version = version;
-            result.Steps = this.Steps;            
+            result.Steps = this.Steps;
+            result.InitialStep = this.InitialStep;
             return result;
         }
 
@@ -39,7 +40,14 @@ namespace WorkflowCore.Services
     }
 
     public class WorkflowBuilder<TData> : WorkflowBuilder, IWorkflowBuilder<TData>
-    {        
+    {
+
+        public override WorkflowDefinition Build(string id, int version)
+        {
+            var result = base.Build(id, version);
+            result.DataType = typeof(TData);
+            return result;
+        }
 
         public WorkflowBuilder(IEnumerable<WorkflowStep> steps)
         {

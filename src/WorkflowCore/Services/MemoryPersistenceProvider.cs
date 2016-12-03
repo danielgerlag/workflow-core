@@ -43,7 +43,26 @@ namespace WorkflowCore.Services
             return _instances.First(x => x.Id == Id);
         }
 
-        
+        public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take)
+        {
+            var result = _instances.AsQueryable();
+
+            if (status.HasValue)
+                result = result.Where(x => x.Status == status.Value);
+
+            if (!String.IsNullOrEmpty(type))
+                result = result.Where(x => x.WorkflowDefinitionId == type);
+
+            if (createdFrom.HasValue)
+                result = result.Where(x => x.CreateTime >= createdFrom.Value);
+
+            if (createdTo.HasValue)
+                result = result.Where(x => x.CreateTime <= createdTo.Value);
+
+            return result.Skip(skip).Take(take).ToList();
+        }
+
+
         public async Task<string> CreateEventSubscription(EventSubscription subscription)
         {
             subscription.Id = Guid.NewGuid().ToString();
