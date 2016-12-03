@@ -199,7 +199,10 @@ namespace WorkflowCore.Services
                         terminals++;
                 }
                 if (forks <= terminals)
+                {
                     workflow.Status = WorkflowStatus.Complete;
+                    workflow.CompleteTime = DateTime.Now.ToUniversalTime();
+                }
             }
         }
 

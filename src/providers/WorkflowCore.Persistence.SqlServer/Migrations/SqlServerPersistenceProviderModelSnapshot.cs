@@ -92,6 +92,10 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<DateTime?>("CompleteTime");
+
+                    b.Property<DateTime>("CreateTime");
+
                     b.Property<string>("Data");
 
                     b.Property<string>("Description")

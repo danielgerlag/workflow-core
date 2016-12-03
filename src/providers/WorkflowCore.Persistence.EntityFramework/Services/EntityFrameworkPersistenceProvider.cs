@@ -87,6 +87,31 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             return result;
         }
 
+        public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take)
+        {
+            IQueryable<PersistedWorkflow> query = Set<PersistedWorkflow>().AsQueryable();
+
+            if (status.HasValue)
+                query = query.Where(x => x.Status == status.Value);
+
+            if (!String.IsNullOrEmpty(type))
+                query = query.Where(x => x.WorkflowDefinitionId == type);
+
+            if (createdFrom.HasValue)
+                query = query.Where(x => x.CreateTime >= createdFrom.Value);
+
+            if (createdTo.HasValue)
+                query = query.Where(x => x.CreateTime <= createdTo.Value);
+
+            var rawResult = query.Skip(skip).Take(take).ToList();
+            List<WorkflowInstance> result = new List<WorkflowInstance>();
+
+            foreach (var item in rawResult)
+                result.Add(item.ToWorkflowInstance());
+
+            return result;
+        }
+
         public async Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey)
         {
             var raw = Set<PersistedSubscription>().Where(x => x.EventName == eventName && x.EventKey == eventKey).ToList();
@@ -168,5 +193,6 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 return;
             }
         }
+                
     }
 }

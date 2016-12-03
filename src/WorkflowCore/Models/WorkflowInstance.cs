@@ -22,8 +22,12 @@ namespace WorkflowCore.Models
 
         public WorkflowStatus Status { get; set; }
 
-        public object Data { get; set; }        
-               
+        public object Data { get; set; }
+
+        public DateTime CreateTime { get; set; }
+
+        public DateTime? CompleteTime { get; set; }
+
     }
 
     public enum WorkflowStatus { Runnable = 0, Suspended = 1, Complete = 2, Terminated = 3 }

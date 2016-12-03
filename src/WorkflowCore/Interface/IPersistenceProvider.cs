@@ -20,6 +20,8 @@ namespace WorkflowCore.Interface
 
         Task<IEnumerable<string>> GetRunnableInstances();
 
+        Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take);
+
         Task<WorkflowInstance> GetWorkflowInstance(string Id);
 
         Task<string> CreateEventSubscription(EventSubscription subscription);

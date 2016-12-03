@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
+using System.Reflection;
 
 namespace WorkflowCore.Services
 {
@@ -36,12 +37,24 @@ namespace WorkflowCore.Services
             persistenceStore.EnsureStoreExists();
         }
 
-        public async Task<string> StartWorkflow(string workflowId, int version, object data)
+        public Task<string> StartWorkflow(string workflowId, object data = null)
         {
-            return await StartWorkflow<object>(workflowId, version, data);
+            return StartWorkflow(workflowId, null, data);
         }
 
-        public async Task<string> StartWorkflow<TData>(string workflowId, int version, TData data)
+        public Task<string> StartWorkflow(string workflowId, int? version, object data = null)
+        {
+            return StartWorkflow<object>(workflowId, version, data);
+        }
+
+        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null) 
+            where TData : class
+        {
+            return StartWorkflow<TData>(workflowId, null, data);
+        }
+
+        public async Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null)
+            where TData : class
         {
             if (_shutdown)
                 throw new Exception("Host is not running");
@@ -52,11 +65,16 @@ namespace WorkflowCore.Services
 
             var wf = new WorkflowInstance();
             wf.WorkflowDefinitionId = workflowId;
-            wf.Version = version;
+            wf.Version = def.Version;
             wf.Data = data;
             wf.Description = def.Description;
             wf.NextExecution = 0;
+            wf.CreateTime = DateTime.Now.ToUniversalTime();
             wf.Status = WorkflowStatus.Runnable;
+
+            if ((def.DataType != null) && (data == null))
+                wf.Data = def.DataType.GetConstructor(new Type[] { }).Invoke(null);
+
             wf.ExecutionPointers.Add(new ExecutionPointer() { StepId = def.InitialStep, Active = true, ConcurrentFork = 1 });
             string id = await _persistenceStore.CreateNewWorkflow(wf);
             await _queueProvider.QueueForProcessing(id);

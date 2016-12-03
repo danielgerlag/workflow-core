@@ -31,6 +31,10 @@ namespace WorkflowCore.Persistence.EntityFramework.Models
 
         public string Data { get; set; }
 
+        public DateTime CreateTime { get; set; }
+
+        public DateTime? CompleteTime { get; set; }
+
         public WorkflowStatus Status { get; set; }
         
     }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace WorkflowCore.Persistence.SqlServer.Migrations
+namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 {
     public partial class InitialDatabase : Migration
     {
@@ -18,7 +18,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                 columns: table => new
                 {
                     ClusterKey = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     EventData = table.Column<string>(nullable: true),
                     EventKey = table.Column<string>(maxLength: 200, nullable: true),
                     EventName = table.Column<string>(maxLength: 200, nullable: true),
@@ -37,7 +37,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                 columns: table => new
                 {
                     ClusterKey = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     EventKey = table.Column<string>(maxLength: 200, nullable: true),
                     EventName = table.Column<string>(maxLength: 200, nullable: true),
                     StepId = table.Column<int>(nullable: false),
@@ -55,7 +55,9 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                 columns: table => new
                 {
                     ClusterKey = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    CompleteTime = table.Column<DateTime>(nullable: true),
+                    CreateTime = table.Column<DateTime>(nullable: false),
                     Data = table.Column<string>(nullable: true),
                     Description = table.Column<string>(maxLength: 500, nullable: true),
                     ExecutionPointers = table.Column<string>(nullable: true),
