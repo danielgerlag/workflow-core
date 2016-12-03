@@ -4,7 +4,7 @@
   "dependencies": {
     "NETStandard.Library": "1.6.0",
     "Newtonsoft.Json": "9.0.1",
-    "WorkflowCore": "1.0.1-*"
+    "WorkflowCore": "1.0.2-*"
   },
 
   "frameworks": {
