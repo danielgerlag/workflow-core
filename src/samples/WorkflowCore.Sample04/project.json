@@ -21,7 +21,8 @@
     "WorkflowCore.Persistence.PostgreSQL": "1.0.2-*",
     "WorkflowCore.Persistence.Sqlite": "1.0.2-*",
     "WorkflowCore.Persistence.SqlServer": "1.0.2-*",
-    "WorkflowCore.QueueProviders.RabbitMQ": "1.0.2-*"
+    "WorkflowCore.QueueProviders.RabbitMQ": "1.0.2-*",
+    "WorkflowCore.QueueProviders.ZeroMQ": "1.0.2-*"
   },
 
   "frameworks": {
