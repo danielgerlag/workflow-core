@@ -18,8 +18,9 @@ namespace WorkflowCore.QueueProviders.ZeroMQ.Services
     {
         private ConcurrentQueue<string> _localRunQueue = new ConcurrentQueue<string>();
         private ConcurrentQueue<EventPublication> _localPublishQueue = new ConcurrentQueue<EventPublication>();
-        private List<Thread> _serviceThreads = new List<Thread>();        
+        private NetMQPoller _poller = new NetMQPoller();
         private PushSocket _nodeSocket;
+        private List<PullSocket> _peerSockets = new List<PullSocket>();
         private List<string> _peerConnectionStrings;
         private string _localConnectionString;
         private bool _active = false;
@@ -74,47 +75,42 @@ namespace WorkflowCore.QueueProviders.ZeroMQ.Services
             foreach (var connStr in _peerConnectionStrings)
             {
                 PullSocket peer = new PullSocket(connStr);
-                Thread thread = new Thread(new ParameterizedThreadStart(ServicePeerNode));
-                thread.Start(peer);
-                _serviceThreads.Add(thread);
-            }   
+                peer.ReceiveReady += Peer_ReceiveReady;
+                _poller.Add(peer);
+                _peerSockets.Add(peer);
+            }
+            _poller.Add(_nodeSocket);
+            _poller.RunAsync();
+        }
+
+        private void Peer_ReceiveReady(object sender, NetMQSocketEventArgs e)
+        {            
+            string data = e.Socket.ReceiveFrameString();
+            var msg = JsonConvert.DeserializeObject<Message>(data);
+            switch (msg.MessageType)
+            {
+                case MessageType.Workflow:
+                    _localRunQueue.Enqueue(msg.Content);
+                    break;
+                case MessageType.Publication:
+                    _localPublishQueue.Enqueue(msg.ToEventPublication());
+                    break;
+            }
         }
 
         public void Stop()
         {
-            _active = false;
-
-            foreach (var thread in _serviceThreads)
-                thread.Join();
-
-            //foreach (var peer in _peerSockets)
-            //    peer.Close();
-
-            _serviceThreads.Clear();
-            _nodeSocket.Close();            
-        }
-
-        private void ServicePeerNode(object socketObj)
-        {
-            PullSocket socket = (socketObj as PullSocket);
-            while (_active)
+            _active = false;            
+            _poller.Stop();
+            
+            _poller.Remove(_nodeSocket);
+            foreach (var peer in _peerSockets)
             {
-                string data;
-                if (socket.TryReceiveFrameString(TimeSpan.FromSeconds(3), out data))
-                {
-                    var msg = JsonConvert.DeserializeObject<Message>(data);
-                    switch (msg.MessageType)
-                    {
-                        case MessageType.Workflow:
-                            _localRunQueue.Enqueue(msg.Content);
-                            break;
-                        case MessageType.Publication:
-                            _localPublishQueue.Enqueue(msg.ToEventPublication());
-                            break;
-                    }
-                }
+                _poller.Remove(peer);
+                peer.Close();
             }
-            socket.Close();
+            _peerSockets.Clear();
+            _nodeSocket.Close();            
         }
 
         private void PushMessage(Message message)

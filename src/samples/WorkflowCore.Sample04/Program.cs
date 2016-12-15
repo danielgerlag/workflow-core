@@ -40,19 +40,20 @@ namespace WorkflowCore.Sample04
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
-            services.AddWorkflow();
+            //services.AddWorkflow();
             //services.AddWorkflow(x => x.UseMongoDB(@"mongodb://localhost:27017", "workflow"));
             //services.AddWorkflow(x => x.UseSqlServer(@"Server=.;Database=WorkflowCore;Trusted_Connection=True;", true, true));
             //services.AddWorkflow(x => x.UsePostgreSQL(@"Server=127.0.0.1;Port=5432;Database=workflow;User Id=postgres;Password=password;", true, true));
             //services.AddWorkflow(x => x.UseSqlite(@"Data Source=database.db;", true));
             //services.AddWorkflow(x => x.UseZeroMQ(5557, new List<string>()));
             //redis = ConnectionMultiplexer.Connect("127.0.0.1");
-            //services.AddWorkflow(x =>
-            //{
-            //    x.UseMongoDB(@"mongodb://localhost:27017", "workflow");
+            services.AddWorkflow(x =>
+            {
+                x.UseMongoDB(@"mongodb://localhost:27017", "workflow");
+                x.UseZeroMQ(5557, new List<string>());
             //    x.UseRabbitMQ(new ConnectionFactory() { HostName = "localhost" });
             //    x.UseRedlock(redis);
-            //});
+            });
 
 
             var serviceProvider = services.BuildServiceProvider();
