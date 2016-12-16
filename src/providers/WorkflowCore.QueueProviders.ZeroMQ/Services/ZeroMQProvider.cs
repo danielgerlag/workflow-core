@@ -1,4 +1,5 @@
-﻿using NetMQ;
+﻿using Microsoft.Extensions.Logging;
+using NetMQ;
 using NetMQ.Sockets;
 using Newtonsoft.Json;
 using System;
@@ -16,6 +17,7 @@ namespace WorkflowCore.QueueProviders.ZeroMQ.Services
 {
     public class ZeroMQProvider : IQueueProvider
     {
+        private ILogger _logger;
         private ConcurrentQueue<string> _localRunQueue = new ConcurrentQueue<string>();
         private ConcurrentQueue<EventPublication> _localPublishQueue = new ConcurrentQueue<EventPublication>();
         private NetMQPoller _poller = new NetMQPoller();
@@ -25,8 +27,9 @@ namespace WorkflowCore.QueueProviders.ZeroMQ.Services
         private string _localConnectionString;
         private bool _active = false;
         
-        public ZeroMQProvider(int port, IEnumerable<string> peers, bool canTakeWork)
+        public ZeroMQProvider(int port, IEnumerable<string> peers, bool canTakeWork, ILoggerFactory loggerFactory)
         {
+            _logger = loggerFactory.CreateLogger<ZeroMQProvider>();
             _localConnectionString = "@tcp://*:" + Convert.ToString(port);
             _peerConnectionStrings = new List<string>();
 
@@ -71,21 +74,22 @@ namespace WorkflowCore.QueueProviders.ZeroMQ.Services
         public void Start()
         {
             _nodeSocket = new PushSocket(_localConnectionString);
+            _poller.Add(_nodeSocket);
+            _poller.RunAsync();
             _active = true;
             foreach (var connStr in _peerConnectionStrings)
             {
                 PullSocket peer = new PullSocket(connStr);
                 peer.ReceiveReady += Peer_ReceiveReady;
                 _poller.Add(peer);
-                _peerSockets.Add(peer);
-            }
-            _poller.Add(_nodeSocket);
-            _poller.RunAsync();
+                _peerSockets.Add(peer);                
+            }            
         }
 
         private void Peer_ReceiveReady(object sender, NetMQSocketEventArgs e)
         {            
             string data = e.Socket.ReceiveFrameString();
+            _logger.LogDebug("{0} - Got remote item {1}", _localConnectionString, data);
             var msg = JsonConvert.DeserializeObject<Message>(data);
             switch (msg.MessageType)
             {

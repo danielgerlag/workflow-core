@@ -16,9 +16,9 @@ namespace WorkflowCore.Tests.ZeroMQ.LockProvider
         {
             LoggerFactory lf = new LoggerFactory();
             lf.AddDebug();
-            Peer1 = new ZeroMQLockProvider(5001, "localhost:5002;localhost:5003".Split(';'), lf);
-            Peer2 = new ZeroMQLockProvider(5002, "localhost:5001;localhost:5003".Split(';'), lf);
-            Peer3 = new ZeroMQLockProvider(5003, "localhost:5001;localhost:5002".Split(';'), lf);
+            Peer1 = new ZeroMQLockProvider(5201, "localhost:5202;localhost:5203".Split(';'), lf);
+            Peer2 = new ZeroMQLockProvider(5202, "localhost:5201;localhost:5203".Split(';'), lf);
+            Peer3 = new ZeroMQLockProvider(5203, "localhost:5201;localhost:5202".Split(';'), lf);
 
             Peer1.Start();
             Peer2.Start();

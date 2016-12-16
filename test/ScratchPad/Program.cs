@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.LockProviders.ZeroMQ.Services;
+using WorkflowCore.QueueProviders.ZeroMQ.Services;
 
 namespace ScratchPad
 {
@@ -12,29 +13,29 @@ namespace ScratchPad
     {
         public static void Main(string[] args)
         {
-            LoggerFactory lf = new LoggerFactory();            
+            LoggerFactory lf = new LoggerFactory();
             lf.AddConsole(LogLevel.Debug);
 
-            IDistributedLockProvider Peer1 = new ZeroMQLockProvider(5001, "localhost:5002".Split(';'), lf);
-            IDistributedLockProvider Peer2 = new ZeroMQLockProvider(5002, "localhost:5001".Split(';'), lf);
+            IQueueProvider Peer1 = new ZeroMQProvider(4001, "localhost:4002;localhost:4003".Split(';'), true, lf);
+            IQueueProvider Peer2 = new ZeroMQProvider(4002, "localhost:4001;localhost:4003".Split(';'), true, lf);
+            IQueueProvider Peer3 = new ZeroMQProvider(4003, "localhost:4001;localhost:4002".Split(';'), true, lf);
+
+            Peer1.Start();            
+            Peer2.Start();            
+            Peer3.Start();
+            System.Threading.Thread.Sleep(500);
+
+            Peer1.QueueForProcessing("Task 1").Wait();
+            Peer1.QueueForProcessing("Task 2").Wait();
+            Peer1.QueueForProcessing("Task 3").Wait();
+            System.Threading.Thread.Sleep(100);
+
+            var value1 = Peer1.DequeueForProcessing().Result;
+            var value2 = Peer2.DequeueForProcessing().Result;
+            var value3 = Peer3.DequeueForProcessing().Result;
             
-            Peer1.Start();
-            Peer2.Start();           
-
-            System.Threading.Thread.Sleep(2000);
-
-            var lock_result0 = Peer1.AcquireLock("lock1").Result;
-            var lock_result1 = Peer1.AcquireLock("lock1").Result;
-            var lock_result2 = Peer2.AcquireLock("lock1").Result;
-            
-            var lock_result4 = Peer2.AcquireLock("lock2").Result;
-
-            Peer1.ReleaseLock("lock1");            
-            var lock_result5 = Peer2.AcquireLock("lock1").Result;
-
-
-
             Console.ReadLine();
         }
     }
 }
+

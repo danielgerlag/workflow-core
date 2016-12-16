@@ -12,6 +12,7 @@
     "NETStandard.Library": "1.6.0",
     "WorkflowCore": "1.0.2-*",
     "WorkflowCore.LockProviders.ZeroMQ": "1.0.2-*",
+    "WorkflowCore.QueueProviders.ZeroMQ": "1.0.2-*",
     "WorkflowCore.TestAssets": "1.0.0-*"
   },
 
