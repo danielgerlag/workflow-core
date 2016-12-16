@@ -20,6 +20,6 @@ Use the .UseZeroMQ extension method when building your service provider.
 var peers = new List<string>();
 peers.Add("machine2:5557");
 peers.Add("machine3:5557");
-services.AddWorkflow(x => x.UseZeroMQ(5557, peers));
+services.AddWorkflow(x => x.UseZeroMQQueuing(5557, peers));
 
 ```

@@ -14,5 +14,9 @@ namespace WorkflowCore.Interface
         Task<bool> AcquireLock(string Id);
 
         Task ReleaseLock(string Id);
+
+        void Start();
+
+        void Stop();
     }
 }

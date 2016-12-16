@@ -182,6 +182,16 @@ namespace WorkflowCore.LockProviders.Redlock.Services
                 UnlockInstance(redis, lockObject.Resource, lockObject.Value);
             });
         }
-        
+
+        public void Start()
+        {
+
+        }
+
+        public void Stop()
+        {
+
+        }
+
     }
 }

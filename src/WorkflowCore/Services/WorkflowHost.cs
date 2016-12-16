@@ -85,6 +85,7 @@ namespace WorkflowCore.Services
         {            
             _shutdown = false;
             _queueProvider.Start();
+            _lockProvider.Start();
             for (int i = 0; i < _options.ThreadCount; i++)
             {
                 _logger.LogInformation("Starting worker thread #{0}", i);
@@ -119,6 +120,7 @@ namespace WorkflowCore.Services
             _logger.LogInformation("Worker threads stopped");
             stashTask.Wait();
             _queueProvider.Stop();
+            _lockProvider.Stop();
         }
 
 

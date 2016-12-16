@@ -9,7 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        public static WorkflowOptions UseZeroMQ(this WorkflowOptions options, int port, IEnumerable<string> peers, bool canTakeWork = true)
+        public static WorkflowOptions UseZeroMQQueuing(this WorkflowOptions options, int port, IEnumerable<string> peers, bool canTakeWork = true)
         {
             options.UseQueueProvider(sp => new ZeroMQProvider(port, peers, canTakeWork));
             return options;
