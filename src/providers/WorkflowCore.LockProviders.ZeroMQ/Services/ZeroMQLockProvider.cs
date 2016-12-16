@@ -46,7 +46,8 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
 
             PendingLock pendingLock = new PendingLock();
             pendingLock.ResourceId = Id;
-            _pendingLocks.Add(pendingLock);
+            lock (_pendingLocks)
+                _pendingLocks.Add(pendingLock);
 
             var peerList = _peerLastContact.Where(x => x.Value >= (DateTime.Now.AddMinutes(-2))).Select(x => x.Key).ToList();
             int requestCount = peerList.Count();
@@ -118,7 +119,8 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
 
             PendingLock pendingRelease = new PendingLock();
             pendingRelease.ResourceId = Id;
-            _pendingReleases.Add(pendingRelease);
+            lock (_pendingReleases)
+                _pendingReleases.Add(pendingRelease);
 
             foreach (var peerId in peerList)
             {
@@ -204,7 +206,10 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
                         _logger.LogDebug("({0}) Recv acquire on {1} from {2}", _nodeId, acqureLockId, serverId);
                         lock (_lockRegistry)
                         {
-                            bool existingLock = _pendingLocks.Any(x => x.ResourceId == acqureLockId);
+                            bool existingLock = false;
+                            lock (_pendingLocks)
+                                existingLock = _pendingLocks.Any(x => x.ResourceId == acqureLockId);
+
                             if (!existingLock)
                                 existingLock = _lockRegistry.Any(x => x.ResourceId == acqureLockId);
 
@@ -273,21 +278,30 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
                         break;
                     case MessageOp.LockReserved:
                         var reservedId = message[2].ConvertToString();
-                        var pendingReserved = _pendingLocks.Where(x => x.ResourceId == reservedId).ToList();
-                        foreach (var pending in pendingReserved)
-                            pending.Responses[clientId] = true;
+                        lock (_pendingLocks)
+                        {
+                            var pendingReserved = _pendingLocks.Where(x => x.ResourceId == reservedId).ToList();
+                            foreach (var pending in pendingReserved)
+                                pending.Responses[clientId] = true;
+                        }
                         break;
                     case MessageOp.LockFailed:
                         var failedId = message[2].ConvertToString();
-                        var pendingFailed = _pendingLocks.Where(x => x.ResourceId == failedId).ToList();
-                        foreach (var pending in pendingFailed)
-                            pending.Responses[clientId] = false;
+                        lock (_pendingLocks)
+                        {
+                            var pendingFailed = _pendingLocks.Where(x => x.ResourceId == failedId).ToList();
+                            foreach (var pending in pendingFailed)
+                                pending.Responses[clientId] = false;
+                        }
                         break;
                     case MessageOp.LockReleased:
                         var releaseId = message[2].ConvertToString();
-                        var pendingRelease = _pendingReleases.Where(x => x.ResourceId == releaseId).ToList();
-                        foreach (var pending in pendingRelease)
-                            pending.Responses[clientId] = true;
+                        lock (_pendingReleases)
+                        {
+                            var pendingRelease = _pendingReleases.Where(x => x.ResourceId == releaseId).ToList();
+                            foreach (var pending in pendingRelease)
+                                pending.Responses[clientId] = true;
+                        }
                         break;                    
                 }                                
             }

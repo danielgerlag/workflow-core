@@ -48,10 +48,10 @@ namespace WorkflowCore.Sample04
             //redis = ConnectionMultiplexer.Connect("127.0.0.1");
             services.AddWorkflow(x =>
             {
-                x.UseMongoDB(@"mongodb://192.168.0.12:27017", "workflow5");
-                x.UseZeroMQLocking(5551, "192.168.0.12:5551".Split(';'));
-                //x.UseZeroMQQueuing(5552, "192.168.0.12:5552".Split(';'));
-                //x.UseRabbitMQ(new ConnectionFactory() { HostName = "192.168.0.12" });
+                x.UseMongoDB(@"mongodb://localhost:27017", "workflow5");
+                x.UseZeroMQLocking(5551, "192.168.0.29:5551".Split(';'));
+                x.UseZeroMQQueuing(5552, "192.168.0.29:5552".Split(';'));
+                //x.UseRabbitMQ(new ConnectionFactory() { HostName = "localhost" });
             //    x.UseRedlock(redis);
             });
 
