@@ -15,6 +15,7 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
     {        
         private List<DistributedLock> _lockRegistry = new List<DistributedLock>();
         private List<PendingLock> _pendingLocks = new List<PendingLock>();
+        private List<PendingLock> _pendingReleases = new List<PendingLock>();
 
         private ConcurrentDictionary<Guid, DateTime> _peerLastContact = new ConcurrentDictionary<Guid, DateTime>();
         private Guid _nodeId = Guid.NewGuid();
@@ -65,12 +66,12 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
             Task<bool> task = new Task<bool>(() =>
             {
                 DateTime expiry = DateTime.Now.AddSeconds(10);
-                _logger.LogDebug("({0}) Waiting for remote responses on {1}, expires at {2}", _nodeId, Id, expiry);
+                _logger.LogDebug("({0}) Waiting for quorum of {1} on {2}, expires at {3}", _nodeId, peerQuorum, Id, expiry);
                 while ((pendingLock.Responses.Count() < peerQuorum) && (!pendingLock.Responses.Any(x => !x.Value)) && (DateTime.Now < expiry))
                 {
                     System.Threading.Thread.Sleep(10);
                 }
-                _logger.LogDebug("({0}) Remote responses on {1}, count {2}", _nodeId, Id, pendingLock.Responses.Count());
+                _logger.LogDebug("({0}) Remote responses on {1}, count {2} of {3}", _nodeId, Id, pendingLock.Responses.Count(), peerQuorum);
                 var result = (pendingLock.Responses.Count(x => x.Value) >= peerQuorum) && (pendingLock.Responses.Count(x => !x.Value) == 0);
                 if (!result)
                 {
@@ -110,6 +111,15 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
             }
 
             var peerList = _peerLastContact.Select(x => x.Key).ToList();
+            var activePeerCount = _peerLastContact.Where(x => x.Value >= (DateTime.Now.AddMinutes(-2))).Count();            
+            int peerQuorum = (activePeerCount / 2) + 1;
+            if (activePeerCount == 0)
+                peerQuorum = 0;
+
+            PendingLock pendingRelease = new PendingLock();
+            pendingRelease.ResourceId = Id;
+            _pendingReleases.Add(pendingRelease);
+
             foreach (var peerId in peerList)
             {
                 _server
@@ -118,6 +128,18 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
                     .SendMoreFrame(ConvertOp(MessageOp.Release))
                     .SendFrame(Id);                
             }
+
+            Task task = new Task(() =>
+            {
+                DateTime expiry = DateTime.Now.AddSeconds(10);                
+                while (pendingRelease.Responses.Count() < peerQuorum) 
+                {
+                    System.Threading.Thread.Sleep(10);
+                }
+                _pendingReleases.Remove(pendingRelease);
+            });
+            task.Start();
+            await task;
         }
 
         public void Start()
@@ -151,7 +173,7 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
                 _server
                     .SendMoreFrame(peerId.ToByteArray())
                     .SendMoreFrame(_nodeId.ToByteArray())
-                    .SendMoreFrame(ConvertOp(MessageOp.Logoff));                
+                    .SendMoreFrame(ConvertOp(MessageOp.Disconnect));                
             }
 
             _poller.Stop();
@@ -180,29 +202,33 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
                     case MessageOp.Acquire:
                         string acqureLockId = message[2].ConvertToString();
                         _logger.LogDebug("({0}) Recv acquire on {1} from {2}", _nodeId, acqureLockId, serverId);
-                        bool existingLock = _pendingLocks.Any(x => x.ResourceId == acqureLockId);
-                        if (!existingLock)
-                            existingLock = _lockRegistry.Any(x => x.ResourceId == acqureLockId);
-
-                        if (!existingLock)
+                        lock (_lockRegistry)
                         {
-                            var distLock = new DistributedLock();
-                            distLock.Expiry = DateTime.Now.Add(_lockTTL);
-                            distLock.NodeId = serverId;
-                            distLock.ResourceId = acqureLockId;
-                            lock (_lockRegistry)
-                                _lockRegistry.Add(distLock);
-                            e.Socket
-                                .SendMoreFrame(ConvertOp(MessageOp.LockReserved))
-                                .SendFrame(acqureLockId);
-                        }
-                        else
-                        {
-                            e.Socket
-                                .SendMoreFrame(ConvertOp(MessageOp.LockFailed))
-                                .SendFrame(acqureLockId);
-                        }
+                            bool existingLock = _pendingLocks.Any(x => x.ResourceId == acqureLockId);
+                            if (!existingLock)
+                                existingLock = _lockRegistry.Any(x => x.ResourceId == acqureLockId);
 
+                            if (!existingLock)
+                            {
+                                _logger.LogDebug("({0}) Remote acquire on {1} from {2} success", _nodeId, acqureLockId, serverId);
+                                var distLock = new DistributedLock();
+                                distLock.Expiry = DateTime.Now.Add(_lockTTL);
+                                distLock.NodeId = serverId;
+                                distLock.ResourceId = acqureLockId;
+                                lock (_lockRegistry)
+                                    _lockRegistry.Add(distLock);
+                                e.Socket
+                                    .SendMoreFrame(ConvertOp(MessageOp.LockReserved))
+                                    .SendFrame(acqureLockId);
+                            }
+                            else
+                            {
+                                _logger.LogDebug("({0}) Remote acquire on {1} from {2} fail", _nodeId, acqureLockId, serverId);
+                                e.Socket
+                                    .SendMoreFrame(ConvertOp(MessageOp.LockFailed))
+                                    .SendFrame(acqureLockId);
+                            }
+                        }
                         break;
                     case MessageOp.Release:
                         string releaseLockId = message[2].ConvertToString();
@@ -211,9 +237,12 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
                             var existingLock1 = _lockRegistry.FirstOrDefault(x => x.ResourceId == releaseLockId && x.NodeId == serverId);
                             if (existingLock1 != null)
                                 _lockRegistry.Remove(existingLock1);
+                            e.Socket
+                                .SendMoreFrame(ConvertOp(MessageOp.LockReleased))
+                                .SendFrame(releaseLockId);
                         }
                         break;
-                    case MessageOp.Logoff:
+                    case MessageOp.Disconnect:
                         if (_peerLastContact.ContainsKey(serverId))
                         {
                             DateTime lastContact;
@@ -254,7 +283,11 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
                         foreach (var pending in pendingFailed)
                             pending.Responses[clientId] = false;
                         break;
-                    case MessageOp.Logon:
+                    case MessageOp.LockReleased:
+                        var releaseId = message[2].ConvertToString();
+                        var pendingRelease = _pendingReleases.Where(x => x.ResourceId == releaseId).ToList();
+                        foreach (var pending in pendingRelease)
+                            pending.Responses[clientId] = true;
                         break;                    
                 }                                
             }
@@ -281,6 +314,6 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
             return result;
         }
 
-        enum MessageOp { Logon = 0, Logoff = 1, Acquire = 2, Release = 3, LockReserved = 4, LockFailed = 5, Ping = 6, Pong = 7 }
+        enum MessageOp { Disconnect = 0, Acquire = 1, Release = 2, LockReserved = 3, LockFailed = 4, LockReleased = 5, Ping = 6, Pong = 7 }
     }
 }

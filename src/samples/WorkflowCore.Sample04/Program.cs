@@ -40,27 +40,27 @@ namespace WorkflowCore.Sample04
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
-            services.AddWorkflow();
+            //services.AddWorkflow();
             //services.AddWorkflow(x => x.UseMongoDB(@"mongodb://localhost:27017", "workflow"));
             //services.AddWorkflow(x => x.UseSqlServer(@"Server=.;Database=WorkflowCore;Trusted_Connection=True;", true, true));
             //services.AddWorkflow(x => x.UsePostgreSQL(@"Server=127.0.0.1;Port=5432;Database=workflow;User Id=postgres;Password=password;", true, true));
             //services.AddWorkflow(x => x.UseSqlite(@"Data Source=database.db;", true));            
             //redis = ConnectionMultiplexer.Connect("127.0.0.1");
-            //services.AddWorkflow(x =>
-            //{
-            //    x.UseMongoDB(@"mongodb://localhost:27017", "workflow");
-            //    x.UseZeroMQLocking(5551, "192.168.0.12:5551;192.168.0.13:5551".Split(';'));
-            //    x.UseZeroMQQueuing(5552, "192.168.0.12:5552;192.168.0.13:5552".Split(';'));
-            //    x.UseRabbitMQ(new ConnectionFactory() { HostName = "localhost" });
+            services.AddWorkflow(x =>
+            {
+                x.UseMongoDB(@"mongodb://192.168.0.12:27017", "workflow5");
+                x.UseZeroMQLocking(5551, "192.168.0.12:5551".Split(';'));
+                //x.UseZeroMQQueuing(5552, "192.168.0.12:5552".Split(';'));
+                //x.UseRabbitMQ(new ConnectionFactory() { HostName = "192.168.0.12" });
             //    x.UseRedlock(redis);
-            //});
+            });
 
 
             var serviceProvider = services.BuildServiceProvider();
 
             //config logging
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            loggerFactory.AddDebug();
+            loggerFactory.AddDebug(LogLevel.Debug);
             return serviceProvider;
         }
 
