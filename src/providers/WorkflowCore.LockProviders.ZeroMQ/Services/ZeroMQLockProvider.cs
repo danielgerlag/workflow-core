@@ -175,7 +175,7 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
                 _server
                     .SendMoreFrame(peerId.ToByteArray())
                     .SendMoreFrame(_nodeId.ToByteArray())
-                    .SendMoreFrame(ConvertOp(MessageOp.Disconnect));                
+                    .SendFrame(ConvertOp(MessageOp.Disconnect));                
             }
 
             _poller.Stop();
@@ -248,10 +248,16 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
                         }
                         break;
                     case MessageOp.Disconnect:
+                        _logger.LogDebug("Recv disconnect from {0}", serverId);
                         if (_peerLastContact.ContainsKey(serverId))
                         {
                             DateTime lastContact;
                             _peerLastContact.TryRemove(serverId, out lastContact);
+                            lock (_lockRegistry)
+                            {
+                                foreach (var peerLock in _lockRegistry.Where(x => x.NodeId == serverId).ToList())
+                                    _lockRegistry.Remove(peerLock);
+                            }
                         }
                         break;
                 }
