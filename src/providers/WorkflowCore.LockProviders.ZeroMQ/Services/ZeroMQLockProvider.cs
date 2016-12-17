@@ -136,7 +136,7 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
             Task task = new Task(() =>
             {
                 DateTime expiry = DateTime.Now.Add(_lockTimeout);
-                while (pendingRelease.Responses.Count() < peerQuorum) 
+                while ((pendingRelease.Responses.Count() < peerQuorum) && (DateTime.Now < expiry))
                 {
                     System.Threading.Thread.Sleep(10);
                 }
