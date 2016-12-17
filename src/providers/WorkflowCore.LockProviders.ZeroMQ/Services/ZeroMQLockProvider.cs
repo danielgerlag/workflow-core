@@ -24,7 +24,9 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
         private List<DealerSocket> _peerClients = new List<DealerSocket>();
         private RouterSocket _server = new RouterSocket(); //todo: dependency injection
         private NetMQPoller _poller = new NetMQPoller(); //todo: dependency injection
-        private TimeSpan _lockTTL = TimeSpan.FromMinutes(5);
+        private TimeSpan _lockTTL = TimeSpan.FromMinutes(5); //todo: make configurable
+        private TimeSpan _peerTTL = TimeSpan.FromMinutes(2); //todo: make configurable
+        private TimeSpan _lockTimeout = TimeSpan.FromSeconds(10); //todo: make configurable
         private ILogger _logger;
         private NetMQTimer _houseKeeper;
 
@@ -49,7 +51,7 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
             lock (_pendingLocks)
                 _pendingLocks.Add(pendingLock);
 
-            var peerList = _peerLastContact.Where(x => x.Value >= (DateTime.Now.AddMinutes(-2))).Select(x => x.Key).ToList();
+            var peerList = _peerLastContact.Where(x => x.Value >= (DateTime.Now.Subtract(_peerTTL))).Select(x => x.Key).ToList();
             int requestCount = peerList.Count();
             int peerQuorum = (requestCount / 2) + 1;
             if (requestCount == 0)
@@ -66,7 +68,7 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
 
             Task<bool> task = new Task<bool>(() =>
             {
-                DateTime expiry = DateTime.Now.AddSeconds(10);
+                DateTime expiry = DateTime.Now.Add(_lockTimeout);
                 _logger.LogDebug("({0}) Waiting for quorum of {1} on {2}, expires at {3}", _nodeId, peerQuorum, Id, expiry);
                 while ((pendingLock.Responses.Count() < peerQuorum) && (!pendingLock.Responses.Any(x => !x.Value)) && (DateTime.Now < expiry))
                 {
@@ -112,7 +114,7 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
             }
 
             var peerList = _peerLastContact.Select(x => x.Key).ToList();
-            var activePeerCount = _peerLastContact.Where(x => x.Value >= (DateTime.Now.AddMinutes(-2))).Count();            
+            var activePeerCount = _peerLastContact.Where(x => x.Value >= (DateTime.Now.Subtract(_peerTTL))).Count();            
             int peerQuorum = (activePeerCount / 2) + 1;
             if (activePeerCount == 0)
                 peerQuorum = 0;
@@ -133,7 +135,7 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
 
             Task task = new Task(() =>
             {
-                DateTime expiry = DateTime.Now.AddSeconds(10);                
+                DateTime expiry = DateTime.Now.Add(_lockTimeout);
                 while (pendingRelease.Responses.Count() < peerQuorum) 
                 {
                     System.Threading.Thread.Sleep(10);
@@ -160,7 +162,7 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
                 peer.SendFrame(ConvertOp(MessageOp.Ping));
             }
 
-            _houseKeeper = new NetMQTimer(TimeSpan.FromSeconds(60));
+            _houseKeeper = new NetMQTimer(TimeSpan.FromSeconds(30));
             _houseKeeper.Elapsed += HouseKeeper_Elapsed;
             _poller.Add(_houseKeeper);
             _houseKeeper.Enable = true;
@@ -249,15 +251,11 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
                         break;
                     case MessageOp.Disconnect:
                         _logger.LogDebug("Recv disconnect from {0}", serverId);
-                        if (_peerLastContact.ContainsKey(serverId))
+                        _peerLastContact[serverId] = DateTime.Now.Subtract(_peerTTL);
+                        lock (_lockRegistry)
                         {
-                            DateTime lastContact;
-                            _peerLastContact.TryRemove(serverId, out lastContact);
-                            lock (_lockRegistry)
-                            {
-                                foreach (var peerLock in _lockRegistry.Where(x => x.NodeId == serverId).ToList())
-                                    _lockRegistry.Remove(peerLock);
-                            }
+                            foreach (var peerLock in _lockRegistry.Where(x => x.NodeId == serverId).ToList())
+                                _lockRegistry.Remove(peerLock);
                         }
                         break;
                 }
@@ -316,6 +314,14 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
         private void HouseKeeper_Elapsed(object sender, NetMQTimerEventArgs e)
         {
             _logger.LogDebug("Performing house keeping");
+            foreach (var peer in _peerLastContact.Select(x => x.Key).ToList())
+            {
+                _server
+                    .SendMoreFrame(peer.ToByteArray())
+                    .SendMoreFrame(_nodeId.ToByteArray())
+                    .SendFrame(ConvertOp(MessageOp.Ping));
+            }
+
             lock (_lockRegistry)
             {
                 var expiredList = _lockRegistry.Where(x => x.Expiry < DateTime.Now).ToList();

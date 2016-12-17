@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace WorkflowCore.Services
 {
-    public class WorkflowHost : IWorkflowHost
+    public class WorkflowHost : IWorkflowHost, IDisposable
     {
 
         protected readonly IPersistenceProvider _persistenceStore;        
@@ -429,6 +429,12 @@ namespace WorkflowCore.Services
                 }
             }
             return false;
+        }
+
+        public void Dispose()
+        {
+            if (!_shutdown)
+                Stop();
         }
     }
 }
