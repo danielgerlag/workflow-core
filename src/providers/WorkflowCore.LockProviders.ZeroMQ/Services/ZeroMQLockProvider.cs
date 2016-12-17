@@ -57,13 +57,16 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
             if (requestCount == 0)
                 peerQuorum = 0;
 
-            foreach (var peerId in peerList)
+            lock (_server)
             {
-                _server
-                    .SendMoreFrame(peerId.ToByteArray())
-                    .SendMoreFrame(_nodeId.ToByteArray())
-                    .SendMoreFrame(ConvertOp(MessageOp.Acquire))
-                    .SendFrame(Id);                
+                foreach (var peerId in peerList)
+                {
+                    _server
+                        .SendMoreFrame(peerId.ToByteArray())
+                        .SendMoreFrame(_nodeId.ToByteArray())
+                        .SendMoreFrame(ConvertOp(MessageOp.Acquire))
+                        .SendFrame(Id);
+                }
             }
 
             Task<bool> task = new Task<bool>(() =>
@@ -78,13 +81,16 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
                 var result = (pendingLock.Responses.Count(x => x.Value) >= peerQuorum) && (pendingLock.Responses.Count(x => !x.Value) == 0);
                 if (!result)
                 {
-                    foreach (var rollbackPeer in pendingLock.Responses.Where(x => x.Value).Select(x => x.Key).ToList())
+                    lock (_server)
                     {
-                        _server
-                            .SendMoreFrame(rollbackPeer.ToByteArray())
-                            .SendMoreFrame(_nodeId.ToByteArray())
-                            .SendMoreFrame(ConvertOp(MessageOp.Release))
-                            .SendFrame(Id);
+                        foreach (var rollbackPeer in pendingLock.Responses.Where(x => x.Value).Select(x => x.Key).ToList())
+                        {
+                            _server
+                                .SendMoreFrame(rollbackPeer.ToByteArray())
+                                .SendMoreFrame(_nodeId.ToByteArray())
+                                .SendMoreFrame(ConvertOp(MessageOp.Release))
+                                .SendFrame(Id);
+                        }
                     }
                 }
                 else
@@ -124,13 +130,16 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
             lock (_pendingReleases)
                 _pendingReleases.Add(pendingRelease);
 
-            foreach (var peerId in peerList)
+            lock (_server)
             {
-                _server
-                    .SendMoreFrame(peerId.ToByteArray())
-                    .SendMoreFrame(_nodeId.ToByteArray())
-                    .SendMoreFrame(ConvertOp(MessageOp.Release))
-                    .SendFrame(Id);                
+                foreach (var peerId in peerList)
+                {
+                    _server
+                        .SendMoreFrame(peerId.ToByteArray())
+                        .SendMoreFrame(_nodeId.ToByteArray())
+                        .SendMoreFrame(ConvertOp(MessageOp.Release))
+                        .SendFrame(Id);
+                }
             }
 
             Task task = new Task(() =>
@@ -172,12 +181,15 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
         public void Stop()
         {
             var peerList = _peerLastContact.Select(x => x.Key).ToList();
-            foreach (var peerId in peerList)
+            lock (_server)
             {
-                _server
-                    .SendMoreFrame(peerId.ToByteArray())
-                    .SendMoreFrame(_nodeId.ToByteArray())
-                    .SendFrame(ConvertOp(MessageOp.Disconnect));                
+                foreach (var peerId in peerList)
+                {
+                    _server
+                        .SendMoreFrame(peerId.ToByteArray())
+                        .SendMoreFrame(_nodeId.ToByteArray())
+                        .SendFrame(ConvertOp(MessageOp.Disconnect));
+                }
             }
 
             _poller.Stop();
@@ -264,7 +276,10 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
 
         private void Server_ReceiveReady(object sender, NetMQSocketEventArgs e)
         {
-            var message = e.Socket.ReceiveMultipartMessage();
+            NetMQMessage message;
+            lock (_server)
+                message = e.Socket.ReceiveMultipartMessage();
+
             if (message.FrameCount > 1)
             {
                 var clientId = new Guid(message[0].Buffer);
@@ -274,11 +289,14 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
                 switch (op)
                 {
                     case MessageOp.Ping:
-                        e.Socket
-                            .SendMoreFrame(message[0].Buffer)
-                            .SendMoreFrame(_nodeId.ToByteArray())
-                            .SendMoreFrame(ConvertOp(MessageOp.Pong))
-                            .SendFrame(_nodeId.ToByteArray());
+                        lock (_server)
+                        {
+                            e.Socket
+                                .SendMoreFrame(message[0].Buffer)
+                                .SendMoreFrame(_nodeId.ToByteArray())
+                                .SendMoreFrame(ConvertOp(MessageOp.Pong))
+                                .SendFrame(_nodeId.ToByteArray());
+                        }
                         break;
                     case MessageOp.LockReserved:
                         var reservedId = message[2].ConvertToString();
@@ -314,12 +332,16 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
         private void HouseKeeper_Elapsed(object sender, NetMQTimerEventArgs e)
         {
             _logger.LogDebug("Performing house keeping");
-            foreach (var peer in _peerLastContact.Select(x => x.Key).ToList())
+
+            lock (_server)
             {
-                _server
-                    .SendMoreFrame(peer.ToByteArray())
-                    .SendMoreFrame(_nodeId.ToByteArray())
-                    .SendFrame(ConvertOp(MessageOp.Ping));
+                foreach (var peer in _peerLastContact.Select(x => x.Key).ToList())
+                {
+                    _server
+                        .SendMoreFrame(peer.ToByteArray())
+                        .SendMoreFrame(_nodeId.ToByteArray())
+                        .SendFrame(ConvertOp(MessageOp.Ping));
+                }
             }
 
             lock (_lockRegistry)
