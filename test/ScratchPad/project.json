@@ -5,18 +5,15 @@
   },
 
   "dependencies": {
-    "Microsoft.Extensions.DependencyInjection": "1.1.0",
-    "Microsoft.Extensions.DependencyInjection.Abstractions": "1.1.0",
-    "Microsoft.Extensions.Logging": "1.1.0",
-    "Microsoft.Extensions.Logging.Abstractions": "1.1.0",
     "Microsoft.Extensions.Logging.Console": "1.1.0",
     "Microsoft.Extensions.Logging.Debug": "1.1.0",
     "Microsoft.NETCore.App": {
       "type": "platform",
       "version": "1.0.1"
     },
-    "WorkflowCore": "1.0.3-*",
-    "WorkflowCore.Persistence.SqlServer": "1.0.3-*"
+    "WorkflowCore": "1.0.2-*",
+    "WorkflowCore.LockProviders.ZeroMQ": "1.0.2-*",
+    "WorkflowCore.QueueProviders.ZeroMQ": "1.0.2-*"
   },
 
   "frameworks": {

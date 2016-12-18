@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace WorkflowCore.Services
 {
-    public class WorkflowHost : IWorkflowHost
+    public class WorkflowHost : IWorkflowHost, IDisposable
     {
 
         protected readonly IPersistenceProvider _persistenceStore;        
@@ -85,6 +85,7 @@ namespace WorkflowCore.Services
         {            
             _shutdown = false;
             _queueProvider.Start();
+            _lockProvider.Start();
             for (int i = 0; i < _options.ThreadCount; i++)
             {
                 _logger.LogInformation("Starting worker thread #{0}", i);
@@ -119,6 +120,7 @@ namespace WorkflowCore.Services
             _logger.LogInformation("Worker threads stopped");
             stashTask.Wait();
             _queueProvider.Stop();
+            _lockProvider.Stop();
         }
 
 
@@ -182,7 +184,7 @@ namespace WorkflowCore.Services
                                 }
                                 finally
                                 {
-                                    _lockProvider.ReleaseLock(workflowId);
+                                    _lockProvider.ReleaseLock(workflowId).Wait();
                                     if (workflow != null)
                                     {
                                         if ((workflow.Status == WorkflowStatus.Runnable) && workflow.NextExecution.HasValue && workflow.NextExecution.Value < DateTime.Now.ToUniversalTime().Ticks)
@@ -247,7 +249,7 @@ namespace WorkflowCore.Services
                                 }
                                 finally
                                 {
-                                    _lockProvider.ReleaseLock(pub.WorkflowId);
+                                    _lockProvider.ReleaseLock(pub.WorkflowId).Wait();
                                     _queueProvider.QueueForProcessing(pub.WorkflowId);
                                 }
                             }
@@ -283,13 +285,23 @@ namespace WorkflowCore.Services
         {   
             try
             {
-                _logger.LogInformation("Polling for runnable workflows");
-                IPersistenceProvider persistenceStore = _serviceProvider.GetService<IPersistenceProvider>();
-                var runnables = persistenceStore.GetRunnableInstances().Result;
-                foreach (var item in runnables)
+                if (_lockProvider.AcquireLock("poll runnables").Result)
                 {
-                    _logger.LogDebug("Got runnable instance {0}", item);
-                    _queueProvider.QueueForProcessing(item);
+                    try
+                    {
+                        _logger.LogInformation("Polling for runnable workflows");
+                        IPersistenceProvider persistenceStore = _serviceProvider.GetService<IPersistenceProvider>();
+                        var runnables = persistenceStore.GetRunnableInstances().Result;
+                        foreach (var item in runnables)
+                        {
+                            _logger.LogDebug("Got runnable instance {0}", item);
+                            _queueProvider.QueueForProcessing(item);
+                        }
+                    }
+                    finally
+                    {
+                        _lockProvider.ReleaseLock("poll runnables").Wait();
+                    }
                 }
             }
             catch (Exception ex)
@@ -297,31 +309,32 @@ namespace WorkflowCore.Services
                 _logger.LogError(ex.Message);
             }
 
-            if (_lockProvider.AcquireLock("unpublished events").Result)
+            try
             {
-                try
+                if (_lockProvider.AcquireLock("unpublished events").Result)
                 {
-
-                    _logger.LogInformation("Polling for unpublished events");
-                    IPersistenceProvider persistenceStore = _serviceProvider.GetService<IPersistenceProvider>();
-                    var events = persistenceStore.GetUnpublishedEvents().Result.ToList();
-                    foreach (var item in events)
+                    try
                     {
-                        _logger.LogDebug("Got unpublished event {0} {1}", item.EventName, item.EventKey);
-                        _queueProvider.QueueForPublishing(item).Wait();
-                        persistenceStore.RemoveUnpublishedEvent(item.Id).Wait();
+                        _logger.LogInformation("Polling for unpublished events");
+                        IPersistenceProvider persistenceStore = _serviceProvider.GetService<IPersistenceProvider>();
+                        var events = persistenceStore.GetUnpublishedEvents().Result.ToList();
+                        foreach (var item in events)
+                        {
+                            _logger.LogDebug("Got unpublished event {0} {1}", item.EventName, item.EventKey);
+                            _queueProvider.QueueForPublishing(item).Wait();
+                            persistenceStore.RemoveUnpublishedEvent(item.Id).Wait();
+                        }
+                    }
+                    finally
+                    {
+                        _lockProvider.ReleaseLock("unpublished events").Wait();
                     }
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex.Message);
-                }
-                finally
-                {
-                    _lockProvider.ReleaseLock("unpublished events").Wait();
-                }
             }
-            
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+            }
         }
 
         private async Task StashUnpublishedEvents()
@@ -416,6 +429,12 @@ namespace WorkflowCore.Services
                 }
             }
             return false;
+        }
+
+        public void Dispose()
+        {
+            if (!_shutdown)
+                Stop();
         }
     }
 }

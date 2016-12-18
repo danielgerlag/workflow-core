@@ -35,6 +35,16 @@ namespace WorkflowCore.Services
                 _locks.Remove(Id);
             }
         }
-        
+
+        public void Start()
+        {
+
+        }
+
+        public void Stop()
+        {
+
+        }
+
     }
 }
