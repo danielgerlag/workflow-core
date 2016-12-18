@@ -1,13 +1,13 @@
 ﻿{
   "title": "Workflow Core ZeroMQ queue provider",
   "authors": [ "Daniel Gerlag" ],
-  "version": "1.0.2-*",
+  "version": "1.0.3-*",
 
   "dependencies": {
     "NetMQ": "4.0.0-rc5",
     "NETStandard.Library": "1.6.0",
     "Newtonsoft.Json": "9.0.1",
-    "WorkflowCore": "1.0.2-*"
+    "WorkflowCore": "1.0.3-*"
   },
 
   "frameworks": {

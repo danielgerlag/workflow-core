@@ -11,7 +11,7 @@
     "Microsoft.Extensions.DependencyInjection": "1.1.0",
     "Microsoft.Extensions.Logging.Debug": "1.1.0",
     "NETStandard.Library": "1.6.0",
-    "WorkflowCore": "1.0.1-*",
+    "WorkflowCore": "1.0.3-*",
     "WorkflowCore.TestAssets": "1.0.0-*"
   },
 
