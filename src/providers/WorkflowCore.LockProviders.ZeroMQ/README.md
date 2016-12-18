@@ -23,3 +23,6 @@ peers.Add("machine3:5551");
 services.AddWorkflow(x => x.UseZeroMQLocking(5551, peers));
 
 ```
+## Experimental package
+
+This package is still experimental and not recommended for production use.
