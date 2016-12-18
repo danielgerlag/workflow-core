@@ -239,14 +239,14 @@ By default, the WorkflowHost service will run as a single node using the built-i
 
 * SingleNodeQueueProvider *(Default built-in provider)*
 * [RabbitMQ](src/providers/WorkflowCore.QueueProviders.RabbitMQ)
-* [0MQ](src/providers/WorkflowCore.QueueProviders.ZeroMQ)
+* [0MQ](src/providers/WorkflowCore.QueueProviders.ZeroMQ) *(experimental)*
 * Apache ZooKeeper *(coming soon...)*
 
 #### Distributed lock managers
 
 * SingleNodeLockProvider *(Default built-in provider)*
 * [Redis Redlock](src/providers/WorkflowCore.LockProviders.Redlock)
-* 0MQ *(coming soon...)*
+* [0MQ](src/providers/WorkflowCore.LockProviders.ZeroMQ) *(experimental)*
 * Apache ZooKeeper *(coming soon...)*
 
 
