@@ -271,9 +271,9 @@ By default, the WorkflowHost service will run as a single node using the built-i
 
 # Ports
 
-[Node.js] (http://github.com/danielgerlag/workflow-es)
+[Node.js] (https://github.com/danielgerlag/workflow-es)
 
-[Ruby] (http://github.com/danielgerlag/workflow_rb)
+[Ruby] (https://github.com/danielgerlag/workflow_rb)
 
 ## License
 
