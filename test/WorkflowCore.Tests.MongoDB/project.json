@@ -1,4 +1,4 @@
-{
+﻿{
   "version": "1.0.0-*",
   "testRunner": "mspec",
   "dependencies": {
@@ -14,7 +14,9 @@
     "NETStandard.Library": "1.6.1",
     "WorkflowCore": "1.0.3-*",
     "WorkflowCore.TestAssets": "1.0.0-*",
-    "Microsoft.Extensions.Logging.Console": "1.1.0"
+    "Microsoft.Extensions.Logging.Console": "1.1.0",
+    "WorkflowCore.Persistence.MongoDB": "1.0.3-*",
+    "Docker.DotNet": "2.124.3"
   },
 
   "frameworks": {
