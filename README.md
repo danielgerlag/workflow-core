@@ -264,6 +264,8 @@ By default, the WorkflowHost service will run as a single node using the built-i
 
 [Looping](src/samples/WorkflowCore.Sample02)
 
+[Exposing a REST API](src/samples/WorkflowCore.Sample07)
+
 
 ## Authors
 
