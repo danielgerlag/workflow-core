@@ -17,6 +17,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             PersistedWorkflow result = new PersistedWorkflow();            
             result.Data = JsonConvert.SerializeObject(instance.Data, SerializerSettings);
             result.Description = instance.Description;
+            result.CreateTime = DateTime.Now.ToUniversalTime();
             result.InstanceId = new Guid(instance.Id);
             result.NextExecution = instance.NextExecution;
             result.Version = instance.Version;
@@ -57,6 +58,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             WorkflowInstance result = new WorkflowInstance();
             result.Data = JsonConvert.DeserializeObject(instance.Data, SerializerSettings);
             result.Description = instance.Description;
+            result.CreateTime = DateTime.Now.ToUniversalTime();
             result.Id = instance.InstanceId.ToString();
             result.NextExecution = instance.NextExecution;
             result.Version = instance.Version;

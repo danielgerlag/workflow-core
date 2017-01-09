@@ -91,6 +91,8 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
         {
             IQueryable<PersistedWorkflow> query = Set<PersistedWorkflow>().AsQueryable();
 
+            take = ((take <= 0) ? 10 : take);
+
             if (status.HasValue)
                 query = query.Where(x => x.Status == status.Value);
 
