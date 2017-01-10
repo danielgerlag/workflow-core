@@ -74,5 +74,7 @@ namespace WorkflowCore.Interface
         IStepBuilder<TData, SubscriptionStepBody> WaitFor(string eventName, string eventKey);
 
         IStepBuilder<TData, TStep> End<TStep>(string name) where TStep : IStepBody;
+
+        IStepBuilder<TData, TStepBody> OnError(WorkflowErrorHandling behavior, TimeSpan? retryInterval = null);
     }
 }

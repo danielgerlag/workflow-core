@@ -15,7 +15,7 @@ namespace WorkflowCore.Models
         internal int ThreadCount;
         internal TimeSpan PollInterval;
         internal TimeSpan IdleTime;
-        internal TimeSpan ErrorRetryInterval;
+        internal TimeSpan ErrorRetryInterval;        
 
         public WorkflowOptions()
         {
@@ -23,7 +23,7 @@ namespace WorkflowCore.Models
             ThreadCount = Environment.ProcessorCount;
             PollInterval = TimeSpan.FromSeconds(10);
             IdleTime = TimeSpan.FromMilliseconds(500);
-            ErrorRetryInterval = TimeSpan.FromSeconds(60);
+            ErrorRetryInterval = TimeSpan.FromSeconds(60);            
 
             QueueFactory = new Func<IServiceProvider, IQueueProvider>(sp => new SingleNodeQueueProvider());
             LockFactory = new Func<IServiceProvider, IDistributedLockProvider>(sp => new SingleNodeLockProvider());
@@ -55,5 +55,12 @@ namespace WorkflowCore.Models
             PollInterval = interval;
         }
 
+        public void UseErrorRetryInterval(TimeSpan interval)
+        {
+            ErrorRetryInterval = interval;
+        }
+                
+
     }
+        
 }

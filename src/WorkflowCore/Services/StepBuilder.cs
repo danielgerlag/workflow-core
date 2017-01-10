@@ -115,6 +115,13 @@ namespace WorkflowCore.Services
             return new StepBuilder<TData, TStep>(_workflowBuilder, (ancestor as WorkflowStep<TStep>));
         }
 
+        public IStepBuilder<TData, TStepBody> OnError(WorkflowErrorHandling behavior, TimeSpan? retryInterval = null)
+        {
+            Step.ErrorBehavior = behavior;
+            Step.RetryInterval = retryInterval;
+            return this;
+        }
+
         private WorkflowStep IterateParents(int id, string name)
         {
             //todo: filter out circular paths
