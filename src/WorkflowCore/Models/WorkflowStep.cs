@@ -18,7 +18,12 @@ namespace WorkflowCore.Models
         public List<StepOutcome> Outcomes { get; set; } = new List<StepOutcome>();
 
         public List<DataMapping> Inputs { get; set; } = new List<DataMapping>();
+
         public List<DataMapping> Outputs { get; set; } = new List<DataMapping>();
+
+        public WorkflowErrorHandling? ErrorBehavior { get; set; }
+
+        public TimeSpan? RetryInterval { get; set; }
     }
 
     public class WorkflowStep<TStepBody> : WorkflowStep

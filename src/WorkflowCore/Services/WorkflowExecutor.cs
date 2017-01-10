@@ -145,12 +145,26 @@ namespace WorkflowCore.Services
                     catch (Exception ex)
                     {
                         _logger.LogError("Workflow {0} raised error on step {1} Message: {2}", workflow.Id, pointer.StepId, ex.Message);
-                        pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(options.ErrorRetryInterval);
                         pointer.Errors.Add(new ExecutionError()
                         {
                             ErrorTime = DateTime.Now.ToUniversalTime(),
                             Message = ex.Message
                         });
+
+                        switch (step.ErrorBehavior ?? def.DefaultErrorBehavior)
+                        {
+                            case WorkflowErrorHandling.Retry:
+                                pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(step.RetryInterval ?? def.DefaultErrorRetryInterval ?? options.ErrorRetryInterval);
+                                break;
+                            case WorkflowErrorHandling.Suspend:
+                                workflow.Status = WorkflowStatus.Suspended;
+                                break;
+                            case WorkflowErrorHandling.Terminate:
+                                workflow.Status = WorkflowStatus.Terminated;
+                                break;
+                        }
+
+                        _host.ReportStepError(workflow, step, ex);
                     }
 
                     await persistenceStore.PersistWorkflow(workflow);

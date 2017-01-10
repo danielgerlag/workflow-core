@@ -25,5 +25,10 @@ namespace WorkflowCore.Interface
         Task<bool> ResumeWorkflow(string workflowId);
         Task<bool> TerminateWorkflow(string workflowId);
 
+        event StepErrorEventHandler OnStepError;
+        void ReportStepError(WorkflowInstance workflow, WorkflowStep step, Exception exception);
+
     }
+
+    public delegate void StepErrorEventHandler(WorkflowInstance workflow, WorkflowStep step, Exception exception);
 }

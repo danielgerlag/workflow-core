@@ -20,5 +20,11 @@ namespace WorkflowCore.Models
 
         public Type DataType { get; set; }
 
+        public WorkflowErrorHandling DefaultErrorBehavior { get; set; }
+
+        public TimeSpan? DefaultErrorRetryInterval { get; set; }
+
     }
+
+    public enum WorkflowErrorHandling { Retry = 0, Suspend = 1, Terminate = 2 }
 }

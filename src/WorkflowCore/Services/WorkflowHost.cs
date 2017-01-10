@@ -24,6 +24,7 @@ namespace WorkflowCore.Services
         protected ILogger _logger;
         protected IServiceProvider _serviceProvider;
         protected Timer _pollTimer;
+        public event StepErrorEventHandler OnStepError;
 
         public WorkflowHost(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, WorkflowOptions options, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider)
         {
@@ -429,6 +430,12 @@ namespace WorkflowCore.Services
                 }
             }
             return false;
+        }
+
+
+        public void ReportStepError(WorkflowInstance workflow, WorkflowStep step, Exception exception)
+        {
+            OnStepError?.Invoke(workflow, step, exception);
         }
 
         public void Dispose()

@@ -13,10 +13,14 @@ namespace WorkflowCore.Services
 
         protected List<WorkflowStep> Steps { get; set; } = new List<WorkflowStep>();
 
+        protected WorkflowErrorHandling DefaultErrorBehavior = WorkflowErrorHandling.Retry;
+
+        protected TimeSpan? DefaultErrorRetryInterval;
+
         public IWorkflowBuilder<T> UseData<T>()
         {
             IWorkflowBuilder<T> result = new WorkflowBuilder<T>(Steps);
-            result.InitialStep = this.InitialStep;
+            result.InitialStep = this.InitialStep;            
             return result;
         }
         
@@ -28,6 +32,8 @@ namespace WorkflowCore.Services
             result.Version = version;
             result.Steps = this.Steps;
             result.InitialStep = this.InitialStep;
+            result.DefaultErrorBehavior = DefaultErrorBehavior;
+            result.DefaultErrorRetryInterval = DefaultErrorRetryInterval;
             return result;
         }
 
@@ -35,8 +41,8 @@ namespace WorkflowCore.Services
         {
             step.Id = Steps.Count();
             Steps.Add(step);
-        }
-        
+        }               
+
     }
 
     public class WorkflowBuilder<TData> : WorkflowBuilder, IWorkflowBuilder<TData>
@@ -82,6 +88,13 @@ namespace WorkflowCore.Services
         public IEnumerable<WorkflowStep> GetUpstreamSteps(int id)
         {
             return Steps.Where(x => x.Outcomes.Any(y => y.NextStep == id)).ToList();
+        }
+
+        public IWorkflowBuilder<TData> UseDefaultErrorBehavior(WorkflowErrorHandling behavior, TimeSpan? retryInterval = null)
+        {
+            DefaultErrorBehavior = behavior;
+            DefaultErrorRetryInterval = retryInterval;
+            return this;
         }
     }
         

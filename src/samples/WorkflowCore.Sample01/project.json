@@ -15,8 +15,8 @@
     "Microsoft.NETCore.App": {
       "type": "platform",
       "version": "1.0.1"
-    }
-
+    },
+    "WorkflowCore.Persistence.MongoDB": "1.0.3-*"
   },
 
   "frameworks": {
