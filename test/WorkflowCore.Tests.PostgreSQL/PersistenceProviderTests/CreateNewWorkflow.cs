@@ -1,24 +1,21 @@
 ﻿using Machine.Specifications;
-using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
-using WorkflowCore.Persistence.MongoDB.Services;
+using WorkflowCore.Persistence.PostgreSQL;
 
-namespace WorkflowCore.Tests.MongoDB.MongoPersistenceProviderTests
+namespace WorkflowCore.Tests.PostgreSQL.PersistenceProviderTests
 {
-    [Subject(typeof(MongoPersistenceProvider))]
+    [Subject(typeof(PostgresPersistenceProvider))]
     public class CreateNewWorkflow
     {
         Establish context = () =>
         {
-            var client = new MongoClient("mongodb://localhost:" + DockerSetup.Port);
-            var db = client.GetDatabase("workflow-tests");
-
-            Subject = new MongoPersistenceProvider(db);
+            Subject = new PostgresPersistenceProvider("Server=127.0.0.1;Port=" + DockerSetup.Port + ";Database=workflow;User Id=postgres;", true, true);
+            Subject.EnsureStoreExists();
             workflow = new WorkflowInstance()
             {
                 Data = new { Value1 = 7 },

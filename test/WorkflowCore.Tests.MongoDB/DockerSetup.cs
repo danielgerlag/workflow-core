@@ -11,7 +11,7 @@ namespace WorkflowCore.Tests.MongoDB
 {
     public class DockerSetup : IAssemblyContext
     {
-
+        public static int Port = 28017;
         DockerClient docker = new DockerClientConfiguration(new Uri("npipe://./pipe/docker_engine")).CreateClient();
         string containerId;
 
@@ -26,7 +26,7 @@ namespace WorkflowCore.Tests.MongoDB
             HostConfig hostCfg = new HostConfig();
             PortBinding pb = new PortBinding();
             pb.HostIP = "0.0.0.0";
-            pb.HostPort = "28017";
+            pb.HostPort = Port.ToString();
             hostCfg.PortBindings = new Dictionary<string, IList<PortBinding>>();
             hostCfg.PortBindings.Add("27017/tcp", new PortBinding[] { pb });
 
