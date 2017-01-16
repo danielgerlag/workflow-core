@@ -6,23 +6,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace WorkflowCore.Tests.MongoDB
 {
     public class DockerSetup : IAssemblyContext
     {
         public static int Port = 28017;
-        DockerClient docker = new DockerClientConfiguration(new Uri("npipe://./pipe/docker_engine")).CreateClient();
+        DockerClient docker;
         string containerId;
-
-        void IAssemblyContext.OnAssemblyComplete()
-        {            
-            docker.Containers.KillContainerAsync(containerId, new ContainerKillParameters()).Wait();
-            docker.Containers.RemoveContainerAsync(containerId, new ContainerRemoveParameters() { Force = true }).Wait();
-        }
-
+        
         void IAssemblyContext.OnAssemblyStart()
-        {
+        {            
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                docker = new DockerClientConfiguration(new Uri("npipe://./pipe/docker_engine")).CreateClient();
+            else
+                docker = new DockerClientConfiguration(new Uri("unix:///var/run/docker.sock")).CreateClient();  
+
             HostConfig hostCfg = new HostConfig();
             PortBinding pb = new PortBinding();
             pb.HostIP = "0.0.0.0";
@@ -43,6 +43,13 @@ namespace WorkflowCore.Tests.MongoDB
                 Console.WriteLine("Docker container failed");
             }
         }
+
+        void IAssemblyContext.OnAssemblyComplete()
+        {            
+            docker.Containers.KillContainerAsync(containerId, new ContainerKillParameters()).Wait();
+            docker.Containers.RemoveContainerAsync(containerId, new ContainerRemoveParameters() { Force = true }).Wait();
+        }
+
         
     }
 }

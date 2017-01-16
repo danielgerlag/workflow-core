@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace WorkflowCore.Tests.PostgreSQL
 {
@@ -13,11 +14,16 @@ namespace WorkflowCore.Tests.PostgreSQL
     {
         public static int Port = 5433;
 
-        DockerClient docker = new DockerClientConfiguration(new Uri("npipe://./pipe/docker_engine")).CreateClient();
+        DockerClient docker;
         string containerId;
         
         void IAssemblyContext.OnAssemblyStart()
         {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                docker = new DockerClientConfiguration(new Uri("npipe://./pipe/docker_engine")).CreateClient();
+            else
+                docker = new DockerClientConfiguration(new Uri("unix:///var/run/docker.sock")).CreateClient();  
+
             HostConfig hostCfg = new HostConfig();
             PortBinding pb = new PortBinding();
             pb.HostIP = "0.0.0.0";
