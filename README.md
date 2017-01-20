@@ -282,3 +282,6 @@ By default, the WorkflowHost service will run as a single node using the built-i
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
 
+## Feedback
+
+[![Feature Requests](http://feathub.com/danielgerlag/workflow-core?format=svg)](http://feathub.com/danielgerlag/workflow-core)
