@@ -24,8 +24,12 @@ namespace WorkflowCore.Users.Models
                 executionPointer.ExtensionAttributes["AssignedPrincipal"] = resolvedUser;
                 executionPointer.ExtensionAttributes["Prompt"] = UserPrompt;
 
-                
-                //defintion.Steps.First(x => x.Id == this.Outcomes)
+                Dictionary<string, object> userOptions = new Dictionary<string, object>();
+                foreach (var outcome in Outcomes)
+                {
+                    userOptions[outcome.Label ?? Convert.ToString(outcome.Value ?? "Proceed")] = outcome.Value;
+                }
+                executionPointer.ExtensionAttributes["UserOptions"] = userOptions;
 
                 executionPointer.EventKey = workflow.Id + "." + executionPointer.Id;
                 executionPointer.EventName = "UserAction";

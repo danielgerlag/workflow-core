@@ -27,14 +27,24 @@ namespace WorkflowCore.Sample08
 
         public void Build(IWorkflowBuilder<object> builder)
         {
-            builder
-                .StartWith(context => ExecutionResult.Next())
-                .UserStep("Choose", data => "MYDOMAIN\\daniel")
+            var step1 = builder.StartWith(context => ExecutionResult.Next());
+            var step2 = step1.UserStep("Do you agree", data => "MYDOMAIN\\daniel");
+            step2
+                .When("yes", "I agree")
                 .Then(context =>
                 {
-                    Console.WriteLine("workflow complete");
+                    Console.WriteLine("You agreed");
                     return ExecutionResult.Next();
                 });
+
+            step2
+                .When("no", "I do not agree")
+                .Then(context =>
+                {
+                    Console.WriteLine("You did not agree");
+                    return ExecutionResult.Next();
+                });
+
         }
     }
 }

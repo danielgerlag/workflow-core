@@ -22,8 +22,9 @@ namespace WorkflowCore.Models
                 {
                     Key = pointer.EventKey,
                     Prompt = Convert.ToString(pointer.ExtensionAttributes["Prompt"]),
-                    AssignedPrincipal = Convert.ToString(pointer.ExtensionAttributes["AssignedPrincipal"])
-                };
+                    AssignedPrincipal = Convert.ToString(pointer.ExtensionAttributes["AssignedPrincipal"]),
+                    Options = (pointer.ExtensionAttributes["UserOptions"] as Dictionary<string, object>)
+                };                                
 
                 result.Add(item);
             }

@@ -29,12 +29,18 @@ namespace WorkflowCore.Sample08
             var openItems = host.GetOpenUserActions(workflowId);
             foreach (var item in openItems)
             {
-                Console.WriteLine("Prompt = " + item.Prompt + ", Assigned to " + item.AssignedPrincipal);
+                Console.WriteLine(item.Prompt + ", Assigned to " + item.AssignedPrincipal);
+                Console.Write("Options are ");
+                foreach (var option in item.Options)
+                {
+                    Console.Write(option.Key + " - " + option.Value + ", ");
+                }
+
+                Console.WriteLine();
+                Console.WriteLine("Choosing " + item.Options.Last().Key);
+
+                host.PublishUserAction(openItems.First().Key, "MYDOMAIN\\me", item.Options.Last().Value).Wait();
             }
-
-
-            //string value = Console.ReadLine();
-            host.PublishUserAction(openItems.First().Key, "MYDOMAIN\\me", null).Wait();
 
             Console.ReadLine();
             host.Stop();
@@ -45,8 +51,8 @@ namespace WorkflowCore.Sample08
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
-            services.AddWorkflow();
-            //services.AddWorkflow(x => x.UseMongoDB(@"mongodb://localhost:27017", "workflow"));
+            //services.AddWorkflow();
+            services.AddWorkflow(x => x.UseMongoDB(@"mongodb://localhost:27017", "workflow"));
             
 
             var serviceProvider = services.BuildServiceProvider();
