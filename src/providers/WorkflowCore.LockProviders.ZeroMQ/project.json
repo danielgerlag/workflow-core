@@ -4,7 +4,7 @@
   "version": "1.0.3-*",
   "dependencies": {
     "NetMQ": "4.0.0-rc5",
-    "NETStandard.Library": "1.6.0",
+    "NETStandard.Library": "1.6.1",
     "System.Threading.Tasks.Parallel": "4.3.0",
     "WorkflowCore": "1.0.3-*"
   },

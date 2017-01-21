@@ -11,9 +11,9 @@
       "type": "platform",
       "version": "1.0.1"
     },
-    "WorkflowCore": "1.0.2-*",
-    "WorkflowCore.LockProviders.ZeroMQ": "1.0.2-*",
-    "WorkflowCore.QueueProviders.ZeroMQ": "1.0.2-*"
+    "WorkflowCore": "1.0.3-*",
+    "WorkflowCore.LockProviders.ZeroMQ": "1.0.3-*",
+    "WorkflowCore.QueueProviders.ZeroMQ": "1.0.3-*"
   },
 
   "frameworks": {
