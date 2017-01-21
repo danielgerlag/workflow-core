@@ -21,7 +21,7 @@ namespace WorkflowCore.Models
                 executionPointer.EventName = EventName;
                 executionPointer.Active = false;
                 persistenceStore.PersistWorkflow(workflow).Wait();
-                host.SubscribeEvent(workflow.Id, executionPointer.StepId, executionPointer.EventName, executionPointer.EventKey);
+                host.SubscribeEvent(workflow.Id, executionPointer.StepId, executionPointer.EventName, executionPointer.EventKey).Wait();
 
                 return ExecutionPipelineDirective.Defer;
             }

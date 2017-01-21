@@ -12,29 +12,31 @@ using System.Reflection;
 namespace WorkflowCore.Services
 {
     public class WorkflowHost : IWorkflowHost, IDisposable
-    {
-
-        protected readonly IPersistenceProvider _persistenceStore;        
-        protected readonly IDistributedLockProvider _lockProvider;
-        protected readonly IWorkflowRegistry _registry;
-        protected readonly WorkflowOptions _options;
-        protected readonly IQueueProvider _queueProvider;
+    {                
         protected List<Thread> _threads = new List<Thread>();
-        protected bool _shutdown = true;
-        protected ILogger _logger;
+        protected bool _shutdown = true;        
         protected IServiceProvider _serviceProvider;
         protected Timer _pollTimer;
+
         public event StepErrorEventHandler OnStepError;
+
+        //public dependencies to allow for extension method access
+        public IPersistenceProvider PersistenceStore { get; private set; }
+        public IDistributedLockProvider LockProvider { get; private set; }
+        public IWorkflowRegistry Registry { get; private set; }
+        public WorkflowOptions Options { get; private set; }
+        public IQueueProvider QueueProvider { get; private set; }
+        public ILogger Logger { get; private set; }
 
         public WorkflowHost(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, WorkflowOptions options, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider)
         {
-            _persistenceStore = persistenceStore;
-            _queueProvider = queueProvider;
-            _options = options;
-            _logger = loggerFactory.CreateLogger<WorkflowHost>();
+            PersistenceStore = persistenceStore;
+            QueueProvider = queueProvider;
+            Options = options;
+            Logger = loggerFactory.CreateLogger<WorkflowHost>();
             _serviceProvider = serviceProvider;
-            _registry = registry;
-            _lockProvider = lockProvider;
+            Registry = registry;
+            LockProvider = lockProvider;
             persistenceStore.EnsureStoreExists();
         }
 
@@ -60,7 +62,7 @@ namespace WorkflowCore.Services
             if (_shutdown)
                 throw new Exception("Host is not running");
 
-            var def = _registry.GetDefinition(workflowId, version);
+            var def = Registry.GetDefinition(workflowId, version);
             if (def == null)
                 throw new Exception(String.Format("Workflow {0} version {1} is not registered", workflowId, version));
 
@@ -83,30 +85,30 @@ namespace WorkflowCore.Services
                 Active = true,
                 ConcurrentFork = 1
             });
-            string id = await _persistenceStore.CreateNewWorkflow(wf);
-            await _queueProvider.QueueForProcessing(id);
+            string id = await PersistenceStore.CreateNewWorkflow(wf);
+            await QueueProvider.QueueForProcessing(id);
             return id;
         }
 
         public void Start()
         {            
             _shutdown = false;
-            _queueProvider.Start();
-            _lockProvider.Start();
-            for (int i = 0; i < _options.ThreadCount; i++)
+            QueueProvider.Start();
+            LockProvider.Start();
+            for (int i = 0; i < Options.ThreadCount; i++)
             {
-                _logger.LogInformation("Starting worker thread #{0}", i);
+                Logger.LogInformation("Starting worker thread #{0}", i);
                 Thread thread = new Thread(RunWorkflows);
                 _threads.Add(thread);
                 thread.Start();
             }
 
-            _logger.LogInformation("Starting publish thread");
+            Logger.LogInformation("Starting publish thread");
             Thread pubThread = new Thread(RunPublications);
             _threads.Add(pubThread);
             pubThread.Start();
 
-            _pollTimer = new Timer(new TimerCallback(PollRunnables), null, TimeSpan.FromSeconds(0), _options.PollInterval);
+            _pollTimer = new Timer(new TimerCallback(PollRunnables), null, TimeSpan.FromSeconds(0), Options.PollInterval);
         }
 
         public void Stop()
@@ -121,26 +123,26 @@ namespace WorkflowCore.Services
 
             var stashTask = StashUnpublishedEvents();
 
-            _logger.LogInformation("Stopping worker threads");
+            Logger.LogInformation("Stopping worker threads");
             foreach (Thread th in _threads)
                 th.Join();
-            _logger.LogInformation("Worker threads stopped");
+            Logger.LogInformation("Worker threads stopped");
             stashTask.Wait();
-            _queueProvider.Stop();
-            _lockProvider.Stop();
+            QueueProvider.Stop();
+            LockProvider.Stop();
         }
 
 
         public async Task SubscribeEvent(string workflowId, int stepId, string eventName, string eventKey)
         {
-            _logger.LogDebug("Subscribing to event {0} {1} for workflow {2} step {3}", eventName, eventKey, workflowId, stepId);
+            Logger.LogDebug("Subscribing to event {0} {1} for workflow {2} step {3}", eventName, eventKey, workflowId, stepId);
             EventSubscription subscription = new EventSubscription();
             subscription.WorkflowId = workflowId;
             subscription.StepId = stepId;
             subscription.EventName = eventName;
             subscription.EventKey = eventKey;
 
-            await _persistenceStore.CreateEventSubscription(subscription);
+            await PersistenceStore.CreateEventSubscription(subscription);
         }
 
         public async Task PublishEvent(string eventName, string eventKey, object eventData)
@@ -148,8 +150,8 @@ namespace WorkflowCore.Services
             if (_shutdown)
                 throw new Exception("Host is not running");
 
-            _logger.LogDebug("Publishing event {0} {1}", eventName, eventKey);
-            var subs = await _persistenceStore.GetSubcriptions(eventName, eventKey);
+            Logger.LogDebug("Publishing event {0} {1}", eventName, eventKey);
+            var subs = await PersistenceStore.GetSubcriptions(eventName, eventKey);
             foreach (var sub in subs.ToList())
             {
                 EventPublication pub = new EventPublication();
@@ -159,8 +161,8 @@ namespace WorkflowCore.Services
                 pub.EventName = eventName;
                 pub.StepId = sub.StepId;
                 pub.WorkflowId = sub.WorkflowId;
-                await _queueProvider.QueueForPublishing(pub);
-                await _persistenceStore.TerminateSubscription(sub.Id);                
+                await QueueProvider.QueueForPublishing(pub);
+                await PersistenceStore.TerminateSubscription(sub.Id);                
             }
         }
 
@@ -175,49 +177,49 @@ namespace WorkflowCore.Services
             {
                 try
                 {
-                    var workflowId = _queueProvider.DequeueForProcessing().Result;
+                    var workflowId = QueueProvider.DequeueForProcessing().Result;
                     if (workflowId != null)
                     {
                         try
                         {
-                            if (_lockProvider.AcquireLock(workflowId).Result)
+                            if (LockProvider.AcquireLock(workflowId).Result)
                             {
                                 WorkflowInstance workflow = null;
                                 try
                                 {
                                     workflow = persistenceStore.GetWorkflowInstance(workflowId).Result;
                                     if (workflow.Status == WorkflowStatus.Runnable)
-                                        workflowExecutor.Execute(workflow, persistenceStore, _options);
+                                        workflowExecutor.Execute(workflow, persistenceStore, Options);
                                 }
                                 finally
                                 {
-                                    _lockProvider.ReleaseLock(workflowId).Wait();
+                                    LockProvider.ReleaseLock(workflowId).Wait();
                                     if (workflow != null)
                                     {
                                         if ((workflow.Status == WorkflowStatus.Runnable) && workflow.NextExecution.HasValue && workflow.NextExecution.Value < DateTime.Now.ToUniversalTime().Ticks)
-                                            _queueProvider.QueueForProcessing(workflowId);
+                                            QueueProvider.QueueForProcessing(workflowId);
                                     }
                                 }
                             }
                             else
                             {
-                                _logger.LogInformation("Workflow locked {0}", workflowId);
+                                Logger.LogInformation("Workflow locked {0}", workflowId);
                             }
                         }
                         catch (Exception ex)
                         {                            
-                            _logger.LogError(ex.Message);
+                            Logger.LogError(ex.Message);
                         }
                     }
                     else
                     {
-                        Thread.Sleep(_options.IdleTime); //no work
+                        Thread.Sleep(Options.IdleTime); //no work
                     }
 
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex.Message);
+                    Logger.LogError(ex.Message);
                 }
             }
         }
@@ -229,12 +231,12 @@ namespace WorkflowCore.Services
             {
                 try
                 {
-                    var pub = _queueProvider.DequeueForPublishing().Result;
+                    var pub = QueueProvider.DequeueForPublishing().Result;
                     if (pub != null)
                     {
                         try
                         {
-                            if (_lockProvider.AcquireLock(pub.WorkflowId).Result)
+                            if (LockProvider.AcquireLock(pub.WorkflowId).Result)
                             {                                
                                 try
                                 {
@@ -251,35 +253,35 @@ namespace WorkflowCore.Services
                                 }
                                 catch (Exception ex)
                                 {
-                                    _logger.LogError(ex.Message);
+                                    Logger.LogError(ex.Message);
                                     persistenceStore.CreateUnpublishedEvent(pub); //retry later                                    
                                 }
                                 finally
                                 {
-                                    _lockProvider.ReleaseLock(pub.WorkflowId).Wait();
-                                    _queueProvider.QueueForProcessing(pub.WorkflowId);
+                                    LockProvider.ReleaseLock(pub.WorkflowId).Wait();
+                                    QueueProvider.QueueForProcessing(pub.WorkflowId);
                                 }
                             }
                             else
                             {
-                                _logger.LogInformation("Workflow locked {0}", pub.WorkflowId);
+                                Logger.LogInformation("Workflow locked {0}", pub.WorkflowId);
                                 persistenceStore.CreateUnpublishedEvent(pub); //retry later
                             }
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex.Message);
+                            Logger.LogError(ex.Message);
                         }
                     }
                     else
                     {
-                        Thread.Sleep(_options.IdleTime); //no work
+                        Thread.Sleep(Options.IdleTime); //no work
                     }
 
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex.Message);
+                    Logger.LogError(ex.Message);
                 }
             }
         }
@@ -292,55 +294,55 @@ namespace WorkflowCore.Services
         {   
             try
             {
-                if (_lockProvider.AcquireLock("poll runnables").Result)
+                if (LockProvider.AcquireLock("poll runnables").Result)
                 {
                     try
                     {
-                        _logger.LogInformation("Polling for runnable workflows");
+                        Logger.LogInformation("Polling for runnable workflows");
                         IPersistenceProvider persistenceStore = _serviceProvider.GetService<IPersistenceProvider>();
                         var runnables = persistenceStore.GetRunnableInstances().Result;
                         foreach (var item in runnables)
                         {
-                            _logger.LogDebug("Got runnable instance {0}", item);
-                            _queueProvider.QueueForProcessing(item);
+                            Logger.LogDebug("Got runnable instance {0}", item);
+                            QueueProvider.QueueForProcessing(item);
                         }
                     }
                     finally
                     {
-                        _lockProvider.ReleaseLock("poll runnables").Wait();
+                        LockProvider.ReleaseLock("poll runnables").Wait();
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                Logger.LogError(ex.Message);
             }
 
             try
             {
-                if (_lockProvider.AcquireLock("unpublished events").Result)
+                if (LockProvider.AcquireLock("unpublished events").Result)
                 {
                     try
                     {
-                        _logger.LogInformation("Polling for unpublished events");
+                        Logger.LogInformation("Polling for unpublished events");
                         IPersistenceProvider persistenceStore = _serviceProvider.GetService<IPersistenceProvider>();
                         var events = persistenceStore.GetUnpublishedEvents().Result.ToList();
                         foreach (var item in events)
                         {
-                            _logger.LogDebug("Got unpublished event {0} {1}", item.EventName, item.EventKey);
-                            _queueProvider.QueueForPublishing(item).Wait();
+                            Logger.LogDebug("Got unpublished event {0} {1}", item.EventName, item.EventKey);
+                            QueueProvider.QueueForPublishing(item).Wait();
                             persistenceStore.RemoveUnpublishedEvent(item.Id).Wait();
                         }
                     }
                     finally
                     {
-                        _lockProvider.ReleaseLock("unpublished events").Wait();
+                        LockProvider.ReleaseLock("unpublished events").Wait();
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                Logger.LogError(ex.Message);
             }
         }
 
@@ -348,11 +350,11 @@ namespace WorkflowCore.Services
         {
             if (!_shutdown)
             {
-                var pub = await _queueProvider.DequeueForPublishing();
+                var pub = await QueueProvider.DequeueForPublishing();
                 while (pub != null)
                 {
-                    await _persistenceStore.CreateUnpublishedEvent(pub);
-                    pub = await _queueProvider.DequeueForPublishing();
+                    await PersistenceStore.CreateUnpublishedEvent(pub);
+                    pub = await QueueProvider.DequeueForPublishing();
                 }
             }
         }
@@ -361,7 +363,7 @@ namespace WorkflowCore.Services
             where TWorkflow : IWorkflow, new()
         {
             TWorkflow wf = new TWorkflow();
-            _registry.RegisterWorkflow(wf);
+            Registry.RegisterWorkflow(wf);
         }
 
         public void RegisterWorkflow<TWorkflow, TData>() 
@@ -369,27 +371,27 @@ namespace WorkflowCore.Services
             where TData : new()
         {
             TWorkflow wf = new TWorkflow();
-            _registry.RegisterWorkflow<TData>(wf);
+            Registry.RegisterWorkflow<TData>(wf);
         }
 
         public async Task<bool> SuspendWorkflow(string workflowId)
         {
-            if (_lockProvider.AcquireLock(workflowId).Result)
+            if (LockProvider.AcquireLock(workflowId).Result)
             {
                 try
                 {
-                    var wf = await _persistenceStore.GetWorkflowInstance(workflowId);
+                    var wf = await PersistenceStore.GetWorkflowInstance(workflowId);
                     if (wf.Status == WorkflowStatus.Runnable)
                     {
                         wf.Status = WorkflowStatus.Suspended;
-                        await _persistenceStore.PersistWorkflow(wf);
+                        await PersistenceStore.PersistWorkflow(wf);
                         return true;
                     }
                     return false;
                 }
                 finally
                 {
-                    await _lockProvider.ReleaseLock(workflowId);
+                    await LockProvider.ReleaseLock(workflowId);
                 }
             }
             return false;
@@ -397,23 +399,23 @@ namespace WorkflowCore.Services
 
         public async Task<bool> ResumeWorkflow(string workflowId)
         {
-            if (_lockProvider.AcquireLock(workflowId).Result)
+            if (LockProvider.AcquireLock(workflowId).Result)
             {
                 try
                 {
-                    var wf = await _persistenceStore.GetWorkflowInstance(workflowId);
+                    var wf = await PersistenceStore.GetWorkflowInstance(workflowId);
                     if (wf.Status == WorkflowStatus.Suspended)
                     {
                         wf.Status = WorkflowStatus.Runnable;
-                        await _persistenceStore.PersistWorkflow(wf);
-                        await _queueProvider.QueueForProcessing(workflowId);
+                        await PersistenceStore.PersistWorkflow(wf);
+                        await QueueProvider.QueueForProcessing(workflowId);
                         return true;
                     }
                     return false;
                 }
                 finally
                 {
-                    await _lockProvider.ReleaseLock(workflowId);
+                    await LockProvider.ReleaseLock(workflowId);
                 }
             }
             return false;
@@ -421,18 +423,18 @@ namespace WorkflowCore.Services
 
         public async Task<bool> TerminateWorkflow(string workflowId)
         {
-            if (_lockProvider.AcquireLock(workflowId).Result)
+            if (LockProvider.AcquireLock(workflowId).Result)
             {
                 try
                 {
-                    var wf = await _persistenceStore.GetWorkflowInstance(workflowId);                    
+                    var wf = await PersistenceStore.GetWorkflowInstance(workflowId);                    
                     wf.Status = WorkflowStatus.Terminated;
-                    await _persistenceStore.PersistWorkflow(wf);
+                    await PersistenceStore.PersistWorkflow(wf);
                     return true;                    
                 }
                 finally
                 {
-                    await _lockProvider.ReleaseLock(workflowId);
+                    await LockProvider.ReleaseLock(workflowId);
                 }
             }
             return false;

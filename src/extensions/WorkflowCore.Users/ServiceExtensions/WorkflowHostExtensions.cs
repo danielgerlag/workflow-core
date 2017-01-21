@@ -22,5 +22,11 @@ namespace WorkflowCore.Interface
 
             await host.PublishEvent("UserAction", actionKey, data);
         }
+
+        public static IEnumerable<OpenUserAction> GetOpenUserActions(this IWorkflowHost host, string workflowId)
+        {
+            var workflow = host.PersistenceStore.GetWorkflowInstance(workflowId).Result;
+            return workflow.GetOpenUserActions();
+        }
     }
 }

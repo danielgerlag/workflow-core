@@ -11,6 +11,8 @@ namespace WorkflowCore.Users.Models
 
         public string Prompt { get; set; }
 
+        public string AssignedPrincipal { get; set; }
+
 
     }
 }
