@@ -23,8 +23,25 @@ namespace WorkflowCore.Models
 
         public WorkflowErrorHandling? ErrorBehavior { get; set; }
 
-        public TimeSpan? RetryInterval { get; set; }
+        public TimeSpan? RetryInterval { get; set; }                
+
+        public virtual ExecutionPipelineDirective InitForExecution(IWorkflowHost host, IPersistenceProvider persistenceStore, WorkflowDefinition defintion, WorkflowInstance workflow, ExecutionPointer executionPointer)
+        {
+            return ExecutionPipelineDirective.Next;
+        }
+
+        public virtual ExecutionPipelineDirective BeforeExecute(IWorkflowHost host, IPersistenceProvider persistenceStore, IStepExecutionContext context, ExecutionPointer executionPointer, IStepBody body)
+        {
+            return ExecutionPipelineDirective.Next;
+        }
+
+        public virtual void AfterExecute(IWorkflowHost host, IPersistenceProvider persistenceStore, IStepExecutionContext context, ExecutionResult result, ExecutionPointer executionPointer)
+        {            
+        }
+
     }
+
+    public enum ExecutionPipelineDirective { Next = 0, Defer = 1 }
 
     public class WorkflowStep<TStepBody> : WorkflowStep
         where TStepBody : IStepBody 

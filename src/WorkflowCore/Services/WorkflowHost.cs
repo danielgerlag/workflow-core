@@ -76,7 +76,13 @@ namespace WorkflowCore.Services
             if ((def.DataType != null) && (data == null))
                 wf.Data = def.DataType.GetConstructor(new Type[] { }).Invoke(null);
 
-            wf.ExecutionPointers.Add(new ExecutionPointer() { StepId = def.InitialStep, Active = true, ConcurrentFork = 1 });
+            wf.ExecutionPointers.Add(new ExecutionPointer()
+            {
+                Id = Guid.NewGuid().ToString(),
+                StepId = def.InitialStep,
+                Active = true,
+                ConcurrentFork = 1
+            });
             string id = await _persistenceStore.CreateNewWorkflow(wf);
             await _queueProvider.QueueForProcessing(id);
             return id;
