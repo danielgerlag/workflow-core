@@ -13,6 +13,7 @@ PM> Install-Package WorkflowCore.Users -Pre
 ## Usage
 
 Use the .UserStep extension method when building your workflow.
+Parameter 2 is a lambda function to resolve the user or group this step will be assigned to.
 
 ```C#
 public class HumanWorkflow : IWorkflow
@@ -22,7 +23,7 @@ public class HumanWorkflow : IWorkflow
     {
         builder
             .StartWith(context => ExecutionResult.Next())
-            .UserStep("Do you approve", data => "MYDOMAIN\\user", x => x.Name("Approval Step")) //Parameter #2 is a lambda function to resolve the user or group this step will be assigned to           
+            .UserStep("Do you approve", data => "MYDOMAIN\\user", x => x.Name("Approval Step"))           
                 .When("yes", "I approve")
                     .Then(context =>
                     {
