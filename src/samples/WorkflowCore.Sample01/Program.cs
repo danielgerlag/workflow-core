@@ -19,7 +19,7 @@ namespace WorkflowCore.Sample01
             //start the workflow host
             var host = serviceProvider.GetService<IWorkflowHost>();
             host.RegisterWorkflow<HelloWorldWorkflow>();        
-            host.Start();
+            host.Start();            
 
             host.StartWorkflow("HelloWorld", 1, null);
             
@@ -32,7 +32,6 @@ namespace WorkflowCore.Sample01
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
-            services.AddWorkflow();
             //services.AddWorkflow(x => x.UseSqlServer(@"Server=.;Database=WorkflowCore;Trusted_Connection=True;"));
             
             var serviceProvider = services.BuildServiceProvider();

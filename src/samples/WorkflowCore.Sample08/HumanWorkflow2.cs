@@ -7,7 +7,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Sample08
 {
-    public class HumanWorkflow : IWorkflow
+    public class HumanWorkflow2 : IWorkflow
     {
         public string Id
         {

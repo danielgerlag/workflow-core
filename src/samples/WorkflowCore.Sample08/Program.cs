@@ -23,7 +23,7 @@ namespace WorkflowCore.Sample08
 
             string workflowId = host.StartWorkflow("HumanWorkflow").Result;
 
-            Thread.Sleep(3000);
+            Thread.Sleep(1000);
 
             Console.WriteLine("Open user actions are");
             var openItems = host.GetOpenUserActions(workflowId);
