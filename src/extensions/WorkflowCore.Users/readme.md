@@ -22,7 +22,7 @@ public class HumanWorkflow : IWorkflow
     {
         builder
             .StartWith(context => ExecutionResult.Next())
-            .UserStep("Do you approve", data => "MYDOMAIN\\user", x => x.Name("Approval Step"))            
+            .UserStep("Do you approve", data => "MYDOMAIN\\user", x => x.Name("Approval Step")) //Parameter #2 is a lambda function to resolve the user or group this step will be assigned to           
                 .When("yes", "I approve")
                     .Then(context =>
                     {
