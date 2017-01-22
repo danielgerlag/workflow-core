@@ -20,24 +20,23 @@ public class HumanWorkflow : IWorkflow
 ...
     public void Build(IWorkflowBuilder<object> builder)
     {
-        var step1 = builder.StartWith(context => ExecutionResult.Next());
-        var step2 = step1.UserStep("Do you agree", data => "MYDOMAIN\\daniel");
-        step2
-            .When("yes", "I agree")
-            .Then(context =>
-            {
-                Console.WriteLine("You agreed");
-                return ExecutionResult.Next();
-            });
-
-        step2
-            .When("no", "I do not agree")
-            .Then(context =>
-            {
-                Console.WriteLine("You did not agree");
-                return ExecutionResult.Next();
-            });
-
+        builder
+            .StartWith(context => ExecutionResult.Next())
+            .UserStep("Do you approve", data => "MYDOMAIN\\user", x => x.Name("Approval Step"))            
+                .When("yes", "I approve")
+                    .Then(context =>
+                    {
+                        Console.WriteLine("You approved");
+                        return ExecutionResult.Next();
+                    })
+                .End("Approval Step")            
+                .When("no", "I do not approve")
+                    .Then(context =>
+                    {
+                        Console.WriteLine("You did not approve");
+                        return ExecutionResult.Next();
+                    })
+                .End("Approval Step");
     }
   }
 ```
