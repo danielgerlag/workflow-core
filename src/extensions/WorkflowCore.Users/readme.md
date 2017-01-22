@@ -30,14 +30,14 @@ public class HumanWorkflow : IWorkflow
                         Console.WriteLine("You approved");
                         return ExecutionResult.Next();
                     })
-                .End("Approval Step")            
+                .End<UserStepBody>("Approval Step")            
                 .When("no", "I do not approve")
                     .Then(context =>
                     {
                         Console.WriteLine("You did not approve");
                         return ExecutionResult.Next();
                     })
-                .End("Approval Step");
+                .End<UserStepBody>("Approval Step");
     }
   }
 ```
