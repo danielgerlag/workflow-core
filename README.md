@@ -249,6 +249,22 @@ By default, the WorkflowHost service will run as a single node using the built-i
 * [0MQ](src/providers/WorkflowCore.LockProviders.ZeroMQ) *(experimental)*
 * Apache ZooKeeper *(coming soon...)*
 
+### Error handling
+
+Each step can be configured with it's own error handling behavior, it can be retried at a later time, suspend the workflow or terminate the workflow.
+
+```C#
+public void Build(IWorkflowBuilder<object> builder)
+{
+    builder                
+        .StartWith<HelloWorld>()
+            .OnError(WorkflowErrorHandling.Retry, TimeSpan.FromMinutes(10))
+        .Then<GoodbyeWorld>();
+}
+```
+
+The WorkflowHost service also has a .OnStepError event which can be used to intercept exceptions from workflow steps on a more global level.
+
 
 ## Samples
 
@@ -281,7 +297,3 @@ By default, the WorkflowHost service will run as a single node using the built-i
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
-
-## Feedback
-
-[![Feature Requests](http://feathub.com/danielgerlag/workflow-core?format=svg)](http://feathub.com/danielgerlag/workflow-core)
