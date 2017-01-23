@@ -31,11 +31,16 @@ namespace WorkflowCore.Tests.MongoDB.MongoPersistenceProviderTests
                 WorkflowDefinitionId = "My Workflow",
                 CreateTime = new DateTime(2000, 1, 1).ToUniversalTime()
             };
-            workflow.ExecutionPointers.Add(new ExecutionPointer()
+
+            var ep = new ExecutionPointer()
             {
                 Active = true,
                 StepId = 0
-            });
+            };
+
+            ep.ExtensionAttributes["Attr1"] = "test";
+            ep.ExtensionAttributes["Attr2"] = 5;
+            workflow.ExecutionPointers.Add(ep);
 
             workflowId = Subject.CreateNewWorkflow(workflow).Result;
         };

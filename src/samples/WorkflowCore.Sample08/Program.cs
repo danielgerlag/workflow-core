@@ -21,21 +21,23 @@ namespace WorkflowCore.Sample08
             host.Start();
 
 
+            Console.WriteLine("Starting workflow...");
             string workflowId = host.StartWorkflow("HumanWorkflow").Result;
 
             Thread.Sleep(1000);
-
+            Console.WriteLine();
             Console.WriteLine("Open user actions are");
             var openItems = host.GetOpenUserActions(workflowId);
             foreach (var item in openItems)
             {
                 Console.WriteLine(item.Prompt + ", Assigned to " + item.AssignedPrincipal);
-                Console.Write("Options are ");
+                Console.WriteLine("Options are ");
                 foreach (var option in item.Options)
                 {
-                    Console.Write(option.Key + " - " + option.Value + ", ");
+                    Console.WriteLine(" - " + option.Key + " : " + option.Value + ", ");
                 }
 
+                Thread.Sleep(500);
                 Console.WriteLine();
                 Console.WriteLine("Choosing " + item.Options.Last().Key);
 

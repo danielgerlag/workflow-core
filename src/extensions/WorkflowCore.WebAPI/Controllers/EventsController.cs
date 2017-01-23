@@ -18,7 +18,7 @@ namespace WorkflowCore.WebAPI.Controllers
         public EventsController(IWorkflowHost workflowHost, ILoggerFactory loggerFactory)
         {
             _workflowHost = workflowHost;
-            _logger = loggerFactory.CreateLogger<WorkflowsController>();
+            _logger = loggerFactory.CreateLogger<EventsController>();
         }
 
         [HttpPost("{eventName}/{eventKey}")]
