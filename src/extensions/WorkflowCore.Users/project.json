@@ -4,15 +4,13 @@
   "version": "1.0.3-*",
 
   "dependencies": {
-    "Microsoft.AspNetCore.Mvc.Abstractions": "1.0.1",
-    "Microsoft.AspNetCore.Mvc": "1.0.1",
     "Microsoft.Extensions.Logging.Abstractions": "1.1.0",
     "NETStandard.Library": "1.6.1",
     "WorkflowCore": "1.0.3-*"
   },
 
   "frameworks": {
-    "netstandard1.6": {
+    "netstandard1.3": {
       "imports": "dnxcore50"
     }
   },
