@@ -15,10 +15,10 @@
       "type": "platform",
       "version": "1.0.1"
     },
-    "WorkflowCore": "1.0.3-*",
-    "WorkflowCore.Persistence.MongoDB": "1.0.3-*",
-    "WorkflowCore.Persistence.PostgreSQL": "1.0.3-*",
-    "WorkflowCore.Persistence.SqlServer": "1.0.3-*"
+    "WorkflowCore": "1.0.4-*",
+    "WorkflowCore.Persistence.MongoDB": "1.0.4-*",
+    "WorkflowCore.Persistence.PostgreSQL": "1.0.4-*",
+    "WorkflowCore.Persistence.SqlServer": "1.0.4-*"
   },
 
   "frameworks": {

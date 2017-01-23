@@ -11,12 +11,12 @@
     "Microsoft.Extensions.Logging.Abstractions": "1.1.0",
     "Microsoft.Extensions.Logging.Console": "1.1.0",
     "Microsoft.Extensions.Logging.Debug": "1.1.0",
-    "WorkflowCore": "1.0.3-*",
+    "WorkflowCore": "1.0.4-*",
     "Microsoft.NETCore.App": {
       "type": "platform",
       "version": "1.0.1"
     },
-    "WorkflowCore.Persistence.MongoDB": "1.0.3-*"
+    "WorkflowCore.Persistence.MongoDB": "1.0.4-*"
   },
 
   "frameworks": {

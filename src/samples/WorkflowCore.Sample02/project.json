@@ -15,7 +15,7 @@
       "type": "platform",
       "version": "1.0.1"
     },
-    "WorkflowCore": "1.0.3-*"
+    "WorkflowCore": "1.0.4-*"
   },
 
   "frameworks": {

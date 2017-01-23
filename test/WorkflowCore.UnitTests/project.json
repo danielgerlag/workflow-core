@@ -13,7 +13,7 @@
     "Microsoft.Extensions.Logging.Debug": "1.1.0",
     "Moq": "4.6.38-alpha",
     "NETStandard.Library": "1.6.1",
-    "WorkflowCore": "1.0.3-*",
+    "WorkflowCore": "1.0.4-*",
     "WorkflowCore.TestAssets": "1.0.0-*"
   },
 
