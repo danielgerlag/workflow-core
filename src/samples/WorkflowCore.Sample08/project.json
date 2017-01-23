@@ -1,10 +1,14 @@
-{
+﻿{
   "version": "1.0.0-*",
   "buildOptions": {
     "emitEntryPoint": true
   },
 
   "dependencies": {
+    "Microsoft.Extensions.DependencyInjection": "1.1.0",
+    "Microsoft.Extensions.DependencyInjection.Abstractions": "1.1.0",
+    "Microsoft.Extensions.Logging": "1.1.0",
+    "Microsoft.Extensions.Logging.Abstractions": "1.1.0",
     "Microsoft.Extensions.Logging.Console": "1.1.0",
     "Microsoft.Extensions.Logging.Debug": "1.1.0",
     "Microsoft.NETCore.App": {
@@ -12,8 +16,8 @@
       "version": "1.0.1"
     },
     "WorkflowCore": "1.0.3-*",
-    "WorkflowCore.LockProviders.ZeroMQ": "1.0.3-*",
-    "WorkflowCore.QueueProviders.ZeroMQ": "1.0.3-*"
+    "WorkflowCore.Persistence.MongoDB": "1.0.3-*",
+    "WorkflowCore.Users": "1.0.3-*"    
   },
 
   "frameworks": {

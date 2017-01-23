@@ -43,15 +43,8 @@ namespace WorkflowCore.Services
                 {
                     try
                     {
-                        if ((step is ISubscriptionStep) && (!pointer.EventPublished))
-                        {
-                            pointer.EventKey = (step as ISubscriptionStep).EventKey;
-                            pointer.EventName = (step as ISubscriptionStep).EventName;
-                            pointer.Active = false;
-                            await persistenceStore.PersistWorkflow(workflow);
-                            await _host.SubscribeEvent(workflow.Id, pointer.StepId, pointer.EventName, pointer.EventKey);
+                        if (step.InitForExecution(_host, persistenceStore, def, workflow, pointer) == ExecutionPipelineDirective.Defer)
                             continue;
-                        }
 
                         if (!pointer.StartTime.HasValue)
                             pointer.StartTime = DateTime.Now;
@@ -93,18 +86,16 @@ namespace WorkflowCore.Services
                             var resolvedValue = input.Source.Compile().DynamicInvoke(workflow.Data);
                             step.BodyType.GetProperty(member.Member.Name).SetValue(body, resolvedValue);                            
                         }
-
-                        if ((body is ISubscriptionBody) && (pointer.EventPublished))
-                        {
-                            (body as ISubscriptionBody).EventData = pointer.EventData;
-                        }
-
+                        
                         IStepExecutionContext context = new StepExecutionContext()
                         {
                             Workflow = workflow,
                             Step = step,
                             PersistenceData = pointer.PersistenceData
                         };
+
+                        if (step.BeforeExecute(_host, persistenceStore, context, pointer, body) == ExecutionPipelineDirective.Defer)
+                            continue;
 
                         var result = body.Run(context);
                                                 
@@ -126,6 +117,7 @@ namespace WorkflowCore.Services
                             {
                                 workflow.ExecutionPointers.Add(new ExecutionPointer()
                                 {
+                                    Id = Guid.NewGuid().ToString(),
                                     StepId = outcome.NextStep,
                                     Active = true,
                                     ConcurrentFork = (forkCounter * pointer.ConcurrentFork)
@@ -141,6 +133,8 @@ namespace WorkflowCore.Services
                             if (result.SleepFor.HasValue)
                                 pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(result.SleepFor.Value);
                         }
+
+                        step.AfterExecute(_host, persistenceStore, context, result, pointer);
                     }
                     catch (Exception ex)
                     {

@@ -22,7 +22,7 @@ namespace WorkflowCore.Models
 
         public WorkflowErrorHandling DefaultErrorBehavior { get; set; }
 
-        public TimeSpan? DefaultErrorRetryInterval { get; set; }
+        public TimeSpan? DefaultErrorRetryInterval { get; set; }                
 
     }
 

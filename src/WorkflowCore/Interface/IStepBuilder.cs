@@ -8,6 +8,9 @@ namespace WorkflowCore.Interface
     public interface IStepBuilder<TData, TStepBody>
         where TStepBody : IStepBody
     {
+
+        IWorkflowBuilder<TData> WorkflowBuilder { get; }        
+
         WorkflowStep<TStepBody> Step { get; set; }
 
         /// <summary>
@@ -45,7 +48,7 @@ namespace WorkflowCore.Interface
         /// </summary>
         /// <param name="outcomeValue"></param>
         /// <returns></returns>
-        IStepOutcomeBuilder<TData> When(object outcomeValue);
+        IStepOutcomeBuilder<TData> When(object outcomeValue, string label = null);
 
         /// <summary>
         /// Map properties on the step to properties on the workflow data object before the step executes

@@ -86,6 +86,16 @@ namespace WorkflowCore.LockProviders.ZooKeeper.Services
             //return _sessions[System.Threading.Thread.CurrentThread.ManagedThreadId];
         }
 
+        public void Start()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Stop()
+        {
+            throw new NotImplementedException();
+        }
+
         ~ZooKeeperLockProvider()
         {            
         }

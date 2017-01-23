@@ -4,9 +4,9 @@
   "authors": [ "Daniel Gerlag" ],
 
   "dependencies": {
-    "NETStandard.Library": "1.6.0",
-    "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0",
-    "Microsoft.Extensions.Logging": "1.0.0",
+    "NETStandard.Library": "1.6.1",
+    "Microsoft.Extensions.DependencyInjection.Abstractions": "1.1.0",
+    "Microsoft.Extensions.Logging": "1.1.0",
     "System.Reflection": "4.3.0",
     "System.Reflection.TypeExtensions": "4.3.0",
     "System.Threading.Thread": "4.3.0",
@@ -20,7 +20,7 @@
   },
 
   "packOptions": {
-    "summary": "Workflow Core is a light weight workflow engine targeting .NET Standard 1.6.  It supports pluggable persistence and concurrency providers to allow for multi-node clusters.",
+    "summary": "Workflow Core is a light weight workflow engine targeting .NET Standard 1.3.  It supports pluggable persistence and concurrency providers to allow for multi-node clusters.",
     "tags": [ "workflow", ".NET", "Core", "state machine" ],
     "owners": [ "Daniel Gerlag" ],
     "projectUrl": "https://github.com/danielgerlag/workflow-core",

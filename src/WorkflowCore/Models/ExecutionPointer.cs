@@ -7,6 +7,8 @@ namespace WorkflowCore.Models
 {
     public class ExecutionPointer
     {
+        public string Id { get; set; }
+
         public int StepId { get; set; }
 
         public bool Active { get; set; }
@@ -32,5 +34,7 @@ namespace WorkflowCore.Models
         public bool PathTerminator { get; set; }
 
         public List<ExecutionError> Errors { get; set; } = new List<ExecutionError>();
+                
+        public Dictionary<string, object> ExtensionAttributes { get; set; } = new Dictionary<string, object>();
     }
 }

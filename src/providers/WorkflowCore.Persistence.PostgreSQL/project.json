@@ -4,7 +4,7 @@
   "version": "1.0.3-*",
 
   "dependencies": {
-    "NETStandard.Library": "1.6.0",
+    "NETStandard.Library": "1.6.1",
     "Npgsql.EntityFrameworkCore.PostgreSQL": "1.1.0",
     "WorkflowCore": "1.0.3-*",
     "WorkflowCore.Persistence.EntityFramework": "1.0.3-*",

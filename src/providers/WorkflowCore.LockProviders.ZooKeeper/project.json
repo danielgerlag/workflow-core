@@ -4,8 +4,8 @@
   "version": "1.0.0-beta6",
 
   "dependencies": {
-    "NETStandard.Library": "1.6.0",
-    "WorkflowCore": "1.0.1.*",
+    "NETStandard.Library": "1.6.1",
+    "WorkflowCore": "1.0.3.*",
     "ZooKeeperNetEx": "3.4.9.1",
     "ZooKeeperNetEx.Recipes": "3.4.9.1"
   },

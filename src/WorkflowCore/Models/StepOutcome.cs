@@ -11,5 +11,7 @@ namespace WorkflowCore.Models
         public object Value { get; set; }
         
         public int NextStep { get; set; }
+
+        public string Label { get; set; }
     }
 }

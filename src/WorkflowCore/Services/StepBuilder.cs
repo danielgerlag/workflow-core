@@ -11,13 +11,13 @@ namespace WorkflowCore.Services
     public class StepBuilder<TData, TStepBody> : IStepBuilder<TData, TStepBody>
         where TStepBody : IStepBody
     {
-        private readonly IWorkflowBuilder<TData> _workflowBuilder;
+        public IWorkflowBuilder<TData> WorkflowBuilder { get; private set; }
 
         public WorkflowStep<TStepBody> Step { get; set; }
 
         public StepBuilder(IWorkflowBuilder<TData> workflowBuilder, WorkflowStep<TStepBody> step)
         {
-            _workflowBuilder = workflowBuilder;
+            WorkflowBuilder = workflowBuilder;
             Step = step;
         }
 
@@ -31,8 +31,8 @@ namespace WorkflowCore.Services
             where TStep : IStepBody
         {
             WorkflowStep<TStep> newStep = new WorkflowStep<TStep>();
-            _workflowBuilder.AddStep(newStep);
-            var stepBuilder = new StepBuilder<TData, TStep>(_workflowBuilder, newStep);
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, TStep>(WorkflowBuilder, newStep);
 
             if (stepSetup != null)
                 stepSetup.Invoke(stepBuilder);
@@ -47,7 +47,7 @@ namespace WorkflowCore.Services
             where TStep : IStepBody
         {
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Step.Id });
-            var stepBuilder = new StepBuilder<TData, TStep>(_workflowBuilder, newStep.Step);
+            var stepBuilder = new StepBuilder<TData, TStep>(WorkflowBuilder, newStep.Step);
             return stepBuilder;
         }
 
@@ -56,18 +56,19 @@ namespace WorkflowCore.Services
         {            
             WorkflowStepInline newStep = new WorkflowStepInline();
             newStep.Body = body;
-            _workflowBuilder.AddStep(newStep);
-            var stepBuilder = new StepBuilder<TData, InlineStepBody>(_workflowBuilder, newStep);
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, InlineStepBody>(WorkflowBuilder, newStep);
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
             return stepBuilder;
         }
 
-        public IStepOutcomeBuilder<TData> When(object outcomeValue)
+        public IStepOutcomeBuilder<TData> When(object outcomeValue, string label = null)
         {
             StepOutcome result = new StepOutcome();
             result.Value = outcomeValue;
+            result.Label = label;
             Step.Outcomes.Add(result);
-            var outcomeBuilder = new StepOutcomeBuilder<TData>(_workflowBuilder, result);
+            var outcomeBuilder = new StepOutcomeBuilder<TData>(WorkflowBuilder, result);
             return outcomeBuilder;
         }
 
@@ -96,8 +97,8 @@ namespace WorkflowCore.Services
             var newStep = new SubscriptionStep<SubscriptionStepBody>();
             newStep.EventName = eventName;
             newStep.EventKey = eventKey;
-            _workflowBuilder.AddStep(newStep);
-            var stepBuilder = new StepBuilder<TData, SubscriptionStepBody>(_workflowBuilder, newStep);
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, SubscriptionStepBody>(WorkflowBuilder, newStep);
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
             return stepBuilder;
         }
@@ -112,7 +113,7 @@ namespace WorkflowCore.Services
             if (!(ancestor is WorkflowStep<TStep>))
                 throw new Exception(String.Format("Parent step of name {0} is not of type {1}", name, typeof(TStep)));
 
-            return new StepBuilder<TData, TStep>(_workflowBuilder, (ancestor as WorkflowStep<TStep>));
+            return new StepBuilder<TData, TStep>(WorkflowBuilder, (ancestor as WorkflowStep<TStep>));
         }
 
         public IStepBuilder<TData, TStepBody> OnError(WorkflowErrorHandling behavior, TimeSpan? retryInterval = null)
@@ -125,7 +126,7 @@ namespace WorkflowCore.Services
         private WorkflowStep IterateParents(int id, string name)
         {
             //todo: filter out circular paths
-            var upstream = _workflowBuilder.GetUpstreamSteps(id);
+            var upstream = WorkflowBuilder.GetUpstreamSteps(id);
             foreach (var parent in upstream)
             {
                 if (parent.Name == name)

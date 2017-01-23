@@ -3,7 +3,7 @@
   "authors": [ "Daniel Gerlag" ],  
   "version": "1.0.3-*",
   "dependencies": {
-    "NETStandard.Library": "1.6.0",
+    "NETStandard.Library": "1.6.1",
     "StackExchange.Redis": "1.1.608",
     "WorkflowCore": "1.0.3-*"
   },
