@@ -54,4 +54,5 @@ Respond to an open user action for a given workflow with the .PublishUserAction 
 host.PublishUserAction(openItems.First().Key, "MYDOMAIN\\someuser", chosenValue);
 ```
 
+[Sample App](src/samples/WorkflowCore.Sample08)
 
