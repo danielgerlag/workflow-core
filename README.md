@@ -265,6 +265,11 @@ public void Build(IWorkflowBuilder<object> builder)
 
 The WorkflowHost service also has a .OnStepError event which can be used to intercept exceptions from workflow steps on a more global level.
 
+## Extensions
+
+* [User (human) workflows](src/extensions/WorkflowCore.Users)
+* [HTTP wrapper for Workflow Host Service](src/extensions/WorkflowCore.WebAPI)
+
 
 ## Samples
 
@@ -281,6 +286,8 @@ The WorkflowHost service also has a .OnStepError event which can be used to inte
 [Looping](src/samples/WorkflowCore.Sample02)
 
 [Exposing a REST API](src/samples/WorkflowCore.Sample07)
+
+[Human(User) Workflow](src/samples/WorkflowCore.Sample08)
 
 
 ## Authors
