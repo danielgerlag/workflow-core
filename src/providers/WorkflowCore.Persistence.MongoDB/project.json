@@ -8,14 +8,15 @@
     "NETStandard.Library": "1.6.1",
     "Newtonsoft.Json": "9.0.1",
     "System.Linq.Dynamic.Core": "1.0.6.8",
-    "System.Reflection": "4.3.0",
     "WorkflowCore": "1.0.4-*"
   },
 
   "frameworks": {
     "netstandard1.3": {
-      "imports": "dnxcore50"
-    }
+      "imports": "dnxcore50",
+      "dependencies": { "System.Reflection": "4.3.0" }
+    },
+    "net452" :  {} 
   },
 
   "packOptions": {
