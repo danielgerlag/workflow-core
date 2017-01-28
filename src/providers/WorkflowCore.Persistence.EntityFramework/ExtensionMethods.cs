@@ -12,21 +12,75 @@ namespace WorkflowCore.Persistence.EntityFramework
     {
         private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
 
-        internal static PersistedWorkflow ToPersistable(this WorkflowInstance instance)
+        internal static PersistedWorkflow ToPersistable(this WorkflowInstance instance, PersistedWorkflow persistable = null)
         {
-            PersistedWorkflow result = new PersistedWorkflow();            
-            result.Data = JsonConvert.SerializeObject(instance.Data, SerializerSettings);
-            result.Description = instance.Description;
-            result.InstanceId = new Guid(instance.Id);
-            result.NextExecution = instance.NextExecution;
-            result.Version = instance.Version;
-            result.WorkflowDefinitionId = instance.WorkflowDefinitionId;
-            result.Status = instance.Status;
-            result.CreateTime = instance.CreateTime;
-            result.CompleteTime = instance.CompleteTime;
-            result.ExecutionPointers = JsonConvert.SerializeObject(instance.ExecutionPointers, SerializerSettings);
+            if (persistable == null)            
+                persistable = new PersistedWorkflow();                        
 
-            return result;
+            persistable.Data = JsonConvert.SerializeObject(instance.Data, SerializerSettings);
+            persistable.Description = instance.Description;
+            persistable.InstanceId = new Guid(instance.Id);
+            persistable.NextExecution = instance.NextExecution;
+            persistable.Version = instance.Version;
+            persistable.WorkflowDefinitionId = instance.WorkflowDefinitionId;
+            persistable.Status = instance.Status;
+            persistable.CreateTime = instance.CreateTime;
+            persistable.CompleteTime = instance.CompleteTime;
+            
+            foreach (var ep in instance.ExecutionPointers)
+            {
+                var persistedEP = persistable.ExecutionPointers.FirstOrDefault(x => x.Id == ep.Id);
+                
+                if (persistedEP == null)
+                {
+                    persistedEP = new PersistedExecutionPointer();
+                    persistable.ExecutionPointers.Add(persistedEP);
+                }
+                 
+                persistedEP.Id = ep.Id;
+                persistedEP.StepId = ep.StepId;
+                persistedEP.Active = ep.Active;
+                persistedEP.SleepUntil = ep.SleepUntil;
+                persistedEP.PersistenceData = JsonConvert.SerializeObject(ep.PersistenceData, SerializerSettings);
+                persistedEP.StartTime = ep.StartTime;
+                persistedEP.EndTime = ep.EndTime;
+                persistedEP.StepName = ep.StepName;
+                persistedEP.EventName = ep.EventName;
+                persistedEP.EventKey = ep.EventKey;
+                persistedEP.EventPublished = ep.EventPublished;
+                persistedEP.ConcurrentFork = ep.ConcurrentFork;
+                persistedEP.PathTerminator = ep.PathTerminator;
+                persistedEP.EventData = JsonConvert.SerializeObject(ep.EventData, SerializerSettings);
+
+                foreach (var attr in ep.ExtensionAttributes)
+                {
+                    var persistedAttr = persistedEP.ExtensionAttributes.FirstOrDefault(x => x.AttributeKey == attr.Key);
+                    if (persistedAttr == null)
+                    {
+                        persistedAttr = new PersistedExtensionAttribute();
+                        persistedEP.ExtensionAttributes.Add(persistedAttr);
+                    }
+
+                    persistedAttr.AttributeKey = attr.Key;
+                    persistedAttr.AttributeValue = JsonConvert.SerializeObject(attr.Value, SerializerSettings);
+                }
+
+                foreach (var err in ep.Errors)
+                {
+                    var persistedErr = persistedEP.Errors.FirstOrDefault(x => x.Id == err.Id);
+                    if (persistedErr == null)
+                    {
+                        persistedErr = new PersistedExecutionError();
+                        persistedErr.Id = err.Id;
+                        persistedErr.ErrorTime = err.ErrorTime;
+                        persistedErr.Message = err.Message;
+                        persistedEP.Errors.Add(persistedErr);
+                    }
+                }
+
+            }
+
+            return persistable;
         }
 
         internal static PersistedSubscription ToPersistable(this EventSubscription instance)
@@ -66,7 +120,43 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.Status = instance.Status;
             result.CreateTime = instance.CreateTime;
             result.CompleteTime = instance.CompleteTime;
-            result.ExecutionPointers = JsonConvert.DeserializeObject<List<ExecutionPointer>>(instance.ExecutionPointers, SerializerSettings);
+            
+            foreach (var ep in instance.ExecutionPointers)
+            {
+                var pointer = new ExecutionPointer();
+                result.ExecutionPointers.Add(pointer);
+
+                pointer.Id = ep.Id;
+                pointer.StepId = ep.StepId;
+                pointer.Active = ep.Active;
+                pointer.SleepUntil = ep.SleepUntil;
+                pointer.PersistenceData = JsonConvert.DeserializeObject(ep.PersistenceData, SerializerSettings);
+                pointer.StartTime = ep.StartTime;
+                pointer.EndTime = ep.EndTime;
+                pointer.StepName = ep.StepName;
+                pointer.EventName = ep.EventName;
+                pointer.EventKey = ep.EventKey;
+                pointer.EventPublished = ep.EventPublished;
+                pointer.ConcurrentFork = ep.ConcurrentFork;
+                pointer.PathTerminator = ep.PathTerminator;
+                pointer.EventData = JsonConvert.DeserializeObject(ep.EventData, SerializerSettings);
+
+                foreach (var attr in ep.ExtensionAttributes)
+                {
+                    pointer.ExtensionAttributes[attr.AttributeKey] = JsonConvert.DeserializeObject(attr.AttributeValue, SerializerSettings);
+                }
+
+                foreach (var err in ep.Errors)
+                {
+                    var execErr = new ExecutionError();
+                    execErr.Id = err.Id;
+                    execErr.ErrorTime = err.ErrorTime;
+                    execErr.Message = err.Message;
+                    pointer.Errors.Add(execErr);                    
+                }
+
+            }
+
 
             return result;
         }

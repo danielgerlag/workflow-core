@@ -11,7 +11,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Models
     public class PersistedWorkflow
     {
         [Key]
-        public long ClusterKey { get; set; }
+        public long PersistenceId { get; set; }
 
         [MaxLength(200)]
         public Guid InstanceId { get; set; }
@@ -24,7 +24,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Models
         [MaxLength(500)]
         public string Description { get; set; }
 
-        public string ExecutionPointers { get; set; }
+        public virtual List<PersistedExecutionPointer> ExecutionPointers { get; set; } = new List<PersistedExecutionPointer>();
 
         //[Index]
         public long? NextExecution { get; set; }

@@ -36,5 +36,8 @@ namespace WorkflowCore.Models
         public List<ExecutionError> Errors { get; set; } = new List<ExecutionError>();
                 
         public Dictionary<string, object> ExtensionAttributes { get; set; } = new Dictionary<string, object>();
+
+        public string StepName { get; set; }
+
     }
 }

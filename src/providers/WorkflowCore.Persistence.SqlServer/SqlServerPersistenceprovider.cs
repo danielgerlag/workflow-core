@@ -31,20 +31,37 @@ namespace WorkflowCore.Persistence.SqlServer
         protected override void ConfigureSubscriptionStorage(EntityTypeBuilder<PersistedSubscription> builder)
         {
             builder.ForSqlServerToTable("Subscription", "wfc");
-            builder.Property(x => x.ClusterKey).UseSqlServerIdentityColumn();
+            builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
         }
 
         protected override void ConfigureWorkflowStorage(EntityTypeBuilder<PersistedWorkflow> builder)
         {
             builder.ForSqlServerToTable("Workflow", "wfc");
-            builder.Property(x => x.ClusterKey).UseSqlServerIdentityColumn();
+            builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
         }
         
         protected override void ConfigurePublicationStorage(EntityTypeBuilder<PersistedPublication> builder)
         {
             builder.ForSqlServerToTable("UnpublishedEvent", "wfc");
-            builder.Property(x => x.ClusterKey).UseSqlServerIdentityColumn();
+            builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
         }
-                
+
+        protected override void ConfigureExecutionPointerStorage(EntityTypeBuilder<PersistedExecutionPointer> builder)
+        {
+            builder.ForSqlServerToTable("ExecutionPointer", "wfc");
+            builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
+        }
+
+        protected override void ConfigureExecutionErrorStorage(EntityTypeBuilder<PersistedExecutionError> builder)
+        {
+            builder.ForSqlServerToTable("ExecutionError", "wfc");
+            builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
+        }
+
+        protected override void ConfigureExetensionAttributeStorage(EntityTypeBuilder<PersistedExtensionAttribute> builder)
+        {
+            builder.ForSqlServerToTable("ExtensionAttribute", "wfc");
+            builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
+        }
     }
 }

@@ -7,12 +7,17 @@ using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Persistence.MongoDB.Services;
+using WorkflowCore.TestAssets.Persistence;
 
 namespace WorkflowCore.Tests.MongoDB.MongoPersistenceProviderTests
 {
     [Subject(typeof(MongoPersistenceProvider))]
     public class CreateNewWorkflow
     {
+        protected static IPersistenceProvider Subject;
+        protected static WorkflowInstance workflow;
+        protected static string workflowId;
+
         Establish context = () =>
         {
             var client = new MongoClient("mongodb://localhost:" + DockerSetup.Port);
@@ -37,17 +42,8 @@ namespace WorkflowCore.Tests.MongoDB.MongoPersistenceProviderTests
 
         Because of = () => workflowId = Subject.CreateNewWorkflow(workflow).Result;
 
-        It should_return_a_generated_id = () => workflowId.ShouldNotBeNull();
-        It should_set_id_on_object = () => workflow.Id.ShouldNotBeNull();
-
-        Cleanup after = () =>
-        {
-        };
-
-        static IPersistenceProvider Subject;
-        static WorkflowInstance workflow;
-        static string workflowId;
-
+        Behaves_like<CreateNewWorkflowBehaviors> a_new_workflow;
+        
 
     }
 }

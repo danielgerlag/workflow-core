@@ -28,21 +28,38 @@ namespace WorkflowCore.Persistence.PostgreSQL
         protected override void ConfigureSubscriptionStorage(EntityTypeBuilder<PersistedSubscription> builder)
         {
             builder.ForNpgsqlToTable("Subscription", "wfc");
-            builder.Property(x => x.ClusterKey).ValueGeneratedOnAdd();
+            builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
 
         protected override void ConfigureWorkflowStorage(EntityTypeBuilder<PersistedWorkflow> builder)
         {
             builder.ForNpgsqlToTable("Workflow", "wfc");
-            builder.Property(x => x.ClusterKey).ValueGeneratedOnAdd();
+            builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
         
         protected override void ConfigurePublicationStorage(EntityTypeBuilder<PersistedPublication> builder)
         {
             builder.ForNpgsqlToTable("UnpublishedEvent", "wfc");
-            builder.Property(x => x.ClusterKey).ValueGeneratedOnAdd();
+            builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
-                
+
+        protected override void ConfigureExecutionPointerStorage(EntityTypeBuilder<PersistedExecutionPointer> builder)
+        {
+            builder.ForNpgsqlToTable("ExecutionPointer", "wfc");
+            builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
+        }
+
+        protected override void ConfigureExecutionErrorStorage(EntityTypeBuilder<PersistedExecutionError> builder)
+        {
+            builder.ForNpgsqlToTable("ExecutionError", "wfc");
+            builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
+        }
+
+        protected override void ConfigureExetensionAttributeStorage(EntityTypeBuilder<PersistedExtensionAttribute> builder)
+        {
+            builder.ForNpgsqlToTable("ExtensionAttribute", "wfc");
+            builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
+        }
     }
 }
 

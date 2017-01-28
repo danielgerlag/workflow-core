@@ -9,12 +9,19 @@ using WorkflowCore.Models;
 using WorkflowCore.Persistence.MongoDB.Services;
 using WorkflowCore.Services;
 using WorkflowCore.TestAssets;
+using WorkflowCore.TestAssets.Persistence;
 
 namespace WorkflowCore.Tests.MongoDB.MongoPersistenceProviderTests
 {    
     [Subject(typeof(MongoPersistenceProvider))]    
     public class GetWorkflowInstance
     {
+        protected static IPersistenceProvider Subject;
+        protected static WorkflowInstance workflow;
+        protected static WorkflowInstance retrievedWorkflow;
+        protected static string workflowId;
+
+
         Establish context = () =>
         {
             var client = new MongoClient("mongodb://localhost:" + DockerSetup.Port);
@@ -47,10 +54,7 @@ namespace WorkflowCore.Tests.MongoDB.MongoPersistenceProviderTests
 
         Because of = () => retrievedWorkflow = Subject.GetWorkflowInstance(workflowId).Result;
 
-        It should_match_the_original = () =>
-        {            
-            Utils.CompareObjects(workflow, retrievedWorkflow).ShouldBeTrue();
-        };
+        Behaves_like<GetWorkflowInstanceBehaviors> get_workflow_instance;
 
         Cleanup after = () =>
         {
@@ -59,12 +63,7 @@ namespace WorkflowCore.Tests.MongoDB.MongoPersistenceProviderTests
             retrievedWorkflow = null;
             workflowId = null;
         };
-
-        static IPersistenceProvider Subject;
-        static WorkflowInstance workflow;
-        static WorkflowInstance retrievedWorkflow;
-        static string workflowId;
-
+                
 
     }
 }
