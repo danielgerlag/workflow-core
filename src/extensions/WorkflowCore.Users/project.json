@@ -1,12 +1,12 @@
 ﻿{
   "title": "Workflow Core extensions for human workflow",
   "authors": [ "Daniel Gerlag" ],
-  "version": "1.0.4-*",
+  "version": "1.0.5-*",
 
   "dependencies": {
     "Microsoft.Extensions.Logging.Abstractions": "1.1.0",
     "NETStandard.Library": "1.6.1",
-    "WorkflowCore": "1.0.4-*"
+    "WorkflowCore": "1.0.5-*"
   },
 
   "frameworks": {

@@ -10,7 +10,7 @@
     "Machine.Specifications.Should": "0.11.0",
     "Moq": "4.6.38-alpha",
     "Newtonsoft.Json": "9.0.1",
-    "WorkflowCore": "1.0.4-*"
+    "WorkflowCore": "1.0.5-*"
   },
 
   "frameworks": {

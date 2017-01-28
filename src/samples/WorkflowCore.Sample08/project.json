@@ -15,13 +15,13 @@
       "type": "platform",
       "version": "1.0.1"
     },
-    "WorkflowCore": "1.0.4-*",
-    "WorkflowCore.Persistence.EntityFramework": "1.0.4-*",
-    "WorkflowCore.Persistence.MongoDB": "1.0.4-*",
-    "WorkflowCore.Persistence.PostgreSQL": "1.0.4-*",
-    "WorkflowCore.Persistence.Sqlite": "1.0.4-*",
-    "WorkflowCore.Persistence.SqlServer": "1.0.4-*",
-    "WorkflowCore.Users": "1.0.4-*"    
+    "WorkflowCore": "1.0.5-*",
+    "WorkflowCore.Persistence.EntityFramework": "1.0.5-*",
+    "WorkflowCore.Persistence.MongoDB": "1.0.5-*",
+    "WorkflowCore.Persistence.PostgreSQL": "1.0.5-*",
+    "WorkflowCore.Persistence.Sqlite": "1.0.5-*",
+    "WorkflowCore.Persistence.SqlServer": "1.0.5-*",
+    "WorkflowCore.Users": "1.0.5-*"    
   },
 
   "frameworks": {

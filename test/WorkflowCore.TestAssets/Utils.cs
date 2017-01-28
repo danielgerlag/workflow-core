@@ -15,6 +15,9 @@ namespace WorkflowCore.TestAssets
             string strA = JsonConvert.SerializeObject(objectA, SerializerSettings);
             string strB = JsonConvert.SerializeObject(objectB, SerializerSettings);
 
+            Console.WriteLine("A = " + strA);
+            Console.WriteLine("B = " + strB);
+
             return (strA == strB);
         }
 

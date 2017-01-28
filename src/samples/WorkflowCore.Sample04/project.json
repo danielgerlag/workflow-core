@@ -15,15 +15,15 @@
       "type": "platform",
       "version": "1.0.1"
     },
-    "WorkflowCore": "1.0.4-*",
-    "WorkflowCore.LockProviders.Redlock": "1.0.4-*",
-    "WorkflowCore.LockProviders.ZeroMQ": "1.0.4-*",
-    "WorkflowCore.Persistence.MongoDB": "1.0.4-*",
-    "WorkflowCore.Persistence.PostgreSQL": "1.0.4-*",
-    "WorkflowCore.Persistence.Sqlite": "1.0.4-*",
-    "WorkflowCore.Persistence.SqlServer": "1.0.4-*",
-    "WorkflowCore.QueueProviders.RabbitMQ": "1.0.4-*",
-    "WorkflowCore.QueueProviders.ZeroMQ": "1.0.4-*"
+    "WorkflowCore": "1.0.5-*",
+    "WorkflowCore.LockProviders.Redlock": "1.0.5-*",
+    "WorkflowCore.LockProviders.ZeroMQ": "1.0.5-*",
+    "WorkflowCore.Persistence.MongoDB": "1.0.5-*",
+    "WorkflowCore.Persistence.PostgreSQL": "1.0.5-*",
+    "WorkflowCore.Persistence.Sqlite": "1.0.5-*",
+    "WorkflowCore.Persistence.SqlServer": "1.0.5-*",
+    "WorkflowCore.QueueProviders.RabbitMQ": "1.0.5-*",
+    "WorkflowCore.QueueProviders.ZeroMQ": "1.0.5-*"
   },
 
   "frameworks": {

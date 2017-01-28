@@ -12,10 +12,10 @@
     "Microsoft.Extensions.Logging.Debug": "1.1.0",
     "Moq": "4.6.38-alpha",
     "NETStandard.Library": "1.6.1",
-    "WorkflowCore": "1.0.4-*",
+    "WorkflowCore": "1.0.5-*",
     "WorkflowCore.TestAssets": "1.0.0-*",
     "Microsoft.Extensions.Logging.Console": "1.1.0",
-    "WorkflowCore.Users": "1.0.4-*"
+    "WorkflowCore.Users": "1.0.5-*"
   },
 
   "frameworks": {
