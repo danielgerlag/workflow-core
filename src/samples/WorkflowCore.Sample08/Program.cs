@@ -54,8 +54,10 @@ namespace WorkflowCore.Sample08
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
             services.AddWorkflow();
-            //services.AddWorkflow(x => x.UseMongoDB(@"mongodb://localhost:27017", "workflow"));
-            
+            //services.AddWorkflow(x => x.UseMongoDB(@"mongodb://localhost:27017", "workflow3"));
+            //services.AddWorkflow(x => x.UseSqlServer(@"Server=.;Database=WorkflowCore3;Trusted_Connection=True;", true, true));            
+            //services.AddWorkflow(x => x.UseSqlite(@"Data Source=database2.db;", true));            
+
 
             var serviceProvider = services.BuildServiceProvider();
 

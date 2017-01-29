@@ -1,13 +1,13 @@
 {
   "title": "Workflow Core PostgreSQL Persistence Provider",
   "authors": [ "Daniel Gerlag" ],
-  "version": "1.0.4-*",
+  "version": "1.0.5-*",
 
   "dependencies": {
     "NETStandard.Library": "1.6.1",
     "Npgsql.EntityFrameworkCore.PostgreSQL": "1.1.0",
-    "WorkflowCore": "1.0.4-*",
-    "WorkflowCore.Persistence.EntityFramework": "1.0.4-*",
+    "WorkflowCore": "1.0.5-*",
+    "WorkflowCore.Persistence.EntityFramework": "1.0.5-*",
     "Microsoft.EntityFrameworkCore.Tools": {
       "version": "1.1.0-preview4-final",
       "type": "build"

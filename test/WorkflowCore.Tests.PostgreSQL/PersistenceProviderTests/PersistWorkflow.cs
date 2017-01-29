@@ -30,6 +30,7 @@ namespace WorkflowCore.Tests.PostgreSQL.PersistenceProviderTests
             };
             oldWorkflow.ExecutionPointers.Add(new ExecutionPointer()
             {
+                Id = Guid.NewGuid().ToString(),
                 Active = true,
                 StepId = 0
             });
@@ -38,7 +39,7 @@ namespace WorkflowCore.Tests.PostgreSQL.PersistenceProviderTests
 
             newWorkflow = Utils.DeepCopy(oldWorkflow);
             newWorkflow.NextExecution = 7;
-            newWorkflow.ExecutionPointers.Add(new ExecutionPointer() { Active = true, StepId = 1 });
+            newWorkflow.ExecutionPointers.Add(new ExecutionPointer() { Id = Guid.NewGuid().ToString(), Active = true, StepId = 1 });
         };
 
         Because of = () => Subject.PersistWorkflow(newWorkflow).Wait();

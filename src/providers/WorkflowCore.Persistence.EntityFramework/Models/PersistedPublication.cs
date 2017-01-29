@@ -9,7 +9,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Models
     public class PersistedPublication
     {
         [Key]
-        public long ClusterKey { get; set; }
+        public long PersistenceId { get; set; }
 
         public Guid PublicationId { get; set; }
 

@@ -10,7 +10,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Models
     public class PersistedSubscription
     {
         [Key]
-        public long ClusterKey { get; set; }
+        public long PersistenceId { get; set; }
 
         [MaxLength(200)]
         public Guid SubscriptionId { get; set; }

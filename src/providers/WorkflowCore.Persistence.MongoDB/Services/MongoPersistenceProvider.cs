@@ -52,7 +52,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                     .SetIdGenerator(new StringObjectIdGenerator());
                 x.MapProperty(y => y.EventName);
                 x.MapProperty(y => y.EventKey);
-                x.MapProperty(y => y.StepId);
+                x.MapProperty(y => y.StepId);                
                 x.MapProperty(y => y.WorkflowId);
             });
         }

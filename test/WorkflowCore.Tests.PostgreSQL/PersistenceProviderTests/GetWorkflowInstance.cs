@@ -30,12 +30,12 @@ namespace WorkflowCore.Tests.PostgreSQL.PersistenceProviderTests
             };
             var ep = new ExecutionPointer()
             {
+                Id = Guid.NewGuid().ToString(),
                 Active = true,
                 StepId = 0
             };
 
-            ep.ExtensionAttributes["Attr1"] = "test";
-            ep.ExtensionAttributes["Attr2"] = 5;
+            ep.ExtensionAttributes["Attr1"] = "test";            
             workflow.ExecutionPointers.Add(ep);
 
             workflowId = Subject.CreateNewWorkflow(workflow).Result;

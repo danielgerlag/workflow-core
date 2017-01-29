@@ -9,12 +9,17 @@ using WorkflowCore.Models;
 using WorkflowCore.Persistence.MongoDB.Services;
 using WorkflowCore.Services;
 using WorkflowCore.TestAssets;
+using WorkflowCore.TestAssets.Persistence;
 
 namespace WorkflowCore.Tests.MongoDB.MongoPersistenceProviderTests
 {    
     [Subject(typeof(MongoPersistenceProvider))]    
     public class PersistWorkflow
     {
+        protected static IPersistenceProvider Subject;
+        protected static WorkflowInstance newWorkflow;
+        protected static string workflowId;
+
         Establish context = () =>
         {
             var client = new MongoClient("mongodb://localhost:" + DockerSetup.Port);
@@ -33,6 +38,7 @@ namespace WorkflowCore.Tests.MongoDB.MongoPersistenceProviderTests
             };
             oldWorkflow.ExecutionPointers.Add(new ExecutionPointer()
             {
+                Id = Guid.NewGuid().ToString(),
                 Active = true,
                 StepId = 0
             });
@@ -41,16 +47,12 @@ namespace WorkflowCore.Tests.MongoDB.MongoPersistenceProviderTests
 
             newWorkflow = Utils.DeepCopy(oldWorkflow);
             newWorkflow.NextExecution = 7;
-            newWorkflow.ExecutionPointers.Add(new ExecutionPointer() { Active = true, StepId = 1 });
+            newWorkflow.ExecutionPointers.Add(new ExecutionPointer() { Id = Guid.NewGuid().ToString(), Active = true, StepId = 1 });
         };
 
         Because of = () => Subject.PersistWorkflow(newWorkflow).Wait();
 
-        It should_store_the_difference = () =>
-        {
-            var oldWorkflow = Subject.GetWorkflowInstance(workflowId).Result;
-            Utils.CompareObjects(oldWorkflow, newWorkflow).ShouldBeTrue();
-        };
+        Behaves_like<PersistWorkflowBehaviors> persist_workflow;
 
         Cleanup after = () =>
         {
@@ -58,11 +60,7 @@ namespace WorkflowCore.Tests.MongoDB.MongoPersistenceProviderTests
             newWorkflow = null;            
             workflowId = null;
         };
-
-        static IPersistenceProvider Subject;        
-        static WorkflowInstance newWorkflow;
-        static string workflowId;
-
+        
 
     }
 }

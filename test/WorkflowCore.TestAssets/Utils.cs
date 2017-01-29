@@ -14,7 +14,7 @@ namespace WorkflowCore.TestAssets
         {
             string strA = JsonConvert.SerializeObject(objectA, SerializerSettings);
             string strB = JsonConvert.SerializeObject(objectB, SerializerSettings);
-
+            
             return (strA == strB);
         }
 

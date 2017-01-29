@@ -83,7 +83,8 @@ namespace WorkflowCore.Services
                 Id = Guid.NewGuid().ToString(),
                 StepId = def.InitialStep,
                 Active = true,
-                ConcurrentFork = 1
+                ConcurrentFork = 1,
+                StepName = def.Steps.First(x => x.Id == def.InitialStep).Name
             });
             string id = await PersistenceStore.CreateNewWorkflow(wf);
             await QueueProvider.QueueForProcessing(id);
@@ -401,6 +402,7 @@ namespace WorkflowCore.Services
         {
             if (LockProvider.AcquireLock(workflowId).Result)
             {
+                bool requeue = false;
                 try
                 {
                     var wf = await PersistenceStore.GetWorkflowInstance(workflowId);
@@ -408,7 +410,7 @@ namespace WorkflowCore.Services
                     {
                         wf.Status = WorkflowStatus.Runnable;
                         await PersistenceStore.PersistWorkflow(wf);
-                        await QueueProvider.QueueForProcessing(workflowId);
+                        requeue = true;
                         return true;
                     }
                     return false;
@@ -416,7 +418,9 @@ namespace WorkflowCore.Services
                 finally
                 {
                     await LockProvider.ReleaseLock(workflowId);
-                }
+                    if (requeue)
+                        await QueueProvider.QueueForProcessing(workflowId);
+                }                
             }
             return false;
         }

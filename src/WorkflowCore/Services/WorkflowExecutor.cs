@@ -73,6 +73,7 @@ namespace WorkflowCore.Services
                                 pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(options.ErrorRetryInterval);
                                 pointer.Errors.Add(new ExecutionError()
                                 {
+                                    Id = Guid.NewGuid().ToString(),
                                     ErrorTime = DateTime.Now.ToUniversalTime(),
                                     Message = String.Format("Unable to construct step body {0}", step.BodyType.ToString())
                                 });
@@ -120,7 +121,8 @@ namespace WorkflowCore.Services
                                     Id = Guid.NewGuid().ToString(),
                                     StepId = outcome.NextStep,
                                     Active = true,
-                                    ConcurrentFork = (forkCounter * pointer.ConcurrentFork)
+                                    ConcurrentFork = (forkCounter * pointer.ConcurrentFork),
+                                    StepName = def.Steps.First(x => x.Id == outcome.NextStep).Name
                                 });
                                 noOutcomes = false;
                                 forkCounter++;
@@ -141,6 +143,7 @@ namespace WorkflowCore.Services
                         _logger.LogError("Workflow {0} raised error on step {1} Message: {2}", workflow.Id, pointer.StepId, ex.Message);
                         pointer.Errors.Add(new ExecutionError()
                         {
+                            Id = Guid.NewGuid().ToString(),
                             ErrorTime = DateTime.Now.ToUniversalTime(),
                             Message = ex.Message
                         });

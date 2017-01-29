@@ -17,9 +17,107 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                 .HasAnnotation("ProductVersion", "1.1.0-rtm-22752")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionError", b =>
+                {
+                    b.Property<long>("PersistenceId")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("ErrorTime");
+
+                    b.Property<long>("ExecutionPointerId");
+
+                    b.Property<string>("Id")
+                        .HasMaxLength(50);
+
+                    b.Property<string>("Message");
+
+                    b.HasKey("PersistenceId");
+
+                    b.HasIndex("ExecutionPointerId");
+
+                    b.ToTable("PersistedExecutionError");
+
+                    b.HasAnnotation("SqlServer:Schema", "wfc");
+
+                    b.HasAnnotation("SqlServer:TableName", "ExecutionError");
+                });
+
+            modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", b =>
+                {
+                    b.Property<long>("PersistenceId")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Active");
+
+                    b.Property<int>("ConcurrentFork");
+
+                    b.Property<DateTime?>("EndTime");
+
+                    b.Property<string>("EventData");
+
+                    b.Property<string>("EventKey");
+
+                    b.Property<string>("EventName");
+
+                    b.Property<bool>("EventPublished");
+
+                    b.Property<string>("Id")
+                        .HasMaxLength(50);
+
+                    b.Property<bool>("PathTerminator");
+
+                    b.Property<string>("PersistenceData");
+
+                    b.Property<DateTime?>("SleepUntil");
+
+                    b.Property<DateTime?>("StartTime");
+
+                    b.Property<int>("StepId");
+
+                    b.Property<string>("StepName");
+
+                    b.Property<long>("WorkflowId");
+
+                    b.HasKey("PersistenceId");
+
+                    b.HasIndex("WorkflowId");
+
+                    b.ToTable("PersistedExecutionPointer");
+
+                    b.HasAnnotation("SqlServer:Schema", "wfc");
+
+                    b.HasAnnotation("SqlServer:TableName", "ExecutionPointer");
+                });
+
+            modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExtensionAttribute", b =>
+                {
+                    b.Property<long>("PersistenceId")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("AttributeKey")
+                        .HasMaxLength(100);
+
+                    b.Property<string>("AttributeValue");
+
+                    b.Property<long>("ExecutionPointerId");
+
+                    b.HasKey("PersistenceId");
+
+                    b.HasIndex("ExecutionPointerId");
+
+                    b.ToTable("PersistedExtensionAttribute");
+
+                    b.HasAnnotation("SqlServer:Schema", "wfc");
+
+                    b.HasAnnotation("SqlServer:TableName", "ExtensionAttribute");
+                });
+
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedPublication", b =>
                 {
-                    b.Property<long>("ClusterKey")
+                    b.Property<long>("PersistenceId")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -38,7 +136,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                     b.Property<string>("WorkflowId")
                         .HasMaxLength(200);
 
-                    b.HasKey("ClusterKey");
+                    b.HasKey("PersistenceId");
 
                     b.HasIndex("PublicationId")
                         .IsUnique();
@@ -52,7 +150,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedSubscription", b =>
                 {
-                    b.Property<long>("ClusterKey")
+                    b.Property<long>("PersistenceId")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -70,7 +168,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                     b.Property<string>("WorkflowId")
                         .HasMaxLength(200);
 
-                    b.HasKey("ClusterKey");
+                    b.HasKey("PersistenceId");
 
                     b.HasIndex("EventKey");
 
@@ -88,7 +186,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedWorkflow", b =>
                 {
-                    b.Property<long>("ClusterKey")
+                    b.Property<long>("PersistenceId")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -100,8 +198,6 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
                     b.Property<string>("Description")
                         .HasMaxLength(500);
-
-                    b.Property<string>("ExecutionPointers");
 
                     b.Property<Guid>("InstanceId")
                         .HasMaxLength(200);
@@ -115,7 +211,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                     b.Property<string>("WorkflowDefinitionId")
                         .HasMaxLength(200);
 
-                    b.HasKey("ClusterKey");
+                    b.HasKey("PersistenceId");
 
                     b.HasIndex("InstanceId")
                         .IsUnique();
@@ -127,6 +223,30 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                     b.HasAnnotation("SqlServer:Schema", "wfc");
 
                     b.HasAnnotation("SqlServer:TableName", "Workflow");
+                });
+
+            modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionError", b =>
+                {
+                    b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", "ExecutionPointer")
+                        .WithMany("Errors")
+                        .HasForeignKey("ExecutionPointerId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", b =>
+                {
+                    b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedWorkflow", "Workflow")
+                        .WithMany("ExecutionPointers")
+                        .HasForeignKey("WorkflowId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExtensionAttribute", b =>
+                {
+                    b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", "ExecutionPointer")
+                        .WithMany("ExtensionAttributes")
+                        .HasForeignKey("ExecutionPointerId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
         }
     }
