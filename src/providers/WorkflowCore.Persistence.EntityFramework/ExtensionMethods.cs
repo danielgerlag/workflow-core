@@ -37,7 +37,7 @@ namespace WorkflowCore.Persistence.EntityFramework
                     persistable.ExecutionPointers.Add(persistedEP);
                 }
                  
-                persistedEP.Id = ep.Id;
+                persistedEP.Id = ep.Id ?? Guid.NewGuid().ToString(); 
                 persistedEP.StepId = ep.StepId;
                 persistedEP.Active = ep.Active;
                 persistedEP.SleepUntil = ep.SleepUntil;
@@ -71,7 +71,7 @@ namespace WorkflowCore.Persistence.EntityFramework
                     if (persistedErr == null)
                     {
                         persistedErr = new PersistedExecutionError();
-                        persistedErr.Id = err.Id;
+                        persistedErr.Id = err.Id ?? Guid.NewGuid().ToString();
                         persistedErr.ErrorTime = err.ErrorTime;
                         persistedErr.Message = err.Message;
                         persistedEP.Errors.Add(persistedErr);

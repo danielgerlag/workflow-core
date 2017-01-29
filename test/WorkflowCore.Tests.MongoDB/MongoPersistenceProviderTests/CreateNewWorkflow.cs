@@ -35,6 +35,7 @@ namespace WorkflowCore.Tests.MongoDB.MongoPersistenceProviderTests
             };
             workflow.ExecutionPointers.Add(new ExecutionPointer()
             {
+                Id = Guid.NewGuid().ToString(),
                 Active = true,
                 StepId = 0
             });

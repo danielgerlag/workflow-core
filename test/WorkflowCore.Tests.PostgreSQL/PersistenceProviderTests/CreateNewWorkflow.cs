@@ -27,6 +27,7 @@ namespace WorkflowCore.Tests.PostgreSQL.PersistenceProviderTests
             };
             workflow.ExecutionPointers.Add(new ExecutionPointer()
             {
+                Id = Guid.NewGuid().ToString(),
                 Active = true,
                 StepId = 0
             });
