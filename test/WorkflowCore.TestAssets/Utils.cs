@@ -12,6 +12,7 @@ namespace WorkflowCore.TestAssets
 
         public static bool CompareObjects(object objectA, object objectB)
         {
+            //TODO: Change to use FluentAssertions
             string strA = JsonConvert.SerializeObject(objectA, SerializerSettings);
             string strB = JsonConvert.SerializeObject(objectB, SerializerSettings);
             
