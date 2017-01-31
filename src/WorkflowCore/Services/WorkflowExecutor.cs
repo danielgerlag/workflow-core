@@ -28,6 +28,7 @@ namespace WorkflowCore.Services
 
         public async Task Execute(WorkflowInstance workflow, IPersistenceProvider persistenceStore, WorkflowOptions options)
         {
+            //TODO: split this method up
             List<ExecutionPointer> exePointers = new List<ExecutionPointer>(workflow.ExecutionPointers.Where(x => x.Active && (!x.SleepUntil.HasValue || x.SleepUntil < DateTime.Now.ToUniversalTime())));
             var def = _registry.GetDefinition(workflow.WorkflowDefinitionId, workflow.Version);
             if (def == null)
