@@ -8,9 +8,7 @@ namespace WorkflowCore.Interface
 {
     /// <remarks>
     /// The implemention of this interface will be responsible for
-    /// persisiting running workflow instances to a durable store
-    /// It also provides a (distributed) queueing mechanism to manage in flight workflows
-    /// and a distributed locking mechanism (todo)
+    /// persisiting running workflow instances to a durable store    
     /// </remarks>
     public interface IPersistenceProvider
     {
