@@ -15,6 +15,7 @@ using WorkflowCore.QueueProviders.ZeroMQ.Models;
 
 namespace WorkflowCore.QueueProviders.ZeroMQ.Services
 {
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public class ZeroMQProvider : IQueueProvider
     {
         private ILogger _logger;
@@ -134,4 +135,5 @@ namespace WorkflowCore.QueueProviders.ZeroMQ.Services
         }
         
     }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }

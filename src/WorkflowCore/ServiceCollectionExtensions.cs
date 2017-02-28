@@ -22,9 +22,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IDistributedLockProvider>(options.LockFactory);
             services.AddSingleton<IWorkflowRegistry, WorkflowRegistry>();
             services.AddSingleton<WorkflowOptions>(options);
-
             services.AddSingleton<IWorkflowHost, WorkflowHost>();
-
             services.AddTransient<IWorkflowExecutor, WorkflowExecutor>();
             services.AddTransient<IWorkflowBuilder, WorkflowBuilder>();
             services.AddTransient<IWorkflowThread, WorkflowThread>();

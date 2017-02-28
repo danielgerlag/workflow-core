@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <AssemblyTitle>Workflow Core RabbitMQ queue provider</AssemblyTitle>
-    <VersionPrefix>1.0.5</VersionPrefix>
+    <VersionPrefix>1.1.0</VersionPrefix>
     <Authors>Daniel Gerlag</Authors>
     <TargetFrameworks>netstandard1.3;net452</TargetFrameworks>
     <AssemblyName>WorkflowCore.QueueProviders.RabbitMQ</AssemblyName>
