@@ -27,7 +27,7 @@
   <ItemGroup>
     <PackageReference Include="MongoDB.Driver" Version="2.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.6.8" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.6.10" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">

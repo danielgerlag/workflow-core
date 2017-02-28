@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NetMQ" Version="4.0.0-rc5" />
+    <PackageReference Include="NetMQ" Version="4.0.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
   </ItemGroup>
 

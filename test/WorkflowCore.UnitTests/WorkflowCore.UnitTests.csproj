@@ -18,9 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20170106-08" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <PackageReference Include="dotnet-test-mspec" Version="0.2.0" />
-    <PackageReference Include="FluentAssertions" Version="4.17.0" />
+    <PackageReference Include="FluentAssertions" Version="4.19.0" />
     <PackageReference Include="Machine.Fakes" Version="2.8.0-beta3" />
     <PackageReference Include="Machine.Fakes.Moq" Version="2.8.0-beta3" />
     <PackageReference Include="Machine.Specifications" Version="0.11.0" />
@@ -28,7 +28,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.1.0" />
-    <PackageReference Include="Moq" Version="4.6.38-alpha" />
+    <PackageReference Include="Moq" Version="4.7.1" />
   </ItemGroup>
 
 </Project>
