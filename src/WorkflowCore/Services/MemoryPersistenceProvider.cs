@@ -8,6 +8,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services
 {
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     /// <summary>
     /// In-memory implementation of IPersistenceProvider for demo and testing purposes
     /// </summary>
@@ -17,6 +18,7 @@ namespace WorkflowCore.Services
         private static List<WorkflowInstance> _instances = new List<WorkflowInstance>();
         private static List<EventSubscription> _subscriptions = new List<EventSubscription>();
         private static List<EventPublication> _unpublishedEvents = new List<EventPublication>();
+
 
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
         {
@@ -103,4 +105,5 @@ namespace WorkflowCore.Services
             return _unpublishedEvents;
         }
     }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }

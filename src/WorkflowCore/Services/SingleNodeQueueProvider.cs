@@ -9,6 +9,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services
 {
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     /// <summary>
     /// Single node in-memory implementation of IQueueProvider
     /// </summary>
@@ -59,8 +60,7 @@ namespace WorkflowCore.Services
 
         public void Dispose()
         {            
-        }
-
-        
+        }        
     }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }

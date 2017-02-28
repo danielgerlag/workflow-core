@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace WorkflowCore.Persistence.EntityFramework.Services
 {
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public abstract class EntityFrameworkPersistenceProvider : DbContext, IPersistenceProvider
     {
         protected readonly bool _canCreateDB;
@@ -265,4 +266,5 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
         }
                 
     }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }

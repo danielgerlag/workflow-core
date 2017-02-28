@@ -13,6 +13,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Persistence.MongoDB.Services
 {
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public class MongoPersistenceProvider : IPersistenceProvider
     {
 
@@ -172,4 +173,5 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             await UnpublishedEvents.DeleteOneAsync(x => x.Id == id);
         }
     }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }

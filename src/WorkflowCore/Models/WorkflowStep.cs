@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 
@@ -37,6 +38,19 @@ namespace WorkflowCore.Models
 
         public virtual void AfterExecute(IWorkflowHost host, IPersistenceProvider persistenceStore, IStepExecutionContext context, ExecutionResult result, ExecutionPointer executionPointer)
         {            
+        }
+
+        public virtual IStepBody ConstructBody(IServiceProvider serviceProvider)
+        {
+            IStepBody body = (serviceProvider.GetService(BodyType) as IStepBody);
+            if (body == null)
+            {
+                var stepCtor = BodyType.GetConstructor(new Type[] { });
+                if (stepCtor != null)
+                    body = (stepCtor.Invoke(null) as IStepBody);
+            }
+
+            return body;
         }
 
     }
