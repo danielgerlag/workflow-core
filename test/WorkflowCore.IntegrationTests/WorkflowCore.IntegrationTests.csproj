@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Machine.Specifications.Runner.Console" Version="0.9.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <PackageReference Include="dotnet-test-mspec" Version="0.2.0" />
     <PackageReference Include="FluentAssertions" Version="4.19.0" />

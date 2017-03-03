@@ -52,13 +52,13 @@ namespace WorkflowCore.Models
             };
         }
 
-        public static ExecutionResult Sleep(TimeSpan duration, object value)
+        public static ExecutionResult Sleep(TimeSpan duration, object persistenceData)
         {
             return new ExecutionResult()
             {
                 Proceed = false,
                 SleepFor = duration,
-                OutcomeValue = value
+                PersistenceData = persistenceData
             };
         }
 
