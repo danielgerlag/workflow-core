@@ -177,7 +177,7 @@ public class EventSampleWorkflow : IWorkflow<MyDataClass>
                 Console.WriteLine("workflow started");
                 return ExecutionResult.Next();
             })
-            .WaitFor("MyEvent", "0")
+            .WaitFor("MyEvent", data => "0")
                 .Output(data => data.Value, step => step.EventData)
             .Then<CustomMessage>()
                 .Input(step => step.Message, data => "The data from the event is " + data.Value);

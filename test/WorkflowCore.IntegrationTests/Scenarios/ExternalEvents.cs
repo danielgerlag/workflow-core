@@ -30,7 +30,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             {
                 builder
                     .StartWith(context => ExecutionResult.Next())
-                    .WaitFor("MyEvent", "0")
+                    .WaitFor("MyEvent", data => data.StrValue)
                         .Output(data => data.StrValue, step => step.EventData);
             }
         }
@@ -64,7 +64,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
         Because of = () =>
         {
-            WorkflowId = Host.StartWorkflow("EventWorkflow").Result;
+            WorkflowId = Host.StartWorkflow("EventWorkflow", new MyDataClass() { StrValue = "0" }).Result;
 
             int counter = 0;
             while ((PersistenceProvider.GetSubcriptions("MyEvent", "0").Result.Count() == 0) && (counter < 60))
