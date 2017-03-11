@@ -102,9 +102,17 @@ namespace WorkflowCore.Services
                 evt.IsProcessed = true;
         }
 
-        public async Task<IEnumerable<Event>> GetUnProcessedEvents()
+        public async Task<IEnumerable<string>> GetUnProcessedEvents()
         {
-            return _events.Where(x => !x.IsProcessed).ToArray();
+            return _events
+                .Where(x => !x.IsProcessed)
+                .Select(x => x.Id)
+                .ToList();
+        }
+
+        public async Task<Event> GetEvent(string id)
+        {
+            return _events.FirstOrDefault(x => x.Id == id);
         }
     }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously

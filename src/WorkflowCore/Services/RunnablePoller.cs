@@ -58,7 +58,7 @@ namespace WorkflowCore.Services
                         foreach (var item in runnables)
                         {
                             _logger.LogDebug("Got runnable instance {0}", item);
-                            _queueProvider.QueueForProcessing(item);
+                            _queueProvider.QueueWork(item, QueueType.Workflow);
                         }
                     }
                     finally
@@ -74,22 +74,21 @@ namespace WorkflowCore.Services
 
             try
             {
-                if (_lockProvider.AcquireLock("unpublished events").Result)
+                if (_lockProvider.AcquireLock("unprocessed events").Result)
                 {
                     try
                     {
-                        _logger.LogInformation("Polling for unpublished events");                        
-                        var events = _persistenceStore.GetUnpublishedEvents().Result.ToList();
+                        _logger.LogInformation("Polling for unprocessed events");                        
+                        var events = _persistenceStore.GetUnProcessedEvents().Result.ToList();
                         foreach (var item in events)
                         {
-                            _logger.LogDebug("Got unpublished event {0} {1}", item.EventName, item.EventKey);
-                            _queueProvider.QueueForPublishing(item).Wait();
-                            _persistenceStore.RemoveUnpublishedEvent(item.Id).Wait();
+                            _logger.LogDebug($"Got unprocessed event {item}");
+                            _queueProvider.QueueWork(item, QueueType.Event);                            
                         }
                     }
                     finally
                     {
-                        _lockProvider.ReleaseLock("unpublished events").Wait();
+                        _lockProvider.ReleaseLock("unprocessed events").Wait();
                     }
                 }
             }

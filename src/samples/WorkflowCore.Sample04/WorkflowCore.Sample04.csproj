@@ -17,11 +17,6 @@
     <ProjectReference Include="..\..\providers\WorkflowCore.LockProviders.Redlock\WorkflowCore.LockProviders.Redlock.csproj" />
     <ProjectReference Include="..\..\providers\WorkflowCore.LockProviders.ZeroMQ\WorkflowCore.LockProviders.ZeroMQ.csproj" />
     <ProjectReference Include="..\..\providers\WorkflowCore.Persistence.MongoDB\WorkflowCore.Persistence.MongoDB.csproj" />
-    <ProjectReference Include="..\..\providers\WorkflowCore.Persistence.PostgreSQL\WorkflowCore.Persistence.PostgreSQL.csproj" />
-    <ProjectReference Include="..\..\providers\WorkflowCore.Persistence.Sqlite\WorkflowCore.Persistence.Sqlite.csproj" />
-    <ProjectReference Include="..\..\providers\WorkflowCore.Persistence.SqlServer\WorkflowCore.Persistence.SqlServer.csproj" />
-    <ProjectReference Include="..\..\providers\WorkflowCore.QueueProviders.RabbitMQ\WorkflowCore.QueueProviders.RabbitMQ.csproj" />
-    <ProjectReference Include="..\..\providers\WorkflowCore.QueueProviders.ZeroMQ\WorkflowCore.QueueProviders.ZeroMQ.csproj" />
   </ItemGroup>
 
   <ItemGroup>

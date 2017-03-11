@@ -27,7 +27,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
         protected abstract void ConfigureExecutionErrorStorage(EntityTypeBuilder<PersistedExecutionError> builder);
         protected abstract void ConfigureExetensionAttributeStorage(EntityTypeBuilder<PersistedExtensionAttribute> builder);
         protected abstract void ConfigureSubscriptionStorage(EntityTypeBuilder<PersistedSubscription> builder);
-        protected abstract void ConfigurePublicationStorage(EntityTypeBuilder<PersistedPublication> builder);
+        protected abstract void ConfigureEventStorage(EntityTypeBuilder<PersistedEvent> builder);
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -46,15 +46,16 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             subscriptions.HasIndex(x => x.EventName);
             subscriptions.HasIndex(x => x.EventKey);
 
-            var publications = modelBuilder.Entity<PersistedPublication>();
-            publications.HasIndex(x => x.PublicationId).IsUnique();
+            var events = modelBuilder.Entity<PersistedEvent>();
+            events.HasIndex(x => x.EventId).IsUnique();
+            events.HasIndex(x => x.IsProcessed);
 
             ConfigureWorkflowStorage(workflows);
             ConfigureExecutionPointerStorage(executionPointers);
             ConfigureExecutionErrorStorage(executionErrors);
             ConfigureExetensionAttributeStorage(extensionAttributes);
             ConfigureSubscriptionStorage(subscriptions);
-            ConfigurePublicationStorage(publications);
+            ConfigureEventStorage(events);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -140,21 +141,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 return result;
             }
         }
-
-        public async Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey)
-        {
-            lock (this)
-            {
-                var raw = Set<PersistedSubscription>().Where(x => x.EventName == eventName && x.EventKey == eventKey).ToList();
-
-                List<EventSubscription> result = new List<EventSubscription>();
-                foreach (var item in raw)
-                    result.Add(item.ToEventSubscription());
-
-                return result;
-            }
-        }
-
+        
         public async Task<WorkflowInstance> GetWorkflowInstance(string Id)
         {
             lock (this)
@@ -214,42 +201,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 SaveChanges();
             }
         }
-
-        public async Task CreateUnpublishedEvent(EventPublication publication)
-        {
-            lock (this)
-            {
-                var persistable = publication.ToPersistable();
-                var result = Set<PersistedPublication>().Add(persistable);
-                SaveChanges();
-                Entry(persistable).State = EntityState.Detached;
-            }
-        }
-
-        public async Task<IEnumerable<EventPublication>> GetUnpublishedEvents()
-        {
-            lock (this)
-            {
-                var raw = Set<PersistedPublication>().ToList();
-
-                List<EventPublication> result = new List<EventPublication>();
-                foreach (var item in raw)
-                    result.Add(item.ToEventPublication());
-
-                return result;
-            }
-        }
-
-        public async Task RemoveUnpublishedEvent(Guid id)
-        {
-            lock (this)
-            {
-                var existing = Set<PersistedPublication>().First(x => x.PublicationId == id);
-                Set<PersistedPublication>().Remove(existing);
-                SaveChanges();
-            }
-        }
-
+                
         public virtual void EnsureStoreExists()
         {
             if (_canCreateDB && !_canMigrateDB)
@@ -264,7 +216,82 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 return;
             }
         }
-                
+
+        public async Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf)
+        {
+            lock (this)
+            {
+                var raw = Set<PersistedSubscription>().Where(x => x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf).ToList();
+
+                List<EventSubscription> result = new List<EventSubscription>();
+                foreach (var item in raw)
+                    result.Add(item.ToEventSubscription());
+
+                return result;
+            }
+        }
+
+        public async Task<string> CreateEvent(Event newEvent)
+        {
+            lock (this)
+            {
+                newEvent.Id = Guid.NewGuid().ToString();
+                var persistable = newEvent.ToPersistable();
+                var result = Set<PersistedEvent>().Add(persistable);
+                SaveChanges();
+                Entry(persistable).State = EntityState.Detached;
+                return newEvent.Id;
+            }
+        }
+
+        public async Task<Event> GetEvent(string id)
+        {
+            lock (this)
+            {
+                Guid uid = new Guid(id);
+                var raw = Set<PersistedEvent>()                    
+                    .First(x => x.EventId == uid);
+
+                if (raw == null)
+                    return null;
+
+                return raw.ToEvent();
+            }
+        }
+
+        public async Task<IEnumerable<string>> GetUnProcessedEvents()
+        {
+            lock (this)
+            {
+                var raw = Set<PersistedEvent>()
+                    .Where(x => !x.IsProcessed)
+                    .Select(x => x.EventId)
+                    .ToList();
+
+                List<string> result = new List<string>();
+
+                foreach (var s in raw)
+                    result.Add(s.ToString());
+
+                return result;
+            }
+        }
+
+        public async Task MarkEventProcessed(string id)
+        {
+            lock (this)
+            {
+                Guid uid = new Guid(id);
+                var existingEntity = Set<PersistedEvent>()
+                    .Where(x => x.EventId == uid)
+                    .AsTracking()
+                    .First();
+
+                existingEntity.IsProcessed = true;
+                SaveChanges();
+                Entry(existingEntity).State = EntityState.Detached;                
+            }
+        }
     }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }

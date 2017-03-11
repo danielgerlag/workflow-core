@@ -91,18 +91,19 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.EventName = instance.EventName;
             result.StepId = instance.StepId;
             result.WorkflowId = instance.WorkflowId;
+            result.SubscribeAsOf = instance.SubscribeAsOf;
 
             return result;
         }
 
-        internal static PersistedPublication ToPersistable(this EventPublication instance)
+        internal static PersistedEvent ToPersistable(this Event instance)
         {
-            PersistedPublication result = new PersistedPublication();
-            result.PublicationId = instance.Id;
+            PersistedEvent result = new PersistedEvent();
+            result.EventId = new Guid(instance.Id);
             result.EventKey = instance.EventKey;
             result.EventName = instance.EventName;
-            result.StepId = instance.StepId;
-            result.WorkflowId = instance.WorkflowId;
+            result.CreateTime = instance.CreateTime;
+            result.IsProcessed = instance.IsProcessed;
             result.EventData = JsonConvert.SerializeObject(instance.EventData, SerializerSettings);
 
             return result;
@@ -169,18 +170,19 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.EventName = instance.EventName;
             result.StepId = instance.StepId;
             result.WorkflowId = instance.WorkflowId;
+            result.SubscribeAsOf = instance.SubscribeAsOf;
 
             return result;
         }
 
-        internal static EventPublication ToEventPublication(this PersistedPublication instance)
+        internal static Event ToEvent(this PersistedEvent instance)
         {
-            EventPublication result = new EventPublication();
-            result.Id = instance.PublicationId;
+            Event result = new Event();
+            result.Id = instance.EventId.ToString();
             result.EventKey = instance.EventKey;
             result.EventName = instance.EventName;
-            result.StepId = instance.StepId;
-            result.WorkflowId = instance.WorkflowId;
+            result.CreateTime = instance.CreateTime;
+            result.IsProcessed = instance.IsProcessed;
             result.EventData = JsonConvert.DeserializeObject(instance.EventData, SerializerSettings);
 
             return result;

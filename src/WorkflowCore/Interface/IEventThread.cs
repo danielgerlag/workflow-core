@@ -1,7 +1,7 @@
 ﻿
 namespace WorkflowCore.Interface
 {
-    interface IPublishThread : IBackgroundWorker
+    interface IEventThread : IBackgroundWorker
     {
     }
 }

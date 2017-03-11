@@ -52,7 +52,7 @@ namespace WorkflowCore.Services
             {
                 try
                 {
-                    var workflowId = _queueProvider.DequeueForProcessing().Result;
+                    var workflowId = _queueProvider.DequeueWork(QueueType.Workflow).Result;
                     if (workflowId != null)
                     {
                         try
@@ -72,7 +72,7 @@ namespace WorkflowCore.Services
                                     if (workflow != null)
                                     {
                                         if ((workflow.Status == WorkflowStatus.Runnable) && workflow.NextExecution.HasValue && workflow.NextExecution.Value < DateTime.Now.ToUniversalTime().Ticks)
-                                            _queueProvider.QueueForProcessing(workflowId);
+                                            _queueProvider.QueueWork(workflowId, QueueType.Workflow);
                                     }
                                 }
                             }

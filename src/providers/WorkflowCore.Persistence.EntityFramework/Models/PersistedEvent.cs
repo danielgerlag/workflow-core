@@ -6,17 +6,12 @@ using System.Threading.Tasks;
 
 namespace WorkflowCore.Persistence.EntityFramework.Models
 {
-    public class PersistedPublication
+    public class PersistedEvent
     {
         [Key]
         public long PersistenceId { get; set; }
 
-        public Guid PublicationId { get; set; }
-
-        [MaxLength(200)]
-        public string WorkflowId { get; set; }
-
-        public int StepId { get; set; }
+        public Guid EventId { get; set; }                
 
         [MaxLength(200)]
         public string EventName { get; set; }
@@ -25,5 +20,9 @@ namespace WorkflowCore.Persistence.EntityFramework.Models
         public string EventKey { get; set; }
 
         public string EventData { get; set; }
+
+        public DateTime CreateTime { get; set; }
+
+        public bool IsProcessed { get; set; }
     }
 }

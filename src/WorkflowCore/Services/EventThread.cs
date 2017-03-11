@@ -9,7 +9,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services
 {
-    class EventThread : IPublishThread
+    class EventThread : IEventThread
     {
         private readonly IPersistenceProvider _persistenceStore;
         private readonly IDistributedLockProvider _lockProvider;
@@ -26,7 +26,7 @@ namespace WorkflowCore.Services
             _options = options;
             _logger = loggerFactory.CreateLogger<EventThread>();
             _lockProvider = lockProvider;
-            _thread = new Thread(RunPublications);            
+            _thread = new Thread(RunEvents);            
         }
 
         public void Start()
@@ -41,7 +41,7 @@ namespace WorkflowCore.Services
             _thread.Join();
         }
 
-        private void RunPublications()
+        private void RunEvents()
         {            
             while (!_shutdown)
             {

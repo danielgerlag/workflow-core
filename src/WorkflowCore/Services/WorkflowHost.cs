@@ -104,7 +104,7 @@ namespace WorkflowCore.Services
             }
 
             Logger.LogInformation("Starting publish thread");
-            IPublishThread pubThread = _serviceProvider.GetService<IPublishThread>();
+            IEventThread pubThread = _serviceProvider.GetService<IEventThread>();
             _workers.Add(pubThread);
             pubThread.Start();
 
@@ -117,16 +117,14 @@ namespace WorkflowCore.Services
         public void Stop()
         {
             _shutdown = true;            
-
-            var stashTask = StashUnpublishedEvents();
-
+            
             Logger.LogInformation("Stopping worker threads");
             foreach (var th in _workers)
                 th.Stop();
 
             _workers.Clear();
             Logger.LogInformation("Worker threads stopped");
-            stashTask.Wait();
+            
             QueueProvider.Stop();
             LockProvider.Stop();
         }
@@ -162,20 +160,6 @@ namespace WorkflowCore.Services
             await QueueProvider.QueueWork(eventId, QueueType.Event);
         }
                 
-
-        private async Task StashUnpublishedEvents()
-        {
-            if (!_shutdown)
-            {
-                var pub = await QueueProvider.DequeueForPublishing();
-                while (pub != null)
-                {
-                    await PersistenceStore.CreateUnpublishedEvent(pub);
-                    pub = await QueueProvider.DequeueForPublishing();
-                }
-            }
-        }
-
         public void RegisterWorkflow<TWorkflow>() 
             where TWorkflow : IWorkflow, new()
         {
