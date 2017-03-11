@@ -11,15 +11,7 @@ namespace WorkflowCore.QueueProviders.ZeroMQ.Models
     {
         public MessageType MessageType { get; set; }
         public string Content { get; set; }
-
-        public EventPublication ToEventPublication()
-        {
-            if (MessageType != MessageType.Publication)
-                throw new NotSupportedException();
-
-            return JsonConvert.DeserializeObject<EventPublication>(Content);
-        }
-
+                
         public static Message FromWorkflowId(string id)
         {
             Message result = new Message();
@@ -28,14 +20,14 @@ namespace WorkflowCore.QueueProviders.ZeroMQ.Models
             return result;
         }
 
-        public static Message FromPublication(EventPublication pub)
+        public static Message FromEventId(string id)
         {
             Message result = new Message();
-            result.MessageType = MessageType.Publication;
-            result.Content = JsonConvert.SerializeObject(pub);
+            result.MessageType = MessageType.Event;
+            result.Content = id;
             return result;
         }
     }
 
-    enum MessageType { Workflow, Publication }
+    enum MessageType { Workflow, Event }
 }
