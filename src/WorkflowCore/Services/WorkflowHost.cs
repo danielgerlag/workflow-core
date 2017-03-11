@@ -86,7 +86,7 @@ namespace WorkflowCore.Services
                 StepName = def.Steps.First(x => x.Id == def.InitialStep).Name
             });
             string id = await PersistenceStore.CreateNewWorkflow(wf);
-            await QueueProvider.QueueForProcessing(id);
+            await QueueProvider.QueueWork(id, QueueType.Workflow);
             return id;
         }
 
@@ -132,7 +132,7 @@ namespace WorkflowCore.Services
         }
 
 
-        public async Task SubscribeEvent(string workflowId, int stepId, string eventName, string eventKey)
+        public async Task SubscribeEvent(string workflowId, int stepId, string eventName, string eventKey, DateTime asOf)
         {
             Logger.LogDebug("Subscribing to event {0} {1} for workflow {2} step {3}", eventName, eventKey, workflowId, stepId);
             EventSubscription subscription = new EventSubscription();
@@ -140,6 +140,7 @@ namespace WorkflowCore.Services
             subscription.StepId = stepId;
             subscription.EventName = eventName;
             subscription.EventKey = eventKey;
+            subscription.SubscribeAsOf = asOf;
 
             await PersistenceStore.CreateEventSubscription(subscription);
         }
@@ -149,20 +150,16 @@ namespace WorkflowCore.Services
             if (_shutdown)
                 throw new Exception("Host is not running");
 
-            Logger.LogDebug("Publishing event {0} {1}", eventName, eventKey);
-            var subs = await PersistenceStore.GetSubcriptions(eventName, eventKey);
-            foreach (var sub in subs.ToList())
-            {
-                EventPublication pub = new EventPublication();
-                pub.Id = Guid.NewGuid();
-                pub.EventData = eventData;
-                pub.EventKey = eventKey;
-                pub.EventName = eventName;
-                pub.StepId = sub.StepId;
-                pub.WorkflowId = sub.WorkflowId;
-                await QueueProvider.QueueForPublishing(pub);
-                await PersistenceStore.TerminateSubscription(sub.Id);                
-            }
+            Logger.LogDebug("Creating event {0} {1}", eventName, eventKey);
+            Event evt = new Event();
+            evt.CreateTime = DateTime.Now.ToUniversalTime();
+            evt.EventData = eventData;
+            evt.EventKey = eventKey;
+            evt.EventName = eventName;
+            evt.IsProcessed = false;
+            string eventId = await PersistenceStore.CreateEvent(evt);
+
+            await QueueProvider.QueueWork(eventId, QueueType.Event);
         }
                 
 
@@ -238,7 +235,7 @@ namespace WorkflowCore.Services
                 {
                     await LockProvider.ReleaseLock(workflowId);
                     if (requeue)
-                        await QueueProvider.QueueForProcessing(workflowId);
+                        await QueueProvider.QueueWork(workflowId, QueueType.Workflow);
                 }                
             }
             return false;

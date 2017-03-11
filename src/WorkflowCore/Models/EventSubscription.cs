@@ -18,6 +18,8 @@ namespace WorkflowCore.Models
 
         public string EventKey { get; set; }
 
+        public DateTime SubscribeAsOf { get; set; }
+
 
     }
 }

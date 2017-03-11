@@ -26,7 +26,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<IWorkflowExecutor, WorkflowExecutor>();
             services.AddTransient<IWorkflowBuilder, WorkflowBuilder>();
             services.AddTransient<IWorkflowThread, WorkflowThread>();
-            services.AddTransient<IPublishThread, PublishThread>();
+            services.AddTransient<IPublishThread, EventThread>();
             services.AddTransient<IRunnablePoller, RunnablePoller>();
         }
     }
