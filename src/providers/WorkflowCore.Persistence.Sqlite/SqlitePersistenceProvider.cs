@@ -35,11 +35,6 @@ namespace WorkflowCore.Persistence.Sqlite
             builder.ForSqliteToTable("Workflow");
         }
         
-        protected override void ConfigurePublicationStorage(EntityTypeBuilder<PersistedPublication> builder)
-        {
-            builder.ForSqliteToTable("UnpublishedEvent");
-        }
-
         protected override void ConfigureExecutionPointerStorage(EntityTypeBuilder<PersistedExecutionPointer> builder)
         {
             builder.ForSqliteToTable("ExecutionPointer");
@@ -53,6 +48,11 @@ namespace WorkflowCore.Persistence.Sqlite
         protected override void ConfigureExetensionAttributeStorage(EntityTypeBuilder<PersistedExtensionAttribute> builder)
         {
             builder.ForSqliteToTable("ExtensionAttribute");
+        }
+
+        protected override void ConfigureEventStorage(EntityTypeBuilder<PersistedEvent> builder)
+        {
+            builder.ForSqliteToTable("Event");
         }
     }
 }
