@@ -30,7 +30,7 @@ namespace WorkflowCore.Sample04
         {
             builder
                 .StartWith(context => ExecutionResult.Next())
-                .WaitFor("MyEvent", "0")
+                .WaitFor("MyEvent", data => "0")
                     .Output(data => data.StrValue, step => step.EventData)
                 .Then<CustomMessage>()
                     .Name("Print custom message")

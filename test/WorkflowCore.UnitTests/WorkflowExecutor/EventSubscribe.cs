@@ -32,7 +32,7 @@ namespace WorkflowCore.UnitTests.WorkflowExecutorTests
                         StartStepTicker++;
                         return ExecutionResult.Next();
                     })
-                    .WaitFor("MyEvent", "0");
+                    .WaitFor("MyEvent", data => "0");
             }
             
         }
