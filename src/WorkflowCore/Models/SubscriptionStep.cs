@@ -13,6 +13,8 @@ namespace WorkflowCore.Models
 
         public string EventName { get; set; }
 
+        public DateTime EffectiveDateUTC { get; set; }
+
         public override ExecutionPipelineDirective InitForExecution(IWorkflowHost host, IPersistenceProvider persistenceStore, WorkflowDefinition defintion, WorkflowInstance workflow, ExecutionPointer executionPointer)
         {
             if (!executionPointer.EventPublished)
