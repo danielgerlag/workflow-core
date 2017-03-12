@@ -92,11 +92,12 @@ namespace WorkflowCore.Services
             return this;
         }
 
-        public IStepBuilder<TData, SubscriptionStepBody> WaitFor(string eventName, Expression<Func<TData, string>> eventKey)
+        public IStepBuilder<TData, SubscriptionStepBody> WaitFor(string eventName, Expression<Func<TData, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null)
         {
             var newStep = new SubscriptionStep<SubscriptionStepBody>();
             newStep.EventName = eventName;
             newStep.EventKey = eventKey;
+            newStep.EffectiveDate = effectiveDate;
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, SubscriptionStepBody>(WorkflowBuilder, newStep);
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });

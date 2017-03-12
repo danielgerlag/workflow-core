@@ -143,14 +143,19 @@ namespace WorkflowCore.Services
             await PersistenceStore.CreateEventSubscription(subscription);
         }
 
-        public async Task PublishEvent(string eventName, string eventKey, object eventData)
+        public async Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null)
         {
             if (_shutdown)
                 throw new Exception("Host is not running");
 
             Logger.LogDebug("Creating event {0} {1}", eventName, eventKey);
             Event evt = new Event();
-            evt.EventTime = DateTime.Now.ToUniversalTime();
+
+            if (effectiveDate.HasValue)
+                evt.EventTime = effectiveDate.Value.ToUniversalTime();
+            else
+                evt.EventTime = DateTime.Now.ToUniversalTime();
+
             evt.EventData = eventData;
             evt.EventKey = eventKey;
             evt.EventName = eventName;

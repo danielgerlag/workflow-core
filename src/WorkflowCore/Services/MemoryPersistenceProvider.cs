@@ -102,10 +102,11 @@ namespace WorkflowCore.Services
                 evt.IsProcessed = true;
         }
 
-        public async Task<IEnumerable<string>> GetUnProcessedEvents()
+        public async Task<IEnumerable<string>> GetRunnableEvents()
         {
             return _events
                 .Where(x => !x.IsProcessed)
+                .Where(x => x.EventTime <= DateTime.Now.ToUniversalTime())
                 .Select(x => x.Id)
                 .ToList();
         }

@@ -55,14 +55,17 @@ namespace WorkflowCore.Services
                             try
                             {
                                 var evt = _persistenceStore.GetEvent(eventId).Result;
-                                var subs = _persistenceStore.GetSubcriptions(evt.EventName, evt.EventKey, evt.EventTime).Result;
-                                var success = true;
+                                if (evt.EventTime <= DateTime.Now.ToUniversalTime())
+                                {
+                                    var subs = _persistenceStore.GetSubcriptions(evt.EventName, evt.EventKey, evt.EventTime).Result;
+                                    var success = true;
 
-                                foreach (var sub in subs)
-                                    success = success && SeedSubscription(evt, sub);
+                                    foreach (var sub in subs)
+                                        success = success && SeedSubscription(evt, sub);
 
-                                if (success)
-                                    _persistenceStore.MarkEventProcessed(eventId).Wait();
+                                    if (success)
+                                        _persistenceStore.MarkEventProcessed(eventId).Wait();
+                                }
                             }
                             catch (Exception ex)
                             {

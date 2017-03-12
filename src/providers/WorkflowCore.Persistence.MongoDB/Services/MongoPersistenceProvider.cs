@@ -181,10 +181,13 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             return Events.AsQueryable().First(x => x.Id == id);
         }
 
-        public async Task<IEnumerable<string>> GetUnProcessedEvents()
+        public async Task<IEnumerable<string>> GetRunnableEvents()
         {
+            var now = DateTime.Now.ToUniversalTime();
+
             return Events.AsQueryable()
                 .Where(x => !x.IsProcessed)
+                .Where(x => x.EventTime <= now)
                 .Select(x => x.Id)
                 .ToList();
         }

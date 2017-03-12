@@ -79,7 +79,7 @@ namespace WorkflowCore.Services
                     try
                     {
                         _logger.LogInformation("Polling for unprocessed events");                        
-                        var events = _persistenceStore.GetUnProcessedEvents().Result.ToList();
+                        var events = _persistenceStore.GetRunnableEvents().Result.ToList();
                         foreach (var item in events)
                         {
                             _logger.LogDebug($"Got unprocessed event {item}");

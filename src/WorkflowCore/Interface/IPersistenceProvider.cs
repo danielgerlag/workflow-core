@@ -32,7 +32,7 @@ namespace WorkflowCore.Interface
 
         Task<Event> GetEvent(string id);
 
-        Task<IEnumerable<string>> GetUnProcessedEvents();
+        Task<IEnumerable<string>> GetRunnableEvents();
 
         Task MarkEventProcessed(string id);
 

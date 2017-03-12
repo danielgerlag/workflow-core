@@ -14,7 +14,7 @@ namespace WorkflowCore.Models
 
         public string EventName { get; set; }
 
-        public DateTime EffectiveDateUTC { get; set; }
+        public LambdaExpression EffectiveDate { get; set; }
 
         public override ExecutionPipelineDirective InitForExecution(IWorkflowHost host, IPersistenceProvider persistenceStore, WorkflowDefinition defintion, WorkflowInstance workflow, ExecutionPointer executionPointer)
         {
@@ -23,10 +23,15 @@ namespace WorkflowCore.Models
                 if (EventKey != null)
                     executionPointer.EventKey = Convert.ToString(EventKey.Compile().DynamicInvoke(workflow.Data));
 
+                DateTime effectiveDate = DateTime.Now.ToUniversalTime();
+
+                if (EffectiveDate != null)
+                    effectiveDate = Convert.ToDateTime(EffectiveDate.Compile().DynamicInvoke(workflow.Data));
+
                 executionPointer.EventName = EventName;
                 executionPointer.Active = false;
                 persistenceStore.PersistWorkflow(workflow).Wait();
-                host.SubscribeEvent(workflow.Id, executionPointer.StepId, executionPointer.EventName, executionPointer.EventKey, DateTime.Now.ToUniversalTime()).Wait();
+                host.SubscribeEvent(workflow.Id, executionPointer.StepId, executionPointer.EventName, executionPointer.EventKey, effectiveDate).Wait();
 
                 return ExecutionPipelineDirective.Defer;
             }

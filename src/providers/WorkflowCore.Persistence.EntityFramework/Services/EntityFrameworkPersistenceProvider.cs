@@ -261,12 +261,15 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             }
         }
 
-        public async Task<IEnumerable<string>> GetUnProcessedEvents()
+        public async Task<IEnumerable<string>> GetRunnableEvents()
         {
+            var now = DateTime.Now.ToUniversalTime();
+
             lock (this)
             {
                 var raw = Set<PersistedEvent>()
                     .Where(x => !x.IsProcessed)
+                    .Where(x => x.EventTime <= now)
                     .Select(x => x.EventId)
                     .ToList();
 
