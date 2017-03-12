@@ -67,7 +67,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             WorkflowId = Host.StartWorkflow("EventWorkflow").Result;
 
             int counter = 0;
-            while ((PersistenceProvider.GetSubcriptions("MyEvent", "0").Result.Count() == 0) && (counter < 60))
+            while ((PersistenceProvider.GetSubcriptions("MyEvent", "0", DateTime.MaxValue).Result.Count() == 0) && (counter < 60))
             {
                 System.Threading.Thread.Sleep(500);
                 counter++;                

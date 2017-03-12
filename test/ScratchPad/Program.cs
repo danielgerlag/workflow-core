@@ -25,14 +25,14 @@ namespace ScratchPad
             Peer3.Start();
             System.Threading.Thread.Sleep(500);
 
-            Peer1.QueueForProcessing("Task 1").Wait();
-            Peer1.QueueForProcessing("Task 2").Wait();
-            Peer1.QueueForProcessing("Task 3").Wait();
+            Peer1.QueueWork("Task 1", QueueType.Workflow).Wait();
+            Peer1.QueueWork("Task 2", QueueType.Workflow).Wait();
+            Peer1.QueueWork("Task 3", QueueType.Workflow).Wait();
             System.Threading.Thread.Sleep(100);
 
-            var value1 = Peer1.DequeueForProcessing().Result;
-            var value2 = Peer2.DequeueForProcessing().Result;
-            var value3 = Peer3.DequeueForProcessing().Result;
+            var value1 = Peer1.DequeueWork(QueueType.Workflow).Result;
+            var value2 = Peer2.DequeueWork(QueueType.Workflow).Result;
+            var value3 = Peer3.DequeueWork(QueueType.Workflow).Result;
             
             Console.ReadLine();
         }
