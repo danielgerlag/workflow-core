@@ -55,7 +55,7 @@ namespace WorkflowCore.Services
                             try
                             {
                                 var evt = _persistenceStore.GetEvent(eventId).Result;
-                                var subs = _persistenceStore.GetSubcriptions(evt.EventName, evt.EventKey, evt.CreateTime).Result;
+                                var subs = _persistenceStore.GetSubcriptions(evt.EventName, evt.EventKey, evt.EventTime).Result;
                                 var success = true;
 
                                 foreach (var sub in subs)

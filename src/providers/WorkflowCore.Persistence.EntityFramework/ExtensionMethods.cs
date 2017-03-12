@@ -102,7 +102,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.EventId = new Guid(instance.Id);
             result.EventKey = instance.EventKey;
             result.EventName = instance.EventName;
-            result.CreateTime = instance.CreateTime;
+            result.EventTime = instance.EventTime;
             result.IsProcessed = instance.IsProcessed;
             result.EventData = JsonConvert.SerializeObject(instance.EventData, SerializerSettings);
 
@@ -181,7 +181,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.Id = instance.EventId.ToString();
             result.EventKey = instance.EventKey;
             result.EventName = instance.EventName;
-            result.CreateTime = instance.CreateTime;
+            result.EventTime = instance.EventTime;
             result.IsProcessed = instance.IsProcessed;
             result.EventData = JsonConvert.DeserializeObject(instance.EventData, SerializerSettings);
 

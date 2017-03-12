@@ -35,7 +35,7 @@ namespace WorkflowCore.Users.Models
                 executionPointer.EventName = "UserAction";
                 executionPointer.Active = false;
                 persistenceStore.PersistWorkflow(workflow).Wait();
-                host.SubscribeEvent(workflow.Id, executionPointer.StepId, executionPointer.EventName, executionPointer.EventKey);
+                host.SubscribeEvent(workflow.Id, executionPointer.StepId, executionPointer.EventName, executionPointer.EventKey, DateTime.Now.ToUniversalTime());
 
                 return ExecutionPipelineDirective.Defer;
             }

@@ -29,15 +29,15 @@ namespace WorkflowCore.Tests.ZeroMQ.QueueProvider
 
         Because of = () =>
         {
-            Peer1.QueueForProcessing("Task 1").Wait();
+            Peer1.QueueWork("Task 1", QueueType.Workflow).Wait();
             System.Threading.Thread.Sleep(100);
         };
 
         It should_be_dequeued_once_on_any_peer = () =>
         {
-            var result1 = Peer1.DequeueForProcessing().Result;
-            var result2 = Peer2.DequeueForProcessing().Result;
-            var result3 = Peer3.DequeueForProcessing().Result;
+            var result1 = Peer1.DequeueWork(QueueType.Workflow).Result;
+            var result2 = Peer2.DequeueWork(QueueType.Workflow).Result;
+            var result3 = Peer3.DequeueWork(QueueType.Workflow).Result;
             var oneResult = (result1 == "Task 1") ^ (result2 == "Task 1") ^ (result3 == "Task 1");
             oneResult.ShouldBeTrue();
         };

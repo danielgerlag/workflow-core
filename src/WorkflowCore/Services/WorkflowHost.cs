@@ -150,7 +150,7 @@ namespace WorkflowCore.Services
 
             Logger.LogDebug("Creating event {0} {1}", eventName, eventKey);
             Event evt = new Event();
-            evt.CreateTime = DateTime.Now.ToUniversalTime();
+            evt.EventTime = DateTime.Now.ToUniversalTime();
             evt.EventData = eventData;
             evt.EventKey = eventKey;
             evt.EventName = eventName;

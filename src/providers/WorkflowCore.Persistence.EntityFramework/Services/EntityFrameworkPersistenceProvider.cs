@@ -48,6 +48,8 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
 
             var events = modelBuilder.Entity<PersistedEvent>();
             events.HasIndex(x => x.EventId).IsUnique();
+            events.HasIndex(x => new { x.EventName, x.EventKey });            
+            events.HasIndex(x => x.EventTime);
             events.HasIndex(x => x.IsProcessed);
 
             ConfigureWorkflowStorage(workflows);

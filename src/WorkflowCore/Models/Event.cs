@@ -14,7 +14,7 @@ namespace WorkflowCore.Models
 
         public object EventData { get; set; }
 
-        public DateTime CreateTime { get; set; }
+        public DateTime EventTime { get; set; }
 
         public bool IsProcessed { get; set; }
     }

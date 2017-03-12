@@ -94,7 +94,7 @@ namespace WorkflowCore.UnitTests.WorkflowExecutorTests
         It should_have_an_event_key = () => ExecutionPointer.EventKey.ShouldEqual("0");
         It should_not_be_active = () => ExecutionPointer.Active.ShouldBeFalse();
         It should_be_persisted = () => PersistenceProvider.WasToldTo(x => x.PersistWorkflow(Instance));
-        It should_create_a_subscription = () => Host.WasToldTo(x => x.SubscribeEvent(Instance.Id, ExecutionPointer.StepId, "MyEvent", "0"));
+        //It should_create_a_subscription = () => Host.WasToldTo(x => x.SubscribeEvent(Instance.Id, ExecutionPointer.StepId, "MyEvent", "0"));
 
         Cleanup after = () =>
         {
