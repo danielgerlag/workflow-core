@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
     <AssemblyName>WorkflowCore.Tests.MongoDB</AssemblyName>
     <PackageId>WorkflowCore.Tests.MongoDB</PackageId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
@@ -19,6 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Machine.Specifications.Runner.Console" Version="0.9.3" />
+    <PackageReference Include="Machine.Specifications.Runner.VisualStudio" Version="2.2.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <PackageReference Include="dotnet-test-mspec" Version="0.2.0" />
     <PackageReference Include="FluentAssertions" Version="4.19.2" />
