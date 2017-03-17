@@ -29,9 +29,9 @@ namespace WorkflowCore.Tests.ZeroMQ.QueueProvider
 
         Because of = () =>
         {
-            Peer1.QueueForProcessing("Task 1").Wait();
-            Peer1.QueueForProcessing("Task 2").Wait();
-            Peer1.QueueForProcessing("Task 3").Wait();
+            Peer1.QueueWork("Task 1", QueueType.Workflow).Wait();
+            Peer1.QueueWork("Task 2", QueueType.Workflow).Wait();
+            Peer1.QueueWork("Task 3", QueueType.Workflow).Wait();
             System.Threading.Thread.Sleep(100);
         };
 
@@ -39,9 +39,9 @@ namespace WorkflowCore.Tests.ZeroMQ.QueueProvider
         {            
             string[] results = new string[] 
             {
-                Peer1.DequeueForProcessing().Result,
-                Peer2.DequeueForProcessing().Result,
-                Peer3.DequeueForProcessing().Result
+                Peer1.DequeueWork(QueueType.Workflow).Result,
+                Peer2.DequeueWork(QueueType.Workflow).Result,
+                Peer3.DequeueWork(QueueType.Workflow).Result
             };
 
             results.ShouldContain("Task 1");

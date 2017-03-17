@@ -36,14 +36,14 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                             ApproveStepTicker++;
                             return ExecutionResult.Next();
                         })
-                    .End<UserStepBody>("Approval Step")
+                    .End<UserStep>("Approval Step")
                     .When("no", "I do not approve")
                         .Then(context =>
                         {
                             DisapproveStepTicker++;
                             return ExecutionResult.Next();
                         })
-                    .End<UserStepBody>("Approval Step");
+                    .End<UserStep>("Approval Step");
             }
         }
                         

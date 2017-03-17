@@ -9,6 +9,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services
 {
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     /// <summary>
     /// Single node in-memory implementation of IQueueProvider
     /// </summary>
@@ -16,39 +17,21 @@ namespace WorkflowCore.Services
     {
                 
         private ConcurrentQueue<string> _runQueue = new ConcurrentQueue<string>();
-        private ConcurrentQueue<EventPublication> _publishQueue = new ConcurrentQueue<EventPublication>();
-                
+        private ConcurrentQueue<string> _eventQueue = new ConcurrentQueue<string>();        
 
-        public async Task QueueForProcessing(string Id)
+        public async Task QueueWork(string id, QueueType queue)
         {
-            _runQueue.Enqueue(Id);
+            SelectQueue(queue).Enqueue(id);
         }
 
-        public async Task<string> DequeueForProcessing()
-        {            
-            string id;
-            if (_runQueue.TryDequeue(out id))
-            {
+        public async Task<string> DequeueWork(QueueType queue)
+        {
+            if (SelectQueue(queue).TryDequeue(out string id))
                 return id;
-            }
+
             return null;
-        }
-                
-        public async Task QueueForPublishing(EventPublication item)
-        {
-            _publishQueue.Enqueue(item);
         }
         
-        public async Task<EventPublication> DequeueForPublishing()
-        {
-            EventPublication item;
-            if (_publishQueue.TryDequeue(out item))
-            {
-                return item;
-            }
-            return null;
-        }
-
         public void Start()
         {
         }
@@ -61,6 +44,18 @@ namespace WorkflowCore.Services
         {            
         }
 
+        private ConcurrentQueue<string> SelectQueue(QueueType queue)
+        {
+            switch (queue)
+            {
+                case QueueType.Workflow:
+                    return _runQueue;                    
+                case QueueType.Event:
+                    return _eventQueue;
+            }
+            return null;
+        }
         
     }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }

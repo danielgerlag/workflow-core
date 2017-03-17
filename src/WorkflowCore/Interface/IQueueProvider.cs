@@ -14,30 +14,23 @@ namespace WorkflowCore.Interface
     {
 
         /// <summary>
-        /// Queues the workflow to be processed by a host in the cluster
+        /// Enqueues work to be processed by a host in the cluster
         /// </summary>
         /// <param name="Id"></param>
         /// <returns></returns>
-        Task QueueForProcessing(string Id);
+        Task QueueWork(string id, QueueType queue);
 
         /// <summary>
-        /// Fetches the next workflow instance from the front of the process queue.
+        /// Fetches the next work item from the front of the process queue.
         /// If the queue is empty, NULL is returned
         /// </summary>
         /// <returns></returns>
-        Task<string> DequeueForProcessing();        
-
-        Task QueueForPublishing(EventPublication item);
-
-        /// <summary>
-        /// Fetches the next published event from the front of the queue.
-        /// If the queue is empty, NULL is returned
-        /// </summary>
-        /// <returns></returns>
-        Task<EventPublication> DequeueForPublishing();
+        Task<string> DequeueWork(QueueType queue);                
 
         void Start();
         void Stop();
 
     }
+
+    public enum QueueType { Workflow = 0, Event = 1 }
 }

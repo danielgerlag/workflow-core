@@ -25,5 +25,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Models
 
         [MaxLength(200)]
         public string EventKey { get; set; }
+
+        public DateTime SubscribeAsOf { get; set; }
     }
 }

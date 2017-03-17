@@ -14,234 +14,247 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
-                .HasAnnotation("ProductVersion", "1.1.0-rtm-22752");
+    .HasAnnotation("ProductVersion", "1.1.1")
+    .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn);
+
+            modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedEvent", b =>
+            {
+                b.Property<long>("PersistenceId")
+                    .ValueGeneratedOnAdd()
+                    .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn);
+
+                b.Property<string>("EventData");
+
+                b.Property<Guid>("EventId");
+
+                b.Property<string>("EventKey")
+                    .HasMaxLength(200);
+
+                b.Property<string>("EventName")
+                    .HasMaxLength(200);
+
+                b.Property<DateTime>("EventTime");
+
+                b.Property<bool>("IsProcessed");
+
+                b.HasKey("PersistenceId");
+
+                b.HasIndex("EventId")
+                    .IsUnique();
+
+                b.HasIndex("EventTime");
+
+                b.HasIndex("IsProcessed");
+
+                b.HasIndex("EventName", "EventKey");
+
+                b.ToTable("PersistedEvent");
+
+                b.HasAnnotation("Npgsql:Schema", "wfc");
+
+                b.HasAnnotation("Npgsql:TableName", "Event");
+            });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionError", b =>
-                {
-                    b.Property<long>("PersistenceId")
-                        .ValueGeneratedOnAdd();
+            {
+                b.Property<long>("PersistenceId")
+                    .ValueGeneratedOnAdd()
+                    .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn);
 
-                    b.Property<DateTime>("ErrorTime");
+                b.Property<DateTime>("ErrorTime");
 
-                    b.Property<long>("ExecutionPointerId");
+                b.Property<long>("ExecutionPointerId");
 
-                    b.Property<string>("Id")
-                        .HasMaxLength(50);
+                b.Property<string>("Id")
+                    .HasMaxLength(50);
 
-                    b.Property<string>("Message");
+                b.Property<string>("Message");
 
-                    b.HasKey("PersistenceId");
+                b.HasKey("PersistenceId");
 
-                    b.HasIndex("ExecutionPointerId");
+                b.HasIndex("ExecutionPointerId");
 
-                    b.ToTable("PersistedExecutionError");
+                b.ToTable("PersistedExecutionError");
 
-                    b.HasAnnotation("Npgsql:Schema", "wfc");
+                b.HasAnnotation("Npgsql:Schema", "wfc");
 
-                    b.HasAnnotation("Npgsql:TableName", "ExecutionError");
-                });
+                b.HasAnnotation("Npgsql:TableName", "ExecutionError");
+            });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", b =>
-                {
-                    b.Property<long>("PersistenceId")
-                        .ValueGeneratedOnAdd();
+            {
+                b.Property<long>("PersistenceId")
+                    .ValueGeneratedOnAdd()
+                    .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn);
 
-                    b.Property<bool>("Active");
+                b.Property<bool>("Active");
 
-                    b.Property<int>("ConcurrentFork");
+                b.Property<int>("ConcurrentFork");
 
-                    b.Property<DateTime?>("EndTime");
+                b.Property<DateTime?>("EndTime");
 
-                    b.Property<string>("EventData");
+                b.Property<string>("EventData");
 
-                    b.Property<string>("EventKey");
+                b.Property<string>("EventKey");
 
-                    b.Property<string>("EventName");
+                b.Property<string>("EventName");
 
-                    b.Property<bool>("EventPublished");
+                b.Property<bool>("EventPublished");
 
-                    b.Property<string>("Id")
-                        .HasMaxLength(50);
+                b.Property<string>("Id")
+                    .HasMaxLength(50);
 
-                    b.Property<bool>("PathTerminator");
+                b.Property<bool>("PathTerminator");
 
-                    b.Property<string>("PersistenceData");
+                b.Property<string>("PersistenceData");
 
-                    b.Property<DateTime?>("SleepUntil");
+                b.Property<DateTime?>("SleepUntil");
 
-                    b.Property<DateTime?>("StartTime");
+                b.Property<DateTime?>("StartTime");
 
-                    b.Property<int>("StepId");
+                b.Property<int>("StepId");
 
-                    b.Property<string>("StepName");
+                b.Property<string>("StepName");
 
-                    b.Property<long>("WorkflowId");
+                b.Property<long>("WorkflowId");
 
-                    b.HasKey("PersistenceId");
+                b.HasKey("PersistenceId");
 
-                    b.HasIndex("WorkflowId");
+                b.HasIndex("WorkflowId");
 
-                    b.ToTable("PersistedExecutionPointer");
+                b.ToTable("PersistedExecutionPointer");
 
-                    b.HasAnnotation("Npgsql:Schema", "wfc");
+                b.HasAnnotation("Npgsql:Schema", "wfc");
 
-                    b.HasAnnotation("Npgsql:TableName", "ExecutionPointer");
-                });
+                b.HasAnnotation("Npgsql:TableName", "ExecutionPointer");
+            });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExtensionAttribute", b =>
-                {
-                    b.Property<long>("PersistenceId")
-                        .ValueGeneratedOnAdd();
+            {
+                b.Property<long>("PersistenceId")
+                    .ValueGeneratedOnAdd()
+                    .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn);
 
-                    b.Property<string>("AttributeKey")
-                        .HasMaxLength(100);
+                b.Property<string>("AttributeKey")
+                    .HasMaxLength(100);
 
-                    b.Property<string>("AttributeValue");
+                b.Property<string>("AttributeValue");
 
-                    b.Property<long>("ExecutionPointerId");
+                b.Property<long>("ExecutionPointerId");
 
-                    b.HasKey("PersistenceId");
+                b.HasKey("PersistenceId");
 
-                    b.HasIndex("ExecutionPointerId");
+                b.HasIndex("ExecutionPointerId");
 
-                    b.ToTable("PersistedExtensionAttribute");
+                b.ToTable("PersistedExtensionAttribute");
 
-                    b.HasAnnotation("Npgsql:Schema", "wfc");
+                b.HasAnnotation("Npgsql:Schema", "wfc");
 
-                    b.HasAnnotation("Npgsql:TableName", "ExtensionAttribute");
-                });
-
-            modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedPublication", b =>
-                {
-                    b.Property<long>("PersistenceId")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("EventData");
-
-                    b.Property<string>("EventKey")
-                        .HasMaxLength(200);
-
-                    b.Property<string>("EventName")
-                        .HasMaxLength(200);
-
-                    b.Property<Guid>("PublicationId");
-
-                    b.Property<int>("StepId");
-
-                    b.Property<string>("WorkflowId")
-                        .HasMaxLength(200);
-
-                    b.HasKey("PersistenceId");
-
-                    b.HasIndex("PublicationId")
-                        .IsUnique();
-
-                    b.ToTable("PersistedPublication");
-
-                    b.HasAnnotation("Npgsql:Schema", "wfc");
-
-                    b.HasAnnotation("Npgsql:TableName", "UnpublishedEvent");
-                });
+                b.HasAnnotation("Npgsql:TableName", "ExtensionAttribute");
+            });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedSubscription", b =>
-                {
-                    b.Property<long>("PersistenceId")
-                        .ValueGeneratedOnAdd();
+            {
+                b.Property<long>("PersistenceId")
+                    .ValueGeneratedOnAdd()
+                    .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn);
 
-                    b.Property<string>("EventKey")
-                        .HasMaxLength(200);
+                b.Property<string>("EventKey")
+                    .HasMaxLength(200);
 
-                    b.Property<string>("EventName")
-                        .HasMaxLength(200);
+                b.Property<string>("EventName")
+                    .HasMaxLength(200);
 
-                    b.Property<int>("StepId");
+                b.Property<int>("StepId");
 
-                    b.Property<Guid>("SubscriptionId")
-                        .HasMaxLength(200);
+                b.Property<DateTime>("SubscribeAsOf");
 
-                    b.Property<string>("WorkflowId")
-                        .HasMaxLength(200);
+                b.Property<Guid>("SubscriptionId")
+                    .HasMaxLength(200);
 
-                    b.HasKey("PersistenceId");
+                b.Property<string>("WorkflowId")
+                    .HasMaxLength(200);
 
-                    b.HasIndex("EventKey");
+                b.HasKey("PersistenceId");
 
-                    b.HasIndex("EventName");
+                b.HasIndex("EventKey");
 
-                    b.HasIndex("SubscriptionId")
-                        .IsUnique();
+                b.HasIndex("EventName");
 
-                    b.ToTable("PersistedSubscription");
+                b.HasIndex("SubscriptionId")
+                    .IsUnique();
 
-                    b.HasAnnotation("Npgsql:Schema", "wfc");
+                b.ToTable("PersistedSubscription");
 
-                    b.HasAnnotation("Npgsql:TableName", "Subscription");
-                });
+                b.HasAnnotation("Npgsql:Schema", "wfc");
+
+                b.HasAnnotation("Npgsql:TableName", "Subscription");
+            });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedWorkflow", b =>
-                {
-                    b.Property<long>("PersistenceId")
-                        .ValueGeneratedOnAdd();
+            {
+                b.Property<long>("PersistenceId")
+                    .ValueGeneratedOnAdd()
+                    .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn);
 
-                    b.Property<DateTime?>("CompleteTime");
+                b.Property<DateTime?>("CompleteTime");
 
-                    b.Property<DateTime>("CreateTime");
+                b.Property<DateTime>("CreateTime");
 
-                    b.Property<string>("Data");
+                b.Property<string>("Data");
 
-                    b.Property<string>("Description")
-                        .HasMaxLength(500);
+                b.Property<string>("Description")
+                    .HasMaxLength(500);
 
-                    b.Property<Guid>("InstanceId")
-                        .HasMaxLength(200);
+                b.Property<Guid>("InstanceId")
+                    .HasMaxLength(200);
 
-                    b.Property<long?>("NextExecution");
+                b.Property<long?>("NextExecution");
 
-                    b.Property<int>("Status");
+                b.Property<int>("Status");
 
-                    b.Property<int>("Version");
+                b.Property<int>("Version");
 
-                    b.Property<string>("WorkflowDefinitionId")
-                        .HasMaxLength(200);
+                b.Property<string>("WorkflowDefinitionId")
+                    .HasMaxLength(200);
 
-                    b.HasKey("PersistenceId");
+                b.HasKey("PersistenceId");
 
-                    b.HasIndex("InstanceId")
-                        .IsUnique();
+                b.HasIndex("InstanceId")
+                    .IsUnique();
 
-                    b.HasIndex("NextExecution");
+                b.HasIndex("NextExecution");
 
-                    b.ToTable("PersistedWorkflow");
+                b.ToTable("PersistedWorkflow");
 
-                    b.HasAnnotation("Npgsql:Schema", "wfc");
+                b.HasAnnotation("Npgsql:Schema", "wfc");
 
-                    b.HasAnnotation("Npgsql:TableName", "Workflow");
-                });
+                b.HasAnnotation("Npgsql:TableName", "Workflow");
+            });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionError", b =>
-                {
-                    b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", "ExecutionPointer")
-                        .WithMany("Errors")
-                        .HasForeignKey("ExecutionPointerId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+            {
+                b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", "ExecutionPointer")
+                    .WithMany("Errors")
+                    .HasForeignKey("ExecutionPointerId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", b =>
-                {
-                    b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedWorkflow", "Workflow")
-                        .WithMany("ExecutionPointers")
-                        .HasForeignKey("WorkflowId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+            {
+                b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedWorkflow", "Workflow")
+                    .WithMany("ExecutionPointers")
+                    .HasForeignKey("WorkflowId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExtensionAttribute", b =>
-                {
-                    b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", "ExecutionPointer")
-                        .WithMany("ExtensionAttributes")
-                        .HasForeignKey("ExecutionPointerId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+            {
+                b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", "ExecutionPointer")
+                    .WithMany("ExtensionAttributes")
+                    .HasForeignKey("ExecutionPointerId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
         }
     }
 }

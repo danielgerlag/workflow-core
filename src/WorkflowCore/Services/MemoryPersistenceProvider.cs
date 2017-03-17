@@ -8,6 +8,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services
 {
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     /// <summary>
     /// In-memory implementation of IPersistenceProvider for demo and testing purposes
     /// </summary>
@@ -16,7 +17,8 @@ namespace WorkflowCore.Services
 
         private static List<WorkflowInstance> _instances = new List<WorkflowInstance>();
         private static List<EventSubscription> _subscriptions = new List<EventSubscription>();
-        private static List<EventPublication> _unpublishedEvents = new List<EventPublication>();
+        private static List<Event> _events = new List<Event>();
+
 
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
         {
@@ -70,10 +72,10 @@ namespace WorkflowCore.Services
             return subscription.Id;
         }
 
-        public async Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey)
+        public async Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf)
         {
             return _subscriptions
-                .Where(x => x.EventName == eventName && x.EventKey == eventKey);
+                .Where(x => x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf);
         }
 
         public async Task TerminateSubscription(string eventSubscriptionId)
@@ -86,21 +88,49 @@ namespace WorkflowCore.Services
         {            
         }
 
-        public async Task CreateUnpublishedEvent(EventPublication publication)
-        {            
-            _unpublishedEvents.Add(publication);
-        }
-
-        public async Task RemoveUnpublishedEvent(Guid id)
+        public async Task<string> CreateEvent(Event newEvent)
         {
-            var evt = _unpublishedEvents.FirstOrDefault(x => x.Id == id);
+            newEvent.Id = Guid.NewGuid().ToString();            
+            _events.Add(newEvent);
+            return newEvent.Id;
+        }
+        
+        public async Task MarkEventProcessed(string id)
+        {
+            var evt = _events.FirstOrDefault(x => x.Id == id);
             if (evt != null)
-                _unpublishedEvents.Remove(evt);
+                evt.IsProcessed = true;
         }
 
-        public async Task<IEnumerable<EventPublication>> GetUnpublishedEvents()
+        public async Task<IEnumerable<string>> GetRunnableEvents()
         {
-            return _unpublishedEvents;
+            return _events
+                .Where(x => !x.IsProcessed)
+                .Where(x => x.EventTime <= DateTime.Now.ToUniversalTime())
+                .Select(x => x.Id)
+                .ToList();
+        }
+
+        public async Task<Event> GetEvent(string id)
+        {
+            return _events.FirstOrDefault(x => x.Id == id);
+        }
+
+        public async Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf)
+        {
+            return _events
+                .Where(x => x.EventName == eventName && x.EventKey == eventKey)
+                .Where(x => x.EventTime >= asOf)
+                .Select(x => x.Id)
+                .ToList();
+        }
+
+        public async Task MarkEventUnprocessed(string id)
+        {
+            var evt = _events.FirstOrDefault(x => x.Id == id);
+            if (evt != null)
+                evt.IsProcessed = false;
         }
     }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }

@@ -14,8 +14,46 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder
-                .HasAnnotation("ProductVersion", "1.1.0-rtm-22752")
+                .HasAnnotation("ProductVersion", "1.1.1")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedEvent", b =>
+                {
+                    b.Property<long>("PersistenceId")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("EventData");
+
+                    b.Property<Guid>("EventId");
+
+                    b.Property<string>("EventKey")
+                        .HasMaxLength(200);
+
+                    b.Property<string>("EventName")
+                        .HasMaxLength(200);
+
+                    b.Property<DateTime>("EventTime");
+
+                    b.Property<bool>("IsProcessed");
+
+                    b.HasKey("PersistenceId");
+
+                    b.HasIndex("EventId")
+                        .IsUnique();
+
+                    b.HasIndex("EventTime");
+
+                    b.HasIndex("IsProcessed");
+
+                    b.HasIndex("EventName", "EventKey");
+
+                    b.ToTable("PersistedEvent");
+
+                    b.HasAnnotation("SqlServer:Schema", "wfc");
+
+                    b.HasAnnotation("SqlServer:TableName", "Event");
+                });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionError", b =>
                 {
@@ -115,39 +153,6 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                     b.HasAnnotation("SqlServer:TableName", "ExtensionAttribute");
                 });
 
-            modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedPublication", b =>
-                {
-                    b.Property<long>("PersistenceId")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("EventData");
-
-                    b.Property<string>("EventKey")
-                        .HasMaxLength(200);
-
-                    b.Property<string>("EventName")
-                        .HasMaxLength(200);
-
-                    b.Property<Guid>("PublicationId");
-
-                    b.Property<int>("StepId");
-
-                    b.Property<string>("WorkflowId")
-                        .HasMaxLength(200);
-
-                    b.HasKey("PersistenceId");
-
-                    b.HasIndex("PublicationId")
-                        .IsUnique();
-
-                    b.ToTable("PersistedPublication");
-
-                    b.HasAnnotation("SqlServer:Schema", "wfc");
-
-                    b.HasAnnotation("SqlServer:TableName", "UnpublishedEvent");
-                });
-
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedSubscription", b =>
                 {
                     b.Property<long>("PersistenceId")
@@ -161,6 +166,8 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                         .HasMaxLength(200);
 
                     b.Property<int>("StepId");
+
+                    b.Property<DateTime>("SubscribeAsOf");
 
                     b.Property<Guid>("SubscriptionId")
                         .HasMaxLength(200);

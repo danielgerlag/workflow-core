@@ -12,6 +12,7 @@ using WorkflowCore.LockProviders.Redlock.Models;
 
 namespace WorkflowCore.LockProviders.Redlock.Services
 {
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public class RedlockProvider : IDistributedLockProvider
     {
         const int DefaultRetryCount = 3;
@@ -194,4 +195,5 @@ namespace WorkflowCore.LockProviders.Redlock.Services
         }
 
     }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }

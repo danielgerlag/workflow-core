@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
-using RabbitMQ.Client;
+//using RabbitMQ.Client;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -24,6 +24,8 @@ namespace WorkflowCore.Sample04
             host.RegisterWorkflow<EventSampleWorkflow, MyDataClass>();
             host.Start();
 
+            host.PublishEvent("MyEvent", "0", "boo");
+
             var initialData = new MyDataClass();
             host.StartWorkflow("EventSampleWorkflow", 1, initialData);
 
@@ -42,8 +44,8 @@ namespace WorkflowCore.Sample04
             services.AddLogging();
             services.AddWorkflow();
             //services.AddWorkflow(x => x.UseMongoDB(@"mongodb://localhost:27017", "workflow"));
-            //services.AddWorkflow(x => x.UseSqlServer(@"Server=.;Database=WorkflowCore4;Trusted_Connection=True;", true, true));
-            //services.AddWorkflow(x => x.UsePostgreSQL(@"Server=127.0.0.1;Port=5432;Database=workflow3;User Id=postgres;", true, true));
+            //services.AddWorkflow(x => x.UseSqlServer(@"Server=.\SQLEXPRESS;Database=WorkflowCore;Trusted_Connection=True;", true, true));
+            //services.AddWorkflow(x => x.UsePostgreSQL(@"Server=127.0.0.1;Port=5432;Database=workflow;User Id=postgres;", true, true));
             //services.AddWorkflow(x => x.UseSqlite(@"Data Source=database.db;", true));            
             //redis = ConnectionMultiplexer.Connect("127.0.0.1");
             //services.AddWorkflow(x =>

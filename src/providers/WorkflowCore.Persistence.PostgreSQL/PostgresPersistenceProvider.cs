@@ -36,13 +36,7 @@ namespace WorkflowCore.Persistence.PostgreSQL
             builder.ForNpgsqlToTable("Workflow", "wfc");
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
-        
-        protected override void ConfigurePublicationStorage(EntityTypeBuilder<PersistedPublication> builder)
-        {
-            builder.ForNpgsqlToTable("UnpublishedEvent", "wfc");
-            builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
-        }
-
+                
         protected override void ConfigureExecutionPointerStorage(EntityTypeBuilder<PersistedExecutionPointer> builder)
         {
             builder.ForNpgsqlToTable("ExecutionPointer", "wfc");
@@ -58,6 +52,12 @@ namespace WorkflowCore.Persistence.PostgreSQL
         protected override void ConfigureExetensionAttributeStorage(EntityTypeBuilder<PersistedExtensionAttribute> builder)
         {
             builder.ForNpgsqlToTable("ExtensionAttribute", "wfc");
+            builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
+        }
+
+        protected override void ConfigureEventStorage(EntityTypeBuilder<PersistedEvent> builder)
+        {
+            builder.ForNpgsqlToTable("Event", "wfc");
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
     }

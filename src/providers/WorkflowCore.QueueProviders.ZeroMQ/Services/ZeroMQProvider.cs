@@ -15,11 +15,12 @@ using WorkflowCore.QueueProviders.ZeroMQ.Models;
 
 namespace WorkflowCore.QueueProviders.ZeroMQ.Services
 {
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public class ZeroMQProvider : IQueueProvider
     {
         private ILogger _logger;
         private ConcurrentQueue<string> _localRunQueue = new ConcurrentQueue<string>();
-        private ConcurrentQueue<EventPublication> _localPublishQueue = new ConcurrentQueue<EventPublication>();
+        private ConcurrentQueue<string> _localPublishQueue = new ConcurrentQueue<string>();
         private NetMQPoller _poller = new NetMQPoller();
         private PushSocket _nodeSocket;
         private List<PullSocket> _peerSockets = new List<PullSocket>();
@@ -41,35 +42,26 @@ namespace WorkflowCore.QueueProviders.ZeroMQ.Services
             }
         }
 
-        public async Task<string> DequeueForProcessing()
+        public async Task QueueWork(string id, QueueType queue)
         {
-            string id;
-            if (_localRunQueue.TryDequeue(out id))
+            switch (queue)
             {
+                case QueueType.Workflow:
+                    PushMessage(Message.FromWorkflowId(id));
+                    break;
+                case QueueType.Event:
+                    PushMessage(Message.FromEventId(id));
+                    break;
+            }
+        }
+
+        public async Task<string> DequeueWork(QueueType queue)
+        {
+            if (SelectQueue(queue).TryDequeue(out string id))
                 return id;
-            }
-            return null;
-        }
 
-        public async Task<EventPublication> DequeueForPublishing()
-        {            
-            EventPublication item;
-            if (_localPublishQueue.TryDequeue(out item))
-            {
-                return item;
-            }
             return null;
-        }
-        
-        public async Task QueueForProcessing(string Id)
-        {
-            PushMessage(Message.FromWorkflowId(Id));
-        }
-
-        public async Task QueueForPublishing(EventPublication item)
-        {
-            PushMessage(Message.FromPublication(item));
-        }
+        }        
 
         public void Start()
         {
@@ -96,8 +88,8 @@ namespace WorkflowCore.QueueProviders.ZeroMQ.Services
                 case MessageType.Workflow:
                     _localRunQueue.Enqueue(msg.Content);
                     break;
-                case MessageType.Publication:
-                    _localPublishQueue.Enqueue(msg.ToEventPublication());
+                case MessageType.Event:
+                    _localPublishQueue.Enqueue(msg.Content);
                     break;
             }
         }
@@ -132,6 +124,19 @@ namespace WorkflowCore.QueueProviders.ZeroMQ.Services
             if (_active)
                 Stop();
         }
-        
+
+        private ConcurrentQueue<string> SelectQueue(QueueType queue)
+        {
+            switch (queue)
+            {
+                case QueueType.Workflow:
+                    return _localRunQueue;
+                case QueueType.Event:
+                    return _localPublishQueue;
+            }
+            return null;
+        }
+
     }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }

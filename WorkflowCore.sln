@@ -1,79 +1,78 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26206.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{EF47161E-E399-451C-BDE8-E92AAD3BD761}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F6AC9AEB-24EF-475A-B190-AA4D9E01270A}"
 	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
 		readme.md = readme.md
 	EndProjectSection
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore", "src\WorkflowCore\WorkflowCore.xproj", "{B7B2EA4D-E7F0-43E2-942A-3A5AA8F57272}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{5080DB09-CBE8-4C45-9957-C3BB7651755E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "providers", "providers", "{2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.Persistence.MongoDB", "src\providers\WorkflowCore.Persistence.MongoDB\WorkflowCore.Persistence.MongoDB.xproj", "{DD26E7B4-9D3A-4E1E-8585-862DB6DE21EB}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.Sample01", "src\samples\WorkflowCore.Sample01\WorkflowCore.Sample01.xproj", "{660FEDAB-D085-476B-9E16-73E42F66DB4F}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.Sample02", "src\samples\WorkflowCore.Sample02\WorkflowCore.Sample02.xproj", "{BC6F28F1-9F47-4FFE-AD06-2B74CB89E76B}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.Sample03", "src\samples\WorkflowCore.Sample03\WorkflowCore.Sample03.xproj", "{FB738255-0304-4A25-B256-22E36EDF9507}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.Sample04", "src\samples\WorkflowCore.Sample04\WorkflowCore.Sample04.xproj", "{91301F52-E589-499E-97DE-91FA074B790C}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.Sample05", "src\samples\WorkflowCore.Sample05\WorkflowCore.Sample05.xproj", "{68883A5C-BD59-404D-A394-18104D6F472C}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.Persistence.EntityFramework", "src\providers\WorkflowCore.Persistence.EntityFramework\WorkflowCore.Persistence.EntityFramework.xproj", "{FE54AD67-817A-4CC6-A9EF-C9F7A5122CA4}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.Persistence.SqlServer", "src\providers\WorkflowCore.Persistence.SqlServer\WorkflowCore.Persistence.SqlServer.xproj", "{1DE96D4F-F2CA-4740-8764-BADD1000040A}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.Persistence.PostgreSQL", "src\providers\WorkflowCore.Persistence.PostgreSQL\WorkflowCore.Persistence.PostgreSQL.xproj", "{9274B938-3996-4FBA-AE2F-0C82009B1116}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.Persistence.Sqlite", "src\providers\WorkflowCore.Persistence.Sqlite\WorkflowCore.Persistence.Sqlite.xproj", "{86BC1E05-E9CE-4E53-B324-885A2FDBCE74}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.LockProviders.Redlock", "src\providers\WorkflowCore.LockProviders.Redlock\WorkflowCore.LockProviders.Redlock.xproj", "{05250D58-A59E-4212-8D55-E7BC0396E9F5}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.LockProviders.ZooKeeper", "src\providers\WorkflowCore.LockProviders.ZooKeeper\WorkflowCore.LockProviders.ZooKeeper.xproj", "{3BBA51EE-765A-4772-A940-7F853E1010FC}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.QueueProviders.RabbitMQ", "src\providers\WorkflowCore.QueueProviders.RabbitMQ\WorkflowCore.QueueProviders.RabbitMQ.xproj", "{AFAD87C7-B2EE-451E-BA7E-3F5A91358C48}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.Sample06", "src\samples\WorkflowCore.Sample06\WorkflowCore.Sample06.xproj", "{8FEAFD74-C304-4F75-BA38-4686BE55C891}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.UnitTests", "test\WorkflowCore.UnitTests\WorkflowCore.UnitTests.xproj", "{37B598A8-B054-4ABA-884D-96AEF2511600}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.TestAssets", "test\WorkflowCore.TestAssets\WorkflowCore.TestAssets.xproj", "{17C270A8-EC88-4883-9318-74BB28EFF508}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.Sample07", "src\samples\WorkflowCore.Sample07\WorkflowCore.Sample07.xproj", "{0631B4BA-D5DD-4C9E-8842-0D370A3D714A}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.QueueProviders.ZeroMQ", "src\providers\WorkflowCore.QueueProviders.ZeroMQ\WorkflowCore.QueueProviders.ZeroMQ.xproj", "{F33E89F6-BC8A-4E11-BEA1-C9A80E815DE8}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.LockProviders.ZeroMQ", "src\providers\WorkflowCore.LockProviders.ZeroMQ\WorkflowCore.LockProviders.ZeroMQ.xproj", "{4DC2200D-BA4F-4508-8426-F0CAE5EE90B5}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.Tests.ZeroMQ", "test\WorkflowCore.Tests.ZeroMQ\WorkflowCore.Tests.ZeroMQ.xproj", "{15FB5CB9-075B-4A54-98EC-2A1F5C40BE48}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ScratchPad", "test\ScratchPad\ScratchPad.xproj", "{6B1C4B1E-AB43-4E87-A137-3AD9F534F059}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.IntegrationTests", "test\WorkflowCore.IntegrationTests\WorkflowCore.IntegrationTests.xproj", "{9162B6AD-AD06-4C64-9032-0E727643B1B9}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.Tests.MongoDB", "test\WorkflowCore.Tests.MongoDB\WorkflowCore.Tests.MongoDB.xproj", "{58EC09C7-EC0A-4708-9B6F-FBE6243CEB49}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.Tests.PostgreSQL", "test\WorkflowCore.Tests.PostgreSQL\WorkflowCore.Tests.PostgreSQL.xproj", "{8C2BD4D2-43EC-4930-9364-CDA938C01803}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.Users", "src\extensions\WorkflowCore.Users\WorkflowCore.Users.xproj", "{4C4DE624-9D91-484F-8BF7-2D71264EAB8B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "extensions", "extensions", "{6803696C-B19A-4B27-9193-082A02B6F205}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.Sample08", "src\samples\WorkflowCore.Sample08\WorkflowCore.Sample08.xproj", "{ED5074AF-A09E-4357-A419-FE3476C0FAE7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore", "src\WorkflowCore\WorkflowCore.csproj", "{B7B2EA4D-E7F0-43E2-942A-3A5AA8F57272}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "WorkflowCore.WebAPI", "src\extensions\WorkflowCore.WebAPI\WorkflowCore.WebAPI.xproj", "{FBF8D151-A3BF-4EB3-8F80-D71618696362}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Persistence.MongoDB", "src\providers\WorkflowCore.Persistence.MongoDB\WorkflowCore.Persistence.MongoDB.csproj", "{DD26E7B4-9D3A-4E1E-8585-862DB6DE21EB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample01", "src\samples\WorkflowCore.Sample01\WorkflowCore.Sample01.csproj", "{660FEDAB-D085-476B-9E16-73E42F66DB4F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample02", "src\samples\WorkflowCore.Sample02\WorkflowCore.Sample02.csproj", "{BC6F28F1-9F47-4FFE-AD06-2B74CB89E76B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample03", "src\samples\WorkflowCore.Sample03\WorkflowCore.Sample03.csproj", "{FB738255-0304-4A25-B256-22E36EDF9507}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample04", "src\samples\WorkflowCore.Sample04\WorkflowCore.Sample04.csproj", "{91301F52-E589-499E-97DE-91FA074B790C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample05", "src\samples\WorkflowCore.Sample05\WorkflowCore.Sample05.csproj", "{68883A5C-BD59-404D-A394-18104D6F472C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Persistence.EntityFramework", "src\providers\WorkflowCore.Persistence.EntityFramework\WorkflowCore.Persistence.EntityFramework.csproj", "{FE54AD67-817A-4CC6-A9EF-C9F7A5122CA4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Persistence.SqlServer", "src\providers\WorkflowCore.Persistence.SqlServer\WorkflowCore.Persistence.SqlServer.csproj", "{1DE96D4F-F2CA-4740-8764-BADD1000040A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Persistence.PostgreSQL", "src\providers\WorkflowCore.Persistence.PostgreSQL\WorkflowCore.Persistence.PostgreSQL.csproj", "{9274B938-3996-4FBA-AE2F-0C82009B1116}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Persistence.Sqlite", "src\providers\WorkflowCore.Persistence.Sqlite\WorkflowCore.Persistence.Sqlite.csproj", "{86BC1E05-E9CE-4E53-B324-885A2FDBCE74}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.LockProviders.Redlock", "src\providers\WorkflowCore.LockProviders.Redlock\WorkflowCore.LockProviders.Redlock.csproj", "{05250D58-A59E-4212-8D55-E7BC0396E9F5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.LockProviders.ZooKeeper", "src\providers\WorkflowCore.LockProviders.ZooKeeper\WorkflowCore.LockProviders.ZooKeeper.csproj", "{3BBA51EE-765A-4772-A940-7F853E1010FC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.QueueProviders.RabbitMQ", "src\providers\WorkflowCore.QueueProviders.RabbitMQ\WorkflowCore.QueueProviders.RabbitMQ.csproj", "{AFAD87C7-B2EE-451E-BA7E-3F5A91358C48}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample06", "src\samples\WorkflowCore.Sample06\WorkflowCore.Sample06.csproj", "{8FEAFD74-C304-4F75-BA38-4686BE55C891}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.UnitTests", "test\WorkflowCore.UnitTests\WorkflowCore.UnitTests.csproj", "{37B598A8-B054-4ABA-884D-96AEF2511600}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.TestAssets", "test\WorkflowCore.TestAssets\WorkflowCore.TestAssets.csproj", "{17C270A8-EC88-4883-9318-74BB28EFF508}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample07", "src\samples\WorkflowCore.Sample07\WorkflowCore.Sample07.csproj", "{0631B4BA-D5DD-4C9E-8842-0D370A3D714A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.QueueProviders.ZeroMQ", "src\providers\WorkflowCore.QueueProviders.ZeroMQ\WorkflowCore.QueueProviders.ZeroMQ.csproj", "{F33E89F6-BC8A-4E11-BEA1-C9A80E815DE8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.LockProviders.ZeroMQ", "src\providers\WorkflowCore.LockProviders.ZeroMQ\WorkflowCore.LockProviders.ZeroMQ.csproj", "{4DC2200D-BA4F-4508-8426-F0CAE5EE90B5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Tests.ZeroMQ", "test\WorkflowCore.Tests.ZeroMQ\WorkflowCore.Tests.ZeroMQ.csproj", "{15FB5CB9-075B-4A54-98EC-2A1F5C40BE48}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScratchPad", "test\ScratchPad\ScratchPad.csproj", "{6B1C4B1E-AB43-4E87-A137-3AD9F534F059}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.IntegrationTests", "test\WorkflowCore.IntegrationTests\WorkflowCore.IntegrationTests.csproj", "{9162B6AD-AD06-4C64-9032-0E727643B1B9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Tests.MongoDB", "test\WorkflowCore.Tests.MongoDB\WorkflowCore.Tests.MongoDB.csproj", "{58EC09C7-EC0A-4708-9B6F-FBE6243CEB49}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Tests.PostgreSQL", "test\WorkflowCore.Tests.PostgreSQL\WorkflowCore.Tests.PostgreSQL.csproj", "{8C2BD4D2-43EC-4930-9364-CDA938C01803}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Users", "src\extensions\WorkflowCore.Users\WorkflowCore.Users.csproj", "{4C4DE624-9D91-484F-8BF7-2D71264EAB8B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample08", "src\samples\WorkflowCore.Sample08\WorkflowCore.Sample08.csproj", "{ED5074AF-A09E-4357-A419-FE3476C0FAE7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.WebAPI", "src\extensions\WorkflowCore.WebAPI\WorkflowCore.WebAPI.csproj", "{FBF8D151-A3BF-4EB3-8F80-D71618696362}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -198,9 +197,10 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{B7B2EA4D-E7F0-43E2-942A-3A5AA8F57272} = {EF47161E-E399-451C-BDE8-E92AAD3BD761}
 		{5080DB09-CBE8-4C45-9957-C3BB7651755E} = {EF47161E-E399-451C-BDE8-E92AAD3BD761}
 		{2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2} = {EF47161E-E399-451C-BDE8-E92AAD3BD761}
+		{6803696C-B19A-4B27-9193-082A02B6F205} = {EF47161E-E399-451C-BDE8-E92AAD3BD761}
+		{B7B2EA4D-E7F0-43E2-942A-3A5AA8F57272} = {EF47161E-E399-451C-BDE8-E92AAD3BD761}
 		{DD26E7B4-9D3A-4E1E-8585-862DB6DE21EB} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
 		{660FEDAB-D085-476B-9E16-73E42F66DB4F} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
 		{BC6F28F1-9F47-4FFE-AD06-2B74CB89E76B} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
@@ -226,7 +226,6 @@ Global
 		{58EC09C7-EC0A-4708-9B6F-FBE6243CEB49} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
 		{8C2BD4D2-43EC-4930-9364-CDA938C01803} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
 		{4C4DE624-9D91-484F-8BF7-2D71264EAB8B} = {6803696C-B19A-4B27-9193-082A02B6F205}
-		{6803696C-B19A-4B27-9193-082A02B6F205} = {EF47161E-E399-451C-BDE8-E92AAD3BD761}
 		{ED5074AF-A09E-4357-A419-FE3476C0FAE7} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
 		{FBF8D151-A3BF-4EB3-8F80-D71618696362} = {6803696C-B19A-4B27-9193-082A02B6F205}
 	EndGlobalSection

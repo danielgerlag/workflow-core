@@ -13,6 +13,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Persistence.MongoDB.Services
 {
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public class MongoPersistenceProvider : IPersistenceProvider
     {
 
@@ -21,7 +22,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
         public MongoPersistenceProvider(IMongoDatabase database)
         {
             _database = database;
-            CreateIndexes(WorkflowInstances);
+            CreateIndexes(this);
         }
 
         static MongoPersistenceProvider()
@@ -54,19 +55,31 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                 x.MapProperty(y => y.EventKey);
                 x.MapProperty(y => y.StepId);                
                 x.MapProperty(y => y.WorkflowId);
+                x.MapProperty(y => y.SubscribeAsOf);                
+            });
+
+            BsonClassMap.RegisterClassMap<Event>(x =>
+            {
+                x.MapIdProperty(y => y.Id)
+                    .SetIdGenerator(new StringObjectIdGenerator());
+                x.MapProperty(y => y.EventName);
+                x.MapProperty(y => y.EventKey);
+                x.MapProperty(y => y.EventData);
+                x.MapProperty(y => y.EventTime);
+                x.MapProperty(y => y.IsProcessed);
             });
         }
 
         static bool indexesCreated = false;
-        static void CreateIndexes(IMongoCollection<WorkflowInstance> workflowInstances)
+        static void CreateIndexes(MongoPersistenceProvider instance)
         {
             if (!indexesCreated)
             {
-                workflowInstances.Indexes.CreateOne(Builders<WorkflowInstance>.IndexKeys.Ascending(x => x.NextExecution), new CreateIndexOptions() { Background = true, Name = "idx_nextExec" });
+                instance.WorkflowInstances.Indexes.CreateOne(Builders<WorkflowInstance>.IndexKeys.Ascending(x => x.NextExecution), new CreateIndexOptions() { Background = true, Name = "idx_nextExec" });
+                instance.Events.Indexes.CreateOne(Builders<Event>.IndexKeys.Ascending(x => x.IsProcessed), new CreateIndexOptions() { Background = true, Name = "idx_processed" });
                 indexesCreated = true;
             }
         }
-
 
         private IMongoCollection<WorkflowInstance> WorkflowInstances
         {
@@ -84,11 +97,11 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             }
         }
 
-        private IMongoCollection<EventPublication> UnpublishedEvents
+        private IMongoCollection<Event> Events
         {
             get
             {
-                return _database.GetCollection<EventPublication>("wfc.unpublishedEvents");
+                return _database.GetCollection<Event>("wfc.events");
             }
         }
 
@@ -140,13 +153,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             await EventSubscriptions.InsertOneAsync(subscription);
             return subscription.Id;
         }
-
-        public async Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey)
-        {
-            return EventSubscriptions.AsQueryable()
-                .Where(x => x.EventName == eventName && x.EventKey == eventKey).ToList();
-        }
-
+        
         public async Task TerminateSubscription(string eventSubscriptionId)
         {
             await EventSubscriptions.DeleteOneAsync(x => x.Id == eventSubscriptionId);
@@ -155,21 +162,60 @@ namespace WorkflowCore.Persistence.MongoDB.Services
         public void EnsureStoreExists()
         {
             
+        }                
+                
+        public async Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf)
+        {
+            return EventSubscriptions.AsQueryable()
+                .Where(x => x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf).ToList();
         }
 
-        public async Task CreateUnpublishedEvent(EventPublication publication)
+        public async Task<string> CreateEvent(Event newEvent)
         {
-            await UnpublishedEvents.InsertOneAsync(publication);
+            await Events.InsertOneAsync(newEvent);
+            return newEvent.Id;
         }
 
-        public async Task<IEnumerable<EventPublication>> GetUnpublishedEvents()
+        public async Task<Event> GetEvent(string id)
         {
-            return await UnpublishedEvents.AsQueryable().ToListAsync();
+            return Events.AsQueryable().First(x => x.Id == id);
         }
 
-        public async Task RemoveUnpublishedEvent(Guid id)
+        public async Task<IEnumerable<string>> GetRunnableEvents()
         {
-            await UnpublishedEvents.DeleteOneAsync(x => x.Id == id);
+            var now = DateTime.Now.ToUniversalTime();
+
+            return Events.AsQueryable()
+                .Where(x => !x.IsProcessed)
+                .Where(x => x.EventTime <= now)
+                .Select(x => x.Id)
+                .ToList();
+        }
+
+        public async Task MarkEventProcessed(string id)
+        {
+            var update = Builders<Event>.Update
+                .Set(x => x.IsProcessed, true);
+
+            await Events.UpdateOneAsync(x => x.Id == id, update);
+        }
+
+        public async Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf)
+        {
+            return Events.AsQueryable()
+                .Where(x => x.EventName == eventName && x.EventKey == eventKey)
+                .Where(x => x.EventTime >= asOf)
+                .Select(x => x.Id)
+                .ToList();
+        }
+
+        public async Task MarkEventUnprocessed(string id)
+        {
+            var update = Builders<Event>.Update
+                .Set(x => x.IsProcessed, false);
+
+            await Events.UpdateOneAsync(x => x.Id == id, update);
         }
     }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }
