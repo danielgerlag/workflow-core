@@ -128,8 +128,7 @@ namespace WorkflowCore.Services
             QueueProvider.Stop();
             LockProvider.Stop();
         }
-
-
+        
         public async Task SubscribeEvent(string workflowId, int stepId, string eventName, string eventKey, DateTime asOf)
         {
             Logger.LogDebug("Subscribing to event {0} {1} for workflow {2} step {3}", eventName, eventKey, workflowId, stepId);
@@ -141,6 +140,17 @@ namespace WorkflowCore.Services
             subscription.SubscribeAsOf = asOf;
 
             await PersistenceStore.CreateEventSubscription(subscription);
+            var events = await PersistenceStore.GetEvents(eventName, eventKey, asOf);
+            foreach (var evt in events)
+            {
+                await PersistenceStore.MarkEventUnprocessed(evt);
+                var task = new Task(() => 
+                {
+                    Thread.Sleep(500);
+                    QueueProvider.QueueWork(evt, QueueType.Event);
+                });
+                task.Start();                
+            }
         }
 
         public async Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null)

@@ -115,6 +115,22 @@ namespace WorkflowCore.Services
         {
             return _events.FirstOrDefault(x => x.Id == id);
         }
+
+        public async Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf)
+        {
+            return _events
+                .Where(x => x.EventName == eventName && x.EventKey == eventKey)
+                .Where(x => x.EventTime >= asOf)
+                .Select(x => x.Id)
+                .ToList();
+        }
+
+        public async Task MarkEventUnprocessed(string id)
+        {
+            var evt = _events.FirstOrDefault(x => x.Id == id);
+            if (evt != null)
+                evt.IsProcessed = false;
+        }
     }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }

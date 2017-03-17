@@ -34,7 +34,11 @@ namespace WorkflowCore.Interface
 
         Task<IEnumerable<string>> GetRunnableEvents();
 
+        Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf);
+
         Task MarkEventProcessed(string id);
+
+        Task MarkEventUnprocessed(string id);
 
         void EnsureStoreExists();
 

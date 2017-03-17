@@ -297,6 +297,41 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 Entry(existingEntity).State = EntityState.Detached;                
             }
         }
+
+        public async Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf)
+        {
+            lock (this)
+            {
+                var raw = Set<PersistedEvent>()
+                    .Where(x => x.EventName == eventName && x.EventKey == eventKey)
+                    .Where(x => x.EventTime >= asOf)
+                    .Select(x => x.EventId)
+                    .ToList();
+
+                List<string> result = new List<string>();
+
+                foreach (var s in raw)
+                    result.Add(s.ToString());
+
+                return result;
+            }
+        }
+
+        public async Task MarkEventUnprocessed(string id)
+        {
+            lock (this)
+            {
+                Guid uid = new Guid(id);
+                var existingEntity = Set<PersistedEvent>()
+                    .Where(x => x.EventId == uid)
+                    .AsTracking()
+                    .First();
+
+                existingEntity.IsProcessed = false;
+                SaveChanges();
+                Entry(existingEntity).State = EntityState.Detached;
+            }
+        }
     }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }

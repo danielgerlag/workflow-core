@@ -23,7 +23,7 @@ namespace WorkflowCore.Models
                 if (EventKey != null)
                     executionPointer.EventKey = Convert.ToString(EventKey.Compile().DynamicInvoke(workflow.Data));
 
-                DateTime effectiveDate = DateTime.Now.ToUniversalTime();
+                DateTime effectiveDate = DateTime.MinValue;
 
                 if (EffectiveDate != null)
                     effectiveDate = Convert.ToDateTime(EffectiveDate.Compile().DynamicInvoke(workflow.Data));

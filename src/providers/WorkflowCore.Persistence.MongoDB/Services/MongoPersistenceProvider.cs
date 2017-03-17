@@ -199,6 +199,23 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
             await Events.UpdateOneAsync(x => x.Id == id, update);
         }
+
+        public async Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf)
+        {
+            return Events.AsQueryable()
+                .Where(x => x.EventName == eventName && x.EventKey == eventKey)
+                .Where(x => x.EventTime >= asOf)
+                .Select(x => x.Id)
+                .ToList();
+        }
+
+        public async Task MarkEventUnprocessed(string id)
+        {
+            var update = Builders<Event>.Update
+                .Set(x => x.IsProcessed, false);
+
+            await Events.UpdateOneAsync(x => x.Id == id, update);
+        }
     }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }

@@ -24,6 +24,8 @@ namespace WorkflowCore.Sample04
             host.RegisterWorkflow<EventSampleWorkflow, MyDataClass>();
             host.Start();
 
+            host.PublishEvent("MyEvent", "0", "boo");
+
             var initialData = new MyDataClass();
             host.StartWorkflow("EventSampleWorkflow", 1, initialData);
 
