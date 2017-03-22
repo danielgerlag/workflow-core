@@ -2,7 +2,8 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/xnby6p5v4ur04u76?svg=true)](https://ci.appveyor.com/project/danielgerlag/workflow-core)
 
-Workflow Core is a light weight workflow engine targeting .NET Standard.  It supports pluggable persistence and concurrency providers to allow for multi-node clusters.
+Workflow Core is a light weight workflow engine targeting .NET Standard.  It supports pluggable persistence and concurrency providers to allow for multi-node clusters.  See [Wiki here.](https://github.com/danielgerlag/workflow-core/wiki)
+
 
 ## Installing
 
@@ -11,8 +12,6 @@ Install the NuGet package "WorkflowCore"
 ```
 PM> Install-Package WorkflowCore
 ```
-
-[Wiki](https://github.com/danielgerlag/workflow-core/wiki)
 
 ## Basic Concepts
 
