@@ -1,4 +1,6 @@
-# Workflow Core ![status](https://ci.appveyor.com/api/projects/status/github/danielgerlag/workflow-core)
+# Workflow Core
+
+[![Build status](https://ci.appveyor.com/api/projects/status/xnby6p5v4ur04u76?svg=true)](https://ci.appveyor.com/project/danielgerlag/workflow-core)
 
 Workflow Core is a light weight workflow engine targeting .NET Standard.  It supports pluggable persistence and concurrency providers to allow for multi-node clusters.
 
@@ -7,9 +9,10 @@ Workflow Core is a light weight workflow engine targeting .NET Standard.  It sup
 Install the NuGet package "WorkflowCore"
 
 ```
-Install-Package WorkflowCore -Pre
+PM> Install-Package WorkflowCore
 ```
 
+[Wiki](https://github.com/danielgerlag/workflow-core/wiki)
 
 ## Basic Concepts
 
@@ -296,9 +299,9 @@ The WorkflowHost service also has a .OnStepError event which can be used to inte
 
 ## Ports
 
-[Node.js] (https://github.com/danielgerlag/workflow-es)
+[Node.js](https://github.com/danielgerlag/workflow-es)
 
-[Ruby] (https://github.com/danielgerlag/workflow_rb)
+[Ruby](https://github.com/danielgerlag/workflow_rb)
 
 ## License
 
