@@ -13,10 +13,23 @@ using WorkflowCore.Services;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
+    [Behaviors]
+    public class OutcomeForkBehavior
+    {
+        static int TaskATicker = 0;
+        static int TaskBTicker = 0;
+        static int TaskCTicker = 0;
+        static WorkflowInstance Instance;
+
+        It should_be_marked_as_complete = () => Instance.Status.ShouldEqual(WorkflowStatus.Complete);
+        It should_execute_taskA_once = () => TaskATicker.ShouldEqual(1);
+        It should_not_execute_taskB = () => TaskBTicker.ShouldEqual(0);
+        It should_execute_taskC_once = () => TaskCTicker.ShouldEqual(1);
+    }
+
     [Subject(typeof(WorkflowHost))]
     public class OutcomeForkTest : WithFakes<MoqFakeEngine>
     {
-
         static int TaskATicker = 0;
         static int TaskBTicker = 0;
         static int TaskCTicker = 0;
@@ -70,13 +83,24 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         static IPersistenceProvider PersistenceProvider;
         static WorkflowInstance Instance;
 
+        Establish context;
 
-        Establish context = () =>
+        public OutcomeForkTest()
+        {
+            context = EstablishContext;
+        }
+
+        protected virtual void ConfigureWorkflow(IServiceCollection services)
+        {
+            services.AddWorkflow();
+        }
+
+        void EstablishContext()
         {
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
-            services.AddWorkflow();
+            ConfigureWorkflow(services);
             
             var serviceProvider = services.BuildServiceProvider();
 
@@ -90,7 +114,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
             Host = serviceProvider.GetService<IWorkflowHost>();
             Host.Start();            
-        };
+        }
 
         Because of = () =>
         {
@@ -105,16 +129,11 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             }
         };
 
-        It should_be_marked_as_complete = () => Instance.Status.ShouldEqual(WorkflowStatus.Complete);
-        It should_execute_taskA_once = () => TaskATicker.ShouldEqual(1);
-        It should_not_execute_taskB = () => TaskBTicker.ShouldEqual(0);
-        It should_execute_taskC_once = () => TaskCTicker.ShouldEqual(1);
+        Behaves_like<OutcomeForkBehavior> outcome_fork_workflow;
 
         Cleanup after = () =>
         {
             Host.Stop();
         };
-
-
     }
 }

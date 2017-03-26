@@ -13,11 +13,28 @@ using WorkflowCore.Services;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
+    class DataIODataClass
+    {
+        public int Value1 { get; set; }
+        public int Value2 { get; set; }
+        public int Value3 { get; set; }
+    }
+
+    [Behaviors]
+    public class DataIOBehavior
+    {
+        static string WorkflowId;
+        static IPersistenceProvider PersistenceProvider;
+        static WorkflowInstance Instance;
+
+        It should_be_marked_as_complete = () => Instance.Status.ShouldEqual(WorkflowStatus.Complete);
+        It should_have_a_return_value_of_5 = () => (Instance.Data as DataIODataClass).Value3.ShouldEqual(5);
+    }
+
     [Subject(typeof(WorkflowHost))]
     public class DataIO : WithFakes<MoqFakeEngine>
     {
-
-        public class AddNumbers : StepBody
+        class AddNumbers : StepBody
         {
             public int Input1 { get; set; }
             public int Input2 { get; set; }
@@ -29,19 +46,12 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                 return ExecutionResult.Next();
             }
         }
-
-        class MyDataClass
-        {
-            public int Value1 { get; set; }
-            public int Value2 { get; set; }
-            public int Value3 { get; set; }
-        }
-
-        class DataIOWorkflow : IWorkflow<MyDataClass>
+                
+        class DataIOWorkflow : IWorkflow<DataIODataClass>
         {
             public string Id { get { return "DataIOWorkflow"; } }
             public int Version { get { return 1; } }
-            public void Build(IWorkflowBuilder<MyDataClass> builder)
+            public void Build(IWorkflowBuilder<DataIODataClass> builder)
             {
                 builder
                     .StartWith<AddNumbers>()
@@ -56,13 +66,24 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         static IPersistenceProvider PersistenceProvider;
         static WorkflowInstance Instance;
 
+        Establish context;
 
-        Establish context = () =>
+        public DataIO()
+        {
+            context = EstablishContext;
+        }
+
+        protected virtual void ConfigureWorkflow(IServiceCollection services)
+        {
+            services.AddWorkflow();
+        }
+
+        void EstablishContext()
         {
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
-            services.AddWorkflow();
+            ConfigureWorkflow(services);
             
             var serviceProvider = services.BuildServiceProvider();
 
@@ -76,11 +97,11 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
             Host = serviceProvider.GetService<IWorkflowHost>();
             Host.Start();            
-        };
+        }
 
         Because of = () =>
         {
-            WorkflowId = Host.StartWorkflow("DataIOWorkflow", new MyDataClass() { Value1 = 2, Value2 = 3 }).Result;
+            WorkflowId = Host.StartWorkflow("DataIOWorkflow", new DataIODataClass() { Value1 = 2, Value2 = 3 }).Result;
             Instance = PersistenceProvider.GetWorkflowInstance(WorkflowId).Result;
             int counter = 0;
             while ((Instance.Status == WorkflowStatus.Runnable) && (counter < 60))
@@ -91,8 +112,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             }
         };
 
-        It should_be_marked_as_complete = () => Instance.Status.ShouldEqual(WorkflowStatus.Complete);
-        It should_have_a_return_value_of_5 = () => (Instance.Data as MyDataClass).Value3.ShouldEqual(5);        
+        Behaves_like<DataIOBehavior> a_data_io_workflow;
 
         Cleanup after = () =>
         {

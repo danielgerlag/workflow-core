@@ -14,13 +14,26 @@ using WorkflowCore.Users.Models;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
-    [Subject(typeof(WorkflowHost))]
-    public class UserStepsTest : WithFakes<MoqFakeEngine>
+    [Behaviors]
+    public class UserStepsBehavior
     {
-
         static int ApproveStepTicker = 0;
         static int DisapproveStepTicker = 0;
+        static IEnumerable<OpenUserAction> openItems1;
+        static IEnumerable<OpenUserAction> openItems2;
 
+        It should_be_marked_as_approved = () => ApproveStepTicker.ShouldEqual(1);
+        It should_not_be_marked_as_disapproved = () => DisapproveStepTicker.ShouldEqual(0);
+        It should_have_return_open_item = () => openItems1.Count().ShouldEqual(1);
+        It should_have_return_2_options = () => openItems1.First().Options.Count().ShouldEqual(2);
+        It should_have_yes_option = () => openItems1.First().Options.ShouldContain(x => Convert.ToString(x.Value) == "yes");
+        It should_have_no_option = () => openItems1.First().Options.ShouldContain(x => Convert.ToString(x.Value) == "no");
+
+    }
+
+    [Subject(typeof(WorkflowHost))]
+    public class UserStepsTest : WithFakes<MoqFakeEngine>
+    {        
         class HumanWorkflow : IWorkflow
         {
             public string Id { get { return "HumanWorkflow"; } }
@@ -46,7 +59,9 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                     .End<UserStep>("Approval Step");
             }
         }
-                        
+
+        static int ApproveStepTicker = 0;
+        static int DisapproveStepTicker = 0;
         static IWorkflowHost Host;
         static string WorkflowId;
         static IEnumerable<OpenUserAction> openItems1;
@@ -54,13 +69,24 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         static IPersistenceProvider PersistenceProvider;
         static WorkflowInstance Instance;
 
+        Establish context;
 
-        Establish context = () =>
+        public UserStepsTest()
+        {
+            context = EstablishContext;
+        }
+
+        protected virtual void ConfigureWorkflow(IServiceCollection services)
+        {
+            services.AddWorkflow();
+        }
+
+        void EstablishContext()
         {
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
-            services.AddWorkflow();
+            ConfigureWorkflow(services);
             
             var serviceProvider = services.BuildServiceProvider();
 
@@ -74,7 +100,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
             Host = serviceProvider.GetService<IWorkflowHost>();
             Host.Start();            
-        };
+        }
 
         Because of = () =>
         {
@@ -104,18 +130,11 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             openItems2 = Host.GetOpenUserActions(WorkflowId);
         };
 
-        It should_be_marked_as_approved = () => ApproveStepTicker.ShouldEqual(1);
-        It should_not_be_marked_as_disapproved = () => DisapproveStepTicker.ShouldEqual(0);
-        It should_have_return_open_item = () => openItems1.Count().ShouldEqual(1);
-        It should_have_return_2_options = () => openItems1.First().Options.Count().ShouldEqual(2);
-        It should_have_yes_option = () => openItems1.First().Options.ShouldContain(x => Convert.ToString(x.Value) == "yes");
-        It should_have_no_option = () => openItems1.First().Options.ShouldContain(x => Convert.ToString(x.Value) == "no");
+        Behaves_like<UserStepsBehavior> user_steps_workflow;
 
         Cleanup after = () =>
         {
             Host.Stop();
         };
-
-
     }
 }

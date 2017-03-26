@@ -13,20 +13,30 @@ using WorkflowCore.Services;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
+    class EventsDataClass
+    {
+        public string StrValue { get; set; }
+    }
+
+    [Behaviors]
+    public class ExternalEventsBehavior
+    {
+        static string WorkflowId;
+        static IPersistenceProvider PersistenceProvider;
+        static WorkflowInstance Instance;
+
+        It should_be_marked_as_complete = () => Instance.Status.ShouldEqual(WorkflowStatus.Complete);
+        It should_have_a_return_value_of_pass = () => (Instance.Data as EventsDataClass).StrValue.ShouldEqual("Pass");
+    }
+
     [Subject(typeof(WorkflowHost))]
     public class ExternalEventsTest : WithFakes<MoqFakeEngine>
     {
-
-        public class MyDataClass
-        {
-            public string StrValue { get; set; }
-        }
-
-        class EventWorkflow : IWorkflow<MyDataClass>
+        class EventWorkflow : IWorkflow<EventsDataClass>
         {
             public string Id { get { return "EventWorkflow"; } }
             public int Version { get { return 1; } }
-            public void Build(IWorkflowBuilder<MyDataClass> builder)
+            public void Build(IWorkflowBuilder<EventsDataClass> builder)
             {
                 builder
                     .StartWith(context => ExecutionResult.Next())
@@ -40,13 +50,24 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         static IPersistenceProvider PersistenceProvider;
         static WorkflowInstance Instance;
 
+        Establish context;
 
-        Establish context = () =>
+        public ExternalEventsTest()
+        {
+            context = EstablishContext;
+        }
+
+        protected virtual void ConfigureWorkflow(IServiceCollection services)
+        {
+            services.AddWorkflow();
+        }
+
+        void EstablishContext() 
         {
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
-            services.AddWorkflow();
+            ConfigureWorkflow(services);
             
             var serviceProvider = services.BuildServiceProvider();
 
@@ -60,11 +81,11 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
             Host = serviceProvider.GetService<IWorkflowHost>();
             Host.Start();            
-        };
+        }
 
         Because of = () =>
         {
-            WorkflowId = Host.StartWorkflow("EventWorkflow", new MyDataClass() { StrValue = "0" }).Result;
+            WorkflowId = Host.StartWorkflow("EventWorkflow", new EventsDataClass() { StrValue = "0" }).Result;
 
             int counter = 0;
             while ((PersistenceProvider.GetSubcriptions("MyEvent", "0", DateTime.MaxValue).Result.Count() == 0) && (counter < 60))
@@ -85,8 +106,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             }
         };
 
-        It should_be_marked_as_complete = () => Instance.Status.ShouldEqual(WorkflowStatus.Complete);
-        It should_have_a_return_value_of_pass = () => (Instance.Data as MyDataClass).StrValue.ShouldEqual("Pass");
+        Behaves_like<ExternalEventsBehavior> events_workflow;
 
         Cleanup after = () =>
         {

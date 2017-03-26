@@ -13,13 +13,22 @@ using WorkflowCore.Services;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
-    [Subject(typeof(WorkflowHost))]
-    public class BasicWorkflowTest : WithFakes<MoqFakeEngine>
+    [Behaviors]
+    public class BasicWorkflowBehavior
     {
+        protected static int Step1Ticker = 0;
+        protected static int Step2Ticker = 0;        
+        protected static string WorkflowId;        
+        protected static WorkflowInstance Instance;
 
-        static int Step1Ticker = 0;
-        static int Step2Ticker = 0;
+        It should_be_marked_as_complete = () => Instance.Status.ShouldEqual(WorkflowStatus.Complete);
+        It should_execute_step1_once = () => Step1Ticker.ShouldEqual(1);
+        It should_execute_step2_once = () => Step2Ticker.ShouldEqual(1);
+    }
 
+    [Subject(typeof(WorkflowHost))]
+    public class BasicWorkflow : WithFakes<MoqFakeEngine>
+    {
         public class Step1 : StepBody
         {            
             public override ExecutionResult Run(IStepExecutionContext context)
@@ -29,7 +38,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             }
         }        
 
-        class BasicWorkflow : IWorkflow
+        class BasicWorkflowDef : IWorkflow
         {
             public string Id { get { return "BasicWorkflow"; } }
             public int Version { get { return 1; } }
@@ -45,35 +54,54 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                         
             }
         }
-                        
-        static IWorkflowHost Host;
-        static string WorkflowId;
-        static IPersistenceProvider PersistenceProvider;
-        static WorkflowInstance Instance;
 
+        protected Establish context;
+        protected Cleanup after;
+        protected Because of;
 
-        Establish context = () =>
+        protected static int Step1Ticker = 0;
+        protected static int Step2Ticker = 0;
+        protected static IWorkflowHost Host;
+        protected static string WorkflowId;
+        protected static IPersistenceProvider PersistenceProvider;
+        protected static WorkflowInstance Instance;
+
+        Behaves_like<BasicWorkflowBehavior> a_basic_workflow;
+
+        public BasicWorkflow()
+        {
+            context = EstablishContext;
+            of = BecauseOf;
+            after = CleanupAfter;
+        }
+
+        protected virtual void ConfigureWorkflow(IServiceCollection services)
+        {
+            services.AddWorkflow();
+        }
+
+        void EstablishContext()
         {
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
-            services.AddWorkflow();
-            
+            ConfigureWorkflow(services);
+
             var serviceProvider = services.BuildServiceProvider();
 
             //config logging
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             loggerFactory.AddConsole(LogLevel.Debug);
 
-            var registry = serviceProvider.GetService<IWorkflowRegistry>();            
-            registry.RegisterWorkflow(new BasicWorkflow());
+            var registry = serviceProvider.GetService<IWorkflowRegistry>();
+            registry.RegisterWorkflow(new BasicWorkflowDef());
 
             PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
             Host = serviceProvider.GetService<IWorkflowHost>();
-            Host.Start();            
-        };
+            Host.Start();
+        }               
 
-        Because of = () =>
+        void BecauseOf()
         {
             WorkflowId = Host.StartWorkflow("BasicWorkflow").Result;
             Instance = PersistenceProvider.GetWorkflowInstance(WorkflowId).Result;
@@ -84,17 +112,18 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                 counter++;
                 Instance = PersistenceProvider.GetWorkflowInstance(WorkflowId).Result;                
             }
-        };
+        }               
 
-        It should_be_marked_as_complete = () => Instance.Status.ShouldEqual(WorkflowStatus.Complete);
-        It should_execute_step1_once = () => Step1Ticker.ShouldEqual(1);
-        It should_execute_step2_once = () => Step2Ticker.ShouldEqual(1);
-
-        Cleanup after = () =>
+        void CleanupAfter()
         {
             Host.Stop();
-        };
-
-
+            Step1Ticker = 0;
+            Step2Ticker = 0;
+            Host = null;
+            WorkflowId = null;
+            Instance = null;
+            PersistenceProvider = null;
+        }
     }
 }
+
