@@ -27,7 +27,7 @@ public class MyWorkflow : IWorkflow
 
 ### Sample use cases
 
-New user workflow
+* New user workflow
 ```c#
 public class MyData
 {
@@ -53,7 +53,7 @@ public class MyWorkflow : IWorkflow
 }
 ```
 
-Resilient service orchestration
+* Resilient service orchestration
 
 ```c#
 public class MyWorkflow : IWorkflow
