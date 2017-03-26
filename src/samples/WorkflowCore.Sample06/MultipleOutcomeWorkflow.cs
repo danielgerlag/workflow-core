@@ -9,15 +9,8 @@ namespace WorkflowCore.Sample06
 {    
     public class MultipleOutcomeWorkflow : IWorkflow
     {
-        public string Id
-        {
-            get { return "MultipleOutcomeWorkflow"; }
-        }
-
-        public int Version
-        {
-            get { return 1; }
-        }
+        public string Id => "MultipleOutcomeWorkflow";
+        public int Version => 1;
 
         public void Build(IWorkflowBuilder<object> builder)
         {

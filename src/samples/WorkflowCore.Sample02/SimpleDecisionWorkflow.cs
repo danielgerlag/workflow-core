@@ -9,15 +9,8 @@ namespace WorkflowCore.Sample02
 {
     public class SimpleDecisionWorkflow : IWorkflow
     {
-        public string Id
-        {
-            get { return "Simple Decision Workflow"; }
-        }
-
-        public int Version
-        {
-            get { return 1; }
-        }
+        public string Id => "Simple Decision Workflow";
+        public int Version => 1;
 
         public void Build(IWorkflowBuilder<object> builder)
         {

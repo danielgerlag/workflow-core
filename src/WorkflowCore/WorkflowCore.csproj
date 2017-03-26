@@ -17,6 +17,8 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <Description>Workflow Core is a light weight workflow engine targeting .NET Standard.</Description>
+    <Version>1.1.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -10,27 +10,14 @@ namespace WorkflowCore.Sample01
 {
     public class HelloWorldWorkflow : IWorkflow
     {
+        public string Id => "HelloWorld";
+        public int Version => 1;
+
         public void Build(IWorkflowBuilder<object> builder)
         {
             builder                
                 .StartWith<HelloWorld>()
                 .Then<GoodbyeWorld>();
-        }
-
-        public string Id
-        {
-            get
-            {
-                return "HelloWorld";
-            }
-        }
-
-        public int Version
-        {
-            get
-            {
-                return 1;
-            }
-        }        
+        }                
     }
 }

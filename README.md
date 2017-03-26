@@ -2,226 +2,75 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/xnby6p5v4ur04u76?svg=true)](https://ci.appveyor.com/project/danielgerlag/workflow-core)
 
-Workflow Core is a light weight workflow engine targeting .NET Standard.  It supports pluggable persistence and concurrency providers to allow for multi-node clusters.  See [Wiki here.](https://github.com/danielgerlag/workflow-core/wiki)
+Workflow Core is a light weight workflow engine targeting .NET Standard.  Think: long running processes with multiple tasks that need to track state.  It supports pluggable persistence and concurrency providers to allow for multi-node clusters.
 
+## Documentation
 
-## Installing
+See [Full Documentation here.](https://github.com/danielgerlag/workflow-core/wiki)
 
-Install the NuGet package "WorkflowCore"
+## Fluent API
 
-```
-PM> Install-Package WorkflowCore
-```
+Define your workflows with the fluent API.
 
-## Basic Concepts
-
-### Steps
-
-A workflow consists of a series of connected steps.  Each step produces an outcome value and subsequent steps are triggered by subscribing to a particular outcome of a preceeding step.  The default outcome of *null* can be used for a basic linear workflow.
-Steps are usually defined by inheriting from the StepBody abstract class and implementing the Run method.  They can also be created inline while defining the workflow structure.
-
-First we define some steps
-
-```C#
-public class HelloWorld : StepBody
+```c#
+public class MyWorkflow : IWorkflow
 {
-    public override ExecutionResult Run(IStepExecutionContext context)
-    {
-        Console.WriteLine("Hello world");
-        return ExecutionResult.Next();
-    }
-}
-```
-*The StepBody class implementations are constructed by the workflow host which first tries to use IServiceProvider from the built-in dependency injection of .NET Core, if it can't construct it with this method, it will search for a parameterless constructor*
-
-Then we define the workflow structure by composing a chain of steps.  The is done by implementing the IWorkflow interface.
-
-```C#
-public class HelloWorldWorkflow : IWorkflow
-{
-    public void Build(IWorkflowBuilder<object> builder)
-    {
+    public void Build(IWorkflowBuilder<MyData> builder)
+    {    
         builder
-            .StartWith<HelloWorld>()
-            .Then<GoodbyeWorld>();
-    }  
-    ...
+           .StartWith<Task1>()
+           .Then<Task2>()
+           .Then<Task3>;
+    }
 }
 ```
-The *IWorkflow* interface also has a readonly Id property and readonly Version property.  These are generally static and are used by the workflow host to identify a workflow definition.
 
-You can also define your steps inline
+### Sample use cases
 
-```C#
-public class HelloWorldWorkflow : IWorkflow
+New user workflow
+```c#
+public class MyData
 {
-    public void Build(IWorkflowBuilder<object> builder)
-    {
+	public string Email { get; set; }
+	public string Password { get; set; }
+	public string UserId { get; set; }
+}
+
+public class MyWorkflow : IWorkflow
+{
+    public void Build(IWorkflowBuilder<MyData> builder)
+    {    
         builder
-            .StartWith(context =>
-            {
-                Console.WriteLine("Hello world");
-                return ExecutionResult.Next();
-            })
-            .Then(context =>
-            {
-                Console.WriteLine("Goodbye world");
-                return ExecutionResult.Next();
-            })
-    }
-    ...
-}
-```
-
-Each running workflow is persisted to the chosen persistence provider between each step, where it can be picked up at a later point in time to continue execution.  The outcome result of your step can instruct the workflow host to defer further execution of the workflow until a future point in time or in response to an external event.
-
-The first time a particular step within the workflow is called, the PersistenceData property on the context object is *null*.  The ExecutionResult produced by the Run method can either cause the workflow to proceed to the next step by providing an outcome value, instruct the workflow to sleep for a defined period or simply not move the workflow forward.  If no outcome value is produced, then the step becomes re-entrant by setting PersistenceData, so the workflow host will call this step again in the future buy will populate the PersistenceData with it's previous value.
-
-For example, this step will initially run with *null* PersistenceData and put the workflow to sleep for 12 hours, while setting the PersistenceData to *new Object()*.  12 hours later, the step will be called again but context.PersistenceData will now contain the object constructed in the previous iteration, and will now produce an outcome value of *null*, causing the workflow to move forward.
-
-```C#
-public class SleepStep : StepBody
-{
-    public override ExecutionResult Run(IStepExecutionContext context)
-    {
-        if (context.PersistenceData == null)
-            return ExecutionResult.Sleep(Timespan.FromHours(12), new Object());
-        else
-            return ExecutionResult.Next();
+           .StartWith<CreateUser>()
+		       .Input(step => step.Email, data => data.Email)
+			   .Input(step => step.Password, data => data.Password)
+			   .Output(data => data.UserId, step => step.UserId);
+           .Then<SendConfirmationEmail>()
+		       .WaitFor("confirmation", data => data.UserId)
+           .Then<UpdateUser>()
+		       .Input(step => step.UserId, data => data.UserId);
     }
 }
 ```
 
-### Passing data between steps
+Resilient service orchestration
 
-Each step is intended to be a black-box, therefore they support inputs and outputs.  These inputs and outputs can be mapped to a data class that defines the custom data relevant to each workflow instance.
-
-The following sample shows how to define inputs and outputs on a step, it then shows how define a workflow with a typed class for internal data and how to map the inputs and outputs to properties on the custom data class.
-
-```C#
-//Our workflow step with inputs and outputs
-public class AddNumbers : StepBody
+```c#
+public class MyWorkflow : IWorkflow
 {
-    public int Input1 { get; set; }
-
-    public int Input2 { get; set; }
-
-    public int Output { get; set; }
-
-    public override ExecutionResult Run(IStepExecutionContext context)
-    {
-        Output = (Input1 + Input2);
-        return ExecutionResult.Next();
-    }
-}
-
-//Our class to define the internal data of our workflow
-public class MyDataClass
-{
-    public int Value1 { get; set; }
-    public int Value2 { get; set; }
-    public int Value3 { get; set; }
-}
-
-//Our workflow definition with strongly typed internal data and mapped inputs & outputs
-public class PassingDataWorkflow : IWorkflow<MyDataClass>
-{  
-    public void Build(IWorkflowBuilder<MyDataClass> builder)
-    {
-        builder            
-            .StartWith<AddNumbers>()
-                .Input(step => step.Input1, data => data.Value1)
-                .Input(step => step.Input2, data => data.Value2)
-                .Output(data => data.Value3, step => step.Output)
-            .Then<CustomMessage>()
-                .Input(step => step.Message, data => "The answer is " + data.Value3.ToString());
-    }
-    ...
-}
-
-```
-
-### Multiple outcomes / forking
-
-A workflow can take a different path depending on the outcomes of preceeding steps.  The following example shows a process where first a random number of 0 or 1 is generated and is the outcome of the first step.  Then, depending on the outcome value, the workflow will either fork to (TaskA + TaskB) or (TaskC + TaskD)
-
-```C#
-public class MultipleOutcomeWorkflow : IWorkflow
-{
-    public void Build(IWorkflowBuilder<object> builder)
-    {
+    public void Build(IWorkflowBuilder<MyData> builder)
+    {    
         builder
-            .StartWith<RandomOutput>(x => x.Name("Random Step"))
-                .When(0)
-                    .Then<TaskA>()
-                    .Then<TaskB>()                        
-                    .End<RandomOutput>("Random Step")
-                .When(1)
-                    .Then<TaskC>()
-                    .Then<TaskD>()
-                    .End<RandomOutput>("Random Step");
+           .StartWith<CreateCustomer>()
+           .Then<PushToSalesforce>()
+		       .OnError(WorkflowErrorHandling.Retry, TimeSpan.FromMinutes(10))
+           .Then<PushToERP>()
+		       .OnError(WorkflowErrorHandling.Retry, TimeSpan.FromMinutes(10));
     }
 }
 ```
 
-### Events
-
-A workflow can also wait for an external event before proceeding.  In the following example, the workflow will wait for an event called *"MyEvent"* with a key of *0*.  Once an external source has fired this event, the workflow will wake up and continue processing, passing the data generated by the event onto the next step.
-
-```C#
-public class EventSampleWorkflow : IWorkflow<MyDataClass>
-{
-    public void Build(IWorkflowBuilder<MyDataClass> builder)
-    {
-        builder
-            .StartWith(context =>
-            {
-                Console.WriteLine("workflow started");
-                return ExecutionResult.Next();
-            })
-            .WaitFor("MyEvent", data => "0")
-                .Output(data => data.Value, step => step.EventData)
-            .Then<CustomMessage>()
-                .Input(step => step.Message, data => "The data from the event is " + data.Value);
-    }
-}
-...
-//External events are published via the host
-//All workflows that have subscribed to MyEvent 0, will be passed "hello"
-host.PublishEvent("MyEvent", "0", "hello");
-```
-
-### Host
-
-The workflow host is the service responsible for executing workflows.  It does this by polling the persistence provider for workflow instances that are ready to run, executes them and then passes them back to the persistence provider to by stored for the next time they are run.  It is also responsible for publishing events to any workflows that may be waiting on one.
-
-#### Setup
-
-Use the *AddWorkflow* extension method for *IServiceCollection* to configure the workflow host upon startup of your application.
-By default, it is configured with *MemoryPersistenceProvider* and *SingleNodeConcurrencyProvider* for testing purposes.  You can also configure a DB persistence provider at this point.
-
-```C#
-services.AddWorkflow();
-```
-
-#### Usage
-
-When your application starts, grab the workflow host from the built-in dependency injection framework *IServiceProvider*.  Make sure you call *RegisterWorkflow*, so that the workflow host knows about all your workflows, and then call *Start()* to fire up the thread pool that executes workflows.  Use the *StartWorkflow* method to initiate a new instance of a particular workflow.
-
-
-```C#
-var host = serviceProvider.GetService<IWorkflowHost>();            
-host.RegisterWorkflow<HelloWorldWorkflow>();
-host.Start();
-
-host.StartWorkflow("HelloWorld", 1, null);
-
-Console.ReadLine();
-host.Stop();
-```
-
-
-### Persistence
+## Persistence
 
 Since workflows are typically long running processes, they will need to be persisted to storage between steps.
 There are several persistence providers available as separate Nuget packages.
@@ -232,40 +81,6 @@ There are several persistence providers available as separate Nuget packages.
 * [PostgreSQL](src/providers/WorkflowCore.Persistence.PostgreSQL)
 * [Sqlite](src/providers/WorkflowCore.Persistence.Sqlite)
 * Redis *(coming soon...)*
-
-### Multi-node clusters
-
-By default, the WorkflowHost service will run as a single node using the built-in queue and locking providers for a single node configuration.  Should you wish to run a multi-node cluster, you will need to configure an external queueing mechanism and a distributed lock manager to co-ordinate the cluster.  These are the providers that are currently available.
-
-#### Queue Providers
-
-* SingleNodeQueueProvider *(Default built-in provider)*
-* [RabbitMQ](src/providers/WorkflowCore.QueueProviders.RabbitMQ)
-* [0MQ](src/providers/WorkflowCore.QueueProviders.ZeroMQ) *(experimental)*
-* Apache ZooKeeper *(coming soon...)*
-
-#### Distributed lock managers
-
-* SingleNodeLockProvider *(Default built-in provider)*
-* [Redis Redlock](src/providers/WorkflowCore.LockProviders.Redlock)
-* [0MQ](src/providers/WorkflowCore.LockProviders.ZeroMQ) *(experimental)*
-* Apache ZooKeeper *(coming soon...)*
-
-### Error handling
-
-Each step can be configured with it's own error handling behavior, it can be retried at a later time, suspend the workflow or terminate the workflow.
-
-```C#
-public void Build(IWorkflowBuilder<object> builder)
-{
-    builder                
-        .StartWith<HelloWorld>()
-            .OnError(WorkflowErrorHandling.Retry, TimeSpan.FromMinutes(10))
-        .Then<GoodbyeWorld>();
-}
-```
-
-The WorkflowHost service also has a .OnStepError event which can be used to intercept exceptions from workflow steps on a more global level.
 
 ## Extensions
 

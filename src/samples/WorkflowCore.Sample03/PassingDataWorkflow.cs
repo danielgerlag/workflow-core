@@ -9,7 +9,10 @@ using WorkflowCore.Sample03.Steps;
 namespace WorkflowCore.Sample03
 {
     public class PassingDataWorkflow : IWorkflow<MyDataClass>
-    {  
+    {
+        public string Id => "PassingDataWorkflow";
+        public int Version => 1;
+
         public void Build(IWorkflowBuilder<MyDataClass> builder)
         {
             builder
@@ -30,22 +33,6 @@ namespace WorkflowCore.Sample03
                         Console.WriteLine("Workflow comeplete");
                         return ExecutionResult.Next();
                     });
-        }
-
-        public string Id
-        {
-            get
-            {
-                return "PassingDataWorkflow";
-            }
-        }
-
-        public int Version
-        {
-            get
-            {
-                return 1;
-            }
         }
     }
 }

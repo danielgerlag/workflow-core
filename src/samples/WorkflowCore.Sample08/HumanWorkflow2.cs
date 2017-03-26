@@ -9,21 +9,8 @@ namespace WorkflowCore.Sample08
 {
     public class HumanWorkflow2 : IWorkflow
     {
-        public string Id
-        {
-            get
-            {
-                return "HumanWorkflow";
-            }
-        }
-
-        public int Version
-        {
-            get
-            {
-                return 1;
-            }
-        }
+        public string Id => "HumanWorkflow";
+        public int Version => 1;
 
         public void Build(IWorkflowBuilder<object> builder)
         {
