@@ -41,14 +41,14 @@ public class MyWorkflow : IWorkflow
     public void Build(IWorkflowBuilder<MyData> builder)
     {    
         builder
-           .StartWith<CreateUser>()
-		       .Input(step => step.Email, data => data.Email)
-			   .Input(step => step.Password, data => data.Password)
-			   .Output(data => data.UserId, step => step.UserId);
+            .StartWith<CreateUser>()
+                .Input(step => step.Email, data => data.Email)
+                .Input(step => step.Password, data => data.Password)
+                .Output(data => data.UserId, step => step.UserId);
            .Then<SendConfirmationEmail>()
-		       .WaitFor("confirmation", data => data.UserId)
+               .WaitFor("confirmation", data => data.UserId)
            .Then<UpdateUser>()
-		       .Input(step => step.UserId, data => data.UserId);
+               .Input(step => step.UserId, data => data.UserId);
     }
 }
 ```
@@ -61,11 +61,11 @@ public class MyWorkflow : IWorkflow
     public void Build(IWorkflowBuilder<MyData> builder)
     {    
         builder
-           .StartWith<CreateCustomer>()
-           .Then<PushToSalesforce>()
-		       .OnError(WorkflowErrorHandling.Retry, TimeSpan.FromMinutes(10))
-           .Then<PushToERP>()
-		       .OnError(WorkflowErrorHandling.Retry, TimeSpan.FromMinutes(10));
+            .StartWith<CreateCustomer>()
+            .Then<PushToSalesforce>()
+                .OnError(WorkflowErrorHandling.Retry, TimeSpan.FromMinutes(10))
+            .Then<PushToERP>()
+                .OnError(WorkflowErrorHandling.Retry, TimeSpan.FromMinutes(10));
     }
 }
 ```
