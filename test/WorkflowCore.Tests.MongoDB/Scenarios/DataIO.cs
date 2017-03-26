@@ -10,7 +10,7 @@ using WorkflowCore.Models;
 namespace WorkflowCore.Tests.MongoDB.Scenarios
 {
     [Subject(typeof(WorkflowHost))]
-    public class MongoDB_DataIO : DataIO
+    public class Mongo_DataIO : DataIO
     {
         protected override void ConfigureWorkflow(IServiceCollection services)
         {

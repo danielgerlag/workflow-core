@@ -12,39 +12,18 @@ using WorkflowCore.TestAssets.Persistence;
 namespace WorkflowCore.Tests.MongoDB.MongoPersistenceProviderTests
 {
     [Subject(typeof(MongoPersistenceProvider))]
-    public class CreateNewWorkflow
+    public class Mongo_CreateNewWorkflow : CreateNewWorkflow
     {
-        protected static IPersistenceProvider Subject;
-        protected static WorkflowInstance workflow;
-        protected static string workflowId;
-
-        Establish context = () =>
+        protected override IPersistenceProvider Provider 
         {
-            var client = new MongoClient("mongodb://localhost:" + DockerSetup.Port);
-            var db = client.GetDatabase("workflow-tests");
-
-            Subject = new MongoPersistenceProvider(db);
-            workflow = new WorkflowInstance()
+            get
             {
-                Data = new { Value1 = 7 },
-                Description = "My Description",
-                Status = WorkflowStatus.Runnable,
-                NextExecution = 0,
-                Version = 1,
-                WorkflowDefinitionId = "My Workflow"
-            };
-            workflow.ExecutionPointers.Add(new ExecutionPointer()
-            {
-                Id = Guid.NewGuid().ToString(),
-                Active = true,
-                StepId = 0
-            });
-        };
-
-        Because of = () => workflowId = Subject.CreateNewWorkflow(workflow).Result;
-
-        Behaves_like<CreateNewWorkflowBehaviors> a_new_workflow;
+                var client = new MongoClient("mongodb://localhost:" + DockerSetup.Port);
+                var db = client.GetDatabase("workflow-tests");
+                return new MongoPersistenceProvider(db);
+            }        
+        }
         
-
+        Behaves_like<CreateNewWorkflowBehaviors> a_new_workflow;
     }
 }

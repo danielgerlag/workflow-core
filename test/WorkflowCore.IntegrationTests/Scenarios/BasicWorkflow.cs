@@ -27,8 +27,11 @@ namespace WorkflowCore.IntegrationTests.Scenarios
     }
 
     [Subject(typeof(WorkflowHost))]
-    public class BasicWorkflow : WithFakes<MoqFakeEngine>
+    public class BasicWorkflow : BaseScenario<BasicWorkflow.WorkflowDef, object>
     {
+        protected static string WorkflowId;
+        protected static WorkflowInstance Instance;
+
         public class Step1 : StepBody
         {            
             public override ExecutionResult Run(IStepExecutionContext context)
@@ -38,10 +41,10 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             }
         }        
 
-        class BasicWorkflowDef : IWorkflow
+        public class WorkflowDef : IWorkflow
         {
-            public string Id { get { return "BasicWorkflow"; } }
-            public int Version { get { return 1; } }
+            public string Id => "BasicWorkflow"; 
+            public int Version => 1;
             public void Build(IWorkflowBuilder<Object> builder)
             {
                 builder
@@ -54,54 +57,18 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                         
             }
         }
-
-        protected Establish context;
-        protected Cleanup after;
-        protected Because of;
-
+        
         protected static int Step1Ticker = 0;
-        protected static int Step2Ticker = 0;
-        protected static IWorkflowHost Host;
-        protected static string WorkflowId;
-        protected static IPersistenceProvider PersistenceProvider;
-        protected static WorkflowInstance Instance;
+        protected static int Step2Ticker = 0;        
 
         Behaves_like<BasicWorkflowBehavior> a_basic_workflow;
-
-        public BasicWorkflow()
-        {
-            context = EstablishContext;
-            of = BecauseOf;
-            after = CleanupAfter;
-        }
-
-        protected virtual void ConfigureWorkflow(IServiceCollection services)
+        
+        protected override void ConfigureWorkflow(IServiceCollection services)
         {
             services.AddWorkflow();
         }
 
-        void EstablishContext()
-        {
-            //setup dependency injection
-            IServiceCollection services = new ServiceCollection();
-            services.AddLogging();
-            ConfigureWorkflow(services);
-
-            var serviceProvider = services.BuildServiceProvider();
-
-            //config logging
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            loggerFactory.AddConsole(LogLevel.Debug);
-
-            var registry = serviceProvider.GetService<IWorkflowRegistry>();
-            registry.RegisterWorkflow(new BasicWorkflowDef());
-
-            PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
-            Host = serviceProvider.GetService<IWorkflowHost>();
-            Host.Start();
-        }               
-
-        void BecauseOf()
+        Because of = () =>
         {
             WorkflowId = Host.StartWorkflow("BasicWorkflow").Result;
             Instance = PersistenceProvider.GetWorkflowInstance(WorkflowId).Result;
@@ -110,20 +77,16 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             {
                 System.Threading.Thread.Sleep(500);
                 counter++;
-                Instance = PersistenceProvider.GetWorkflowInstance(WorkflowId).Result;                
+                Instance = PersistenceProvider.GetWorkflowInstance(WorkflowId).Result;
             }
-        }               
+        };
 
-        void CleanupAfter()
+        protected override void CleanupAfter()
         {
-            Host.Stop();
+            base.CleanupAfter();
             Step1Ticker = 0;
             Step2Ticker = 0;
-            Host = null;
-            WorkflowId = null;
-            Instance = null;
-            PersistenceProvider = null;
-        }
+        }        
     }
 }
 

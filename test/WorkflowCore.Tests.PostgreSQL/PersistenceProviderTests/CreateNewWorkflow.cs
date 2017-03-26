@@ -6,46 +6,23 @@ using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Persistence.PostgreSQL;
+using WorkflowCore.TestAssets.Persistence;
 
 namespace WorkflowCore.Tests.PostgreSQL.PersistenceProviderTests
 {
     [Subject(typeof(PostgresPersistenceProvider))]
-    public class CreateNewWorkflow
+    public class PostgreSQL_CreateNewWorkflow : CreateNewWorkflow
     {
-        Establish context = () =>
+        protected override IPersistenceProvider Provider
         {
-            Subject = new PostgresPersistenceProvider("Server=127.0.0.1;Port=" + DockerSetup.Port + ";Database=workflow;User Id=postgres;", true, true);
-            Subject.EnsureStoreExists();
-            workflow = new WorkflowInstance()
+            get
             {
-                Data = new { Value1 = 7 },
-                Description = "My Description",
-                Status = WorkflowStatus.Runnable,
-                NextExecution = 0,
-                Version = 1,
-                WorkflowDefinitionId = "My Workflow"
-            };
-            workflow.ExecutionPointers.Add(new ExecutionPointer()
-            {
-                Id = Guid.NewGuid().ToString(),
-                Active = true,
-                StepId = 0
-            });
-        };
+                var db = new PostgresPersistenceProvider("Server=127.0.0.1;Port=" + DockerSetup.Port + ";Database=workflow;User Id=postgres;", true, true);
+                db.EnsureStoreExists();
+                return db;
+            }
+        }
 
-        Because of = () => workflowId = Subject.CreateNewWorkflow(workflow).Result;
-
-        It should_return_a_generated_id = () => workflowId.ShouldNotBeNull();
-        It should_set_id_on_object = () => workflow.Id.ShouldNotBeNull();
-
-        Cleanup after = () =>
-        {
-        };
-
-        static IPersistenceProvider Subject;
-        static WorkflowInstance workflow;
-        static string workflowId;
-
-
-    }
+        Behaves_like<CreateNewWorkflowBehaviors> a_new_workflow;
+    }    
 }

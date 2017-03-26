@@ -14,57 +14,18 @@ using WorkflowCore.TestAssets.Persistence;
 namespace WorkflowCore.Tests.MongoDB.MongoPersistenceProviderTests
 {    
     [Subject(typeof(MongoPersistenceProvider))]    
-    public class GetWorkflowInstance
+    public class Mongo_GetWorkflowInstance : GetWorkflowInstance
     {
-        protected static IPersistenceProvider Subject;
-        protected static WorkflowInstance workflow;
-        protected static WorkflowInstance retrievedWorkflow;
-        protected static string workflowId;
-
-
-        Establish context = () =>
+        protected override IPersistenceProvider Provider
         {
-            var client = new MongoClient("mongodb://localhost:" + DockerSetup.Port);
-            var db = client.GetDatabase("workflow-tests");
-            Subject = new MongoPersistenceProvider(db);
-
-            workflow = new WorkflowInstance()
+            get
             {
-                Data = new { Value1 = 7 },
-                Description = "My Description",
-                Status = WorkflowStatus.Runnable,
-                NextExecution = 0,
-                Version = 1,
-                WorkflowDefinitionId = "My Workflow",
-                CreateTime = new DateTime(2000, 1, 1).ToUniversalTime()
-            };
+                var client = new MongoClient("mongodb://localhost:" + DockerSetup.Port);
+                var db = client.GetDatabase("workflow-tests");
+                return new MongoPersistenceProvider(db);
+            }
+        }
 
-            var ep = new ExecutionPointer()
-            {
-                Id = Guid.NewGuid().ToString(),
-                Active = true,
-                StepId = 0
-            };
-
-            ep.ExtensionAttributes["Attr1"] = "test";
-            ep.ExtensionAttributes["Attr2"] = 5;
-            workflow.ExecutionPointers.Add(ep);
-
-            workflowId = Subject.CreateNewWorkflow(workflow).Result;
-        };
-
-        Because of = () => retrievedWorkflow = Subject.GetWorkflowInstance(workflowId).Result;
-
-        Behaves_like<GetWorkflowInstanceBehaviors> get_workflow_instance;
-
-        Cleanup after = () =>
-        {
-            Subject = null;
-            workflow = null;
-            retrievedWorkflow = null;
-            workflowId = null;
-        };
-                
-
+        Behaves_like<GetWorkflowInstanceBehaviors> get_workflow_instance;        
     }
 }

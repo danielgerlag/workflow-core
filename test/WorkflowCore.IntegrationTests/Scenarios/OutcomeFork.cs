@@ -16,10 +16,10 @@ namespace WorkflowCore.IntegrationTests.Scenarios
     [Behaviors]
     public class OutcomeForkBehavior
     {
-        static int TaskATicker = 0;
-        static int TaskBTicker = 0;
-        static int TaskCTicker = 0;
-        static WorkflowInstance Instance;
+        protected static int TaskATicker = 0;
+        protected static int TaskBTicker = 0;
+        protected static int TaskCTicker = 0;
+        protected static WorkflowInstance Instance;
 
         It should_be_marked_as_complete = () => Instance.Status.ShouldEqual(WorkflowStatus.Complete);
         It should_execute_taskA_once = () => TaskATicker.ShouldEqual(1);
@@ -28,11 +28,14 @@ namespace WorkflowCore.IntegrationTests.Scenarios
     }
 
     [Subject(typeof(WorkflowHost))]
-    public class OutcomeForkTest : WithFakes<MoqFakeEngine>
+    public class OutcomeForkTest : BaseScenario<OutcomeForkTest.WorkflowDef, object>
     {
-        static int TaskATicker = 0;
-        static int TaskBTicker = 0;
-        static int TaskCTicker = 0;
+        protected static string WorkflowId;
+        protected static WorkflowInstance Instance;
+
+        protected static int TaskATicker = 0;
+        protected static int TaskBTicker = 0;
+        protected static int TaskCTicker = 0;
 
         public class TaskA : StepBody
         {            
@@ -61,10 +64,10 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             }
         }
 
-        class OutcomeFork : IWorkflow
+        public class WorkflowDef : IWorkflow
         {
-            public string Id { get { return "OutcomeFork"; } }
-            public int Version { get { return 1; } }
+            public string Id => "OutcomeFork";
+            public int Version => 1;
             public void Build(IWorkflowBuilder<Object> builder)
             {
                 var taskA = builder.StartWith<TaskA>();
@@ -78,44 +81,11 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             }
         }
                         
-        static IWorkflowHost Host;
-        static string WorkflowId;
-        static IPersistenceProvider PersistenceProvider;
-        static WorkflowInstance Instance;
-
-        Establish context;
-
-        public OutcomeForkTest()
-        {
-            context = EstablishContext;
-        }
-
-        protected virtual void ConfigureWorkflow(IServiceCollection services)
+        protected override void ConfigureWorkflow(IServiceCollection services)
         {
             services.AddWorkflow();
         }
-
-        void EstablishContext()
-        {
-            //setup dependency injection
-            IServiceCollection services = new ServiceCollection();
-            services.AddLogging();
-            ConfigureWorkflow(services);
-            
-            var serviceProvider = services.BuildServiceProvider();
-
-            //config logging
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            loggerFactory.AddConsole(LogLevel.Debug);
-
-            var registry = serviceProvider.GetService<IWorkflowRegistry>();            
-            registry.RegisterWorkflow(new OutcomeFork());
-
-            PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
-            Host = serviceProvider.GetService<IWorkflowHost>();
-            Host.Start();            
-        }
-
+        
         Because of = () =>
         {
             WorkflowId = Host.StartWorkflow("OutcomeFork").Result;
@@ -130,10 +100,6 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         };
 
         Behaves_like<OutcomeForkBehavior> outcome_fork_workflow;
-
-        Cleanup after = () =>
-        {
-            Host.Stop();
-        };
+        
     }
 }

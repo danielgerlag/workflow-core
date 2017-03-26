@@ -14,53 +14,18 @@ using WorkflowCore.TestAssets.Persistence;
 namespace WorkflowCore.Tests.MongoDB.MongoPersistenceProviderTests
 {    
     [Subject(typeof(MongoPersistenceProvider))]    
-    public class PersistWorkflow
+    public class Mongo_PersistWorkflow : PersistWorkflow
     {
-        protected static IPersistenceProvider Subject;
-        protected static WorkflowInstance newWorkflow;
-        protected static string workflowId;
-
-        Establish context = () =>
+        protected override IPersistenceProvider Provider
         {
-            var client = new MongoClient("mongodb://localhost:" + DockerSetup.Port);
-            var db = client.GetDatabase("workflow-tests");
-            Subject = new MongoPersistenceProvider(db);
-
-            var oldWorkflow = new WorkflowInstance()
+            get
             {
-                Data = new { Value1 = 7 },
-                Description = "My Description",
-                Status = WorkflowStatus.Runnable,
-                NextExecution = 0,
-                Version = 1,
-                WorkflowDefinitionId = "My Workflow",
-                CreateTime = new DateTime(2000, 1, 1).ToUniversalTime()
-            };
-            oldWorkflow.ExecutionPointers.Add(new ExecutionPointer()
-            {
-                Id = Guid.NewGuid().ToString(),
-                Active = true,
-                StepId = 0
-            });
+                var client = new MongoClient("mongodb://localhost:" + DockerSetup.Port);
+                var db = client.GetDatabase("workflow-tests");
+                return new MongoPersistenceProvider(db);
+            }
+        }
 
-            workflowId = Subject.CreateNewWorkflow(oldWorkflow).Result;
-
-            newWorkflow = Utils.DeepCopy(oldWorkflow);
-            newWorkflow.NextExecution = 7;
-            newWorkflow.ExecutionPointers.Add(new ExecutionPointer() { Id = Guid.NewGuid().ToString(), Active = true, StepId = 1 });
-        };
-
-        Because of = () => Subject.PersistWorkflow(newWorkflow).Wait();
-
-        Behaves_like<PersistWorkflowBehaviors> persist_workflow;
-
-        Cleanup after = () =>
-        {
-            Subject = null;
-            newWorkflow = null;            
-            workflowId = null;
-        };
-        
-
+        Behaves_like<PersistWorkflowBehaviors> persist_workflow;        
     }
 }

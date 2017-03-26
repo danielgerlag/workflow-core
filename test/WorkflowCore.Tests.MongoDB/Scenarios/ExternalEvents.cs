@@ -10,13 +10,13 @@ using WorkflowCore.Models;
 namespace WorkflowCore.Tests.MongoDB.Scenarios
 {
     [Subject(typeof(WorkflowHost))]
-    public class Mongo_BasicWorkflow : BasicWorkflow
+    public class Mongo_ExternalEvents : ExternalEventsTest
     {
         protected override void ConfigureWorkflow(IServiceCollection services)
         {
             services.AddWorkflow(x => x.UseMongoDB($"mongodb://localhost:{DockerSetup.Port}", "workflow-tests"));
         }
 
-        Behaves_like<BasicWorkflowBehavior> a_basic_workflow;
+        Behaves_like<ExternalEventsBehavior> a_external_events_workflow;
     }
 }

@@ -17,10 +17,10 @@ namespace WorkflowCore.IntegrationTests.Scenarios
     [Behaviors]
     public class UserStepsBehavior
     {
-        static int ApproveStepTicker = 0;
-        static int DisapproveStepTicker = 0;
-        static IEnumerable<OpenUserAction> openItems1;
-        static IEnumerable<OpenUserAction> openItems2;
+        protected static int ApproveStepTicker = 0;
+        protected static int DisapproveStepTicker = 0;
+        protected static IEnumerable<OpenUserAction> openItems1;
+        protected static IEnumerable<OpenUserAction> openItems2;
 
         It should_be_marked_as_approved = () => ApproveStepTicker.ShouldEqual(1);
         It should_not_be_marked_as_disapproved = () => DisapproveStepTicker.ShouldEqual(0);
@@ -28,16 +28,18 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         It should_have_return_2_options = () => openItems1.First().Options.Count().ShouldEqual(2);
         It should_have_yes_option = () => openItems1.First().Options.ShouldContain(x => Convert.ToString(x.Value) == "yes");
         It should_have_no_option = () => openItems1.First().Options.ShouldContain(x => Convert.ToString(x.Value) == "no");
-
     }
 
     [Subject(typeof(WorkflowHost))]
-    public class UserStepsTest : WithFakes<MoqFakeEngine>
-    {        
-        class HumanWorkflow : IWorkflow
+    public class UserStepsTest : BaseScenario<UserStepsTest.HumanWorkflow, object>
+    {
+        protected static string WorkflowId;
+        protected static WorkflowInstance Instance;
+
+        public class HumanWorkflow : IWorkflow
         {
-            public string Id { get { return "HumanWorkflow"; } }
-            public int Version { get { return 1; } }
+            public string Id => "HumanWorkflow";
+            public int Version => 1;
             public void Build(IWorkflowBuilder<object> builder)
             {
                 builder
@@ -60,47 +62,15 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             }
         }
 
-        static int ApproveStepTicker = 0;
-        static int DisapproveStepTicker = 0;
-        static IWorkflowHost Host;
-        static string WorkflowId;
-        static IEnumerable<OpenUserAction> openItems1;
-        static IEnumerable<OpenUserAction> openItems2;
-        static IPersistenceProvider PersistenceProvider;
-        static WorkflowInstance Instance;
-
-        Establish context;
-
-        public UserStepsTest()
-        {
-            context = EstablishContext;
-        }
-
-        protected virtual void ConfigureWorkflow(IServiceCollection services)
+        protected static int ApproveStepTicker = 0;
+        protected static int DisapproveStepTicker = 0;
+        protected static IEnumerable<OpenUserAction> openItems1;
+        protected static IEnumerable<OpenUserAction> openItems2;
+                
+        protected override void ConfigureWorkflow(IServiceCollection services)
         {
             services.AddWorkflow();
-        }
-
-        void EstablishContext()
-        {
-            //setup dependency injection
-            IServiceCollection services = new ServiceCollection();
-            services.AddLogging();
-            ConfigureWorkflow(services);
-            
-            var serviceProvider = services.BuildServiceProvider();
-
-            //config logging
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            loggerFactory.AddConsole(LogLevel.Debug);
-
-            var registry = serviceProvider.GetService<IWorkflowRegistry>();            
-            registry.RegisterWorkflow(new HumanWorkflow());
-
-            PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
-            Host = serviceProvider.GetService<IWorkflowHost>();
-            Host.Start();            
-        }
+        }        
 
         Because of = () =>
         {
@@ -131,10 +101,6 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         };
 
         Behaves_like<UserStepsBehavior> user_steps_workflow;
-
-        Cleanup after = () =>
-        {
-            Host.Stop();
-        };
+        
     }
 }

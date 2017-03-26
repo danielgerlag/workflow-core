@@ -7,16 +7,16 @@ using WorkflowCore.Services;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Models;
 
-namespace WorkflowCore.Tests.MongoDB.Scenarios
+namespace WorkflowCore.Tests.PostgreSQL.Scenarios
 {
     [Subject(typeof(WorkflowHost))]
-    public class Mongo_BasicWorkflow : BasicWorkflow
+    public class PostgreSQL_OutcomeFork : OutcomeForkTest
     {
         protected override void ConfigureWorkflow(IServiceCollection services)
         {
-            services.AddWorkflow(x => x.UseMongoDB($"mongodb://localhost:{DockerSetup.Port}", "workflow-tests"));
+            services.AddWorkflow(x => x.UsePostgreSQL($"Server=127.0.0.1;Port={DockerSetup.Port};Database=workflow;User Id=postgres;", true, true));
         }
 
-        Behaves_like<BasicWorkflowBehavior> a_basic_workflow;
+        Behaves_like<OutcomeForkBehavior> outcome_workflow;
     }
 }
