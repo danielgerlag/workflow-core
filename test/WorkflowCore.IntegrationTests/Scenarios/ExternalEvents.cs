@@ -64,6 +64,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                 counter++;                
             }
 
+            Host.PublishEvent("MyEvent", "1", "Fail");
             Host.PublishEvent("MyEvent", "0", "Pass");
 
             Instance = PersistenceProvider.GetWorkflowInstance(WorkflowId).Result;
