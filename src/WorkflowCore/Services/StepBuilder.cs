@@ -143,5 +143,12 @@ namespace WorkflowCore.Services
             return null;
         }
 
+        public IStepBuilder<TData, TStepBody> EndWorkflow()
+        {
+            EndStep newStep = new EndStep();
+            WorkflowBuilder.AddStep(newStep);
+            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            return this;
+        }
     }
 }

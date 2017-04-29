@@ -79,5 +79,11 @@ namespace WorkflowCore.Interface
         IStepBuilder<TData, TStep> End<TStep>(string name) where TStep : IStepBody;
 
         IStepBuilder<TData, TStepBody> OnError(WorkflowErrorHandling behavior, TimeSpan? retryInterval = null);
+
+        /// <summary>
+        /// Ends the workflow and marks it as complete
+        /// </summary>
+        /// <returns></returns>
+        IStepBuilder<TData, TStepBody> EndWorkflow();
     }
 }

@@ -13,14 +13,14 @@ namespace WorkflowCore.Services
     public class WorkflowExecutor : IWorkflowExecutor
     {
 
-        protected readonly IWorkflowHost _host;        
+        protected readonly IWorkflowHost _host;
         protected readonly IWorkflowRegistry _registry;
         protected readonly IServiceProvider _serviceProvider;
         protected readonly ILogger _logger;
 
         public WorkflowExecutor(IWorkflowHost host, IWorkflowRegistry registry, IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
-            _host = host;            
+            _host = host;
             _serviceProvider = serviceProvider;
             _registry = registry;
             _logger = loggerFactory.CreateLogger<WorkflowExecutor>();
@@ -44,8 +44,15 @@ namespace WorkflowCore.Services
                 {
                     try
                     {
-                        if (step.InitForExecution(_host, persistenceStore, def, workflow, pointer) == ExecutionPipelineDirective.Defer)
-                            continue;
+                        switch (step.InitForExecution(_host, persistenceStore, def, workflow, pointer))
+                        {
+                            case ExecutionPipelineDirective.Defer:
+                                continue;
+                            case ExecutionPipelineDirective.EndWorkflow:
+                                workflow.Status = WorkflowStatus.Complete;
+                                workflow.CompleteTime = DateTime.Now.ToUniversalTime();
+                                continue;
+                        }
 
                         if (!pointer.StartTime.HasValue)
                             pointer.StartTime = DateTime.Now;
@@ -76,8 +83,15 @@ namespace WorkflowCore.Services
                             PersistenceData = pointer.PersistenceData
                         };
 
-                        if (step.BeforeExecute(_host, persistenceStore, context, pointer, body) == ExecutionPipelineDirective.Defer)
-                            continue;
+                        switch (step.BeforeExecute(_host, persistenceStore, context, pointer, body))
+                        {
+                            case ExecutionPipelineDirective.Defer:
+                                continue;
+                            case ExecutionPipelineDirective.EndWorkflow:
+                                workflow.Status = WorkflowStatus.Complete;
+                                workflow.CompleteTime = DateTime.Now.ToUniversalTime();
+                                continue;
+                        }
 
                         var result = body.Run(context);
 
@@ -184,6 +198,9 @@ namespace WorkflowCore.Services
         private void DetermineNextExecutionTime(WorkflowInstance workflow)
         {
             workflow.NextExecution = null;
+
+            if (workflow.Status == WorkflowStatus.Complete)
+                return;
 
             foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active))
             {

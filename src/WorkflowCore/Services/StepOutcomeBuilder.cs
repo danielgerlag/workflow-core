@@ -52,5 +52,12 @@ namespace WorkflowCore.Services
             Outcome.NextStep = newStep.Id;
             return stepBuilder;
         }
+
+        public void EndWorkflow()
+        {
+            EndStep newStep = new EndStep();
+            WorkflowBuilder.AddStep(newStep);
+            Outcome.NextStep = newStep.Id;
+        }
     }
 }
