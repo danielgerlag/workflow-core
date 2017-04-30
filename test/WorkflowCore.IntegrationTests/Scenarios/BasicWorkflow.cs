@@ -31,8 +31,8 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
         class BasicWorkflow : IWorkflow
         {
-            public string Id { get { return "BasicWorkflow"; } }
-            public int Version { get { return 1; } }
+            public string Id => "BasicWorkflow";
+            public int Version => 1;
             public void Build(IWorkflowBuilder<Object> builder)
             {
                 builder

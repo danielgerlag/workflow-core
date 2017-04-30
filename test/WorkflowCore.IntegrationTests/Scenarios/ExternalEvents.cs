@@ -24,8 +24,8 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
         class EventWorkflow : IWorkflow<MyDataClass>
         {
-            public string Id { get { return "EventWorkflow"; } }
-            public int Version { get { return 1; } }
+            public string Id => "EventWorkflow";
+            public int Version => 1;
             public void Build(IWorkflowBuilder<MyDataClass> builder)
             {
                 builder

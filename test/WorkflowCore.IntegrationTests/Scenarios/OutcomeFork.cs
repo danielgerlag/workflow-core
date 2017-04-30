@@ -50,8 +50,8 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
         class OutcomeFork : IWorkflow
         {
-            public string Id { get { return "OutcomeFork"; } }
-            public int Version { get { return 1; } }
+            public string Id => "OutcomeFork";
+            public int Version => 1;
             public void Build(IWorkflowBuilder<Object> builder)
             {
                 var taskA = builder.StartWith<TaskA>();

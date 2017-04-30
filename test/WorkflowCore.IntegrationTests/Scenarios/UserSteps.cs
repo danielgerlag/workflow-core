@@ -23,8 +23,8 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
         class HumanWorkflow : IWorkflow
         {
-            public string Id { get { return "HumanWorkflow"; } }
-            public int Version { get { return 1; } }
+            public string Id => "HumanWorkflow";
+            public int Version => 1;
             public void Build(IWorkflowBuilder<object> builder)
             {
                 builder
