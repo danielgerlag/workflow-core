@@ -7,7 +7,7 @@ using Xunit;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
-    public class EndStepScenario : BaseScenario<EndStepScenario.ScenarioWorkflow>
+    public class EndStepScenario : BaseScenario<EndStepScenario.ScenarioWorkflow, Object>
     {        
         internal static int StartStepCounter = 0;
         internal static int Branch1Counter = 0;

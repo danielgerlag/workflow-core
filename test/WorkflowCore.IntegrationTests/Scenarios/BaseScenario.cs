@@ -7,8 +7,9 @@ using WorkflowCore.Interface;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
-    public abstract class BaseScenario<TWorkflow>
-        where TWorkflow : IWorkflow, new()
+    public abstract class BaseScenario<TWorkflow, TData> : IDisposable
+        where TWorkflow : IWorkflow<TData>, new()
+        where TData : class, new()
     {
         protected IWorkflowHost Host;
         protected IPersistenceProvider PersistenceProvider;
@@ -28,13 +29,18 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
             PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
             Host = serviceProvider.GetService<IWorkflowHost>();
-            Host.RegisterWorkflow<TWorkflow>();
+            Host.RegisterWorkflow<TWorkflow, TData>();
             Host.Start();
         }
-
+                
         protected virtual void Configure(IServiceCollection services)
         {
             services.AddWorkflow();
+        }
+
+        public void Dispose()
+        {
+            Host.Stop();
         }
     }
 }
