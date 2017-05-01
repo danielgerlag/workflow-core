@@ -16,6 +16,11 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
         public BaseScenario()
         {
+            Setup();
+        }
+
+        protected void Setup()
+        {
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
@@ -25,14 +30,14 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
             //config logging
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            loggerFactory.AddConsole(LogLevel.Debug);                        
+            loggerFactory.AddConsole(LogLevel.Debug);
 
             PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
             Host = serviceProvider.GetService<IWorkflowHost>();
             Host.RegisterWorkflow<TWorkflow, TData>();
             Host.Start();
         }
-                
+
         protected virtual void Configure(IServiceCollection services)
         {
             services.AddWorkflow();
