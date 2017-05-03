@@ -107,13 +107,12 @@ namespace WorkflowCore.UnitTests.Services
             instance.ExecutionPointers.Add(executionPointer);
 
             //act
-            Subject.Execute(instance, PersistenceProvider, Options).Wait();
+            Subject.Execute(instance, Options);
 
             //assert
             executionPointer.EventName.Should().Be("MyEvent");
             executionPointer.EventKey.Should().Be("0");
             executionPointer.Active.Should().Be(false);
-            A.CallTo(() => PersistenceProvider.PersistWorkflow(instance)).MustHaveHappened();            
         }
 
         [Fact]
@@ -138,14 +137,13 @@ namespace WorkflowCore.UnitTests.Services
             });                        
 
             //act
-            Subject.Execute(instance, PersistenceProvider, Options).Wait();
-            Subject.Execute(instance, PersistenceProvider, Options).Wait();
+            Subject.Execute(instance, Options);
+            Subject.Execute(instance, Options);
 
             //assert
             StepExecutionTestWorkflow.Step1StepTicker.Should().Be(1);
             StepExecutionTestWorkflow.Step2StepTicker.Should().Be(1);
-            instance.Status.Should().Be(WorkflowStatus.Complete);
-            A.CallTo(() => PersistenceProvider.PersistWorkflow(instance)).MustHaveHappened();            
+            instance.Status.Should().Be(WorkflowStatus.Complete);            
         }
     }
 }

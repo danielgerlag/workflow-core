@@ -26,15 +26,16 @@ namespace WorkflowCore.Services
             _logger = loggerFactory.CreateLogger<WorkflowExecutor>();
         }
 
-        public async Task Execute(WorkflowInstance workflow, IPersistenceProvider persistenceStore, WorkflowOptions options)
+        public WorkflowExecutorResult Execute(WorkflowInstance workflow, WorkflowOptions options)
         {
-            //TODO: split this method up
+            WorkflowExecutorResult wfResult = new WorkflowExecutorResult();
+
             List<ExecutionPointer> exePointers = new List<ExecutionPointer>(workflow.ExecutionPointers.Where(x => x.Active && (!x.SleepUntil.HasValue || x.SleepUntil < DateTime.Now.ToUniversalTime())));
             var def = _registry.GetDefinition(workflow.WorkflowDefinitionId, workflow.Version);
             if (def == null)
             {
                 _logger.LogError("Workflow {0} version {1} is not registered", workflow.WorkflowDefinitionId, workflow.Version);
-                return;
+                return wfResult;
             }
 
             foreach (var pointer in exePointers)
@@ -44,7 +45,7 @@ namespace WorkflowCore.Services
                 {
                     try
                     {
-                        switch (step.InitForExecution(_host, persistenceStore, def, workflow, pointer))
+                        switch (step.InitForExecution(wfResult, def, workflow, pointer))
                         {
                             case ExecutionPipelineDirective.Defer:
                                 continue;
@@ -83,7 +84,7 @@ namespace WorkflowCore.Services
                             PersistenceData = pointer.PersistenceData
                         };
 
-                        switch (step.BeforeExecute(_host, persistenceStore, context, pointer, body))
+                        switch (step.BeforeExecute(wfResult, context, pointer, body))
                         {
                             case ExecutionPipelineDirective.Defer:
                                 continue;
@@ -97,7 +98,7 @@ namespace WorkflowCore.Services
 
                         ProcessOutputs(workflow, step, body);
                         ProcessExecutionResult(workflow, def, pointer, step, result);
-                        step.AfterExecute(_host, persistenceStore, context, result, pointer);
+                        step.AfterExecute(wfResult, context, result, pointer);
                     }
                     catch (Exception ex)
                     {
@@ -124,8 +125,6 @@ namespace WorkflowCore.Services
 
                         _host.ReportStepError(workflow, step, ex);
                     }
-
-                    await persistenceStore.PersistWorkflow(workflow);
                 }
                 else
                 {
@@ -140,7 +139,8 @@ namespace WorkflowCore.Services
 
             }
             DetermineNextExecutionTime(workflow);
-            await persistenceStore.PersistWorkflow(workflow);
+
+            return wfResult;
         }
 
         private void ProcessExecutionResult(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, ExecutionResult result)

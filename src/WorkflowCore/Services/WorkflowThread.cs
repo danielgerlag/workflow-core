@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
@@ -47,7 +48,7 @@ namespace WorkflowCore.Services
         /// Worker thread body
         /// </summary>        
         private void RunWorkflows()
-        {            
+        {
             while (!_shutdown)
             {
                 try
@@ -60,17 +61,24 @@ namespace WorkflowCore.Services
                             if (_lockProvider.AcquireLock(workflowId).Result)
                             {
                                 WorkflowInstance workflow = null;
+                                WorkflowExecutorResult result = null;
                                 try
                                 {
                                     workflow = _persistenceStore.GetWorkflowInstance(workflowId).Result;
                                     if (workflow.Status == WorkflowStatus.Runnable)
-                                        _executor.Execute(workflow, _persistenceStore, _options);
+                                    {
+                                        result = _executor.Execute(workflow, _options);
+                                        _persistenceStore.PersistWorkflow(workflow).Wait();
+                                    }
                                 }
                                 finally
                                 {
                                     _lockProvider.ReleaseLock(workflowId).Wait();
-                                    if (workflow != null)
+                                    if ((workflow != null) && (result != null))
                                     {
+                                        foreach (var sub in result.AddSubscriptions)
+                                            SubscribeEvent(sub);
+
                                         if ((workflow.Status == WorkflowStatus.Runnable) && workflow.NextExecution.HasValue && workflow.NextExecution.Value < DateTime.Now.ToUniversalTime().Ticks)
                                             _queueProvider.QueueWork(workflowId, QueueType.Workflow);
                                     }
@@ -96,6 +104,19 @@ namespace WorkflowCore.Services
                 {
                     _logger.LogError(ex.Message);
                 }
+            }
+        }
+
+        private void SubscribeEvent(EventSubscription subscription)
+        {
+            _logger.LogDebug("Subscribing to event {0} {1} for workflow {2} step {3}", subscription.EventName, subscription.EventKey, subscription.WorkflowId, subscription.StepId);
+            
+            _persistenceStore.CreateEventSubscription(subscription).Wait();
+            var events = _persistenceStore.GetEvents(subscription.EventName, subscription.EventKey, subscription.SubscribeAsOf).Result;
+            foreach (var evt in events)
+            {
+                _persistenceStore.MarkEventUnprocessed(evt).Wait();
+                _queueProvider.QueueWork(evt, QueueType.Event);
             }
         }
     }
