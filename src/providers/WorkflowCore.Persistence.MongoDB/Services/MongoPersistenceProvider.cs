@@ -216,6 +216,11 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
             await Events.UpdateOneAsync(x => x.Id == id, update);
         }
+
+        public async Task PersistErrors(IEnumerable<ExecutionError> errors)
+        {
+            throw new NotImplementedException();
+        }
     }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }

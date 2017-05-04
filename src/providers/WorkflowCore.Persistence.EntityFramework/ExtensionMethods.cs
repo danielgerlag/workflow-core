@@ -65,18 +65,18 @@ namespace WorkflowCore.Persistence.EntityFramework
                     persistedAttr.AttributeValue = JsonConvert.SerializeObject(attr.Value, SerializerSettings);
                 }
 
-                foreach (var err in ep.Errors)
-                {
-                    var persistedErr = persistedEP.Errors.FirstOrDefault(x => x.Id == err.Id);
-                    if (persistedErr == null)
-                    {
-                        persistedErr = new PersistedExecutionError();
-                        persistedErr.Id = err.Id ?? Guid.NewGuid().ToString();
-                        persistedErr.ErrorTime = err.ErrorTime;
-                        persistedErr.Message = err.Message;
-                        persistedEP.Errors.Add(persistedErr);
-                    }
-                }
+                //foreach (var err in ep.Errors)
+                //{
+                //    var persistedErr = persistedEP.Errors.FirstOrDefault(x => x.Id == err.Id);
+                //    if (persistedErr == null)
+                //    {
+                //        persistedErr = new PersistedExecutionError();
+                //        persistedErr.Id = err.Id ?? Guid.NewGuid().ToString();
+                //        persistedErr.ErrorTime = err.ErrorTime;
+                //        persistedErr.Message = err.Message;
+                //        persistedEP.Errors.Add(persistedErr);
+                //    }
+                //}
 
             }
 
@@ -147,14 +147,14 @@ namespace WorkflowCore.Persistence.EntityFramework
                     pointer.ExtensionAttributes[attr.AttributeKey] = JsonConvert.DeserializeObject(attr.AttributeValue, SerializerSettings);
                 }
 
-                foreach (var err in ep.Errors)
-                {
-                    var execErr = new ExecutionError();
-                    execErr.Id = err.Id;
-                    execErr.ErrorTime = err.ErrorTime;
-                    execErr.Message = err.Message;
-                    pointer.Errors.Add(execErr);                    
-                }
+                //foreach (var err in ep.Errors)
+                //{
+                //    var execErr = new ExecutionError();
+                //    execErr.Id = err.Id;
+                //    execErr.ErrorTime = err.ErrorTime;
+                //    execErr.Message = err.Message;
+                //    pointer.Errors.Add(execErr);                    
+                //}
 
             }
 

@@ -156,18 +156,21 @@ namespace WorkflowCore.Services
                 pointer.EndTime = DateTime.Now;
                 int forkCounter = 1;
                 bool noOutcomes = true;
-                foreach (var outcome in step.Outcomes.Where(x => object.Equals(x.Value, result.OutcomeValue)))
+                foreach (var outcomeValue in result.OutcomeValues)
                 {
-                    workflow.ExecutionPointers.Add(new ExecutionPointer()
+                    foreach (var outcomeTarget in step.Outcomes.Where(x => object.Equals(x.Value, outcomeValue) || x.Value == null))
                     {
-                        Id = Guid.NewGuid().ToString(),
-                        StepId = outcome.NextStep,
-                        Active = true,
-                        ConcurrentFork = (forkCounter * pointer.ConcurrentFork),
-                        StepName = def.Steps.First(x => x.Id == outcome.NextStep).Name
-                    });
-                    noOutcomes = false;
-                    forkCounter++;
+                        workflow.ExecutionPointers.Add(new ExecutionPointer()
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            StepId = outcomeTarget.NextStep,
+                            Active = true,
+                            ConcurrentFork = (forkCounter * pointer.ConcurrentFork),
+                            StepName = def.Steps.First(x => x.Id == outcomeTarget.NextStep).Name
+                        });
+                        noOutcomes = false;
+                        forkCounter++;
+                    }
                 }
                 pointer.PathTerminator = noOutcomes;
             }

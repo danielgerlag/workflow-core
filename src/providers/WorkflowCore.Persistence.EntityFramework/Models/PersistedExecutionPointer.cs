@@ -46,9 +46,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Models
         public bool PathTerminator { get; set; }
 
         public string StepName { get; set; }
-
-        public List<PersistedExecutionError> Errors { get; set; } = new List<PersistedExecutionError>();
-
+                
         public List<PersistedExtensionAttribute> ExtensionAttributes { get; set; } = new List<PersistedExtensionAttribute>();                
 
     }
