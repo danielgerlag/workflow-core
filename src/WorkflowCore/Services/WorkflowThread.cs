@@ -76,8 +76,10 @@ namespace WorkflowCore.Services
                                     _lockProvider.ReleaseLock(workflowId).Wait();
                                     if ((workflow != null) && (result != null))
                                     {
-                                        foreach (var sub in result.AddSubscriptions)
+                                        foreach (var sub in result.Subscriptions)
                                             SubscribeEvent(sub);
+
+                                        _persistenceStore.PersistErrors(result.Errors);
 
                                         if ((workflow.Status == WorkflowStatus.Runnable) && workflow.NextExecution.HasValue && workflow.NextExecution.Value < DateTime.Now.ToUniversalTime().Ticks)
                                             _queueProvider.QueueWork(workflowId, QueueType.Workflow);

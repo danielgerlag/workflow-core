@@ -66,9 +66,10 @@ namespace WorkflowCore.Services
                         {
                             _logger.LogError("Unable to construct step body {0}", step.BodyType.ToString());
                             pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(options.ErrorRetryInterval);
-                            pointer.Errors.Add(new ExecutionError()
+                            wfResult.Errors.Add(new ExecutionError()
                             {
-                                Id = Guid.NewGuid().ToString(),
+                                WorkflowId = workflow.Id,
+                                ExecutionPointerId = pointer.Id,
                                 ErrorTime = DateTime.Now.ToUniversalTime(),
                                 Message = String.Format("Unable to construct step body {0}", step.BodyType.ToString())
                             });
@@ -102,10 +103,12 @@ namespace WorkflowCore.Services
                     }
                     catch (Exception ex)
                     {
+                        pointer.RetryCount++;
                         _logger.LogError("Workflow {0} raised error on step {1} Message: {2}", workflow.Id, pointer.StepId, ex.Message);
-                        pointer.Errors.Add(new ExecutionError()
+                        wfResult.Errors.Add(new ExecutionError()
                         {
-                            Id = Guid.NewGuid().ToString(),
+                            WorkflowId = workflow.Id,
+                            ExecutionPointerId = pointer.Id,
                             ErrorTime = DateTime.Now.ToUniversalTime(),
                             Message = ex.Message
                         });
@@ -130,8 +133,10 @@ namespace WorkflowCore.Services
                 {
                     _logger.LogError("Unable to find step {0} in workflow definition", pointer.StepId);
                     pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(options.ErrorRetryInterval);
-                    pointer.Errors.Add(new ExecutionError()
+                    wfResult.Errors.Add(new ExecutionError()
                     {
+                        WorkflowId = workflow.Id,
+                        ExecutionPointerId = pointer.Id,
                         ErrorTime = DateTime.Now.ToUniversalTime(),
                         Message = String.Format("Unable to find step {0} in workflow definition", pointer.StepId)
                     });

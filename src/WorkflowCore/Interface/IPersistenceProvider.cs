@@ -40,6 +40,8 @@ namespace WorkflowCore.Interface
 
         Task MarkEventUnprocessed(string id);
 
+        Task PersistErrors(IEnumerable<ExecutionError> errors);
+
         void EnsureStoreExists();
 
     }

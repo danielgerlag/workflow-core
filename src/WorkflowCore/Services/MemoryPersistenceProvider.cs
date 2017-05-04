@@ -18,7 +18,7 @@ namespace WorkflowCore.Services
         private static List<WorkflowInstance> _instances = new List<WorkflowInstance>();
         private static List<EventSubscription> _subscriptions = new List<EventSubscription>();
         private static List<Event> _events = new List<Event>();
-
+        private static List<ExecutionError> _errors = new List<ExecutionError>();
 
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
         {
@@ -130,6 +130,11 @@ namespace WorkflowCore.Services
             var evt = _events.FirstOrDefault(x => x.Id == id);
             if (evt != null)
                 evt.IsProcessed = false;
+        }
+
+        public async Task PersistErrors(IEnumerable<ExecutionError> errors)
+        {
+            _errors.AddRange(errors);
         }
     }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously

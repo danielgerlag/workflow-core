@@ -32,12 +32,12 @@ namespace WorkflowCore.Models
         public int ConcurrentFork { get; set; }
 
         public bool PathTerminator { get; set; }
-
-        public List<ExecutionError> Errors { get; set; } = new List<ExecutionError>();
-                
+        
         public Dictionary<string, object> ExtensionAttributes { get; set; } = new Dictionary<string, object>();
 
         public string StepName { get; set; }
+
+        public int RetryCount { get; set; }
 
     }
 }

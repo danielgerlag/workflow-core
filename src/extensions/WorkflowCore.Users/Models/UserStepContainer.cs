@@ -35,7 +35,7 @@ namespace WorkflowCore.Users.Models
                 executionPointer.EventName = "UserAction";
                 executionPointer.Active = false;
 
-                executorResult.AddSubscriptions.Add(new EventSubscription()
+                executorResult.Subscriptions.Add(new EventSubscription()
                 {
                     WorkflowId = workflow.Id,
                     StepId = executionPointer.StepId,
