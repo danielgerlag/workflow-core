@@ -16,6 +16,8 @@ namespace WorkflowCore.Models
 
         public string Name { get; set; }
 
+        public List<int> Children { get; set; } = new List<int>();
+
         public List<StepOutcome> Outcomes { get; set; } = new List<StepOutcome>();
 
         public List<DataMapping> Inputs { get; set; } = new List<DataMapping>();

@@ -39,5 +39,9 @@ namespace WorkflowCore.Models
 
         public int RetryCount { get; set; }
 
+        public List<string> Children { get; set; } = new List<string>();
+
+        public object ContextData { get; set; }
+
     }
 }

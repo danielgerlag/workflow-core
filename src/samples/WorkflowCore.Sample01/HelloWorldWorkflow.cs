@@ -17,20 +17,9 @@ namespace WorkflowCore.Sample01
                 .Then<GoodbyeWorld>();
         }
 
-        public string Id
-        {
-            get
-            {
-                return "HelloWorld";
-            }
-        }
-
-        public int Version
-        {
-            get
-            {
-                return 1;
-            }
-        }        
+        public string Id => "HelloWorld";
+            
+        public int Version => 1;
+                 
     }
 }

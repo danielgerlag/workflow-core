@@ -9,11 +9,13 @@ namespace WorkflowCore.Models
     {
         public bool Proceed { get; set; }
 
-        public object[] OutcomeValues { get; set; } = new object[0];
+        public object OutcomeValue { get; set; }
 
         public TimeSpan? SleepFor { get; set; }
 
         public object PersistenceData { get; set; }
+
+        public List<object> BranchValues { get; set; } = new List<object>();
 
         public ExecutionResult()
         {
@@ -22,7 +24,7 @@ namespace WorkflowCore.Models
         public ExecutionResult(object outcome)
         {
             Proceed = true;
-            OutcomeValues = new[] { outcome };
+            OutcomeValue = outcome;
         }
 
         public static ExecutionResult Outcome(object value)
@@ -30,7 +32,7 @@ namespace WorkflowCore.Models
             return new ExecutionResult()
             {
                 Proceed = true,
-                OutcomeValues = new[] { value }
+                OutcomeValue = value
             };
         }
 
@@ -39,7 +41,7 @@ namespace WorkflowCore.Models
             return new ExecutionResult()
             {
                 Proceed = true,
-                OutcomeValues = new object[] { null }
+                OutcomeValue = null
             };
         }
 
@@ -49,6 +51,16 @@ namespace WorkflowCore.Models
             {
                 Proceed = false,
                 PersistenceData = persistenceData
+            };
+        }
+
+        public static ExecutionResult Branch(List<object> branches, object persistenceData)
+        {
+            return new ExecutionResult()
+            {
+                Proceed = false,
+                PersistenceData = persistenceData,
+                BranchValues = branches
             };
         }
 

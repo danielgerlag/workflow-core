@@ -150,36 +150,55 @@ namespace WorkflowCore.Services
 
         private void ProcessExecutionResult(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, ExecutionResult result)
         {
+            pointer.PersistenceData = result.PersistenceData;
+            if (result.SleepFor.HasValue)
+                pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(result.SleepFor.Value);
+            
             if (result.Proceed)
             {
                 pointer.Active = false;
                 pointer.EndTime = DateTime.Now;
-                int forkCounter = 1;
                 bool noOutcomes = true;
-                foreach (var outcomeValue in result.OutcomeValues)
+                int forkCounter = 1;
+
+                foreach (var outcomeTarget in step.Outcomes.Where(x => object.Equals(x.Value, result.OutcomeValue) || x.Value == null))
                 {
-                    foreach (var outcomeTarget in step.Outcomes.Where(x => object.Equals(x.Value, outcomeValue) || x.Value == null))
+                    workflow.ExecutionPointers.Add(new ExecutionPointer()
                     {
-                        workflow.ExecutionPointers.Add(new ExecutionPointer()
-                        {
-                            Id = Guid.NewGuid().ToString(),
-                            StepId = outcomeTarget.NextStep,
-                            Active = true,
-                            ConcurrentFork = (forkCounter * pointer.ConcurrentFork),
-                            StepName = def.Steps.First(x => x.Id == outcomeTarget.NextStep).Name
-                        });
-                        noOutcomes = false;
-                        forkCounter++;
-                    }
+                        Id = Guid.NewGuid().ToString(),
+                        StepId = outcomeTarget.NextStep,
+                        Active = true,
+                        ConcurrentFork = (forkCounter * pointer.ConcurrentFork),
+                        StepName = def.Steps.First(x => x.Id == outcomeTarget.NextStep).Name
+                    });
+                    noOutcomes = false;
+                    forkCounter++;
                 }
-                pointer.PathTerminator = noOutcomes;
+                pointer.PathTerminator = (noOutcomes && pointer.PathTerminator);
             }
             else
             {
-                pointer.PersistenceData = result.PersistenceData;
-                if (result.SleepFor.HasValue)
-                    pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(result.SleepFor.Value);
+                int forkCounter = 1;
+                foreach (var branch in result.BranchValues)
+                {
+                    foreach (var childDefId in step.Children)
+                    {
+                        var childPointerId = Guid.NewGuid().ToString();
+                        workflow.ExecutionPointers.Add(new ExecutionPointer()
+                        {
+                            Id = childPointerId,
+                            StepId = childDefId,
+                            Active = true,
+                            ContextData = branch,
+                            ConcurrentFork = (forkCounter * pointer.ConcurrentFork),
+                            StepName = def.Steps.First(x => x.Id == childDefId).Name
+                        });
+                        pointer.Children.Add(childPointerId);
+                        forkCounter++;
+                    }
+                }
             }
+
         }
 
         private void ProcessInputs(WorkflowInstance workflow, WorkflowStep step, IStepBody body)

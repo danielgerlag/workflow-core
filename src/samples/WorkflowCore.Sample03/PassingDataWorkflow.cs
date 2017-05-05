@@ -32,20 +32,9 @@ namespace WorkflowCore.Sample03
                     });
         }
 
-        public string Id
-        {
-            get
-            {
-                return "PassingDataWorkflow";
-            }
-        }
+        public string Id => "PassingDataWorkflow";
+            
+        public int Version => 1;
 
-        public int Version
-        {
-            get
-            {
-                return 1;
-            }
-        }
     }
 }

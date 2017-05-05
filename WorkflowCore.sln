@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26206.0
+VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{EF47161E-E399-451C-BDE8-E92AAD3BD761}"
 EndProject
@@ -73,6 +73,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample08", "src\samples\WorkflowCore.Sample08\WorkflowCore.Sample08.csproj", "{ED5074AF-A09E-4357-A419-FE3476C0FAE7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.WebAPI", "src\extensions\WorkflowCore.WebAPI\WorkflowCore.WebAPI.csproj", "{FBF8D151-A3BF-4EB3-8F80-D71618696362}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Sample09", "WorkflowCore.Sample09\WorkflowCore.Sample09.csproj", "{CFFE642C-E9ED-4662-B5BB-6586A06BC58E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -192,6 +194,10 @@ Global
 		{FBF8D151-A3BF-4EB3-8F80-D71618696362}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FBF8D151-A3BF-4EB3-8F80-D71618696362}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FBF8D151-A3BF-4EB3-8F80-D71618696362}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFFE642C-E9ED-4662-B5BB-6586A06BC58E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFFE642C-E9ED-4662-B5BB-6586A06BC58E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFFE642C-E9ED-4662-B5BB-6586A06BC58E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFFE642C-E9ED-4662-B5BB-6586A06BC58E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -228,5 +234,6 @@ Global
 		{4C4DE624-9D91-484F-8BF7-2D71264EAB8B} = {6803696C-B19A-4B27-9193-082A02B6F205}
 		{ED5074AF-A09E-4357-A419-FE3476C0FAE7} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
 		{FBF8D151-A3BF-4EB3-8F80-D71618696362} = {6803696C-B19A-4B27-9193-082A02B6F205}
+		{CFFE642C-E9ED-4662-B5BB-6586A06BC58E} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
 	EndGlobalSection
 EndGlobal
