@@ -10,6 +10,8 @@ namespace WorkflowCore.Models
     {
         public WorkflowInstance Workflow { get; set; }
         public WorkflowStep Step { get; set; }
+        public ExecutionPointer ExecutionPointer { get; set; }
         public object PersistenceData { get; set; }
+        public object ContextData { get; set; }
     }
 }

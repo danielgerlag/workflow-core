@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -149,6 +150,30 @@ namespace WorkflowCore.Services
             WorkflowBuilder.AddStep(newStep);
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
             return this;
+        }
+
+        public IStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection, Action<IStepBuilder<TData, Foreach>> builder)
+        {
+            var newStep = new WorkflowStep<Foreach>();
+            
+            Expression<Func<Foreach, IEnumerable>> inputExpr = (x => x.Collection);
+
+            var mapping = new DataMapping()
+            {
+                Source = collection,
+                Target = inputExpr
+            };
+            newStep.Inputs.Add(mapping);            
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, Foreach>(WorkflowBuilder, newStep);
+            
+            builder.Invoke(stepBuilder);
+            newStep.Children.Add(newStep.Id + 1); //TODO: make more elegant
+
+            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+
+            return stepBuilder;
         }
     }
 }

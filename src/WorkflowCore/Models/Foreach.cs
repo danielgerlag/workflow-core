@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -11,18 +12,13 @@ namespace WorkflowCore.Models
     {
         public enum LoopState { Running, Complete };
 
-        public LambdaExpression CollectionExpression { get; set; }
-
-        public Foreach(LambdaExpression collectionExpression)
-        {
-            CollectionExpression = collectionExpression;
-        }
+        public IEnumerable Collection { get; set; }                
 
         public override ExecutionResult Run(IStepExecutionContext context)
         {
             if (context.PersistenceData == null)
             {
-                var values = (IEnumerable<object>)CollectionExpression.Compile().DynamicInvoke(context.Workflow.Data);
+                var values = Collection.Cast<object>();
                 return ExecutionResult.Branch(new List<object>(values), LoopState.Running);
             }
 
@@ -30,11 +26,34 @@ namespace WorkflowCore.Models
             {
                 if ((LoopState)(context.PersistenceData) == LoopState.Running)
                 {
-                    //TODO
+                    bool complete = true;
+                    foreach (var childId in context.ExecutionPointer.Children)
+                        complete = complete && IsBranchComplete(context.Workflow.ExecutionPointers, childId);
+
+                    if (complete)
+                        return ExecutionResult.Next();
                 }
             }
 
             return ExecutionResult.Persist(context.PersistenceData);
         }
+
+        private bool IsBranchComplete(IEnumerable<ExecutionPointer> pointers, string rootId)
+        {
+            var root = pointers.First(x => x.Id == rootId);
+
+            if (root.EndTime == null)
+                return false;
+
+            var list = pointers.Where(x => x.PredecessorId == rootId).ToList();
+
+            bool result = true;
+
+            foreach (var item in list)
+                result = result && IsBranchComplete(pointers, item.Id);
+
+            return result;
+        }
+
     }
 }

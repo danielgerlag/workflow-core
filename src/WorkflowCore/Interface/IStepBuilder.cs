@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Linq.Expressions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -85,5 +86,7 @@ namespace WorkflowCore.Interface
         /// </summary>
         /// <returns></returns>
         IStepBuilder<TData, TStepBody> EndWorkflow();
+
+        IStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection, Action<IStepBuilder<TData, Foreach>> builder);
     }
 }

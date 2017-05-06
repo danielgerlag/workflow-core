@@ -82,7 +82,9 @@ namespace WorkflowCore.Services
                         {
                             Workflow = workflow,
                             Step = step,
-                            PersistenceData = pointer.PersistenceData
+                            PersistenceData = pointer.PersistenceData,
+                            ExecutionPointer = pointer,
+                            ContextData = pointer.ContextData
                         };
 
                         switch (step.BeforeExecute(wfResult, context, pointer, body))
@@ -157,7 +159,7 @@ namespace WorkflowCore.Services
             if (result.Proceed)
             {
                 pointer.Active = false;
-                pointer.EndTime = DateTime.Now;
+                pointer.EndTime = DateTime.Now.ToUniversalTime();
                 bool noOutcomes = true;
                 int forkCounter = 1;
 
@@ -166,6 +168,7 @@ namespace WorkflowCore.Services
                     workflow.ExecutionPointers.Add(new ExecutionPointer()
                     {
                         Id = Guid.NewGuid().ToString(),
+                        PredecessorId = pointer.Id,
                         StepId = outcomeTarget.NextStep,
                         Active = true,
                         ConcurrentFork = (forkCounter * pointer.ConcurrentFork),
@@ -187,6 +190,7 @@ namespace WorkflowCore.Services
                         workflow.ExecutionPointers.Add(new ExecutionPointer()
                         {
                             Id = childPointerId,
+                            PredecessorId = pointer.Id,
                             StepId = childDefId,
                             Active = true,
                             ContextData = branch,
