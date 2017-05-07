@@ -80,10 +80,9 @@ namespace WorkflowCore.Services
             wf.ExecutionPointers.Add(new ExecutionPointer()
             {
                 Id = Guid.NewGuid().ToString(),
-                StepId = def.InitialStep,
+                StepId = 0,
                 Active = true,
-                ConcurrentFork = 1,
-                StepName = def.Steps.First(x => x.Id == def.InitialStep).Name
+                StepName = def.Steps.First(x => x.Id == 0).Name
             });
             string id = await PersistenceStore.CreateNewWorkflow(wf);
             await QueueProvider.QueueWork(id, QueueType.Workflow);

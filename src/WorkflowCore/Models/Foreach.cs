@@ -10,7 +10,7 @@ namespace WorkflowCore.Models
 {
     public class Foreach : StepBody
     {
-        public enum LoopState { Running, Complete };
+        private const int ChildrenActive = 0;
 
         public IEnumerable Collection { get; set; }                
 
@@ -19,12 +19,12 @@ namespace WorkflowCore.Models
             if (context.PersistenceData == null)
             {
                 var values = Collection.Cast<object>();
-                return ExecutionResult.Branch(new List<object>(values), LoopState.Running);
+                return ExecutionResult.Branch(new List<object>(values), ChildrenActive);
             }
 
-            if (context.PersistenceData is LoopState)
+            if (context.PersistenceData is int)
             {
-                if ((LoopState)(context.PersistenceData) == LoopState.Running)
+                if ((int)(context.PersistenceData) == ChildrenActive)
                 {
                     bool complete = true;
                     foreach (var childId in context.ExecutionPointer.Children)

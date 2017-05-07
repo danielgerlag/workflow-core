@@ -84,7 +84,7 @@ namespace WorkflowCore.Services
                             Step = step,
                             PersistenceData = pointer.PersistenceData,
                             ExecutionPointer = pointer,
-                            ContextData = pointer.ContextData
+                            Item = pointer.ContextItem
                         };
 
                         switch (step.BeforeExecute(wfResult, context, pointer, body))
@@ -159,9 +159,7 @@ namespace WorkflowCore.Services
             if (result.Proceed)
             {
                 pointer.Active = false;
-                pointer.EndTime = DateTime.Now.ToUniversalTime();
-                bool noOutcomes = true;
-                int forkCounter = 1;
+                pointer.EndTime = DateTime.Now.ToUniversalTime();                
 
                 foreach (var outcomeTarget in step.Outcomes.Where(x => object.Equals(x.Value, result.OutcomeValue) || x.Value == null))
                 {
@@ -171,14 +169,10 @@ namespace WorkflowCore.Services
                         PredecessorId = pointer.Id,
                         StepId = outcomeTarget.NextStep,
                         Active = true,
-                        ContextData = pointer.ContextData,
-                        ConcurrentFork = (forkCounter * pointer.ConcurrentFork),
+                        ContextItem = pointer.ContextItem,
                         StepName = def.Steps.First(x => x.Id == outcomeTarget.NextStep).Name
                     });
-                    noOutcomes = false;
-                    forkCounter++;
                 }
-                pointer.PathTerminator = (noOutcomes && pointer.PathTerminator);
             }
             else
             {
@@ -194,8 +188,7 @@ namespace WorkflowCore.Services
                             PredecessorId = pointer.Id,
                             StepId = childDefId,
                             Active = true,
-                            ContextData = branch,
-                            ConcurrentFork = (forkCounter * pointer.ConcurrentFork),
+                            ContextItem = branch,
                             StepName = def.Steps.First(x => x.Id == childDefId).Name
                         });
                         pointer.Children.Add(childPointerId);
@@ -203,7 +196,6 @@ namespace WorkflowCore.Services
                     }
                 }
             }
-
         }
 
         private void ProcessInputs(WorkflowInstance workflow, WorkflowStep step, IStepBody body)
@@ -245,23 +237,12 @@ namespace WorkflowCore.Services
                 long pointerSleep = pointer.SleepUntil.Value.ToUniversalTime().Ticks;
                 workflow.NextExecution = Math.Min(pointerSleep, workflow.NextExecution ?? pointerSleep);
             }
-
-            if (workflow.NextExecution == null)
+            
+            if ((workflow.NextExecution == null) && (workflow.ExecutionPointers.All(x => x.EndTime != null)))
             {
-                int forks = 1;
-                int terminals = 0;
-                foreach (var pointer in workflow.ExecutionPointers)
-                {
-                    forks = Math.Max(pointer.ConcurrentFork, forks);
-                    if (pointer.PathTerminator)
-                        terminals++;
-                }
-                if (forks <= terminals)
-                {
-                    workflow.Status = WorkflowStatus.Complete;
-                    workflow.CompleteTime = DateTime.Now.ToUniversalTime();
-                }
-            }
+                workflow.Status = WorkflowStatus.Complete;
+                workflow.CompleteTime = DateTime.Now.ToUniversalTime();
+            }            
         }
 
     }

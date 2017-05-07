@@ -27,11 +27,7 @@ namespace WorkflowCore.Models
 
         public bool EventPublished { get; set; }
 
-        public object EventData { get; set; }
-
-        public int ConcurrentFork { get; set; }
-
-        public bool PathTerminator { get; set; }
+        public object EventData { get; set; }                
         
         public Dictionary<string, object> ExtensionAttributes { get; set; } = new Dictionary<string, object>();
 
@@ -41,7 +37,7 @@ namespace WorkflowCore.Models
 
         public List<string> Children { get; set; } = new List<string>();
 
-        public object ContextData { get; set; }
+        public object ContextItem { get; set; }
 
         public string PredecessorId { get; set; }
 

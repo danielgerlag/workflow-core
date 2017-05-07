@@ -9,7 +9,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services
 {
-    public class StepBuilder<TData, TStepBody> : IStepBuilder<TData, TStepBody>
+    public class StepBuilder<TData, TStepBody> : IStepBuilder<TData, TStepBody>, IParentStepBuilder<TData, TStepBody>
         where TStepBody : IStepBody
     {
         public IWorkflowBuilder<TData> WorkflowBuilder { get; private set; }
@@ -149,7 +149,7 @@ namespace WorkflowCore.Services
             return this;
         }
 
-        public IStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection, Action<IWorkflowBuilder<TData>> builder)
+        public IParentStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection)
         {
             var newStep = new WorkflowStep<Foreach>();
             
@@ -163,14 +163,19 @@ namespace WorkflowCore.Services
             newStep.Inputs.Add(mapping);            
 
             WorkflowBuilder.AddStep(newStep);
-            var stepBuilder = new StepBuilder<TData, Foreach>(WorkflowBuilder, newStep);
-            
-            builder.Invoke(WorkflowBuilder);
-            newStep.Children.Add(newStep.Id + 1); //TODO: make more elegant
+            var stepBuilder = new StepBuilder<TData, Foreach>(WorkflowBuilder, newStep);                        
 
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
 
             return stepBuilder;
+        }
+
+        public IStepBuilder<TData, TStepBody> Do(Action<IWorkflowBuilder<TData>> builder)
+        {
+            builder.Invoke(WorkflowBuilder);
+            Step.Children.Add(Step.Id + 1); //TODO: make more elegant                        
+
+            return this;
         }
     }
 }

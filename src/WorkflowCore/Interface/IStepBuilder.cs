@@ -87,6 +87,6 @@ namespace WorkflowCore.Interface
         /// <returns></returns>
         IStepBuilder<TData, TStepBody> EndWorkflow();
 
-        IStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection, Action<IWorkflowBuilder<TData>> builder);
+        IParentStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection);
     }
 }

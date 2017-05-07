@@ -20,18 +20,18 @@ namespace WorkflowCore.Sample09
                     Console.WriteLine("Hello");
                     return ExecutionResult.Next();
                 })
-                .ForEach(data => new List<int>() { 1, 2, 3, 4 }, each => each
-                    .StartWith(context =>
-                    {
-                        Console.WriteLine($"iteration {context.ContextData}");
-                        return ExecutionResult.Next();
-                    })
-                    .Then(context =>
-                    {
-                        Console.WriteLine($"step2 {context.ContextData}");
-                        return ExecutionResult.Next();
-                    })
-                )
+                .ForEach(data => new List<int>() { 1, 2, 3, 4 })
+                    .Do(x => x
+                        .StartWith(context =>
+                        {
+                            Console.WriteLine($"iteration {context.Item}");
+                            return ExecutionResult.Next();
+                        })
+                        .Then(context =>
+                        {
+                            Console.WriteLine($"step2 {context.Item}");
+                            return ExecutionResult.Next();
+                        }))
                 .Then(context => 
                 {
                     Console.WriteLine("bye");

@@ -100,7 +100,6 @@ namespace WorkflowCore.UnitTests.Services
             var executionPointer = new ExecutionPointer()
             {
                 Active = true,
-                ConcurrentFork = 1,
                 StepId = 1
             };
 
@@ -132,7 +131,6 @@ namespace WorkflowCore.UnitTests.Services
             instance.ExecutionPointers.Add(new ExecutionPointer()
             {
                 Active = true,
-                ConcurrentFork = 1,
                 StepId = 0
             });                        
 

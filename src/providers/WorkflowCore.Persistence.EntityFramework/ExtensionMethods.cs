@@ -48,8 +48,6 @@ namespace WorkflowCore.Persistence.EntityFramework
                 persistedEP.EventName = ep.EventName;
                 persistedEP.EventKey = ep.EventKey;
                 persistedEP.EventPublished = ep.EventPublished;
-                persistedEP.ConcurrentFork = ep.ConcurrentFork;
-                persistedEP.PathTerminator = ep.PathTerminator;
                 persistedEP.EventData = JsonConvert.SerializeObject(ep.EventData, SerializerSettings);
 
                 foreach (var attr in ep.ExtensionAttributes)
@@ -138,8 +136,6 @@ namespace WorkflowCore.Persistence.EntityFramework
                 pointer.EventName = ep.EventName;
                 pointer.EventKey = ep.EventKey;
                 pointer.EventPublished = ep.EventPublished;
-                pointer.ConcurrentFork = ep.ConcurrentFork;
-                pointer.PathTerminator = ep.PathTerminator;
                 pointer.EventData = JsonConvert.DeserializeObject(ep.EventData, SerializerSettings);
 
                 foreach (var attr in ep.ExtensionAttributes)

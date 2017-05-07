@@ -40,10 +40,6 @@ namespace WorkflowCore.Persistence.EntityFramework.Models
         public bool EventPublished { get; set; }
 
         public string EventData { get; set; }
-        
-        public int ConcurrentFork { get; set; }
-
-        public bool PathTerminator { get; set; }
 
         public string StepName { get; set; }
                 
