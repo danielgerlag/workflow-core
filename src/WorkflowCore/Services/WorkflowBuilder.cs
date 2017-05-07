@@ -20,7 +20,7 @@ namespace WorkflowCore.Services
         public IWorkflowBuilder<T> UseData<T>()
         {
             IWorkflowBuilder<T> result = new WorkflowBuilder<T>(Steps);
-            result.InitialStep = this.InitialStep;            
+            //result.InitialStep = this.InitialStep;            
             return result;
         }
         
@@ -31,7 +31,7 @@ namespace WorkflowCore.Services
             result.Id = id;
             result.Version = version;
             result.Steps = this.Steps;
-            result.InitialStep = this.InitialStep;
+            result.InitialStep = 0; // this.InitialStep;
             result.DefaultErrorBehavior = DefaultErrorBehavior;
             result.DefaultErrorRetryInterval = DefaultErrorRetryInterval;
             return result;
@@ -71,7 +71,7 @@ namespace WorkflowCore.Services
 
             step.Name = step.Name ?? typeof(TStep).Name;
             AddStep(step);
-            this.InitialStep = step.Id;
+            //this.InitialStep = step.Id;
             return stepBuilder;
         }
 
@@ -81,7 +81,7 @@ namespace WorkflowCore.Services
             newStep.Body = body;
             var stepBuilder = new StepBuilder<TData, InlineStepBody>(this, newStep);
             AddStep(newStep);
-            this.InitialStep = newStep.Id;
+            //this.InitialStep = newStep.Id;
             return stepBuilder;
         }
 

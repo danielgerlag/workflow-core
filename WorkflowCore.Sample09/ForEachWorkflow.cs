@@ -20,8 +20,8 @@ namespace WorkflowCore.Sample09
                     Console.WriteLine("Hello");
                     return ExecutionResult.Next();
                 })
-                .ForEach(data => new List<int>() { 1, 2, 3 }, each => each
-                    .Then(context =>
+                .ForEach(data => new List<int>() { 1, 2, 3, 4 }, each => each
+                    .StartWith(context =>
                     {
                         Console.WriteLine($"iteration {context.ContextData}");
                         return ExecutionResult.Next();

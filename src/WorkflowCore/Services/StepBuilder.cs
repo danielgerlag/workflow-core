@@ -52,7 +52,6 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
-
         public IStepBuilder<TData, InlineStepBody> Then(Func<IStepExecutionContext, ExecutionResult> body)
         {            
             WorkflowStepInline newStep = new WorkflowStepInline();
@@ -72,8 +71,6 @@ namespace WorkflowCore.Services
             var outcomeBuilder = new StepOutcomeBuilder<TData>(WorkflowBuilder, result);
             return outcomeBuilder;
         }
-
-
 
         public IStepBuilder<TData, TStepBody> Input<TInput>(Expression<Func<TStepBody, TInput>> stepProperty, Expression<Func<TData, TInput>> value)
         {
@@ -152,7 +149,7 @@ namespace WorkflowCore.Services
             return this;
         }
 
-        public IStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection, Action<IStepBuilder<TData, Foreach>> builder)
+        public IStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection, Action<IWorkflowBuilder<TData>> builder)
         {
             var newStep = new WorkflowStep<Foreach>();
             
@@ -168,7 +165,7 @@ namespace WorkflowCore.Services
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, Foreach>(WorkflowBuilder, newStep);
             
-            builder.Invoke(stepBuilder);
+            builder.Invoke(WorkflowBuilder);
             newStep.Children.Add(newStep.Id + 1); //TODO: make more elegant
 
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });

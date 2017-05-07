@@ -171,6 +171,7 @@ namespace WorkflowCore.Services
                         PredecessorId = pointer.Id,
                         StepId = outcomeTarget.NextStep,
                         Active = true,
+                        ContextData = pointer.ContextData,
                         ConcurrentFork = (forkCounter * pointer.ConcurrentFork),
                         StepName = def.Steps.First(x => x.Id == outcomeTarget.NextStep).Name
                     });
