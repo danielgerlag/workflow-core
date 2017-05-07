@@ -88,5 +88,7 @@ namespace WorkflowCore.Interface
         IStepBuilder<TData, TStepBody> EndWorkflow();
 
         IParentStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection);
+
+        IParentStepBuilder<TData, While> While(Expression<Func<TData, bool>> condition);
     }
 }

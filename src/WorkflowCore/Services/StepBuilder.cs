@@ -170,6 +170,27 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
+        public IParentStepBuilder<TData, While> While(Expression<Func<TData, bool>> condition)
+        {
+            var newStep = new WorkflowStep<While>();
+
+            Expression<Func<While, bool>> inputExpr = (x => x.ConditionResult);
+
+            var mapping = new DataMapping()
+            {
+                Source = condition,
+                Target = inputExpr
+            };
+            newStep.Inputs.Add(mapping);
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, While>(WorkflowBuilder, newStep);
+
+            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+
+            return stepBuilder;
+        }
+
         public IStepBuilder<TData, TStepBody> Do(Action<IWorkflowBuilder<TData>> builder)
         {
             builder.Invoke(WorkflowBuilder);

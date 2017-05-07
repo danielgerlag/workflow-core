@@ -152,6 +152,7 @@ namespace WorkflowCore.Services
 
         private void ProcessExecutionResult(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, ExecutionResult result)
         {
+            //TODO: refactor this into it's own class
             pointer.PersistenceData = result.PersistenceData;
             if (result.SleepFor.HasValue)
                 pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(result.SleepFor.Value);
