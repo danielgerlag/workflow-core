@@ -11,8 +11,9 @@ namespace WorkflowCore.Sample04
     public class EventSampleWorkflow : IWorkflow<MyDataClass>
     {
         public string Id => "EventSampleWorkflow";
+            
         public int Version => 1;
-        
+            
         public void Build(IWorkflowBuilder<MyDataClass> builder)
         {
             builder

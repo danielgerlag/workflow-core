@@ -13,28 +13,29 @@ namespace WorkflowCore.Services
     public class WorkflowExecutor : IWorkflowExecutor
     {
 
-        protected readonly IWorkflowHost _host;        
+        protected readonly IWorkflowHost _host;
         protected readonly IWorkflowRegistry _registry;
         protected readonly IServiceProvider _serviceProvider;
         protected readonly ILogger _logger;
 
         public WorkflowExecutor(IWorkflowHost host, IWorkflowRegistry registry, IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
-            _host = host;            
+            _host = host;
             _serviceProvider = serviceProvider;
             _registry = registry;
             _logger = loggerFactory.CreateLogger<WorkflowExecutor>();
         }
 
-        public async Task Execute(WorkflowInstance workflow, IPersistenceProvider persistenceStore, WorkflowOptions options)
+        public WorkflowExecutorResult Execute(WorkflowInstance workflow, WorkflowOptions options)
         {
-            //TODO: split this method up
+            WorkflowExecutorResult wfResult = new WorkflowExecutorResult();
+
             List<ExecutionPointer> exePointers = new List<ExecutionPointer>(workflow.ExecutionPointers.Where(x => x.Active && (!x.SleepUntil.HasValue || x.SleepUntil < DateTime.Now.ToUniversalTime())));
             var def = _registry.GetDefinition(workflow.WorkflowDefinitionId, workflow.Version);
             if (def == null)
             {
                 _logger.LogError("Workflow {0} version {1} is not registered", workflow.WorkflowDefinitionId, workflow.Version);
-                return;
+                return wfResult;
             }
 
             foreach (var pointer in exePointers)
@@ -44,8 +45,15 @@ namespace WorkflowCore.Services
                 {
                     try
                     {
-                        if (step.InitForExecution(_host, persistenceStore, def, workflow, pointer) == ExecutionPipelineDirective.Defer)
-                            continue;
+                        switch (step.InitForExecution(wfResult, def, workflow, pointer))
+                        {
+                            case ExecutionPipelineDirective.Defer:
+                                continue;
+                            case ExecutionPipelineDirective.EndWorkflow:
+                                workflow.Status = WorkflowStatus.Complete;
+                                workflow.CompleteTime = DateTime.Now.ToUniversalTime();
+                                continue;
+                        }
 
                         if (!pointer.StartTime.HasValue)
                             pointer.StartTime = DateTime.Now;
@@ -58,9 +66,10 @@ namespace WorkflowCore.Services
                         {
                             _logger.LogError("Unable to construct step body {0}", step.BodyType.ToString());
                             pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(options.ErrorRetryInterval);
-                            pointer.Errors.Add(new ExecutionError()
+                            wfResult.Errors.Add(new ExecutionError()
                             {
-                                Id = Guid.NewGuid().ToString(),
+                                WorkflowId = workflow.Id,
+                                ExecutionPointerId = pointer.Id,
                                 ErrorTime = DateTime.Now.ToUniversalTime(),
                                 Message = String.Format("Unable to construct step body {0}", step.BodyType.ToString())
                             });
@@ -73,24 +82,35 @@ namespace WorkflowCore.Services
                         {
                             Workflow = workflow,
                             Step = step,
-                            PersistenceData = pointer.PersistenceData
+                            PersistenceData = pointer.PersistenceData,
+                            ExecutionPointer = pointer,
+                            Item = pointer.ContextItem
                         };
 
-                        if (step.BeforeExecute(_host, persistenceStore, context, pointer, body) == ExecutionPipelineDirective.Defer)
-                            continue;
+                        switch (step.BeforeExecute(wfResult, context, pointer, body))
+                        {
+                            case ExecutionPipelineDirective.Defer:
+                                continue;
+                            case ExecutionPipelineDirective.EndWorkflow:
+                                workflow.Status = WorkflowStatus.Complete;
+                                workflow.CompleteTime = DateTime.Now.ToUniversalTime();
+                                continue;
+                        }
 
                         var result = body.Run(context);
 
                         ProcessOutputs(workflow, step, body);
                         ProcessExecutionResult(workflow, def, pointer, step, result);
-                        step.AfterExecute(_host, persistenceStore, context, result, pointer);
+                        step.AfterExecute(wfResult, context, result, pointer);
                     }
                     catch (Exception ex)
                     {
+                        pointer.RetryCount++;
                         _logger.LogError("Workflow {0} raised error on step {1} Message: {2}", workflow.Id, pointer.StepId, ex.Message);
-                        pointer.Errors.Add(new ExecutionError()
+                        wfResult.Errors.Add(new ExecutionError()
                         {
-                            Id = Guid.NewGuid().ToString(),
+                            WorkflowId = workflow.Id,
+                            ExecutionPointerId = pointer.Id,
                             ErrorTime = DateTime.Now.ToUniversalTime(),
                             Message = ex.Message
                         });
@@ -110,15 +130,15 @@ namespace WorkflowCore.Services
 
                         _host.ReportStepError(workflow, step, ex);
                     }
-
-                    await persistenceStore.PersistWorkflow(workflow);
                 }
                 else
                 {
                     _logger.LogError("Unable to find step {0} in workflow definition", pointer.StepId);
                     pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(options.ErrorRetryInterval);
-                    pointer.Errors.Add(new ExecutionError()
+                    wfResult.Errors.Add(new ExecutionError()
                     {
+                        WorkflowId = workflow.Id,
+                        ExecutionPointerId = pointer.Id,
                         ErrorTime = DateTime.Now.ToUniversalTime(),
                         Message = String.Format("Unable to find step {0} in workflow definition", pointer.StepId)
                     });
@@ -126,37 +146,56 @@ namespace WorkflowCore.Services
 
             }
             DetermineNextExecutionTime(workflow);
-            await persistenceStore.PersistWorkflow(workflow);
+
+            return wfResult;
         }
 
         private void ProcessExecutionResult(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, ExecutionResult result)
         {
+            //TODO: refactor this into it's own class
+            pointer.PersistenceData = result.PersistenceData;
+            if (result.SleepFor.HasValue)
+                pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(result.SleepFor.Value);
+            
             if (result.Proceed)
             {
                 pointer.Active = false;
-                pointer.EndTime = DateTime.Now;
-                int forkCounter = 1;
-                bool noOutcomes = true;
-                foreach (var outcome in step.Outcomes.Where(x => object.Equals(x.Value, result.OutcomeValue)))
+                pointer.EndTime = DateTime.Now.ToUniversalTime();                
+
+                foreach (var outcomeTarget in step.Outcomes.Where(x => object.Equals(x.Value, result.OutcomeValue) || x.Value == null))
                 {
                     workflow.ExecutionPointers.Add(new ExecutionPointer()
                     {
                         Id = Guid.NewGuid().ToString(),
-                        StepId = outcome.NextStep,
+                        PredecessorId = pointer.Id,
+                        StepId = outcomeTarget.NextStep,
                         Active = true,
-                        ConcurrentFork = (forkCounter * pointer.ConcurrentFork),
-                        StepName = def.Steps.First(x => x.Id == outcome.NextStep).Name
+                        ContextItem = pointer.ContextItem,
+                        StepName = def.Steps.First(x => x.Id == outcomeTarget.NextStep).Name
                     });
-                    noOutcomes = false;
-                    forkCounter++;
                 }
-                pointer.PathTerminator = noOutcomes;
             }
             else
             {
-                pointer.PersistenceData = result.PersistenceData;
-                if (result.SleepFor.HasValue)
-                    pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(result.SleepFor.Value);
+                int forkCounter = 1;
+                foreach (var branch in result.BranchValues)
+                {
+                    foreach (var childDefId in step.Children)
+                    {
+                        var childPointerId = Guid.NewGuid().ToString();
+                        workflow.ExecutionPointers.Add(new ExecutionPointer()
+                        {
+                            Id = childPointerId,
+                            PredecessorId = pointer.Id,
+                            StepId = childDefId,
+                            Active = true,
+                            ContextItem = branch,
+                            StepName = def.Steps.First(x => x.Id == childDefId).Name
+                        });
+                        pointer.Children.Add(childPointerId);
+                        forkCounter++;
+                    }
+                }
             }
         }
 
@@ -185,6 +224,9 @@ namespace WorkflowCore.Services
         {
             workflow.NextExecution = null;
 
+            if (workflow.Status == WorkflowStatus.Complete)
+                return;
+
             foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active))
             {
                 if (!pointer.SleepUntil.HasValue)
@@ -196,23 +238,12 @@ namespace WorkflowCore.Services
                 long pointerSleep = pointer.SleepUntil.Value.ToUniversalTime().Ticks;
                 workflow.NextExecution = Math.Min(pointerSleep, workflow.NextExecution ?? pointerSleep);
             }
-
-            if (workflow.NextExecution == null)
+            
+            if ((workflow.NextExecution == null) && (workflow.ExecutionPointers.All(x => x.EndTime != null)))
             {
-                int forks = 1;
-                int terminals = 0;
-                foreach (var pointer in workflow.ExecutionPointers)
-                {
-                    forks = Math.Max(pointer.ConcurrentFork, forks);
-                    if (pointer.PathTerminator)
-                        terminals++;
-                }
-                if (forks <= terminals)
-                {
-                    workflow.Status = WorkflowStatus.Complete;
-                    workflow.CompleteTime = DateTime.Now.ToUniversalTime();
-                }
-            }
+                workflow.Status = WorkflowStatus.Complete;
+                workflow.CompleteTime = DateTime.Now.ToUniversalTime();
+            }            
         }
 
     }

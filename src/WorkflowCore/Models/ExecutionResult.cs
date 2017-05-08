@@ -15,6 +15,8 @@ namespace WorkflowCore.Models
 
         public object PersistenceData { get; set; }
 
+        public List<object> BranchValues { get; set; } = new List<object>();
+
         public ExecutionResult()
         {
         }
@@ -43,12 +45,22 @@ namespace WorkflowCore.Models
             };
         }
 
-        public static ExecutionResult Persist(object value)
+        public static ExecutionResult Persist(object persistenceData)
         {
             return new ExecutionResult()
             {
                 Proceed = false,
-                OutcomeValue = value
+                PersistenceData = persistenceData
+            };
+        }
+
+        public static ExecutionResult Branch(List<object> branches, object persistenceData)
+        {
+            return new ExecutionResult()
+            {
+                Proceed = false,
+                PersistenceData = persistenceData,
+                BranchValues = branches
             };
         }
 

@@ -16,7 +16,7 @@ namespace WorkflowCore.Models
 
         public LambdaExpression EffectiveDate { get; set; }
 
-        public override ExecutionPipelineDirective InitForExecution(IWorkflowHost host, IPersistenceProvider persistenceStore, WorkflowDefinition defintion, WorkflowInstance workflow, ExecutionPointer executionPointer)
+        public override ExecutionPipelineDirective InitForExecution(WorkflowExecutorResult executorResult, WorkflowDefinition defintion, WorkflowInstance workflow, ExecutionPointer executionPointer)
         {
             if (!executionPointer.EventPublished)
             {
@@ -30,15 +30,22 @@ namespace WorkflowCore.Models
 
                 executionPointer.EventName = EventName;
                 executionPointer.Active = false;
-                persistenceStore.PersistWorkflow(workflow).Wait();
-                host.SubscribeEvent(workflow.Id, executionPointer.StepId, executionPointer.EventName, executionPointer.EventKey, effectiveDate).Wait();
+
+                executorResult.Subscriptions.Add(new EventSubscription()
+                {
+                    WorkflowId = workflow.Id,
+                    StepId = executionPointer.StepId,
+                    EventName = executionPointer.EventName,
+                    EventKey = executionPointer.EventKey,
+                    SubscribeAsOf = effectiveDate
+                });
 
                 return ExecutionPipelineDirective.Defer;
             }
             return ExecutionPipelineDirective.Next;
         }
 
-        public override ExecutionPipelineDirective BeforeExecute(IWorkflowHost host, IPersistenceProvider persistenceStore, IStepExecutionContext context, ExecutionPointer executionPointer, IStepBody body)
+        public override ExecutionPipelineDirective BeforeExecute(WorkflowExecutorResult executorResult, IStepExecutionContext context, ExecutionPointer executionPointer, IStepBody body)
         {
             if (executionPointer.EventPublished)
             {

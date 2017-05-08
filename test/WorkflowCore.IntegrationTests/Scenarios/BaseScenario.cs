@@ -1,59 +1,51 @@
-﻿using Machine.Specifications;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using WorkflowCore.Interface;
-using WorkflowCore.Models;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
-    public abstract class BaseScenario<TWorkflow, TData>
+    public abstract class BaseScenario<TWorkflow, TData> : IDisposable
         where TWorkflow : IWorkflow<TData>, new()
-        where TData : new()
+        where TData : class, new()
     {
-        protected static IWorkflowHost Host;
-        protected static IPersistenceProvider PersistenceProvider;
-        //protected static string WorkflowId;
-        //protected static WorkflowInstance Instance;
-
-        protected Establish context;
-        protected Cleanup after;
+        protected IWorkflowHost Host;
+        protected IPersistenceProvider PersistenceProvider;
 
         public BaseScenario()
         {
-            context = EstablishContext;
-            after = CleanupAfter;
+            Setup();
         }
 
-        protected abstract void ConfigureWorkflow(IServiceCollection services);
-
-        protected virtual void EstablishContext()
+        protected void Setup()
         {
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
-            ConfigureWorkflow(services);
+            Configure(services);
+
             var serviceProvider = services.BuildServiceProvider();
 
             //config logging
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            loggerFactory.AddConsole(LogLevel.Debug);            
-                        
+            loggerFactory.AddConsole(LogLevel.Debug);
+
             PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
             Host = serviceProvider.GetService<IWorkflowHost>();
             Host.RegisterWorkflow<TWorkflow, TData>();
             Host.Start();
         }
 
-        protected virtual void CleanupAfter()
+        protected virtual void Configure(IServiceCollection services)
         {
-            Host.Stop();            
-            Host = null;
-            //WorkflowId = null;
-            //Instance = null;
-            PersistenceProvider = null;
+            services.AddWorkflow();
+        }
+
+        public void Dispose()
+        {
+            Host.Stop();
         }
     }
 }

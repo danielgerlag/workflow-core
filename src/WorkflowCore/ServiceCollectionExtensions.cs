@@ -28,6 +28,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<IWorkflowThread, WorkflowThread>();
             services.AddTransient<IEventThread, EventThread>();
             services.AddTransient<IRunnablePoller, RunnablePoller>();
+
+            services.AddTransient<Foreach>();
         }
     }
 }

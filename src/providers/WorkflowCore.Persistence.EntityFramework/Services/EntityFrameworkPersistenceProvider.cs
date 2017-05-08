@@ -119,7 +119,6 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .Include(wf => wf.ExecutionPointers)
                         .ThenInclude(ep => ep.ExtensionAttributes)
                     .Include(wf => wf.ExecutionPointers)
-                        .ThenInclude(ep => ep.Errors)
                     .AsQueryable();
 
                 if (status.HasValue)
@@ -153,7 +152,6 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .Include(wf => wf.ExecutionPointers)
                         .ThenInclude(ep => ep.ExtensionAttributes)
                     .Include(wf => wf.ExecutionPointers)
-                        .ThenInclude(ep => ep.Errors)
                     .First(x => x.InstanceId == uid);
 
                 if (raw == null)
@@ -173,7 +171,6 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .Include(wf => wf.ExecutionPointers)
                         .ThenInclude(ep => ep.ExtensionAttributes)
                     .Include(wf => wf.ExecutionPointers)
-                        .ThenInclude(ep => ep.Errors)
                     .AsTracking()
                     .First();
 
@@ -186,9 +183,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
 
                     foreach (var attr in ep.ExtensionAttributes)
                         Entry(attr).State = EntityState.Detached;
-
-                    foreach (var err in ep.Errors)
-                        Entry(err).State = EntityState.Detached;
+                    
                 }
             }
         }
@@ -331,6 +326,15 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 SaveChanges();
                 Entry(existingEntity).State = EntityState.Detached;
             }
+        }
+
+        public async Task PersistErrors(IEnumerable<ExecutionError> errors)
+        {
+            foreach (var error in errors)
+            {
+                Set<PersistedExecutionError>().Add(error.ToPersistable());
+            }
+            await SaveChangesAsync();
         }
     }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously

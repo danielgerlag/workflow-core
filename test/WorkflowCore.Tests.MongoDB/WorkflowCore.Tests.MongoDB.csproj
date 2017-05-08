@@ -6,7 +6,6 @@
     <PackageId>WorkflowCore.Tests.MongoDB</PackageId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
-    <RuntimeFrameworkVersion>1.0.3</RuntimeFrameworkVersion>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
@@ -17,16 +16,13 @@
     <ProjectReference Include="..\WorkflowCore.IntegrationTests\WorkflowCore.IntegrationTests.csproj" />
     <ProjectReference Include="..\WorkflowCore.TestAssets\WorkflowCore.TestAssets.csproj" />
     <ProjectReference Include="..\..\src\providers\WorkflowCore.Persistence.MongoDB\WorkflowCore.Persistence.MongoDB.csproj" />
+    <ProjectReference Include="..\WorkflowCore.UnitTests\WorkflowCore.UnitTests.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Machine.Specifications.Runner.Console" Version="0.9.3" />
-    <PackageReference Include="Machine.Specifications.Runner.VisualStudio" Version="2.2.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <PackageReference Include="dotnet-test-mspec" Version="0.2.0" />
     <PackageReference Include="FluentAssertions" Version="4.19.2" />
-    <PackageReference Include="Machine.Fakes" Version="2.8.0" />
-    <PackageReference Include="Machine.Fakes.Moq" Version="2.8.0" />
     <PackageReference Include="Machine.Specifications" Version="0.11.0" />
     <PackageReference Include="Machine.Specifications.Should" Version="0.11.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.1.0" />
@@ -34,6 +30,8 @@
     <PackageReference Include="Moq" Version="4.7.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.1.1" />
     <PackageReference Include="Docker.DotNet" Version="2.124.3" />
+    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
   </ItemGroup>
 
 </Project>

@@ -14,8 +14,6 @@ namespace WorkflowCore.Models
 
         public string Description { get; set; }
 
-        public int InitialStep { get; set; }
-
         public List<WorkflowStep> Steps { get; set; }
 
         public Type DataType { get; set; }

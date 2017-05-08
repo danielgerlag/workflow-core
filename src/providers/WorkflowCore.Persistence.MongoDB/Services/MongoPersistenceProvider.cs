@@ -68,6 +68,16 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                 x.MapProperty(y => y.EventTime);
                 x.MapProperty(y => y.IsProcessed);
             });
+
+            //BsonClassMap.RegisterClassMap<ExecutionError>(x =>
+            //{
+            //    x.MapIdProperty(y => y.Id)
+            //        .SetIdGenerator(new StringObjectIdGenerator());
+            //    x.MapProperty(y => y.ErrorTime);
+            //    x.MapProperty(y => y.ExecutionPointerId);
+            //    x.MapProperty(y => y.Message);
+            //    x.MapProperty(y => y.WorkflowId);
+            //});
         }
 
         static bool indexesCreated = false;
@@ -102,6 +112,14 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             get
             {
                 return _database.GetCollection<Event>("wfc.events");
+            }
+        }
+
+        private IMongoCollection<ExecutionError> ExecutionErrors
+        {
+            get
+            {
+                return _database.GetCollection<ExecutionError>("wfc.execution_errors");
             }
         }
 
@@ -215,6 +233,11 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                 .Set(x => x.IsProcessed, false);
 
             await Events.UpdateOneAsync(x => x.Id == id, update);
+        }
+
+        public async Task PersistErrors(IEnumerable<ExecutionError> errors)
+        {
+            await ExecutionErrors.InsertManyAsync(errors);
         }
     }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously

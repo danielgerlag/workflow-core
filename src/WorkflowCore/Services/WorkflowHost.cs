@@ -80,10 +80,9 @@ namespace WorkflowCore.Services
             wf.ExecutionPointers.Add(new ExecutionPointer()
             {
                 Id = Guid.NewGuid().ToString(),
-                StepId = def.InitialStep,
+                StepId = 0,
                 Active = true,
-                ConcurrentFork = 1,
-                StepName = def.Steps.First(x => x.Id == def.InitialStep).Name
+                StepName = def.Steps.First(x => x.Id == 0).Name
             });
             string id = await PersistenceStore.CreateNewWorkflow(wf);
             await QueueProvider.QueueWork(id, QueueType.Workflow);
@@ -129,30 +128,6 @@ namespace WorkflowCore.Services
             LockProvider.Stop();
         }
         
-        public async Task SubscribeEvent(string workflowId, int stepId, string eventName, string eventKey, DateTime asOf)
-        {
-            Logger.LogDebug("Subscribing to event {0} {1} for workflow {2} step {3}", eventName, eventKey, workflowId, stepId);
-            EventSubscription subscription = new EventSubscription();
-            subscription.WorkflowId = workflowId;
-            subscription.StepId = stepId;
-            subscription.EventName = eventName;
-            subscription.EventKey = eventKey;
-            subscription.SubscribeAsOf = asOf;
-
-            await PersistenceStore.CreateEventSubscription(subscription);
-            var events = await PersistenceStore.GetEvents(eventName, eventKey, asOf);
-            foreach (var evt in events)
-            {
-                await PersistenceStore.MarkEventUnprocessed(evt);
-                var task = new Task(() => 
-                {
-                    Thread.Sleep(500);
-                    QueueProvider.QueueWork(evt, QueueType.Event);
-                });
-                task.Start();                
-            }
-        }
-
         public async Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null)
         {
             if (_shutdown)

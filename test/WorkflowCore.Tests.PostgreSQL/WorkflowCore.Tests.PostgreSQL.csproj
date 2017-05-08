@@ -6,7 +6,6 @@
     <PackageId>WorkflowCore.Tests.PostgreSQL</PackageId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
-    <RuntimeFrameworkVersion>1.0.3</RuntimeFrameworkVersion>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
@@ -17,6 +16,7 @@
     <ProjectReference Include="..\WorkflowCore.IntegrationTests\WorkflowCore.IntegrationTests.csproj" />
     <ProjectReference Include="..\WorkflowCore.TestAssets\WorkflowCore.TestAssets.csproj" />
     <ProjectReference Include="..\..\src\providers\WorkflowCore.Persistence.PostgreSQL\WorkflowCore.Persistence.PostgreSQL.csproj" />
+    <ProjectReference Include="..\WorkflowCore.UnitTests\WorkflowCore.UnitTests.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,6 +33,8 @@
     <PackageReference Include="Moq" Version="4.7.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.1.1" />
     <PackageReference Include="Docker.DotNet" Version="2.124.3" />
+    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
   </ItemGroup>
 
 </Project>

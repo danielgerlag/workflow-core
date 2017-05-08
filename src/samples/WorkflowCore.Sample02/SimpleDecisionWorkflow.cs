@@ -10,6 +10,7 @@ namespace WorkflowCore.Sample02
     public class SimpleDecisionWorkflow : IWorkflow
     {
         public string Id => "Simple Decision Workflow";
+
         public int Version => 1;
 
         public void Build(IWorkflowBuilder<object> builder)

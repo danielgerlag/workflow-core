@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Linq.Expressions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -79,5 +80,15 @@ namespace WorkflowCore.Interface
         IStepBuilder<TData, TStep> End<TStep>(string name) where TStep : IStepBody;
 
         IStepBuilder<TData, TStepBody> OnError(WorkflowErrorHandling behavior, TimeSpan? retryInterval = null);
+
+        /// <summary>
+        /// Ends the workflow and marks it as complete
+        /// </summary>
+        /// <returns></returns>
+        //IStepBuilder<TData, TStepBody> EndWorkflow();
+
+        IParentStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection);
+
+        IParentStepBuilder<TData, While> While(Expression<Func<TData, bool>> condition);
     }
 }

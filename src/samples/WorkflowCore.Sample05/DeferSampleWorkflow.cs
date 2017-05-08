@@ -11,8 +11,9 @@ namespace WorkflowCore.Sample05
     public class DeferSampleWorkflow : IWorkflow
     {
         public string Id => "DeferSampleWorkflow";
+            
         public int Version => 1;
-
+            
         public void Build(IWorkflowBuilder<object> builder)
         {
             builder

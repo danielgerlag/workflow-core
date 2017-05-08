@@ -63,16 +63,15 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
                     b.Property<DateTime>("ErrorTime");
 
-                    b.Property<long>("ExecutionPointerId");
-
-                    b.Property<string>("Id")
-                        .HasMaxLength(50);
+                    b.Property<string>("ExecutionPointerId")
+                        .HasMaxLength(100);
 
                     b.Property<string>("Message");
 
-                    b.HasKey("PersistenceId");
+                    b.Property<string>("WorkflowId")
+                        .HasMaxLength(100);
 
-                    b.HasIndex("ExecutionPointerId");
+                    b.HasKey("PersistenceId");
 
                     b.ToTable("PersistedExecutionError");
 
@@ -89,24 +88,31 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
                     b.Property<bool>("Active");
 
-                    b.Property<int>("ConcurrentFork");
+                    b.Property<string>("Children");
+
+                    b.Property<string>("ContextItem");
 
                     b.Property<DateTime?>("EndTime");
 
                     b.Property<string>("EventData");
 
-                    b.Property<string>("EventKey");
+                    b.Property<string>("EventKey")
+                        .HasMaxLength(100);
 
-                    b.Property<string>("EventName");
+                    b.Property<string>("EventName")
+                        .HasMaxLength(100);
 
                     b.Property<bool>("EventPublished");
 
                     b.Property<string>("Id")
                         .HasMaxLength(50);
 
-                    b.Property<bool>("PathTerminator");
-
                     b.Property<string>("PersistenceData");
+
+                    b.Property<string>("PredecessorId")
+                        .HasMaxLength(100);
+
+                    b.Property<int>("RetryCount");
 
                     b.Property<DateTime?>("SleepUntil");
 
@@ -114,7 +120,8 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
                     b.Property<int>("StepId");
 
-                    b.Property<string>("StepName");
+                    b.Property<string>("StepName")
+                        .HasMaxLength(100);
 
                     b.Property<long>("WorkflowId");
 
@@ -230,14 +237,6 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                     b.HasAnnotation("SqlServer:Schema", "wfc");
 
                     b.HasAnnotation("SqlServer:TableName", "Workflow");
-                });
-
-            modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionError", b =>
-                {
-                    b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", "ExecutionPointer")
-                        .WithMany("Errors")
-                        .HasForeignKey("ExecutionPointerId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", b =>

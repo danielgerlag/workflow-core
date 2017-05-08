@@ -11,8 +11,9 @@ namespace WorkflowCore.Sample08
     public class HumanWorkflow : IWorkflow
     {
         public string Id => "HumanWorkflow";
+            
         public int Version => 1;
-
+            
         public void Build(IWorkflowBuilder<object> builder)
         {
             builder

@@ -13,14 +13,12 @@ namespace WorkflowCore.Persistence.EntityFramework.Models
         [Key]
         public long PersistenceId { get; set; }
 
-        public long ExecutionPointerId { get; set; }
+        [MaxLength(100)]
+        public string WorkflowId { get; set; }
 
-        [ForeignKey("ExecutionPointerId")]
-        public PersistedExecutionPointer ExecutionPointer { get; set; }
-
-        [MaxLength(50)]
-        public string Id { get; set; }
-
+        [MaxLength(100)]
+        public string ExecutionPointerId { get; set; }
+        
         public DateTime ErrorTime { get; set; }
 
         public string Message { get; set; }

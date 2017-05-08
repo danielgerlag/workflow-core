@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -8,7 +9,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services
 {
-    public class StepBuilder<TData, TStepBody> : IStepBuilder<TData, TStepBody>
+    public class StepBuilder<TData, TStepBody> : IStepBuilder<TData, TStepBody>, IParentStepBuilder<TData, TStepBody>
         where TStepBody : IStepBody
     {
         public IWorkflowBuilder<TData> WorkflowBuilder { get; private set; }
@@ -51,7 +52,6 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
-
         public IStepBuilder<TData, InlineStepBody> Then(Func<IStepExecutionContext, ExecutionResult> body)
         {            
             WorkflowStepInline newStep = new WorkflowStepInline();
@@ -71,8 +71,6 @@ namespace WorkflowCore.Services
             var outcomeBuilder = new StepOutcomeBuilder<TData>(WorkflowBuilder, result);
             return outcomeBuilder;
         }
-
-
 
         public IStepBuilder<TData, TStepBody> Input<TInput>(Expression<Func<TStepBody, TInput>> stepProperty, Expression<Func<TData, TInput>> value)
         {
@@ -143,5 +141,62 @@ namespace WorkflowCore.Services
             return null;
         }
 
+        //public IStepBuilder<TData, TStepBody> EndWorkflow()
+        //{
+        //    EndStep newStep = new EndStep();
+        //    WorkflowBuilder.AddStep(newStep);
+        //    Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+        //    return this;
+        //}
+
+        public IParentStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection)
+        {
+            var newStep = new WorkflowStep<Foreach>();
+            
+            Expression<Func<Foreach, IEnumerable>> inputExpr = (x => x.Collection);
+
+            var mapping = new DataMapping()
+            {
+                Source = collection,
+                Target = inputExpr
+            };
+            newStep.Inputs.Add(mapping);            
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, Foreach>(WorkflowBuilder, newStep);                        
+
+            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+
+            return stepBuilder;
+        }
+
+        public IParentStepBuilder<TData, While> While(Expression<Func<TData, bool>> condition)
+        {
+            var newStep = new WorkflowStep<While>();
+
+            Expression<Func<While, bool>> inputExpr = (x => x.ConditionResult);
+
+            var mapping = new DataMapping()
+            {
+                Source = condition,
+                Target = inputExpr
+            };
+            newStep.Inputs.Add(mapping);
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, While>(WorkflowBuilder, newStep);
+
+            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+
+            return stepBuilder;
+        }
+
+        public IStepBuilder<TData, TStepBody> Do(Action<IWorkflowBuilder<TData>> builder)
+        {
+            builder.Invoke(WorkflowBuilder);
+            Step.Children.Add(Step.Id + 1); //TODO: make more elegant                        
+
+            return this;
+        }
     }
 }

@@ -17,6 +17,8 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <Version>1.2.0</Version>
+    <Description>Base package for Workflow-core peristence providers using entity framework</Description>
   </PropertyGroup>
 
   <ItemGroup>

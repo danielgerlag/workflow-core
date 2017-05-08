@@ -17,6 +17,8 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <Version>1.2.0</Version>
+    <Description>Queue provider for Workflow-core using RabbitMQ</Description>
   </PropertyGroup>
 
   <ItemGroup>
