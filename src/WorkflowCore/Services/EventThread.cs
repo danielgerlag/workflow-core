@@ -102,7 +102,7 @@ namespace WorkflowCore.Services
                 try
                 {
                     var workflow = _persistenceStore.GetWorkflowInstance(sub.WorkflowId).Result;
-                    var pointers = workflow.ExecutionPointers.Where(p => p.EventName == sub.EventName && p.EventKey == p.EventKey && !p.EventPublished);
+                    var pointers = workflow.ExecutionPointers.Where(p => p.EventName == sub.EventName && p.EventKey == sub.EventKey && !p.EventPublished);
                     foreach (var p in pointers)
                     {
                         p.EventData = evt.EventData;
