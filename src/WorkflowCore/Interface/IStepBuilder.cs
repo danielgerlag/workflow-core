@@ -85,7 +85,7 @@ namespace WorkflowCore.Interface
         /// Ends the workflow and marks it as complete
         /// </summary>
         /// <returns></returns>
-        //IStepBuilder<TData, TStepBody> EndWorkflow();
+        IStepBuilder<TData, TStepBody> EndWorkflow();
 
         IParentStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection);
 
