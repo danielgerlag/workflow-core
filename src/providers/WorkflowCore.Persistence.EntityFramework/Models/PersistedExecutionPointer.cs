@@ -33,17 +33,29 @@ namespace WorkflowCore.Persistence.EntityFramework.Models
 
         public DateTime? EndTime { get; set; }
 
+        [MaxLength(100)]
         public string EventName { get; set; }
 
+        [MaxLength(100)]
         public string EventKey { get; set; }
 
         public bool EventPublished { get; set; }
 
         public string EventData { get; set; }
 
+        [MaxLength(100)]
         public string StepName { get; set; }
                 
-        public List<PersistedExtensionAttribute> ExtensionAttributes { get; set; } = new List<PersistedExtensionAttribute>();                
+        public List<PersistedExtensionAttribute> ExtensionAttributes { get; set; } = new List<PersistedExtensionAttribute>();
+
+        public int RetryCount { get; set; }
+
+        public string Children { get; set; }
+
+        public string ContextItem { get; set; }
+
+        [MaxLength(100)]
+        public string PredecessorId { get; set; }
 
     }
 }

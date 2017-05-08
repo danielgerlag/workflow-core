@@ -8,23 +8,30 @@ using WorkflowCore.Interface;
 
 namespace WorkflowCore.Models
 {
-    public class While : StepBody
-    {        
-        public bool ConditionResult { get; set; }                
+    public class Foreach : StepBody
+    {
+        public IEnumerable Collection { get; set; }                
 
         public override ExecutionResult Run(IStepExecutionContext context)
         {
-            if (ConditionResult)
-            {                
-                return ExecutionResult.Branch(new List<object>() { null }, null);
+            if (context.PersistenceData == null)
+            {
+                var values = Collection.Cast<object>();
+                return ExecutionResult.Branch(new List<object>(values), new ControlPersistenceData() { ChildrenActive = true });
             }
 
-            bool complete = true;
-            foreach (var childId in context.ExecutionPointer.Children)
-                complete = complete && IsBranchComplete(context.Workflow.ExecutionPointers, childId);
+            if (context.PersistenceData is ControlPersistenceData)
+            {
+                if ((context.PersistenceData as ControlPersistenceData).ChildrenActive)
+                {
+                    bool complete = true;
+                    foreach (var childId in context.ExecutionPointer.Children)
+                        complete = complete && IsBranchComplete(context.Workflow.ExecutionPointers, childId);
 
-            if (complete)
-                return ExecutionResult.Next();
+                    if (complete)
+                        return ExecutionResult.Next();
+                }
+            }
 
             return ExecutionResult.Persist(context.PersistenceData);
         }

@@ -7,8 +7,6 @@ namespace WorkflowCore.Models
 {
     public class ExecutionError
     {
-        public string Id { get; set; }
-
         public DateTime ErrorTime { get; set; }
 
         public string WorkflowId { get; set; }

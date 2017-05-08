@@ -45,6 +45,14 @@ namespace WorkflowCore.Persistence.EntityFramework
                 persistedEP.StartTime = ep.StartTime;
                 persistedEP.EndTime = ep.EndTime;
                 persistedEP.StepName = ep.StepName;
+                persistedEP.RetryCount = ep.RetryCount;
+                persistedEP.PredecessorId = ep.PredecessorId;
+                persistedEP.ContextItem = JsonConvert.SerializeObject(ep.ContextItem, SerializerSettings);
+                persistedEP.Children = string.Empty;
+
+                foreach (var child in ep.Children)
+                    persistedEP.Children += child + ";";
+
                 persistedEP.EventName = ep.EventName;
                 persistedEP.EventKey = ep.EventKey;
                 persistedEP.EventPublished = ep.EventPublished;
@@ -79,6 +87,17 @@ namespace WorkflowCore.Persistence.EntityFramework
             }
 
             return persistable;
+        }
+
+        internal static PersistedExecutionError ToPersistable(this ExecutionError instance)
+        {
+            var result = new PersistedExecutionError();            
+            result.ErrorTime = instance.ErrorTime;
+            result.Message = instance.Message;
+            result.ExecutionPointerId = instance.ExecutionPointerId;
+            result.WorkflowId = instance.WorkflowId;
+
+            return result;
         }
 
         internal static PersistedSubscription ToPersistable(this EventSubscription instance)
@@ -133,6 +152,14 @@ namespace WorkflowCore.Persistence.EntityFramework
                 pointer.StartTime = ep.StartTime;
                 pointer.EndTime = ep.EndTime;
                 pointer.StepName = ep.StepName;
+
+                pointer.RetryCount = ep.RetryCount;
+                pointer.PredecessorId = ep.PredecessorId;
+                pointer.ContextItem = JsonConvert.DeserializeObject(ep.ContextItem, SerializerSettings);
+
+                if (!string.IsNullOrEmpty(ep.Children))
+                    pointer.Children = ep.Children.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+
                 pointer.EventName = ep.EventName;
                 pointer.EventKey = ep.EventKey;
                 pointer.EventPublished = ep.EventPublished;

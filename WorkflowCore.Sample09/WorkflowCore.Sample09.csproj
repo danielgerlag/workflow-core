@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\src\providers\WorkflowCore.Persistence.MongoDB\WorkflowCore.Persistence.MongoDB.csproj" />
+    <ProjectReference Include="..\src\providers\WorkflowCore.Persistence.PostgreSQL\WorkflowCore.Persistence.PostgreSQL.csproj" />
     <ProjectReference Include="..\src\WorkflowCore\WorkflowCore.csproj" />
   </ItemGroup>
 
