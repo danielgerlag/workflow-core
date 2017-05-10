@@ -67,8 +67,14 @@ namespace WorkflowCore.Services
                                     workflow = _persistenceStore.GetWorkflowInstance(workflowId).Result;
                                     if (workflow.Status == WorkflowStatus.Runnable)
                                     {
-                                        result = _executor.Execute(workflow, _options);
-                                        _persistenceStore.PersistWorkflow(workflow).Wait();
+                                        try
+                                        {
+                                            result = _executor.Execute(workflow, _options);
+                                        }
+                                        finally
+                                        {
+                                            _persistenceStore.PersistWorkflow(workflow).Wait();
+                                        }
                                     }
                                 }
                                 finally

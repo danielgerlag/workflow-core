@@ -330,11 +330,14 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
 
         public async Task PersistErrors(IEnumerable<ExecutionError> errors)
         {
-            foreach (var error in errors)
+            lock (this)
             {
-                Set<PersistedExecutionError>().Add(error.ToPersistable());
+                foreach (var error in errors)
+                {
+                    Set<PersistedExecutionError>().Add(error.ToPersistable());
+                }
+                SaveChanges();
             }
-            await SaveChangesAsync();
         }
     }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
