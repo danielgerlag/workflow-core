@@ -117,6 +117,7 @@ namespace WorkflowCore.Services
 
         private void SubscribeEvent(EventSubscription subscription)
         {
+            //TODO: move to own class
             _logger.LogDebug("Subscribing to event {0} {1} for workflow {2} step {3}", subscription.EventName, subscription.EventKey, subscription.WorkflowId, subscription.StepId);
             
             _persistenceStore.CreateEventSubscription(subscription).Wait();

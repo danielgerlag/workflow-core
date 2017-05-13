@@ -177,7 +177,6 @@ namespace WorkflowCore.Services
             }
             else
             {
-                int forkCounter = 1;
                 foreach (var branch in result.BranchValues)
                 {
                     foreach (var childDefId in step.Children)
@@ -193,7 +192,6 @@ namespace WorkflowCore.Services
                             StepName = def.Steps.First(x => x.Id == childDefId).Name
                         });
                         pointer.Children.Add(childPointerId);
-                        forkCounter++;
                     }
                 }
             }
