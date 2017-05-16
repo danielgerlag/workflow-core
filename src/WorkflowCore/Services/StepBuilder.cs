@@ -191,6 +191,27 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
+        public IParentStepBuilder<TData, If> If(Expression<Func<TData, bool>> condition)
+        {
+            var newStep = new WorkflowStep<If>();
+
+            Expression<Func<If, bool>> inputExpr = (x => x.ConditionResult);
+
+            var mapping = new DataMapping()
+            {
+                Source = condition,
+                Target = inputExpr
+            };
+            newStep.Inputs.Add(mapping);
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, If>(WorkflowBuilder, newStep);
+
+            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+
+            return stepBuilder;
+        }
+
         public IStepBuilder<TData, TStepBody> Do(Action<IWorkflowBuilder<TData>> builder)
         {
             builder.Invoke(WorkflowBuilder);

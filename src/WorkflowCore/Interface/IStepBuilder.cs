@@ -90,5 +90,7 @@ namespace WorkflowCore.Interface
         IParentStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection);
 
         IParentStepBuilder<TData, While> While(Expression<Func<TData, bool>> condition);
+
+        IParentStepBuilder<TData, If> If(Expression<Func<TData, bool>> condition);
     }
 }
