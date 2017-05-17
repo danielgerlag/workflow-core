@@ -50,6 +50,7 @@ namespace WorkflowCore.Interface
         /// </summary>
         /// <param name="outcomeValue"></param>
         /// <returns></returns>
+        [Obsolete]
         IStepOutcomeBuilder<TData> When(object outcomeValue, string label = null);
 
         /// <summary>
@@ -93,5 +94,12 @@ namespace WorkflowCore.Interface
         IContainerStepBuilder<TData, While> While(Expression<Func<TData, bool>> condition);
 
         IContainerStepBuilder<TData, If> If(Expression<Func<TData, bool>> condition);
+
+        /// <summary>
+        /// Configure an outcome for this step, then wire it to a sequence
+        /// </summary>
+        /// <param name="outcomeValue"></param>
+        /// <returns></returns>
+        IContainerStepBuilder<TData, Sequence> When(Expression<Func<TData, object>> outcomeValue, string label = null);
     }
 }

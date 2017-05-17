@@ -162,7 +162,7 @@ namespace WorkflowCore.Services
                 pointer.Active = false;
                 pointer.EndTime = DateTime.Now.ToUniversalTime();                
 
-                foreach (var outcomeTarget in step.Outcomes.Where(x => object.Equals(x.Value, result.OutcomeValue) || x.Value == null))
+                foreach (var outcomeTarget in step.Outcomes.Where(x => object.Equals(x.Value.Compile().Invoke(workflow.Data), result.OutcomeValue) || x.Value == null))
                 {
                     workflow.ExecutionPointers.Add(new ExecutionPointer()
                     {

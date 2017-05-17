@@ -66,7 +66,7 @@ namespace WorkflowCore.Services
         public IStepOutcomeBuilder<TData> When(object outcomeValue, string label = null)
         {
             StepOutcome result = new StepOutcome();
-            result.Value = outcomeValue;
+            result.Value = x => outcomeValue;
             result.Label = label;
             Step.Outcomes.Add(result);
             var outcomeBuilder = new StepOutcomeBuilder<TData>(WorkflowBuilder, result);
@@ -209,6 +209,24 @@ namespace WorkflowCore.Services
             var stepBuilder = new StepBuilder<TData, If>(WorkflowBuilder, newStep);
 
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+
+            return stepBuilder;
+        }
+        
+        public IContainerStepBuilder<TData, Sequence> When(Expression<Func<TData, object>> outcomeValue, string label = null)
+        {
+            var newStep = new WorkflowStep<Sequence>();
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, Sequence>(WorkflowBuilder, newStep);
+
+            Step.Outcomes.Add(new StepOutcome()
+            {
+                //Value = data => outcomeValue.Compile().Invoke((TData)data),
+                Value = (outcomeValue as Expression<Func<object, object>>),
+                NextStep = newStep.Id,
+                Label = label
+            });
 
             return stepBuilder;
         }
