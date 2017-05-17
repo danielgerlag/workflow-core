@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WorkflowCore.Interface
 {
-    public interface IParentStepBuilder<TData, TStepBody>
+    public interface IContainerStepBuilder<TData, TStepBody>
         where TStepBody : IStepBody
     {
         IStepBuilder<TData, TStepBody> Do(Action<IWorkflowBuilder<TData>> builder);

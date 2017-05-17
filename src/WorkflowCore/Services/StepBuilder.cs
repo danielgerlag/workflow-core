@@ -6,10 +6,11 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
+using WorkflowCore.Primitives;
 
 namespace WorkflowCore.Services
 {
-    public class StepBuilder<TData, TStepBody> : IStepBuilder<TData, TStepBody>, IParentStepBuilder<TData, TStepBody>
+    public class StepBuilder<TData, TStepBody> : IStepBuilder<TData, TStepBody>, IContainerStepBuilder<TData, TStepBody>
         where TStepBody : IStepBody
     {
         public IWorkflowBuilder<TData> WorkflowBuilder { get; private set; }
@@ -149,7 +150,7 @@ namespace WorkflowCore.Services
             return this;
         }
 
-        public IParentStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection)
+        public IContainerStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection)
         {
             var newStep = new WorkflowStep<Foreach>();
             
@@ -170,7 +171,7 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
-        public IParentStepBuilder<TData, While> While(Expression<Func<TData, bool>> condition)
+        public IContainerStepBuilder<TData, While> While(Expression<Func<TData, bool>> condition)
         {
             var newStep = new WorkflowStep<While>();
 
@@ -191,7 +192,7 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
-        public IParentStepBuilder<TData, If> If(Expression<Func<TData, bool>> condition)
+        public IContainerStepBuilder<TData, If> If(Expression<Func<TData, bool>> condition)
         {
             var newStep = new WorkflowStep<If>();
 

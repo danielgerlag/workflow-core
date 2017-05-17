@@ -7,6 +7,7 @@ using WorkflowCore.Interface;
 using WorkflowCore.Services;
 using WorkflowCore.Models;
 using Microsoft.Extensions.Logging;
+using WorkflowCore.Primitives;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

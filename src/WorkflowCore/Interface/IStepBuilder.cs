@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq.Expressions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
+using WorkflowCore.Primitives;
 
 namespace WorkflowCore.Interface
 {
@@ -87,10 +88,10 @@ namespace WorkflowCore.Interface
         /// <returns></returns>
         IStepBuilder<TData, TStepBody> EndWorkflow();
 
-        IParentStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection);
+        IContainerStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection);
 
-        IParentStepBuilder<TData, While> While(Expression<Func<TData, bool>> condition);
+        IContainerStepBuilder<TData, While> While(Expression<Func<TData, bool>> condition);
 
-        IParentStepBuilder<TData, If> If(Expression<Func<TData, bool>> condition);
+        IContainerStepBuilder<TData, If> If(Expression<Func<TData, bool>> condition);
     }
 }
