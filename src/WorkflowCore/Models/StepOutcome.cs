@@ -9,7 +9,12 @@ namespace WorkflowCore.Models
 {
     public class StepOutcome
     {
-        public Expression<Func<object, object>> Value { get; set; }
+        private Expression<Func<object, object>> _value;
+
+        public Expression<Func<object, object>> Value
+        {
+            set { _value = value; }
+        }
         
         public int NextStep { get; set; }
 
@@ -17,7 +22,10 @@ namespace WorkflowCore.Models
 
         public object GetValue(object data)
         {
-            return Value.Compile().Invoke(data);
+            if (_value == null)
+                return null;
+
+            return _value.Compile().Invoke(data);
         }
     }
 }
