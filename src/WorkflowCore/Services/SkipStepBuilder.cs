@@ -10,28 +10,29 @@ using WorkflowCore.Primitives;
 
 namespace WorkflowCore.Services
 {
-    public class SkipStepBuilder<TData, TStepBody> : IContainerStepBuilder<TData, TStepBody>
+    public class SkipStepBuilder<TData, TStepBody, TParentStep> : IContainerStepBuilder<TData, TStepBody, TParentStep>
         where TStepBody : IStepBody
+        where TParentStep : IStepBody
     {
-        private IStepBuilder<TData, TStepBody> _referenceBuilder;
+        private IStepBuilder<TData, TParentStep> _referenceBuilder;
 
         public IWorkflowBuilder<TData> WorkflowBuilder { get; private set; }
 
         public WorkflowStep<TStepBody> Step { get; set; }
 
-        public SkipStepBuilder(IWorkflowBuilder<TData> workflowBuilder, WorkflowStep<TStepBody> step, IStepBuilder<TData, TStepBody> referenceBuilder)
+        public SkipStepBuilder(IWorkflowBuilder<TData> workflowBuilder, WorkflowStep<TStepBody> step, IStepBuilder<TData, TParentStep> referenceBuilder)
         {
             WorkflowBuilder = workflowBuilder;
             Step = step;
             _referenceBuilder = referenceBuilder;
         }
         
-        public IStepBuilder<TData, TStepBody> Do(Action<IWorkflowBuilder<TData>> builder)
+        public IStepBuilder<TData, TParentStep> Do(Action<IWorkflowBuilder<TData>> builder)
         {
             builder.Invoke(WorkflowBuilder);
             Step.Children.Add(Step.Id + 1); //TODO: make more elegant                        
 
-            return this;
+            return _referenceBuilder;
         }
     }
 }

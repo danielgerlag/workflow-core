@@ -89,17 +89,17 @@ namespace WorkflowCore.Interface
         /// <returns></returns>
         IStepBuilder<TData, TStepBody> EndWorkflow();
 
-        IContainerStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection);
+        IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection);
 
-        IContainerStepBuilder<TData, While> While(Expression<Func<TData, bool>> condition);
+        IContainerStepBuilder<TData, While, While> While(Expression<Func<TData, bool>> condition);
 
-        IContainerStepBuilder<TData, If> If(Expression<Func<TData, bool>> condition);
+        IContainerStepBuilder<TData, If, If> If(Expression<Func<TData, bool>> condition);
 
         /// <summary>
         /// Configure an outcome for this step, then wire it to a sequence
         /// </summary>
         /// <param name="outcomeValue"></param>
         /// <returns></returns>
-        IContainerStepBuilder<TData, Sequence> When(Expression<Func<TData, object>> outcomeValue, string label = null);
+        IContainerStepBuilder<TData, When, TStepBody> When(Expression<Func<TData, object>> outcomeValue, string label = null);
     }
 }

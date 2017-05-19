@@ -41,5 +41,6 @@ namespace WorkflowCore.Models
 
         public string PredecessorId { get; set; }
 
+        public object Outcome { get; set; }
     }
 }

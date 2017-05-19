@@ -57,6 +57,7 @@ namespace WorkflowCore.Persistence.EntityFramework
                 persistedEP.EventKey = ep.EventKey;
                 persistedEP.EventPublished = ep.EventPublished;
                 persistedEP.EventData = JsonConvert.SerializeObject(ep.EventData, SerializerSettings);
+                persistedEP.Outcome = JsonConvert.SerializeObject(ep.Outcome, SerializerSettings);
 
                 foreach (var attr in ep.ExtensionAttributes)
                 {
@@ -164,21 +165,12 @@ namespace WorkflowCore.Persistence.EntityFramework
                 pointer.EventKey = ep.EventKey;
                 pointer.EventPublished = ep.EventPublished;
                 pointer.EventData = JsonConvert.DeserializeObject(ep.EventData, SerializerSettings);
+                pointer.Outcome = JsonConvert.DeserializeObject(ep.Outcome, SerializerSettings);
 
                 foreach (var attr in ep.ExtensionAttributes)
                 {
                     pointer.ExtensionAttributes[attr.AttributeKey] = JsonConvert.DeserializeObject(attr.AttributeValue, SerializerSettings);
                 }
-
-                //foreach (var err in ep.Errors)
-                //{
-                //    var execErr = new ExecutionError();
-                //    execErr.Id = err.Id;
-                //    execErr.ErrorTime = err.ErrorTime;
-                //    execErr.Message = err.Message;
-                //    pointer.Errors.Add(execErr);                    
-                //}
-
             }
 
 

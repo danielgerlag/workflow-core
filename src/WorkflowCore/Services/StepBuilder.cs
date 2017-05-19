@@ -10,7 +10,7 @@ using WorkflowCore.Primitives;
 
 namespace WorkflowCore.Services
 {
-    public class StepBuilder<TData, TStepBody> : IStepBuilder<TData, TStepBody>, IContainerStepBuilder<TData, TStepBody>
+    public class StepBuilder<TData, TStepBody> : IStepBuilder<TData, TStepBody>, IContainerStepBuilder<TData, TStepBody, TStepBody>
         where TStepBody : IStepBody
     {
         public IWorkflowBuilder<TData> WorkflowBuilder { get; private set; }
@@ -150,7 +150,7 @@ namespace WorkflowCore.Services
             return this;
         }
 
-        public IContainerStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection)
+        public IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection)
         {
             var newStep = new WorkflowStep<Foreach>();
             
@@ -171,7 +171,7 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
-        public IContainerStepBuilder<TData, While> While(Expression<Func<TData, bool>> condition)
+        public IContainerStepBuilder<TData, While, While> While(Expression<Func<TData, bool>> condition)
         {
             var newStep = new WorkflowStep<While>();
 
@@ -192,7 +192,7 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
-        public IContainerStepBuilder<TData, If> If(Expression<Func<TData, bool>> condition)
+        public IContainerStepBuilder<TData, If, If> If(Expression<Func<TData, bool>> condition)
         {
             var newStep = new WorkflowStep<If>();
 
@@ -213,17 +213,22 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
         
-        public IContainerStepBuilder<TData, Sequence> When(Expression<Func<TData, object>> outcomeValue, string label = null)
+        public IContainerStepBuilder<TData, When, TStepBody> When(Expression<Func<TData, object>> outcomeValue, string label = null)
         {
-            var newStep = new WorkflowStep<Sequence>();
-
+            var newStep = new WorkflowStep<When>();
+            Expression<Func<When, object>> inputExpr = (x => x.ExpectedOutcome);
+            var mapping = new DataMapping()
+            {
+                Source = outcomeValue,
+                Target = inputExpr
+            };
+            newStep.Inputs.Add(mapping);
             WorkflowBuilder.AddStep(newStep);
-            var stepBuilder = new StepBuilder<TData, Sequence>(WorkflowBuilder, newStep);
+            var stepBuilder = new SkipStepBuilder<TData, When, TStepBody>(WorkflowBuilder, newStep, this);
 
             Step.Outcomes.Add(new StepOutcome()
             {
                 //Value = data => outcomeValue.Compile().Invoke((TData)data),
-                Value = (outcomeValue as Expression<Func<object, object>>),
                 NextStep = newStep.Id,
                 Label = label
             });

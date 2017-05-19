@@ -154,6 +154,7 @@ namespace WorkflowCore.Services
         {
             //TODO: refactor this into it's own class
             pointer.PersistenceData = result.PersistenceData;
+            pointer.Outcome = result.OutcomeValue;
             if (result.SleepFor.HasValue)
                 pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(result.SleepFor.Value);
             

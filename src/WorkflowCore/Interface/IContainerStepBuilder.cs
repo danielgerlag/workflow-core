@@ -4,9 +4,10 @@ using System.Text;
 
 namespace WorkflowCore.Interface
 {
-    public interface IContainerStepBuilder<TData, TStepBody>
+    public interface IContainerStepBuilder<TData, TStepBody, TReturnStep>
         where TStepBody : IStepBody
+        where TReturnStep : IStepBody
     {
-        IStepBuilder<TData, TStepBody> Do(Action<IWorkflowBuilder<TData>> builder);
+        IStepBuilder<TData, TReturnStep> Do(Action<IWorkflowBuilder<TData>> builder);
     }
 }

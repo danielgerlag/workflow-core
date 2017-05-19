@@ -23,7 +23,7 @@ namespace WorkflowCore.Sample12
                     .When(data => 2).Do(then => then
                         .StartWith<PrintMessage>()
                             .Input(step => step.Message, data => "Outcome was 2")
-                    )
+                    )                
                 .Then<SayGoodbye>();
         }        
     }
