@@ -17,7 +17,7 @@ namespace WorkflowCore.Sample12
             host.Start();
 
             Console.WriteLine("Starting workflow...");
-            string workflowId = host.StartWorkflow("outcome-sample", new MyData() { Counter = 4 }).Result;
+            string workflowId = host.StartWorkflow("outcome-sample").Result;
 
 
             Console.ReadLine();
@@ -29,10 +29,10 @@ namespace WorkflowCore.Sample12
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
-            services.AddWorkflow();
-            //services.AddWorkflow(x => x.UseMongoDB(@"mongodb://localhost:27017", "workflow-test001"));
-            //services.AddWorkflow(x => x.UseSqlServer(@"Server=.\SQLEXPRESS;Database=WorkflowCore;Trusted_Connection=True;", true, true));
-            //services.AddWorkflow(x => x.UseSqlite(@"Data Source=database2.db;", true));            
+            //services.AddWorkflow();
+            //services.AddWorkflow(x => x.UseMongoDB(@"mongodb://localhost:27017", "workflow-test002"));
+            //services.AddWorkflow(x => x.UseSqlServer(@"Server=.\SQLEXPRESS;Database=WorkflowCoreTest001;Trusted_Connection=True;", true, true));
+            services.AddWorkflow(x => x.UseSqlite(@"Data Source=wfc001.db;", true));            
 
 
             var serviceProvider = services.BuildServiceProvider();

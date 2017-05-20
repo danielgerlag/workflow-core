@@ -15,8 +15,13 @@ namespace WorkflowCore.Primitives
 
         public override ExecutionResult Run(IStepExecutionContext context)
         {
-            if (!object.Equals(ExpectedOutcome, GetSwitchOutcome(context)))
-                return ExecutionResult.Next();
+            var switchOutcome = GetSwitchOutcome(context);
+
+            if (ExpectedOutcome != switchOutcome)
+            {
+                if (Convert.ToString(ExpectedOutcome) != Convert.ToString(switchOutcome))
+                    return ExecutionResult.Next();
+            }
 
             if (context.PersistenceData == null)
                 return ExecutionResult.Branch(new List<object>() { null }, new ControlPersistenceData() { ChildrenActive = true });

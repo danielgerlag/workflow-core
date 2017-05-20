@@ -71,20 +71,6 @@ namespace WorkflowCore.Persistence.EntityFramework
                     persistedAttr.AttributeKey = attr.Key;
                     persistedAttr.AttributeValue = JsonConvert.SerializeObject(attr.Value, SerializerSettings);
                 }
-
-                //foreach (var err in ep.Errors)
-                //{
-                //    var persistedErr = persistedEP.Errors.FirstOrDefault(x => x.Id == err.Id);
-                //    if (persistedErr == null)
-                //    {
-                //        persistedErr = new PersistedExecutionError();
-                //        persistedErr.Id = err.Id ?? Guid.NewGuid().ToString();
-                //        persistedErr.ErrorTime = err.ErrorTime;
-                //        persistedErr.Message = err.Message;
-                //        persistedEP.Errors.Add(persistedErr);
-                //    }
-                //}
-
             }
 
             return persistable;
