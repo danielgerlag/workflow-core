@@ -9,9 +9,10 @@ using WorkflowCore.Models;
 namespace WorkflowCore.Persistence.SqlServer.Migrations
 {
     [DbContext(typeof(SqlServerPersistenceProvider))]
-    partial class SqlServerPersistenceProviderModelSnapshot : ModelSnapshot
+    [Migration("20170519231452_PersistOutcome")]
+    partial class PersistOutcome
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.1")

@@ -9,17 +9,16 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Primitives
 {
-    public class When : ContainerStepBody
+    public class OutcomeSwitch : ContainerStepBody
     {
-        public object ExpectedOutcome { get; set; }
-
         public override ExecutionResult Run(IStepExecutionContext context)
         {
-            if (!object.Equals(ExpectedOutcome, GetSwitchOutcome(context)))
-                return ExecutionResult.Next();
-
             if (context.PersistenceData == null)
-                return ExecutionResult.Branch(new List<object>() { null }, new ControlPersistenceData() { ChildrenActive = true });
+            {
+                var result = ExecutionResult.Branch(new List<object>() { null }, new ControlPersistenceData() { ChildrenActive = true });
+                result.OutcomeValue = GetPreviousOutcome(context);
+                return result;
+            }
 
             if ((context.PersistenceData is ControlPersistenceData) && ((context.PersistenceData as ControlPersistenceData).ChildrenActive))
             { 
@@ -30,16 +29,21 @@ namespace WorkflowCore.Primitives
                 if (complete)
                     return ExecutionResult.Next();
                 else
-                    return ExecutionResult.Persist(context.PersistenceData);
+                {
+                    var result = ExecutionResult.Persist(context.PersistenceData);
+                    result.OutcomeValue = GetPreviousOutcome(context);
+                    return result;
+                }
             }
 
             throw new Exception("Corrupt persistence data");
-        }        
-
-        private object GetSwitchOutcome(IStepExecutionContext context)
-        {
-            var switchPointer = context.Workflow.ExecutionPointers.First(x => x.Children.Contains(context.ExecutionPointer.Id));
-            return switchPointer.Outcome;
         }
+
+        private object GetPreviousOutcome(IStepExecutionContext context)
+        {
+            var prevPointer = context.Workflow.ExecutionPointers.First(x => x.Id == context.ExecutionPointer.PredecessorId);
+            return prevPointer.Outcome;
+        }
+
     }
 }

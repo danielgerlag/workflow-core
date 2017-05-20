@@ -149,14 +149,14 @@ namespace WorkflowCore.Persistence.EntityFramework
                 pointer.StepId = ep.StepId;
                 pointer.Active = ep.Active;
                 pointer.SleepUntil = ep.SleepUntil;
-                pointer.PersistenceData = JsonConvert.DeserializeObject(ep.PersistenceData, SerializerSettings);
+                pointer.PersistenceData = JsonConvert.DeserializeObject(ep.PersistenceData ?? string.Empty, SerializerSettings);
                 pointer.StartTime = ep.StartTime;
                 pointer.EndTime = ep.EndTime;
                 pointer.StepName = ep.StepName;
 
                 pointer.RetryCount = ep.RetryCount;
                 pointer.PredecessorId = ep.PredecessorId;
-                pointer.ContextItem = JsonConvert.DeserializeObject(ep.ContextItem, SerializerSettings);
+                pointer.ContextItem = JsonConvert.DeserializeObject(ep.ContextItem ?? string.Empty, SerializerSettings);
 
                 if (!string.IsNullOrEmpty(ep.Children))
                     pointer.Children = ep.Children.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
@@ -164,15 +164,14 @@ namespace WorkflowCore.Persistence.EntityFramework
                 pointer.EventName = ep.EventName;
                 pointer.EventKey = ep.EventKey;
                 pointer.EventPublished = ep.EventPublished;
-                pointer.EventData = JsonConvert.DeserializeObject(ep.EventData, SerializerSettings);
-                pointer.Outcome = JsonConvert.DeserializeObject(ep.Outcome, SerializerSettings);
+                pointer.EventData = JsonConvert.DeserializeObject(ep.EventData ?? string.Empty, SerializerSettings);
+                pointer.Outcome = JsonConvert.DeserializeObject(ep.Outcome ?? string.Empty, SerializerSettings);
 
                 foreach (var attr in ep.ExtensionAttributes)
                 {
                     pointer.ExtensionAttributes[attr.AttributeKey] = JsonConvert.DeserializeObject(attr.AttributeValue, SerializerSettings);
                 }
             }
-
 
             return result;
         }

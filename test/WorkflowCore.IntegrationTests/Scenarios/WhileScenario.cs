@@ -14,15 +14,17 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         static int Step2Ticker = 0;
         static int Step3Ticker = 0;
         static int AfterLoopValue = 0;
-        static int CheckSum = 0;
+
+        static DateTime LastWhileBlock;
+        static DateTime AfterWhileBlock;
 
         public class DoSomething : StepBody
         {
-            public int Increment => 1;
+            public int Counter { get; set; }
             public override ExecutionResult Run(IStepExecutionContext context)
             {
                 Step2Ticker++;
-                CheckSum += (int)context.Item;
+                Counter = Step2Ticker;
                 return ExecutionResult.Next();
             }
         }
@@ -44,12 +46,20 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                         Step1Ticker++;
                         return ExecutionResult.Next();
                     })
-                    .While(x => x.Counter < 3)
-                        .Do(x => x.StartWith<DoSomething>())                    
+                    .While(x => x.Counter < 3).Do(x => x
+                        .StartWith<DoSomething>()
+                            .Output(data => data.Counter, step => step.Counter)
+                        .Then(context =>
+                        {
+                            LastWhileBlock = DateTime.Now;
+                            return ExecutionResult.Next();
+                        })
+                    )                    
                     .Then(context =>
                     {
                         AfterLoopValue = Step2Ticker;
                         Step3Ticker++;
+                        AfterWhileBlock = DateTime.Now;
                         return ExecutionResult.Next();
                     });
             }
@@ -73,7 +83,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             Step2Ticker.Should().Be(3);
             Step3Ticker.Should().Be(1);
             AfterLoopValue.Should().Be(3);
-            CheckSum.Should().Be(7);
+            AfterWhileBlock.Should().BeAfter(LastWhileBlock);
         }
     }
 }

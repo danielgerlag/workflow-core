@@ -213,7 +213,7 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
         
-        public IContainerStepBuilder<TData, When, TStepBody> When(Expression<Func<TData, object>> outcomeValue, string label = null)
+        public IContainerStepBuilder<TData, When, OutcomeSwitch> When(Expression<Func<TData, object>> outcomeValue, string label = null)
         {
             var newStep = new WorkflowStep<When>();
             Expression<Func<When, object>> inputExpr = (x => x.ExpectedOutcome);
@@ -223,15 +223,29 @@ namespace WorkflowCore.Services
                 Target = inputExpr
             };
             newStep.Inputs.Add(mapping);
-            WorkflowBuilder.AddStep(newStep);
-            var stepBuilder = new SkipStepBuilder<TData, When, TStepBody>(WorkflowBuilder, newStep, this);
 
-            Step.Outcomes.Add(new StepOutcome()
+            IStepBuilder<TData, OutcomeSwitch> switchBuilder;
+
+            if (Step.BodyType != typeof(OutcomeSwitch))
             {
-                //Value = data => outcomeValue.Compile().Invoke((TData)data),
-                NextStep = newStep.Id,
-                Label = label
-            });
+                var switchStep = new WorkflowStep<OutcomeSwitch>();
+                WorkflowBuilder.AddStep(switchStep);
+                Step.Outcomes.Add(new StepOutcome()
+                {
+                    NextStep = switchStep.Id,
+                    Label = label
+                });
+                switchBuilder = new StepBuilder<TData, OutcomeSwitch>(WorkflowBuilder, switchStep);
+            }
+            else
+            {
+                switchBuilder = (this as IStepBuilder<TData, OutcomeSwitch>);
+            }
+            
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new SkipStepBuilder<TData, When, OutcomeSwitch>(WorkflowBuilder, newStep, switchBuilder);
+
+            switchBuilder.Step.Children.Add(newStep.Id);
 
             return stepBuilder;
         }

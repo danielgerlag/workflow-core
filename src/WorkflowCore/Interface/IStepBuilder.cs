@@ -100,6 +100,6 @@ namespace WorkflowCore.Interface
         /// </summary>
         /// <param name="outcomeValue"></param>
         /// <returns></returns>
-        IContainerStepBuilder<TData, When, TStepBody> When(Expression<Func<TData, object>> outcomeValue, string label = null);
+        IContainerStepBuilder<TData, When, OutcomeSwitch> When(Expression<Func<TData, object>> outcomeValue, string label = null);
     }
 }
