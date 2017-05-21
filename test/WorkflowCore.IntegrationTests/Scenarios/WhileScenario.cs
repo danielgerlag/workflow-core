@@ -5,6 +5,7 @@ using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using Xunit;
 using FluentAssertions;
+using System.Threading;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
@@ -25,6 +26,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             {
                 Step2Ticker++;
                 Counter = Step2Ticker;
+                Thread.Sleep(50);
                 return ExecutionResult.Next();
             }
         }
