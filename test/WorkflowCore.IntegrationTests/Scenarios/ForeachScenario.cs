@@ -22,7 +22,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             public override ExecutionResult Run(IStepExecutionContext context)
             {
                 Step2Ticker++;
-                CheckSum += (int)context.Item;
+                CheckSum += Convert.ToInt32(context.Item);
                 return ExecutionResult.Next();
             }
         }

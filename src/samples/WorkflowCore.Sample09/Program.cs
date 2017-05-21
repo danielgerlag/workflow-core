@@ -33,7 +33,7 @@ namespace WorkflowCore.Sample09
             //services.AddWorkflow(x => x.UseMongoDB(@"mongodb://localhost:27017", "workflow-test002"));
             //services.AddWorkflow(x => x.UseSqlServer(@"Server=.;Database=WorkflowCore3;Trusted_Connection=True;", true, true));            
             //services.AddWorkflow(x => x.UseSqlite(@"Data Source=database2.db;", true));            
-            //services.AddWorkflow(x => x.UsePostgreSQL(@"Server=127.0.0.1;Port=32768;Database=workflow_test001;User Id=postgres;", true, true));
+            //services.AddWorkflow(x => x.UsePostgreSQL(@"Server=127.0.0.1;Port=32768;Database=workflow_test002;User Id=postgres;", true, true));
 
 
             var serviceProvider = services.BuildServiceProvider();
