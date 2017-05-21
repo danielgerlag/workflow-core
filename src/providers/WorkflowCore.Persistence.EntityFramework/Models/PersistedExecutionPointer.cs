@@ -57,5 +57,6 @@ namespace WorkflowCore.Persistence.EntityFramework.Models
         [MaxLength(100)]
         public string PredecessorId { get; set; }
 
+        public string Outcome { get; set; }
     }
 }

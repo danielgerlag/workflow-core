@@ -107,6 +107,8 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                     b.Property<string>("Id")
                         .HasMaxLength(50);
 
+                    b.Property<string>("Outcome");
+
                     b.Property<string>("PersistenceData");
 
                     b.Property<string>("PredecessorId")

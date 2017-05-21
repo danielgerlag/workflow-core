@@ -6,10 +6,11 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
+using WorkflowCore.Primitives;
 
 namespace WorkflowCore.Services
 {
-    public class StepBuilder<TData, TStepBody> : IStepBuilder<TData, TStepBody>, IParentStepBuilder<TData, TStepBody>
+    public class StepBuilder<TData, TStepBody> : IStepBuilder<TData, TStepBody>, IContainerStepBuilder<TData, TStepBody, TStepBody>
         where TStepBody : IStepBody
     {
         public IWorkflowBuilder<TData> WorkflowBuilder { get; private set; }
@@ -65,7 +66,7 @@ namespace WorkflowCore.Services
         public IStepOutcomeBuilder<TData> When(object outcomeValue, string label = null)
         {
             StepOutcome result = new StepOutcome();
-            result.Value = outcomeValue;
+            result.Value = x => outcomeValue;
             result.Label = label;
             Step.Outcomes.Add(result);
             var outcomeBuilder = new StepOutcomeBuilder<TData>(WorkflowBuilder, result);
@@ -149,7 +150,7 @@ namespace WorkflowCore.Services
             return this;
         }
 
-        public IParentStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection)
+        public IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection)
         {
             var newStep = new WorkflowStep<Foreach>();
             
@@ -170,7 +171,7 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
-        public IParentStepBuilder<TData, While> While(Expression<Func<TData, bool>> condition)
+        public IContainerStepBuilder<TData, While, While> While(Expression<Func<TData, bool>> condition)
         {
             var newStep = new WorkflowStep<While>();
 
@@ -187,6 +188,64 @@ namespace WorkflowCore.Services
             var stepBuilder = new StepBuilder<TData, While>(WorkflowBuilder, newStep);
 
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+
+            return stepBuilder;
+        }
+
+        public IContainerStepBuilder<TData, If, If> If(Expression<Func<TData, bool>> condition)
+        {
+            var newStep = new WorkflowStep<If>();
+
+            Expression<Func<If, bool>> inputExpr = (x => x.ConditionResult);
+
+            var mapping = new DataMapping()
+            {
+                Source = condition,
+                Target = inputExpr
+            };
+            newStep.Inputs.Add(mapping);
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, If>(WorkflowBuilder, newStep);
+
+            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+
+            return stepBuilder;
+        }
+        
+        public IContainerStepBuilder<TData, When, OutcomeSwitch> When(Expression<Func<TData, object>> outcomeValue, string label = null)
+        {
+            var newStep = new WorkflowStep<When>();
+            Expression<Func<When, object>> inputExpr = (x => x.ExpectedOutcome);
+            var mapping = new DataMapping()
+            {
+                Source = outcomeValue,
+                Target = inputExpr
+            };
+            newStep.Inputs.Add(mapping);
+
+            IStepBuilder<TData, OutcomeSwitch> switchBuilder;
+
+            if (Step.BodyType != typeof(OutcomeSwitch))
+            {
+                var switchStep = new WorkflowStep<OutcomeSwitch>();
+                WorkflowBuilder.AddStep(switchStep);
+                Step.Outcomes.Add(new StepOutcome()
+                {
+                    NextStep = switchStep.Id,
+                    Label = label
+                });
+                switchBuilder = new StepBuilder<TData, OutcomeSwitch>(WorkflowBuilder, switchStep);
+            }
+            else
+            {
+                switchBuilder = (this as IStepBuilder<TData, OutcomeSwitch>);
+            }
+            
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new SkipStepBuilder<TData, When, OutcomeSwitch>(WorkflowBuilder, newStep, switchBuilder);
+
+            switchBuilder.Step.Children.Add(newStep.Id);
 
             return stepBuilder;
         }

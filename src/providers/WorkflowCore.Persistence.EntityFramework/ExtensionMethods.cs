@@ -57,6 +57,7 @@ namespace WorkflowCore.Persistence.EntityFramework
                 persistedEP.EventKey = ep.EventKey;
                 persistedEP.EventPublished = ep.EventPublished;
                 persistedEP.EventData = JsonConvert.SerializeObject(ep.EventData, SerializerSettings);
+                persistedEP.Outcome = JsonConvert.SerializeObject(ep.Outcome, SerializerSettings);
 
                 foreach (var attr in ep.ExtensionAttributes)
                 {
@@ -70,20 +71,6 @@ namespace WorkflowCore.Persistence.EntityFramework
                     persistedAttr.AttributeKey = attr.Key;
                     persistedAttr.AttributeValue = JsonConvert.SerializeObject(attr.Value, SerializerSettings);
                 }
-
-                //foreach (var err in ep.Errors)
-                //{
-                //    var persistedErr = persistedEP.Errors.FirstOrDefault(x => x.Id == err.Id);
-                //    if (persistedErr == null)
-                //    {
-                //        persistedErr = new PersistedExecutionError();
-                //        persistedErr.Id = err.Id ?? Guid.NewGuid().ToString();
-                //        persistedErr.ErrorTime = err.ErrorTime;
-                //        persistedErr.Message = err.Message;
-                //        persistedEP.Errors.Add(persistedErr);
-                //    }
-                //}
-
             }
 
             return persistable;
@@ -148,14 +135,14 @@ namespace WorkflowCore.Persistence.EntityFramework
                 pointer.StepId = ep.StepId;
                 pointer.Active = ep.Active;
                 pointer.SleepUntil = ep.SleepUntil;
-                pointer.PersistenceData = JsonConvert.DeserializeObject(ep.PersistenceData, SerializerSettings);
+                pointer.PersistenceData = JsonConvert.DeserializeObject(ep.PersistenceData ?? string.Empty, SerializerSettings);
                 pointer.StartTime = ep.StartTime;
                 pointer.EndTime = ep.EndTime;
                 pointer.StepName = ep.StepName;
 
                 pointer.RetryCount = ep.RetryCount;
                 pointer.PredecessorId = ep.PredecessorId;
-                pointer.ContextItem = JsonConvert.DeserializeObject(ep.ContextItem, SerializerSettings);
+                pointer.ContextItem = JsonConvert.DeserializeObject(ep.ContextItem ?? string.Empty, SerializerSettings);
 
                 if (!string.IsNullOrEmpty(ep.Children))
                     pointer.Children = ep.Children.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
@@ -163,24 +150,14 @@ namespace WorkflowCore.Persistence.EntityFramework
                 pointer.EventName = ep.EventName;
                 pointer.EventKey = ep.EventKey;
                 pointer.EventPublished = ep.EventPublished;
-                pointer.EventData = JsonConvert.DeserializeObject(ep.EventData, SerializerSettings);
+                pointer.EventData = JsonConvert.DeserializeObject(ep.EventData ?? string.Empty, SerializerSettings);
+                pointer.Outcome = JsonConvert.DeserializeObject(ep.Outcome ?? string.Empty, SerializerSettings);
 
                 foreach (var attr in ep.ExtensionAttributes)
                 {
                     pointer.ExtensionAttributes[attr.AttributeKey] = JsonConvert.DeserializeObject(attr.AttributeValue, SerializerSettings);
                 }
-
-                //foreach (var err in ep.Errors)
-                //{
-                //    var execErr = new ExecutionError();
-                //    execErr.Id = err.Id;
-                //    execErr.ErrorTime = err.ErrorTime;
-                //    execErr.Message = err.Message;
-                //    pointer.Errors.Add(execErr);                    
-                //}
-
             }
-
 
             return result;
         }

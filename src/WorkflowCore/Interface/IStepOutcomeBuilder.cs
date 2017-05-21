@@ -1,6 +1,7 @@
 ﻿using System;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
+using WorkflowCore.Primitives;
 
 namespace WorkflowCore.Interface
 {    

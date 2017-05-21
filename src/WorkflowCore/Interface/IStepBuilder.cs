@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq.Expressions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
+using WorkflowCore.Primitives;
 
 namespace WorkflowCore.Interface
 {
@@ -49,6 +50,7 @@ namespace WorkflowCore.Interface
         /// </summary>
         /// <param name="outcomeValue"></param>
         /// <returns></returns>
+        [Obsolete]
         IStepOutcomeBuilder<TData> When(object outcomeValue, string label = null);
 
         /// <summary>
@@ -87,8 +89,17 @@ namespace WorkflowCore.Interface
         /// <returns></returns>
         IStepBuilder<TData, TStepBody> EndWorkflow();
 
-        IParentStepBuilder<TData, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection);
+        IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection);
 
-        IParentStepBuilder<TData, While> While(Expression<Func<TData, bool>> condition);
+        IContainerStepBuilder<TData, While, While> While(Expression<Func<TData, bool>> condition);
+
+        IContainerStepBuilder<TData, If, If> If(Expression<Func<TData, bool>> condition);
+
+        /// <summary>
+        /// Configure an outcome for this step, then wire it to a sequence
+        /// </summary>
+        /// <param name="outcomeValue"></param>
+        /// <returns></returns>
+        IContainerStepBuilder<TData, When, OutcomeSwitch> When(Expression<Func<TData, object>> outcomeValue, string label = null);
     }
 }

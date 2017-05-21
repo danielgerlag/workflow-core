@@ -154,6 +154,7 @@ namespace WorkflowCore.Services
         {
             //TODO: refactor this into it's own class
             pointer.PersistenceData = result.PersistenceData;
+            pointer.Outcome = result.OutcomeValue;
             if (result.SleepFor.HasValue)
                 pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(result.SleepFor.Value);
             
@@ -162,7 +163,7 @@ namespace WorkflowCore.Services
                 pointer.Active = false;
                 pointer.EndTime = DateTime.Now.ToUniversalTime();                
 
-                foreach (var outcomeTarget in step.Outcomes.Where(x => object.Equals(x.Value, result.OutcomeValue) || x.Value == null))
+                foreach (var outcomeTarget in step.Outcomes.Where(x => object.Equals(x.GetValue(workflow.Data), result.OutcomeValue) || x.GetValue(workflow.Data) == null))
                 {
                     workflow.ExecutionPointers.Add(new ExecutionPointer()
                     {
