@@ -90,21 +90,27 @@ There are several persistence providers available as separate Nuget packages.
 
 ## Samples
 
-[Hello World](src/samples/WorkflowCore.Sample01)
+* [Hello World](src/samples/WorkflowCore.Sample01)
 
-[Multiple outcomes](src/samples/WorkflowCore.Sample06)
+* [Multiple outcomes](src/samples/WorkflowCore.Sample12)
 
-[Passing Data](src/samples/WorkflowCore.Sample03)
+* [Passing Data](src/samples/WorkflowCore.Sample03)
 
-[Events](src/samples/WorkflowCore.Sample04)
+* [Parallel ForEach](src/samples/WorkflowCore.Sample09)
 
-[Deferred execution & re-entrant steps](src/samples/WorkflowCore.Sample05)
+* [While Loop](src/samples/WorkflowCore.Sample10)
 
-[Looping](src/samples/WorkflowCore.Sample02)
+* [If Statement](src/samples/WorkflowCore.Sample11)
 
-[Exposing a REST API](src/samples/WorkflowCore.Sample07)
+* [Events](src/samples/WorkflowCore.Sample04)
 
-[Human(User) Workflow](src/samples/WorkflowCore.Sample08)
+* [Deferred execution & re-entrant steps](src/samples/WorkflowCore.Sample05)
+
+* [Looping](src/samples/WorkflowCore.Sample02)
+
+* [Exposing a REST API](src/samples/WorkflowCore.Sample07)
+
+* [Human(User) Workflow](src/samples/WorkflowCore.Sample08)
 
 
 ## Authors
