@@ -88,6 +88,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.LockProviders.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Sample13", "src\samples\WorkflowCore.Sample13\WorkflowCore.Sample13.csproj", "{77C49ACA-203E-428C-A4DB-114DFE454988}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Providers.Azure", "src\providers\WorkflowCore.Providers.Azure\WorkflowCore.Providers.Azure.csproj", "{A2374B7C-4198-40B3-B8FE-FAC3DB3F2539}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -234,6 +236,10 @@ Global
 		{77C49ACA-203E-428C-A4DB-114DFE454988}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{77C49ACA-203E-428C-A4DB-114DFE454988}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{77C49ACA-203E-428C-A4DB-114DFE454988}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2374B7C-4198-40B3-B8FE-FAC3DB3F2539}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2374B7C-4198-40B3-B8FE-FAC3DB3F2539}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2374B7C-4198-40B3-B8FE-FAC3DB3F2539}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2374B7C-4198-40B3-B8FE-FAC3DB3F2539}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -277,5 +283,6 @@ Global
 		{F9F8F9CD-01D9-468B-856D-6A87F0762A01} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
 		{AAE2E9F9-37EF-4AE1-A200-D37417C9040C} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
 		{77C49ACA-203E-428C-A4DB-114DFE454988} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
+		{A2374B7C-4198-40B3-B8FE-FAC3DB3F2539} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
 	EndGlobalSection
 EndGlobal
