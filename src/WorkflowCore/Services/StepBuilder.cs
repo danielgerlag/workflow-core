@@ -250,6 +250,16 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
+        public IParallelStepBuilder<TData, Sequence, TStepBody> Parallel()
+        {
+            var newStep = new WorkflowStep<Sequence>();
+            var newBuilder = new StepBuilder<TData, Sequence>(WorkflowBuilder, newStep);
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new ParallelStepBuilder<TData, Sequence, TStepBody>(WorkflowBuilder, newBuilder, this);
+            
+            return stepBuilder;
+        }
+
         public IStepBuilder<TData, TStepBody> Do(Action<IWorkflowBuilder<TData>> builder)
         {
             builder.Invoke(WorkflowBuilder);
