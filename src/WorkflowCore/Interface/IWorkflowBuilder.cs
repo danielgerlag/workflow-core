@@ -8,13 +8,14 @@ namespace WorkflowCore.Interface
 {
     public interface IWorkflowBuilder
     {
-        int InitialStep { get; set; }                
+        int LastStep { get; }                
 
         IWorkflowBuilder<T> UseData<T>();
 
         WorkflowDefinition Build(string id, int version);
 
-        void AddStep(WorkflowStep step);                
+        void AddStep(WorkflowStep step);
+
     }
 
     public interface IWorkflowBuilder<TData> : IWorkflowBuilder

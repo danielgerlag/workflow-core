@@ -102,6 +102,6 @@ namespace WorkflowCore.Interface
         /// <returns></returns>
         IContainerStepBuilder<TData, When, OutcomeSwitch> When(Expression<Func<TData, object>> outcomeValue, string label = null);
 
-        IParallelStepBuilder<TData, Sequence, TStepBody> Parallel();
+        IParallelStepBuilder<TData, Sequence> Parallel();
     }
 }
