@@ -86,6 +86,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Tests.Sqlite",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.LockProviders.SqlServer", "src\providers\WorkflowCore.LockProviders.SqlServer\WorkflowCore.LockProviders.SqlServer.csproj", "{AAE2E9F9-37EF-4AE1-A200-D37417C9040C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Sample13", "src\samples\WorkflowCore.Sample13\WorkflowCore.Sample13.csproj", "{77C49ACA-203E-428C-A4DB-114DFE454988}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -228,6 +230,10 @@ Global
 		{AAE2E9F9-37EF-4AE1-A200-D37417C9040C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AAE2E9F9-37EF-4AE1-A200-D37417C9040C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AAE2E9F9-37EF-4AE1-A200-D37417C9040C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77C49ACA-203E-428C-A4DB-114DFE454988}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77C49ACA-203E-428C-A4DB-114DFE454988}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77C49ACA-203E-428C-A4DB-114DFE454988}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77C49ACA-203E-428C-A4DB-114DFE454988}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -270,5 +276,6 @@ Global
 		{BB776411-D279-419F-8697-5C6F52BCD5CD} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
 		{F9F8F9CD-01D9-468B-856D-6A87F0762A01} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
 		{AAE2E9F9-37EF-4AE1-A200-D37417C9040C} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
+		{77C49ACA-203E-428C-A4DB-114DFE454988} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
 	EndGlobalSection
 EndGlobal
