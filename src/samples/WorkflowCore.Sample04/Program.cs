@@ -46,7 +46,11 @@ namespace WorkflowCore.Sample04
             //services.AddWorkflow(x => x.UsePostgreSQL(@"Server=127.0.0.1;Port=5432;Database=workflow;User Id=postgres;", true, true));
             //services.AddWorkflow(x => x.UseSqlite(@"Data Source=database.db;", true));            
 
-            services.AddWorkflow(x => x.UseAzureSyncronization(@"UseDevelopmentStorage=true"));
+            services.AddWorkflow(x =>
+            {
+                x.UseAzureSyncronization(@"UseDevelopmentStorage=true");
+                x.UseThreads(1);
+            });
 
             //redis = ConnectionMultiplexer.Connect("127.0.0.1");
             //services.AddWorkflow(x =>

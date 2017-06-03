@@ -19,8 +19,8 @@ namespace WorkflowCore.Providers.Azure.Services
         private readonly ILogger _logger;
         private readonly List<ControlledLock> _locks = new List<ControlledLock>();
         private Timer _renewTimer;
-        private TimeSpan LockTimeout => TimeSpan.FromMinutes(5);
-        private TimeSpan RenewInterval => TimeSpan.FromMinutes(3);
+        private TimeSpan LockTimeout => TimeSpan.FromMinutes(1);
+        private TimeSpan RenewInterval => TimeSpan.FromSeconds(45);
 
         public AzureLockManager(string connectionString, ILoggerFactory logFactory)
         {
@@ -67,7 +67,14 @@ namespace WorkflowCore.Providers.Azure.Services
 
             if (entry != null)
             {
-                await entry.Blob.ReleaseLeaseAsync(AccessCondition.GenerateLeaseCondition(entry.Id));
+                try
+                {
+                    await entry.Blob.ReleaseLeaseAsync(AccessCondition.GenerateLeaseCondition(entry.Id));
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Error releasing lock - {ex.Message}");
+                }
                 lock (_locks)
                 {
                     _locks.Remove(entry);

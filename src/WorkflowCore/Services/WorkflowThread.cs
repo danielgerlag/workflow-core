@@ -47,24 +47,24 @@ namespace WorkflowCore.Services
         /// <summary>
         /// Worker thread body
         /// </summary>        
-        private void RunWorkflows()
+        private async void RunWorkflows()
         {
             while (!_shutdown)
             {
                 try
                 {
-                    var workflowId = _queueProvider.DequeueWork(QueueType.Workflow).Result;
+                    var workflowId = await _queueProvider.DequeueWork(QueueType.Workflow);
                     if (workflowId != null)
                     {
                         try
                         {
-                            if (_lockProvider.AcquireLock(workflowId).Result)
+                            if (await _lockProvider.AcquireLock(workflowId))
                             {
                                 WorkflowInstance workflow = null;
                                 WorkflowExecutorResult result = null;
                                 try
                                 {
-                                    workflow = _persistenceStore.GetWorkflowInstance(workflowId).Result;
+                                    workflow = await _persistenceStore.GetWorkflowInstance(workflowId);
                                     if (workflow.Status == WorkflowStatus.Runnable)
                                     {
                                         try
@@ -73,22 +73,22 @@ namespace WorkflowCore.Services
                                         }
                                         finally
                                         {
-                                            _persistenceStore.PersistWorkflow(workflow).Wait();
+                                            await _persistenceStore.PersistWorkflow(workflow);
                                         }
                                     }
                                 }
                                 finally
                                 {
-                                    _lockProvider.ReleaseLock(workflowId).Wait();
+                                    await _lockProvider.ReleaseLock(workflowId);
                                     if ((workflow != null) && (result != null))
                                     {
                                         foreach (var sub in result.Subscriptions)
-                                            SubscribeEvent(sub);
+                                            await SubscribeEvent(sub);
 
-                                        _persistenceStore.PersistErrors(result.Errors);
+                                        await _persistenceStore.PersistErrors(result.Errors);
 
                                         if ((workflow.Status == WorkflowStatus.Runnable) && workflow.NextExecution.HasValue && workflow.NextExecution.Value < DateTime.Now.ToUniversalTime().Ticks)
-                                            _queueProvider.QueueWork(workflowId, QueueType.Workflow);
+                                            await _queueProvider.QueueWork(workflowId, QueueType.Workflow);
                                     }
                                 }
                             }
@@ -104,7 +104,7 @@ namespace WorkflowCore.Services
                     }
                     else
                     {
-                        Thread.Sleep(_options.IdleTime); //no work
+                        await Task.Delay(_options.IdleTime);  //no work
                     }
 
                 }
@@ -115,17 +115,17 @@ namespace WorkflowCore.Services
             }
         }
 
-        private void SubscribeEvent(EventSubscription subscription)
+        private async Task SubscribeEvent(EventSubscription subscription)
         {
             //TODO: move to own class
             _logger.LogDebug("Subscribing to event {0} {1} for workflow {2} step {3}", subscription.EventName, subscription.EventKey, subscription.WorkflowId, subscription.StepId);
             
-            _persistenceStore.CreateEventSubscription(subscription).Wait();
-            var events = _persistenceStore.GetEvents(subscription.EventName, subscription.EventKey, subscription.SubscribeAsOf).Result;
+            await _persistenceStore.CreateEventSubscription(subscription);
+            var events = await _persistenceStore.GetEvents(subscription.EventName, subscription.EventKey, subscription.SubscribeAsOf);
             foreach (var evt in events)
             {
-                _persistenceStore.MarkEventUnprocessed(evt).Wait();
-                _queueProvider.QueueWork(evt, QueueType.Event);
+                await _persistenceStore.MarkEventUnprocessed(evt);
+                await _queueProvider.QueueWork(evt, QueueType.Event);
             }
         }
     }

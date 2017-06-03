@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
@@ -41,30 +42,30 @@ namespace WorkflowCore.Services
             _thread.Join();
         }
 
-        private void RunEvents()
+        private async void RunEvents()
         {            
             while (!_shutdown)
             {
                 try
                 {
-                    var eventId = _queueProvider.DequeueWork(QueueType.Event).Result;
+                    var eventId = await _queueProvider.DequeueWork(QueueType.Event);
                     if (eventId != null)
                     {
-                        if (_lockProvider.AcquireLock($"evt:{eventId}").Result)
+                        if (await _lockProvider.AcquireLock($"evt:{eventId}"))
                         {
                             try
                             {
-                                var evt = _persistenceStore.GetEvent(eventId).Result;
+                                var evt = await _persistenceStore.GetEvent(eventId);
                                 if (evt.EventTime <= DateTime.Now.ToUniversalTime())
                                 {
-                                    var subs = _persistenceStore.GetSubcriptions(evt.EventName, evt.EventKey, evt.EventTime).Result;
+                                    var subs = await _persistenceStore.GetSubcriptions(evt.EventName, evt.EventKey, evt.EventTime);
                                     var success = true;
 
-                                    foreach (var sub in subs)
-                                        success = success && SeedSubscription(evt, sub);
+                                    foreach (var sub in subs.ToList())
+                                        success = success && await SeedSubscription(evt, sub);
 
                                     if (success)
-                                        _persistenceStore.MarkEventProcessed(eventId).Wait();
+                                        await _persistenceStore.MarkEventProcessed(eventId);
                                 }
                             }
                             catch (Exception ex)
@@ -73,7 +74,7 @@ namespace WorkflowCore.Services
                             }
                             finally
                             {
-                                _lockProvider.ReleaseLock($"evt:{eventId}");
+                                await _lockProvider.ReleaseLock($"evt:{eventId}");
                             }
                         }
                         else
@@ -84,7 +85,7 @@ namespace WorkflowCore.Services
                     }
                     else
                     {
-                        Thread.Sleep(_options.IdleTime); //no work
+                        await Task.Delay(_options.IdleTime); //no work
                     }
 
                 }
@@ -95,13 +96,13 @@ namespace WorkflowCore.Services
             }
         }
 
-        private bool SeedSubscription(Event evt, EventSubscription sub)
+        private async Task<bool> SeedSubscription(Event evt, EventSubscription sub)
         {
-            if (_lockProvider.AcquireLock(sub.WorkflowId).Result)
+            if (await _lockProvider.AcquireLock(sub.WorkflowId))
             {
                 try
                 {
-                    var workflow = _persistenceStore.GetWorkflowInstance(sub.WorkflowId).Result;
+                    var workflow = await _persistenceStore.GetWorkflowInstance(sub.WorkflowId);
                     var pointers = workflow.ExecutionPointers.Where(p => p.EventName == sub.EventName && p.EventKey == sub.EventKey && !p.EventPublished);
                     foreach (var p in pointers)
                     {
@@ -110,8 +111,8 @@ namespace WorkflowCore.Services
                         p.Active = true;
                     }
                     workflow.NextExecution = 0;
-                    _persistenceStore.PersistWorkflow(workflow).Wait();
-                    _persistenceStore.TerminateSubscription(sub.Id).Wait();
+                    await _persistenceStore.PersistWorkflow(workflow);
+                    await _persistenceStore.TerminateSubscription(sub.Id);
                     return true;
                 }
                 catch (Exception ex)
@@ -121,8 +122,8 @@ namespace WorkflowCore.Services
                 }
                 finally
                 {
-                    _lockProvider.ReleaseLock(sub.WorkflowId).Wait();
-                    _queueProvider.QueueWork(sub.WorkflowId, QueueType.Workflow);
+                    await _lockProvider.ReleaseLock(sub.WorkflowId);
+                    await _queueProvider.QueueWork(sub.WorkflowId, QueueType.Workflow);
                 }
             }
             else
