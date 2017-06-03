@@ -155,7 +155,7 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
             await task;
         }
 
-        public void Start()
+        public async Task Start()
         {
             _server.Bind(_localConnectionString);
             _poller.Add(_server);
@@ -178,7 +178,7 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
 
         }
                 
-        public void Stop()
+        public async Task Stop()
         {
             var peerList = _peerLastContact.Select(x => x.Key).ToList();
             lock (_server)

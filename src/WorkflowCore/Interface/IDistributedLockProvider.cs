@@ -15,8 +15,8 @@ namespace WorkflowCore.Interface
 
         Task ReleaseLock(string Id);
 
-        void Start();
+        Task Start();
 
-        void Stop();
+        Task Stop();
     }
 }

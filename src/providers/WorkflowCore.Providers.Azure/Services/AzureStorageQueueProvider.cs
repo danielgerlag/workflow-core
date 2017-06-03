@@ -22,10 +22,7 @@ namespace WorkflowCore.Providers.Azure.Services
             var client = account.CreateCloudQueueClient();
 
             _workflowQueue = client.GetQueueReference("workflowcore-workflows");
-            _eventQueue = client.GetQueueReference("workflowcore-events");
-
-            _workflowQueue.CreateIfNotExistsAsync().Wait();
-            _eventQueue.CreateIfNotExistsAsync().Wait();
+            _eventQueue = client.GetQueueReference("workflowcore-events");                        
         }
 
         public async Task QueueWork(string id, QueueType queue)
@@ -68,11 +65,13 @@ namespace WorkflowCore.Providers.Azure.Services
             return msg.AsString;
         }
 
-        public void Start()
+        public async Task Start()
         {
+            await _workflowQueue.CreateIfNotExistsAsync();
+            await _eventQueue.CreateIfNotExistsAsync();
         }
 
-        public void Stop()
+        public async Task Stop()
         {
         }
 

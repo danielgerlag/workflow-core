@@ -89,11 +89,11 @@ namespace WorkflowCore.Services
             return id;
         }
 
-        public void Start()
+        public async Task Start()
         {            
             _shutdown = false;
-            QueueProvider.Start();
-            LockProvider.Start();
+            await QueueProvider.Start();
+            await LockProvider.Start();
             for (int i = 0; i < Options.ThreadCount; i++)
             {
                 Logger.LogInformation("Starting worker thread #{0}", i);
@@ -113,7 +113,7 @@ namespace WorkflowCore.Services
             poller.Start();
         }
 
-        public void Stop()
+        public async Task Stop()
         {
             _shutdown = true;            
             
@@ -124,8 +124,8 @@ namespace WorkflowCore.Services
             _workers.Clear();
             Logger.LogInformation("Worker threads stopped");
             
-            QueueProvider.Stop();
-            LockProvider.Stop();
+            await QueueProvider.Stop();
+            await LockProvider.Stop();
         }
         
         public async Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null)
@@ -167,7 +167,7 @@ namespace WorkflowCore.Services
 
         public async Task<bool> SuspendWorkflow(string workflowId)
         {
-            if (LockProvider.AcquireLock(workflowId).Result)
+            if (await LockProvider.AcquireLock(workflowId))
             {
                 try
                 {
@@ -190,7 +190,7 @@ namespace WorkflowCore.Services
 
         public async Task<bool> ResumeWorkflow(string workflowId)
         {
-            if (LockProvider.AcquireLock(workflowId).Result)
+            if (await LockProvider.AcquireLock(workflowId))
             {
                 bool requeue = false;
                 try
@@ -217,7 +217,7 @@ namespace WorkflowCore.Services
 
         public async Task<bool> TerminateWorkflow(string workflowId)
         {
-            if (LockProvider.AcquireLock(workflowId).Result)
+            if (await LockProvider.AcquireLock(workflowId))
             {
                 try
                 {

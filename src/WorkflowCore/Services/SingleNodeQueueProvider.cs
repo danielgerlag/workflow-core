@@ -32,11 +32,11 @@ namespace WorkflowCore.Services
             return null;
         }
         
-        public void Start()
+        public async Task Start()
         {
         }
 
-        public void Stop()
+        public async Task Stop()
         {
         }
 

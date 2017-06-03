@@ -14,10 +14,11 @@ namespace WorkflowCore.Providers.Azure.Services
 {
     public class AzureLockManager: IDistributedLockProvider
     {
-        private readonly CloudBlobClient _client;
-        private readonly CloudBlobContainer _container;
+        private readonly CloudBlobClient _client;        
         private readonly ILogger _logger;
         private readonly List<ControlledLock> _locks = new List<ControlledLock>();
+        private readonly AutoResetEvent _mutex = new AutoResetEvent(true);
+        private CloudBlobContainer _container;
         private Timer _renewTimer;
         private TimeSpan LockTimeout => TimeSpan.FromMinutes(1);
         private TimeSpan RenewInterval => TimeSpan.FromSeconds(45);
@@ -27,9 +28,6 @@ namespace WorkflowCore.Providers.Azure.Services
             _logger = logFactory.CreateLogger<AzureLockManager>();
             var account = CloudStorageAccount.Parse(connectionString);
             _client = account.CreateCloudBlobClient();
-
-            _container = _client.GetContainerReference("workflowcore-locks");
-            _container.CreateIfNotExistsAsync().Wait();
         }
 
         public async Task<bool> AcquireLock(string Id)
@@ -37,57 +35,65 @@ namespace WorkflowCore.Providers.Azure.Services
             var blob = _container.GetBlockBlobReference(Id);
 
             if (!await blob.ExistsAsync())
-            {
                 await blob.UploadTextAsync(string.Empty);
-            }
 
-            try
+            if (_mutex.WaitOne())
             {
-                var leaseId = await blob.AcquireLeaseAsync(LockTimeout);
-                lock (_locks)
+                try
                 {
-                    _locks.Add(new ControlledLock(Id, leaseId, blob));
+                    var leaseId = await blob.AcquireLeaseAsync(LockTimeout);
+                    _locks.Add(new ControlledLock(Id, leaseId, blob));                    
+                    return true;
                 }
-                return true;
+                catch (StorageException ex)
+                {
+                    _logger.LogDebug($"Failed to acquire lock {Id} - {ex.Message}");
+                    return false;
+                }
+                finally
+                {
+                    _mutex.Set();
+                }
             }
-            catch (StorageException ex)
-            {
-                _logger.LogDebug($"Failed to acquire lock {Id} - {ex.Message}");
-                return false;
-            }
+            return false;
         }
 
         public async Task ReleaseLock(string Id)
         {
-            ControlledLock entry = null;
-            lock (_locks)
-            {
-                entry = _locks.FirstOrDefault(x => x.Id == Id);
-            }
-
-            if (entry != null)
+            if (_mutex.WaitOne())
             {
                 try
                 {
-                    await entry.Blob.ReleaseLeaseAsync(AccessCondition.GenerateLeaseCondition(entry.Id));
+                    var entry = _locks.FirstOrDefault(x => x.Id == Id);
+
+                    if (entry != null)
+                    {
+                        try
+                        {
+                            await entry.Blob.ReleaseLeaseAsync(AccessCondition.GenerateLeaseCondition(entry.LeaseId));
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError($"Error releasing lock - {ex.Message}");
+                        }                        
+                        _locks.Remove(entry);
+                    }
                 }
-                catch (Exception ex)
+                finally
                 {
-                    _logger.LogError($"Error releasing lock - {ex.Message}");
-                }
-                lock (_locks)
-                {
-                    _locks.Remove(entry);
+                    _mutex.Set();
                 }
             }
         }
 
-        public void Start()
+        public async Task Start()
         {
+            _container = _client.GetContainerReference("workflowcore-locks");
+            await _container.CreateIfNotExistsAsync();
             _renewTimer = new Timer(RenewLeases, null, RenewInterval, RenewInterval);
         }
 
-        public void Stop()
+        public async Task Stop()
         {
             if (_renewTimer == null)
                 return;
@@ -96,13 +102,24 @@ namespace WorkflowCore.Providers.Azure.Services
             _renewTimer = null;
         }
 
-        private void RenewLeases(object state)
+        private async void RenewLeases(object state)
         {
             _logger.LogDebug("Renewing active leases");
-            lock (_locks)
+            if (_mutex.WaitOne())
             {
-                foreach (var entry in _locks)
-                    RenewLock(entry);
+                try
+                {
+                    foreach (var entry in _locks)
+                        await RenewLock(entry);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Error renewing leases - {ex.Message}");
+                }
+                finally
+                {
+                    _mutex.Set();
+                }
             }
         }
 
