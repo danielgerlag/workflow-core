@@ -330,13 +330,16 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
 
         public async Task PersistErrors(IEnumerable<ExecutionError> errors)
         {
-            lock (this)
+            if (errors.Count() > 0)
             {
-                foreach (var error in errors)
+                lock (this)
                 {
-                    Set<PersistedExecutionError>().Add(error.ToPersistable());
+                    foreach (var error in errors)
+                    {
+                        Set<PersistedExecutionError>().Add(error.ToPersistable());
+                    }
+                    SaveChanges();
                 }
-                SaveChanges();
             }
         }
     }

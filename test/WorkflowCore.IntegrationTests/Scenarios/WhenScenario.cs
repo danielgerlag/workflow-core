@@ -78,12 +78,11 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                 instance = PersistenceProvider.GetWorkflowInstance(workflowId).Result;
             }
 
-            instance.Status.Should().Be(WorkflowStatus.Complete);
-
             Case1Ticker.Should().Be(0);
             Case2Ticker.Should().Be(1);
             Case3Ticker.Should().Be(1);
             AfterBlock.Should().BeAfter(LastBlock);
+            instance.Status.Should().Be(WorkflowStatus.Complete);
         }
     }
 }

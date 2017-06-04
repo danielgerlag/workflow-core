@@ -237,7 +237,8 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         public async Task PersistErrors(IEnumerable<ExecutionError> errors)
         {
-            await ExecutionErrors.InsertManyAsync(errors);
+            if (errors.Count() > 0)
+                await ExecutionErrors.InsertManyAsync(errors);
         }
     }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously

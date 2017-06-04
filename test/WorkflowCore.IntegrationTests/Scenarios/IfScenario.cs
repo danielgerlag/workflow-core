@@ -82,7 +82,6 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                 instance = PersistenceProvider.GetWorkflowInstance(workflowId).Result;
             }
 
-            instance.Status.Should().Be(WorkflowStatus.Complete);
             Step1Ticker.Should().Be(1);
             Step2Ticker.Should().Be(1);
 
@@ -91,6 +90,8 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             If3Ticker.Should().Be(1);
 
             AfterIfBlock.Should().BeAfter(LastIfBlock);
+
+            instance.Status.Should().Be(WorkflowStatus.Complete);
         }
     }
 }

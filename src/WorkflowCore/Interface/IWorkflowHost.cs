@@ -9,8 +9,8 @@ namespace WorkflowCore.Interface
 {
     public interface IWorkflowHost
     {
-        Task Start();
-        Task Stop();
+        void Start();
+        void Stop();
         Task<string> StartWorkflow(string workflowId, object data = null);
         Task<string> StartWorkflow(string workflowId, int? version, object data = null);
         Task<string> StartWorkflow<TData>(string workflowId, TData data = null) where TData : class;

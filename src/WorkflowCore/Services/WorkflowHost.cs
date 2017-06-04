@@ -89,11 +89,11 @@ namespace WorkflowCore.Services
             return id;
         }
 
-        public async Task Start()
+        public void Start()
         {            
             _shutdown = false;
-            await QueueProvider.Start();
-            await LockProvider.Start();
+            QueueProvider.Start().Wait();
+            LockProvider.Start().Wait();
             for (int i = 0; i < Options.ThreadCount; i++)
             {
                 Logger.LogInformation("Starting worker thread #{0}", i);
@@ -113,7 +113,7 @@ namespace WorkflowCore.Services
             poller.Start();
         }
 
-        public async Task Stop()
+        public void Stop()
         {
             _shutdown = true;            
             
@@ -124,8 +124,8 @@ namespace WorkflowCore.Services
             _workers.Clear();
             Logger.LogInformation("Worker threads stopped");
             
-            await QueueProvider.Stop();
-            await LockProvider.Stop();
+            QueueProvider.Stop();
+            LockProvider.Stop();
         }
         
         public async Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null)
