@@ -63,7 +63,7 @@ namespace WorkflowCore.QueueProviders.ZeroMQ.Services
             return null;
         }        
 
-        public void Start()
+        public async Task Start()
         {
             _nodeSocket = new PushSocket(_localConnectionString);
             _poller.Add(_nodeSocket);
@@ -94,7 +94,7 @@ namespace WorkflowCore.QueueProviders.ZeroMQ.Services
             }
         }
 
-        public void Stop()
+        public async Task Stop()
         {
             _active = false;            
             _poller.Stop();

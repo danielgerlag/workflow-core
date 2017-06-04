@@ -45,25 +45,25 @@ namespace WorkflowCore.Services
         /// Poll the persistence store for workflows ready to run.
         /// Poll the persistence store for stashed unpublished events
         /// </summary>        
-        private void PollRunnables(object target)
+        private async void PollRunnables(object target)
         {
             try
             {
-                if (_lockProvider.AcquireLock("poll runnables").Result)
+                if (await _lockProvider.AcquireLock("poll runnables"))
                 {
                     try
                     {
                         _logger.LogInformation("Polling for runnable workflows");                        
-                        var runnables = _persistenceStore.GetRunnableInstances().Result;
+                        var runnables = await _persistenceStore.GetRunnableInstances();
                         foreach (var item in runnables)
                         {
                             _logger.LogDebug("Got runnable instance {0}", item);
-                            _queueProvider.QueueWork(item, QueueType.Workflow);
+                            await _queueProvider.QueueWork(item, QueueType.Workflow);
                         }
                     }
                     finally
                     {
-                        _lockProvider.ReleaseLock("poll runnables").Wait();
+                        await _lockProvider.ReleaseLock("poll runnables");
                     }
                 }
             }
@@ -74,21 +74,21 @@ namespace WorkflowCore.Services
 
             try
             {
-                if (_lockProvider.AcquireLock("unprocessed events").Result)
+                if (await _lockProvider.AcquireLock("unprocessed events"))
                 {
                     try
                     {
                         _logger.LogInformation("Polling for unprocessed events");                        
-                        var events = _persistenceStore.GetRunnableEvents().Result.ToList();
-                        foreach (var item in events)
+                        var events = await _persistenceStore.GetRunnableEvents();
+                        foreach (var item in events.ToList())
                         {
                             _logger.LogDebug($"Got unprocessed event {item}");
-                            _queueProvider.QueueWork(item, QueueType.Event);                            
+                            await _queueProvider.QueueWork(item, QueueType.Event);                            
                         }
                     }
                     finally
                     {
-                        _lockProvider.ReleaseLock("unprocessed events").Wait();
+                        await _lockProvider.ReleaseLock("unprocessed events");
                     }
                 }
             }

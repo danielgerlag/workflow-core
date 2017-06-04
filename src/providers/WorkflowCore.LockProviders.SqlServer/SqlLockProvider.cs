@@ -60,12 +60,12 @@ namespace WorkflowCore.LockProviders.SqlServer
                 _logger.LogError($"Unable to release lock for {Id}");
         }
 
-        public void Start()
+        public async Task Start()
         {
-            _connection.Open();
+            await _connection.OpenAsync();
         }
 
-        public void Stop()
+        public async Task Stop()
         {
             _connection.Close();
         }

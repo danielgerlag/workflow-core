@@ -33,6 +33,11 @@ namespace WorkflowCore.Sample13
             //services.AddWorkflow(x => x.UseSqlServer(@"Server=.\SQLEXPRESS;Database=WorkflowCoreTest001;Trusted_Connection=True;", true, true));
             //services.AddWorkflow(x => x.UseSqlite(@"Data Source=wfc001.db;", true));            
 
+            //services.AddWorkflow(x =>
+            //{
+            //    x.UseAzureSyncronization(@"UseDevelopmentStorage=true");
+            //    x.UseMongoDB(@"mongodb://localhost:27017", "workflow-test002");
+            //});
 
             var serviceProvider = services.BuildServiceProvider();
 

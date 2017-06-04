@@ -17,7 +17,7 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>1.2.0</Version>
+    <Version>1.2.7</Version>
     <PackageReleaseNotes></PackageReleaseNotes>
     <Description>Distributed lock provider for Workflow-core using Redis</Description>
   </PropertyGroup>

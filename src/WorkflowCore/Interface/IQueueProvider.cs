@@ -27,8 +27,8 @@ namespace WorkflowCore.Interface
         /// <returns></returns>
         Task<string> DequeueWork(QueueType queue);                
 
-        void Start();
-        void Stop();
+        Task Start();
+        Task Stop();
 
     }
 
