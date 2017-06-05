@@ -1,7 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.3</TargetFramework>
+    <TargetFrameworks>netstandard1.3;net452</TargetFrameworks>
+    <Description>Azure providers for Workflow Core
+
+- Provides distributed lock management  on Workflow Core
+- Provides Queueing support  on Workflow Core</Description>
+    <PackageTags>workflow workflowcore dlm</PackageTags>
+    <Version>1.1.0</Version>
+    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.3' ">$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+    <PackageProjectUrl>https://github.com/danielgerlag/workflow-core</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/danielgerlag/workflow-core/blob/master/LICENSE.md</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/danielgerlag/workflow-core.git</RepositoryUrl>
+    <Authors>Daniel Gerlag</Authors>
   </PropertyGroup>
 
   <ItemGroup>
@@ -10,6 +22,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\WorkflowCore\WorkflowCore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
 </Project>
