@@ -139,7 +139,7 @@ namespace WorkflowCore.UnitTests
                 }));
             }
 
-            Task.WhenAll(tasks);
+            Task.WhenAll(tasks).Wait();
 
             foreach (var task in tasks)
             {
