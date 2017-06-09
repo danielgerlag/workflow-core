@@ -39,6 +39,12 @@ namespace WorkflowCore.Sample13
             //    x.UseMongoDB(@"mongodb://localhost:27017", "workflow-test002");
             //});
 
+            //services.AddWorkflow(x =>
+            //{
+            //    x.UseSqlServer(@"Server=.\SQLEXPRESS;Database=WorkflowCore3;Trusted_Connection=True;", true, true);
+            //    x.UseSqlServerLocking(@"Server=.\SQLEXPRESS;Database=WorkflowCore3;Trusted_Connection=True;");
+            //});
+
             var serviceProvider = services.BuildServiceProvider();
 
             //config logging

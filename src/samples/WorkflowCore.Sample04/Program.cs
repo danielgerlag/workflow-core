@@ -52,6 +52,12 @@ namespace WorkflowCore.Sample04
             //    x.UseMongoDB(@"mongodb://localhost:27017", "workflow9999");
             //});
 
+            //services.AddWorkflow(x =>
+            //{
+            //    x.UseSqlServer(@"Server=.\SQLEXPRESS;Database=WorkflowCore;Trusted_Connection=True;", true, true);
+            //    x.UseSqlServerLocking(@"Server=.\SQLEXPRESS;Database=WorkflowCore;Trusted_Connection=True;");
+            //});
+
             //redis = ConnectionMultiplexer.Connect("127.0.0.1");
             //services.AddWorkflow(x =>
             //{
