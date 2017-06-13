@@ -71,12 +71,12 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
             }
         }
 
-        public void Start()
+        public async Task Start()
         {
             _connection = _connectionFactory.CreateConnection("Workflow-Core");
         }
 
-        public void Stop()
+        public async Task Stop()
         {
             if (_connection != null)
             {

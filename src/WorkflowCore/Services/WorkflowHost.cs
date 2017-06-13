@@ -92,8 +92,8 @@ namespace WorkflowCore.Services
         public void Start()
         {            
             _shutdown = false;
-            QueueProvider.Start();
-            LockProvider.Start();
+            QueueProvider.Start().Wait();
+            LockProvider.Start().Wait();
             for (int i = 0; i < Options.ThreadCount; i++)
             {
                 Logger.LogInformation("Starting worker thread #{0}", i);
@@ -167,7 +167,7 @@ namespace WorkflowCore.Services
 
         public async Task<bool> SuspendWorkflow(string workflowId)
         {
-            if (LockProvider.AcquireLock(workflowId).Result)
+            if (await LockProvider.AcquireLock(workflowId))
             {
                 try
                 {
@@ -190,7 +190,7 @@ namespace WorkflowCore.Services
 
         public async Task<bool> ResumeWorkflow(string workflowId)
         {
-            if (LockProvider.AcquireLock(workflowId).Result)
+            if (await LockProvider.AcquireLock(workflowId))
             {
                 bool requeue = false;
                 try
@@ -217,7 +217,7 @@ namespace WorkflowCore.Services
 
         public async Task<bool> TerminateWorkflow(string workflowId)
         {
-            if (LockProvider.AcquireLock(workflowId).Result)
+            if (await LockProvider.AcquireLock(workflowId))
             {
                 try
                 {

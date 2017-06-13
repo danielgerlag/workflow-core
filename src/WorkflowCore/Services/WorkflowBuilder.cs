@@ -10,13 +10,13 @@ namespace WorkflowCore.Services
 {
     public class WorkflowBuilder : IWorkflowBuilder
     {
-        public int InitialStep { get; set; }
-
         protected List<WorkflowStep> Steps { get; set; } = new List<WorkflowStep>();
 
         protected WorkflowErrorHandling DefaultErrorBehavior = WorkflowErrorHandling.Retry;
 
         protected TimeSpan? DefaultErrorRetryInterval;
+
+        public int LastStep => Steps.Max(x => x.Id);
 
         public IWorkflowBuilder<T> UseData<T>()
         {

@@ -9,7 +9,7 @@ This makes it possible to have a cluster of nodes processing your workflows, alo
 Install the NuGet package "WorkflowCore.LockProviders.Redlock"
 
 ```
-PM> Install-Package WorkflowCore.LockProviders.Redlock -Pre
+PM> Install-Package WorkflowCore.LockProviders.Redlock
 ```
 
 ## Usage

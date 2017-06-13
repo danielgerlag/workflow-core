@@ -29,6 +29,8 @@ namespace WorkflowCore.Primitives
                 if (EffectiveDate != null)
                     effectiveDate = Convert.ToDateTime(EffectiveDate.Compile().DynamicInvoke(workflow.Data));
 
+                effectiveDate = effectiveDate.ToUniversalTime();
+
                 executionPointer.EventName = EventName;
                 executionPointer.Active = false;
 
