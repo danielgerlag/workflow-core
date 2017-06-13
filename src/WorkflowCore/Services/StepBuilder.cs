@@ -150,6 +150,27 @@ namespace WorkflowCore.Services
             return this;
         }
 
+        public IStepBuilder<TData, Delay> Delay(Expression<Func<TData, TimeSpan>> period)
+        {
+            var newStep = new WorkflowStep<Delay>();
+
+            Expression<Func<Delay, TimeSpan>> inputExpr = (x => x.Period);
+
+            var mapping = new DataMapping()
+            {
+                Source = period,
+                Target = inputExpr
+            };
+            newStep.Inputs.Add(mapping);
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, Delay>(WorkflowBuilder, newStep);
+
+            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+
+            return stepBuilder;
+        }
+
         public IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection)
         {
             var newStep = new WorkflowStep<Foreach>();

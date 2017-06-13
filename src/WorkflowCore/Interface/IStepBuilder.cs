@@ -76,11 +76,18 @@ namespace WorkflowCore.Interface
         /// </summary>
         /// <param name="eventName"></param>
         /// <param name="eventKey"></param>
+        /// <param name="effectiveDate"></param>
         /// <returns></returns>
         IStepBuilder<TData, SubscriptionStepBody> WaitFor(string eventName, Expression<Func<TData, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null);
 
         IStepBuilder<TData, TStep> End<TStep>(string name) where TStep : IStepBody;
 
+        /// <summary>
+        /// Configure the behavior when this step throws an unhandled exception
+        /// </summary>
+        /// <param name="behavior"></param>
+        /// <param name="retryInterval"></param>
+        /// <returns></returns>
         IStepBuilder<TData, TStepBody> OnError(WorkflowErrorHandling behavior, TimeSpan? retryInterval = null);
 
         /// <summary>
@@ -88,6 +95,13 @@ namespace WorkflowCore.Interface
         /// </summary>
         /// <returns></returns>
         IStepBuilder<TData, TStepBody> EndWorkflow();
+
+        /// <summary>
+        /// Wait for a specified period
+        /// </summary>
+        /// <param name="period"></param>
+        /// <returns></returns>
+        IStepBuilder<TData, Delay> Delay(Expression<Func<TData, TimeSpan>> period);
 
         IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection);
 
