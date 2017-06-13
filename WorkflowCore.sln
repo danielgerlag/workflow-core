@@ -84,6 +84,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Sample12", "sr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Tests.Sqlite", "test\WorkflowCore.Tests.Sqlite\WorkflowCore.Tests.Sqlite.csproj", "{F9F8F9CD-01D9-468B-856D-6A87F0762A01}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Tests.SqlServer", "test\WorkflowCore.Tests.SqlServer\WorkflowCore.Tests.SqlServer.csproj", "{A4B8E54D-F8FE-4358-AE14-A5354E828938}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -222,6 +224,10 @@ Global
 		{F9F8F9CD-01D9-468B-856D-6A87F0762A01}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9F8F9CD-01D9-468B-856D-6A87F0762A01}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F9F8F9CD-01D9-468B-856D-6A87F0762A01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4B8E54D-F8FE-4358-AE14-A5354E828938}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4B8E54D-F8FE-4358-AE14-A5354E828938}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4B8E54D-F8FE-4358-AE14-A5354E828938}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4B8E54D-F8FE-4358-AE14-A5354E828938}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -263,5 +269,6 @@ Global
 		{58D0480F-D05D-4348-86D9-B0A7255700E6} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
 		{BB776411-D279-419F-8697-5C6F52BCD5CD} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
 		{F9F8F9CD-01D9-468B-856D-6A87F0762A01} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
+		{A4B8E54D-F8FE-4358-AE14-A5354E828938} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
 	EndGlobalSection
 EndGlobal
