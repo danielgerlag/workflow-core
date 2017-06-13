@@ -82,6 +82,15 @@ namespace WorkflowCore.Services
             return this;
         }
 
+        public IStepBuilder<TData, TStepBody> Input<TInput>(Expression<Func<TStepBody, TInput>> stepProperty, Expression<Func<TData, IStepExecutionContext, TInput>> value)
+        {
+            var mapping = new DataMapping();
+            mapping.Source = value;
+            mapping.Target = stepProperty;
+            Step.Inputs.Add(mapping);
+            return this;
+        }
+
         public IStepBuilder<TData, TStepBody> Output<TOutput>(Expression<Func<TData, TOutput>> dataProperty, Expression<Func<TStepBody, TOutput>> value)
         {
             var mapping = new DataMapping();

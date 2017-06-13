@@ -75,9 +75,7 @@ namespace WorkflowCore.Services
                             });
                             continue;
                         }
-
-                        ProcessInputs(workflow, step, body);
-
+                        
                         IStepExecutionContext context = new StepExecutionContext()
                         {
                             Workflow = workflow,
@@ -86,6 +84,8 @@ namespace WorkflowCore.Services
                             ExecutionPointer = pointer,
                             Item = pointer.ContextItem
                         };
+
+                        ProcessInputs(workflow, step, body, context);
 
                         switch (step.BeforeExecute(wfResult, context, pointer, body))
                         {
@@ -198,12 +198,26 @@ namespace WorkflowCore.Services
             }
         }
 
-        private void ProcessInputs(WorkflowInstance workflow, WorkflowStep step, IStepBody body)
+        private void ProcessInputs(WorkflowInstance workflow, WorkflowStep step, IStepBody body, IStepExecutionContext context)
         {
+            //TODO: Move to own class
             foreach (var input in step.Inputs)
             {
                 var member = (input.Target.Body as MemberExpression);
-                var resolvedValue = input.Source.Compile().DynamicInvoke(workflow.Data);
+                object resolvedValue = null;
+
+                switch (input.Source.Parameters.Count)
+                {
+                    case 1:
+                        resolvedValue = input.Source.Compile().DynamicInvoke(workflow.Data);
+                        break;
+                    case 2:
+                        resolvedValue = input.Source.Compile().DynamicInvoke(workflow.Data, context);
+                        break;
+                    default:
+                        throw new ArgumentException();
+                }
+                
                 step.BodyType.GetProperty(member.Member.Name).SetValue(body, resolvedValue);
             }
         }

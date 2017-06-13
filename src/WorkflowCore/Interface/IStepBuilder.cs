@@ -63,6 +63,15 @@ namespace WorkflowCore.Interface
         IStepBuilder<TData, TStepBody> Input<TInput>(Expression<Func<TStepBody, TInput>> stepProperty, Expression<Func<TData, TInput>> value);
 
         /// <summary>
+        /// Map properties on the step to properties on the workflow data object before the step executes
+        /// </summary>
+        /// <typeparam name="TInput"></typeparam>
+        /// <param name="stepProperty"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        IStepBuilder<TData, TStepBody> Input<TInput>(Expression<Func<TStepBody, TInput>> stepProperty, Expression<Func<TData, IStepExecutionContext, TInput>> value);
+
+        /// <summary>
         /// Map properties on the workflow data object to properties on the step after the step executes
         /// </summary>
         /// <typeparam name="TOutput"></typeparam>
