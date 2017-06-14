@@ -99,52 +99,41 @@ namespace WorkflowCore.UnitTests
         {
             var subject = Subject; // Don't initialize in the thread.
 
-            var tasks = new List<Task<string>>();
+            var actions = new List<Action>();
 
             for (int i = 0; i < 30; i++)
             {
-                tasks.Add(Task.Run(() =>
+                actions.Add(() =>
                 {
-                    try
+                    var oldWorkflow = new WorkflowInstance()
                     {
-                        var oldWorkflow = new WorkflowInstance()
-                        {
-                            Data = new { Value1 = 7 },
-                            Description = "My Description",
-                            Status = WorkflowStatus.Runnable,
-                            NextExecution = 0,
-                            Version = 1,
-                            WorkflowDefinitionId = "My Workflow",
-                            CreateTime = new DateTime(2000, 1, 1).ToUniversalTime()
-                        };
-                        oldWorkflow.ExecutionPointers.Add(new ExecutionPointer()
-                        {
-                            Id = Guid.NewGuid().ToString(),
-                            Active = true,
-                            StepId = 0
-                        });
-                        var workflowId = subject.CreateNewWorkflow(oldWorkflow).Result;
-                        var newWorkflow = Utils.DeepCopy(oldWorkflow);
-                        newWorkflow.NextExecution = 7;
-                        newWorkflow.ExecutionPointers.Add(new ExecutionPointer() { Id = Guid.NewGuid().ToString(), Active = true, StepId = 1 });
-
-                        subject.PersistWorkflow(newWorkflow).Wait(); // It will throw an exception if the persistence provider occurred resource competition.
-
-                        return workflowId;
-                    }
-                    catch (Exception)
+                        Data = new { Value1 = 7 },
+                        Description = "My Description",
+                        Status = WorkflowStatus.Runnable,
+                        NextExecution = 0,
+                        Version = 1,
+                        WorkflowDefinitionId = "My Workflow",
+                        CreateTime = new DateTime(2000, 1, 1).ToUniversalTime()
+                    };
+                    oldWorkflow.ExecutionPointers.Add(new ExecutionPointer()
                     {
-                        return null;
-                    }
-                }));
+                        Id = Guid.NewGuid().ToString(),
+                        Active = true,
+                        StepId = 0
+                    });
+                    var workflowId = subject.CreateNewWorkflow(oldWorkflow).Result;
+                    var newWorkflow = Utils.DeepCopy(oldWorkflow);
+                    newWorkflow.NextExecution = 7;
+                    newWorkflow.ExecutionPointers.Add(new ExecutionPointer() { Id = Guid.NewGuid().ToString(), Active = true, StepId = 1 });
+
+                    subject.PersistWorkflow(newWorkflow).Wait(); // It will throw an exception if the persistence provider occurred resource competition.
+                });
             }
 
-            Task.WhenAll(tasks).Wait();
-
-            foreach (var task in tasks)
+            Parallel.ForEach(actions, action =>
             {
-                task.Result.Should().NotBeNull();
-            }
+                action.ShouldNotThrow<InvalidOperationException>();
+            });
         }
     }
 }
