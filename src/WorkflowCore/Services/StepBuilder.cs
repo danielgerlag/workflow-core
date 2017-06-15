@@ -63,6 +63,16 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
+        public IStepBuilder<TData, ActionStepBody> Then(Action<IStepExecutionContext> body)
+        {
+            var newStep = new WorkflowStep<ActionStepBody>();
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, ActionStepBody>(WorkflowBuilder, newStep);
+            stepBuilder.Input(x => x.Body, x => body);
+            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            return stepBuilder;
+        }
+
         public IStepOutcomeBuilder<TData> When(object outcomeValue, string label = null)
         {
             StepOutcome result = new StepOutcome();
@@ -274,7 +284,7 @@ namespace WorkflowCore.Services
             
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new SkipStepBuilder<TData, When, OutcomeSwitch>(WorkflowBuilder, newStep, switchBuilder);
-
+            
             switchBuilder.Step.Children.Add(newStep.Id);
 
             return stepBuilder;
@@ -287,6 +297,27 @@ namespace WorkflowCore.Services
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new ParallelStepBuilder<TData, Sequence>(WorkflowBuilder, newBuilder, newBuilder);
 
+            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+
+            return stepBuilder;
+        }
+
+        public IContainerStepBuilder<TData, Schedule, TStepBody> Schedule(Expression<Func<TData, TimeSpan>> time)
+        {
+            var newStep = new WorkflowStep<Schedule>();
+
+            Expression<Func<Schedule, TimeSpan>> inputExpr = (x => x.Period);
+
+            var mapping = new DataMapping()
+            {
+                Source = time,
+                Target = inputExpr
+            };
+            newStep.Inputs.Add(mapping);
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new SkipStepBuilder<TData, Schedule, TStepBody>(WorkflowBuilder, newStep, this);
+            
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
 
             return stepBuilder;

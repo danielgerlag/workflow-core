@@ -46,6 +46,13 @@ namespace WorkflowCore.Interface
         IStepBuilder<TData, InlineStepBody> Then(Func<IStepExecutionContext, ExecutionResult> body);
 
         /// <summary>
+        /// Specify an inline next step in the workflow
+        /// </summary>
+        /// <param name="body"></param>
+        /// <returns></returns>
+        IStepBuilder<TData, ActionStepBody> Then(Action<IStepExecutionContext> body);
+
+        /// <summary>
         /// Configure an outcome for this step, then wire it to another step
         /// </summary>
         /// <param name="outcomeValue"></param>
@@ -126,5 +133,7 @@ namespace WorkflowCore.Interface
         IContainerStepBuilder<TData, When, OutcomeSwitch> When(Expression<Func<TData, object>> outcomeValue, string label = null);
 
         IParallelStepBuilder<TData, Sequence> Parallel();
+
+        IContainerStepBuilder<TData, Schedule, TStepBody> Schedule(Expression<Func<TData, TimeSpan>> time);
     }
 }

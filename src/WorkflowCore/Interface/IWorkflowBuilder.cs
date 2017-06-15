@@ -24,6 +24,8 @@ namespace WorkflowCore.Interface
 
         IStepBuilder<TData, InlineStepBody> StartWith(Func<IStepExecutionContext, ExecutionResult> body);
 
+        IStepBuilder<TData, ActionStepBody> StartWith(Action<IStepExecutionContext> body);
+
         IEnumerable<WorkflowStep> GetUpstreamSteps(int id);
 
         IWorkflowBuilder<TData> UseDefaultErrorBehavior(WorkflowErrorHandling behavior, TimeSpan? retryInterval = null);
