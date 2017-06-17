@@ -34,6 +34,7 @@ namespace WorkflowCore.Sample01
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
             services.AddWorkflow();
+            //services.AddWorkflow(x => x.UseMongoDB(@"mongodb://localhost:27017", "workflow"));
             services.AddTransient<GoodbyeWorld>();
             
             var serviceProvider = services.BuildServiceProvider();

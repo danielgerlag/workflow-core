@@ -4,7 +4,7 @@
     <AssemblyTitle>Workflow Core 0MQ distributed lock manager</AssemblyTitle>
     <VersionPrefix>1.1.0</VersionPrefix>
     <Authors>Daniel Gerlag</Authors>
-    <TargetFrameworks>netstandard1.3;net452</TargetFrameworks>
+    <TargetFramework>netstandard1.3</TargetFramework>
     <AssemblyName>WorkflowCore.LockProviders.ZeroMQ</AssemblyName>
     <PackageId>WorkflowCore.LockProviders.ZeroMQ</PackageId>
     <PackageTags>workflow;.NET;Core;state machine;WorkflowCore;0MQ</PackageTags>

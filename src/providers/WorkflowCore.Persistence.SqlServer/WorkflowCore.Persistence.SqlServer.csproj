@@ -4,7 +4,7 @@
     <AssemblyTitle>Workflow Core SQL Server Persistence Provider</AssemblyTitle>
     <VersionPrefix>1.1.0</VersionPrefix>
     <Authors>Daniel Gerlag</Authors>
-    <TargetFrameworks>netstandard1.3;net452</TargetFrameworks>
+    <TargetFramework>netstandard1.3</TargetFramework>
     <AssemblyName>WorkflowCore.Persistence.SqlServer</AssemblyName>
     <PackageId>WorkflowCore.Persistence.SqlServer</PackageId>
     <PackageTags>workflow;.NET;Core;state machine;WorkflowCore</PackageTags>
@@ -17,10 +17,10 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>1.2.4</Version>
+    <Version>1.2.8</Version>
     <Description>Provides support to persist workflows running on Workflow Core to a SQL Server database.</Description>
-    <AssemblyVersion>1.2.4.0</AssemblyVersion>
-    <FileVersion>1.2.4.0</FileVersion>
+    <AssemblyVersion>1.2.8.0</AssemblyVersion>
+    <FileVersion>1.2.8.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,11 +34,6 @@
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.1.1" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
   <ItemGroup>

@@ -82,6 +82,15 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
+        public IStepBuilder<TData, ActionStepBody> StartWith(Action<IStepExecutionContext> body)
+        {
+            var newStep = new WorkflowStep<ActionStepBody>();
+            AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, ActionStepBody>(this, newStep);
+            stepBuilder.Input(x => x.Body, x => body);
+            return stepBuilder;
+        }
+
         public IEnumerable<WorkflowStep> GetUpstreamSteps(int id)
         {
             return Steps.Where(x => x.Outcomes.Any(y => y.NextStep == id)).ToList();

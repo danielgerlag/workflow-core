@@ -4,7 +4,7 @@
     <AssemblyTitle>Workflow Core Redlock distributed lock manager</AssemblyTitle>
     <VersionPrefix>1.1.0</VersionPrefix>
     <Authors>Daniel Gerlag</Authors>
-    <TargetFrameworks>netstandard1.3;net452</TargetFrameworks>
+    <TargetFramework>netstandard1.3</TargetFramework>
     <AssemblyName>WorkflowCore.LockProviders.Redlock</AssemblyName>
     <PackageId>WorkflowCore.LockProviders.Redlock</PackageId>
     <PackageTags>workflow;.NET;Core;state machine;WorkflowCore;Redlock</PackageTags>
