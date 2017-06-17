@@ -6,6 +6,7 @@ using WorkflowCore.Models;
 using Xunit;
 using FluentAssertions;
 using WorkflowCore.TestAssets;
+using System.Threading.Tasks;
 
 namespace WorkflowCore.UnitTests
 {
@@ -91,6 +92,48 @@ namespace WorkflowCore.UnitTests
 
             var current = Subject.GetWorkflowInstance(workflowId).Result;
             current.ShouldBeEquivalentTo(newWorkflow);
+        }
+
+        [Fact]
+        public void ConcurrentPersistWorkflow()
+        {
+            var subject = Subject; // Don't initialize in the thread.
+
+            var actions = new List<Action>();
+
+            for (int i = 0; i < 30; i++)
+            {
+                actions.Add(() =>
+                {
+                    var oldWorkflow = new WorkflowInstance()
+                    {
+                        Data = new { Value1 = 7 },
+                        Description = "My Description",
+                        Status = WorkflowStatus.Runnable,
+                        NextExecution = 0,
+                        Version = 1,
+                        WorkflowDefinitionId = "My Workflow",
+                        CreateTime = new DateTime(2000, 1, 1).ToUniversalTime()
+                    };
+                    oldWorkflow.ExecutionPointers.Add(new ExecutionPointer()
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Active = true,
+                        StepId = 0
+                    });
+                    var workflowId = subject.CreateNewWorkflow(oldWorkflow).Result;
+                    var newWorkflow = Utils.DeepCopy(oldWorkflow);
+                    newWorkflow.NextExecution = 7;
+                    newWorkflow.ExecutionPointers.Add(new ExecutionPointer() { Id = Guid.NewGuid().ToString(), Active = true, StepId = 1 });
+
+                    subject.PersistWorkflow(newWorkflow).Wait(); // It will throw an exception if the persistence provider occurred resource competition.
+                });
+            }
+
+            Parallel.ForEach(actions, action =>
+            {
+                action.ShouldNotThrow<InvalidOperationException>();
+            });
         }
     }
 }
