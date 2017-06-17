@@ -89,6 +89,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Providers.Azure", "src\providers\WorkflowCore.Providers.Azure\WorkflowCore.Providers.Azure.csproj", "{A2374B7C-4198-40B3-B8FE-FAC3DB3F2539}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReleaseNotes", "ReleaseNotes", "{38ECB00C-3F3B-4442-8408-ACE3B37FFAA8}"
+	ProjectSection(SolutionItems) = preProject
+		ReleaseNotes\1.2.8.md = ReleaseNotes\1.2.8.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
