@@ -119,10 +119,25 @@ namespace WorkflowCore.Interface
         /// <returns></returns>
         IStepBuilder<TData, Delay> Delay(Expression<Func<TData, TimeSpan>> period);
 
+        /// <summary>
+        /// Execute a block of steps, once for each item in a collection in a parallel foreach
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <returns></returns>
         IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection);
 
+        /// <summary>
+        /// Repeat a block of steps until a condition becomes true
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <returns></returns>
         IContainerStepBuilder<TData, While, While> While(Expression<Func<TData, bool>> condition);
 
+        /// <summary>
+        /// Execute a block of steps if a condition is true
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <returns></returns>
         IContainerStepBuilder<TData, If, If> If(Expression<Func<TData, bool>> condition);
 
         /// <summary>
@@ -132,8 +147,17 @@ namespace WorkflowCore.Interface
         /// <returns></returns>
         IContainerStepBuilder<TData, When, OutcomeSwitch> When(Expression<Func<TData, object>> outcomeValue, string label = null);
 
+        /// <summary>
+        /// Execute multiple blocks of steps in parallel
+        /// </summary>
+        /// <returns></returns>
         IParallelStepBuilder<TData, Sequence> Parallel();
 
+        /// <summary>
+        /// Schedule a block of steps to execute in parallel sometime in the future
+        /// </summary>
+        /// <param name="time"></param>
+        /// <returns></returns>
         IContainerStepBuilder<TData, Schedule, TStepBody> Schedule(Expression<Func<TData, TimeSpan>> time);
     }
 }

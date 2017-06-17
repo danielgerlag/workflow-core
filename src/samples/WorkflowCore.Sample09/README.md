@@ -9,6 +9,7 @@ builder
 	.ForEach(data => new List<int>() { 1, 2, 3, 4 })
 		.Do(x => x
 			.StartWith<DisplayContext>()
+				.Input(step => step.Item, (data, context) => context.Item)
 			.Then<DoSomething>())
 	.Then<SayGoodbye>();
 ```
@@ -21,20 +22,8 @@ builder
 	.ForEach(data => data.MyCollection)
 		.Do(x => x
 			.StartWith<DisplayContext>()
+				.Input(step => step.Item, (data, context) => context.Item)
 			.Then<DoSomething>())
 	.Then<SayGoodbye>();
 
-```
-
-Access the iteration item from the step execution context
-
-```c#
-public class DisplayContext : StepBody
-{        
-    public override ExecutionResult Run(IStepExecutionContext context)
-    {
-        Console.WriteLine($"Working on item {context.Item}");
-        return ExecutionResult.Next();
-    }
-}
 ```
