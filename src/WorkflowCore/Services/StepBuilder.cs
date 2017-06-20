@@ -322,18 +322,13 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
-        public IContainerStepBuilder<TData, Recur, TStepBody> Recur(Expression<Func<TData, TimeSpan>> interval)
+        public IContainerStepBuilder<TData, Recur, TStepBody> Recur(Expression<Func<TData, TimeSpan>> interval, Expression<Func<TData, bool>> until)
         {
             var newStep = new WorkflowStep<Recur>();
-
-            Expression<Func<Recur, TimeSpan>> inputExpr = (x => x.Interval);
-
-            var mapping = new DataMapping()
-            {
-                Source = interval,
-                Target = inputExpr
-            };
-            newStep.Inputs.Add(mapping);
+            Expression<Func<Recur, TimeSpan>> intervalExpr = (x => x.Interval);
+            Expression<Func<Recur, bool>> untilExpr = (x => x.StopCondition);
+            newStep.Inputs.Add(new DataMapping() { Source = interval, Target = intervalExpr });
+            newStep.Inputs.Add(new DataMapping() { Source = until, Target = untilExpr });
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new SkipStepBuilder<TData, Recur, TStepBody>(WorkflowBuilder, newStep, this);

@@ -18,16 +18,18 @@ namespace WorkflowCore.Sample04
         {
             builder
                 .StartWith(context => ExecutionResult.Next())
+                    .Name("start")
+                .Recur(x => TimeSpan.FromSeconds(10), x => !string.IsNullOrEmpty(x.StrValue))
+                //.Recur(x => TimeSpan.FromSeconds(10), x => false)
+                    .Do(x => x.StartWith(context => Console.WriteLine(DateTime.Now.ToString())).Name("write"))
+
                 .WaitFor("MyEvent", data => "0", data => DateTime.Now)
                     .Output(data => data.StrValue, step => step.EventData)
+                    .Name("wait")
                 .Then<CustomMessage>()
                     .Name("Print custom message")
                     .Input(step => step.Message, data => "The data from the event is " + data.StrValue)
-                .Then(context =>
-                {
-                    Console.WriteLine("workflow complete");
-                    return ExecutionResult.Next();
-                });
+                .Then(context => Console.WriteLine("workflow complete"));
         }
     }
 }

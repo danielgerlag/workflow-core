@@ -75,7 +75,7 @@ namespace WorkflowCore.Services
                             });
                             continue;
                         }
-                        
+
                         IStepExecutionContext context = new StepExecutionContext()
                         {
                             Workflow = workflow,
@@ -174,11 +174,11 @@ namespace WorkflowCore.Services
                     SubscribeAsOf = result.EventAsOf
                 });
             }
-            
+
             if (result.Proceed)
             {
                 pointer.Active = false;
-                pointer.EndTime = DateTime.Now.ToUniversalTime();                
+                pointer.EndTime = DateTime.Now.ToUniversalTime();
 
                 foreach (var outcomeTarget in step.Outcomes.Where(x => object.Equals(x.GetValue(workflow.Data), result.OutcomeValue) || x.GetValue(workflow.Data) == null))
                 {
@@ -234,7 +234,7 @@ namespace WorkflowCore.Services
                     default:
                         throw new ArgumentException();
                 }
-                
+
                 step.BodyType.GetProperty(member.Member.Name).SetValue(body, resolvedValue);
             }
         }
@@ -286,9 +286,15 @@ namespace WorkflowCore.Services
                 {
                     if (workflow.ExecutionPointers.Where(x => pointer.Children.Contains(x.Id)).All(x => IsBranchComplete(workflow.ExecutionPointers, x.Id)))
                     {
-                        workflow.NextExecution = 0;
-                        return;
-                    }                    
+                        if (!pointer.SleepUntil.HasValue)
+                        {
+                            workflow.NextExecution = 0;
+                            return;
+                        }
+
+                        long pointerSleep = pointer.SleepUntil.Value.ToUniversalTime().Ticks;
+                        workflow.NextExecution = Math.Min(pointerSleep, workflow.NextExecution ?? pointerSleep);
+                    }
                 }
             }
 
@@ -296,7 +302,7 @@ namespace WorkflowCore.Services
             {
                 workflow.Status = WorkflowStatus.Complete;
                 workflow.CompleteTime = DateTime.Now.ToUniversalTime();
-            }            
+            }
         }
 
         private bool IsBranchComplete(IEnumerable<ExecutionPointer> pointers, string rootId)

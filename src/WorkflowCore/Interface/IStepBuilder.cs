@@ -159,5 +159,13 @@ namespace WorkflowCore.Interface
         /// <param name="time"></param>
         /// <returns></returns>
         IContainerStepBuilder<TData, Schedule, TStepBody> Schedule(Expression<Func<TData, TimeSpan>> time);
+
+        /// <summary>
+        /// Schedule a block of steps to execute in parallel sometime in the future at a recurring interval
+        /// </summary>
+        /// <param name="interval"></param>
+        /// <param name="until"></param>
+        /// <returns></returns>
+        IContainerStepBuilder<TData, Recur, TStepBody> Recur(Expression<Func<TData, TimeSpan>> interval, Expression<Func<TData, bool>> until);
     }
 }
