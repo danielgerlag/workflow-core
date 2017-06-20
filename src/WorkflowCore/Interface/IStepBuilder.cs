@@ -94,7 +94,7 @@ namespace WorkflowCore.Interface
         /// <param name="eventKey"></param>
         /// <param name="effectiveDate"></param>
         /// <returns></returns>
-        IStepBuilder<TData, SubscriptionStepBody> WaitFor(string eventName, Expression<Func<TData, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null);
+        IStepBuilder<TData, WaitFor> WaitFor(string eventName, Expression<Func<TData, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null);
 
         IStepBuilder<TData, TStep> End<TStep>(string name) where TStep : IStepBody;
 

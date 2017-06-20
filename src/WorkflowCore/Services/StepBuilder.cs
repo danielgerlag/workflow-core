@@ -110,14 +110,14 @@ namespace WorkflowCore.Services
             return this;
         }
 
-        public IStepBuilder<TData, SubscriptionStepBody> WaitFor(string eventName, Expression<Func<TData, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null)
+        public IStepBuilder<TData, WaitFor> WaitFor(string eventName, Expression<Func<TData, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null)
         {
-            var newStep = new SubscriptionStep<SubscriptionStepBody>();
-            newStep.EventName = eventName;
-            newStep.EventKey = eventKey;
-            newStep.EffectiveDate = effectiveDate;
+            var newStep = new WorkflowStep<WaitFor>();
             WorkflowBuilder.AddStep(newStep);
-            var stepBuilder = new StepBuilder<TData, SubscriptionStepBody>(WorkflowBuilder, newStep);
+            var stepBuilder = new StepBuilder<TData, WaitFor>(WorkflowBuilder, newStep);
+            stepBuilder.Input((step) => step.EventName, (data) => eventName);
+            stepBuilder.Input((step) => step.EventKey, eventKey);
+            stepBuilder.Input((step) => step.EffectiveDate, effectiveDate);
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
             return stepBuilder;
         }
@@ -317,7 +317,26 @@ namespace WorkflowCore.Services
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new SkipStepBuilder<TData, Schedule, TStepBody>(WorkflowBuilder, newStep, this);
-            
+            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+
+            return stepBuilder;
+        }
+
+        public IContainerStepBuilder<TData, Recur, TStepBody> Recur(Expression<Func<TData, TimeSpan>> interval)
+        {
+            var newStep = new WorkflowStep<Recur>();
+
+            Expression<Func<Recur, TimeSpan>> inputExpr = (x => x.Interval);
+
+            var mapping = new DataMapping()
+            {
+                Source = interval,
+                Target = inputExpr
+            };
+            newStep.Inputs.Add(mapping);
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new SkipStepBuilder<TData, Recur, TStepBody>(WorkflowBuilder, newStep, this);
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
 
             return stepBuilder;

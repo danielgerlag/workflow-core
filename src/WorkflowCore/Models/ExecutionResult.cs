@@ -15,6 +15,12 @@ namespace WorkflowCore.Models
 
         public object PersistenceData { get; set; }
 
+        public string EventName { get; set; }
+
+        public string EventKey { get; set; }
+
+        public DateTime EventAsOf { get; set; }
+
         public List<object> BranchValues { get; set; } = new List<object>();
 
         public ExecutionResult()
@@ -74,5 +80,15 @@ namespace WorkflowCore.Models
             };
         }
 
+        public static ExecutionResult WaitForEvent(string eventName, string eventKey, DateTime effectiveDate)
+        {
+            return new ExecutionResult()
+            {
+                Proceed = false,
+                EventName = eventName,
+                EventKey = eventKey,
+                EventAsOf = effectiveDate.ToUniversalTime()
+            };
+        }
     }
 }
