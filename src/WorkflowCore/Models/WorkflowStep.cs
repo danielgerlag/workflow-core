@@ -73,11 +73,7 @@ namespace WorkflowCore.Models
     public class WorkflowStep<TStepBody> : WorkflowStep
         where TStepBody : IStepBody 
     {
-        public override Type BodyType
-        {
-            get { return typeof(TStepBody); }
-        }
-                                
+        public override Type BodyType => typeof(TStepBody);
     }
 
     

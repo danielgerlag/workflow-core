@@ -7,6 +7,7 @@ using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Services;
 using WorkflowCore.Users.Models;
+using WorkflowCore.Users.Primitives;
 
 namespace WorkflowCore.Interface
 {
@@ -20,7 +21,7 @@ namespace WorkflowCore.Interface
                 OutcomeValue = value
             };
 
-            await host.PublishEvent("UserAction", actionKey, data);
+            await host.PublishEvent(UserTask.EventName, actionKey, data);
         }
 
         public static IEnumerable<OpenUserAction> GetOpenUserActions(this IWorkflowHost host, string workflowId)

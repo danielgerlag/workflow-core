@@ -76,22 +76,24 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample09", "sr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample10", "src\samples\WorkflowCore.Sample10\WorkflowCore.Sample10.csproj", "{5E792455-4C4C-460F-849E-50A5DCED454D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Sample11", "src\samples\WorkflowCore.Sample11\WorkflowCore.Sample11.csproj", "{58D0480F-D05D-4348-86D9-B0A7255700E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample11", "src\samples\WorkflowCore.Sample11\WorkflowCore.Sample11.csproj", "{58D0480F-D05D-4348-86D9-B0A7255700E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Sample12", "src\samples\WorkflowCore.Sample12\WorkflowCore.Sample12.csproj", "{BB776411-D279-419F-8697-5C6F52BCD5CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample12", "src\samples\WorkflowCore.Sample12\WorkflowCore.Sample12.csproj", "{BB776411-D279-419F-8697-5C6F52BCD5CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Tests.Sqlite", "test\WorkflowCore.Tests.Sqlite\WorkflowCore.Tests.Sqlite.csproj", "{F9F8F9CD-01D9-468B-856D-6A87F0762A01}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Tests.Sqlite", "test\WorkflowCore.Tests.Sqlite\WorkflowCore.Tests.Sqlite.csproj", "{F9F8F9CD-01D9-468B-856D-6A87F0762A01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.LockProviders.SqlServer", "src\providers\WorkflowCore.LockProviders.SqlServer\WorkflowCore.LockProviders.SqlServer.csproj", "{AAE2E9F9-37EF-4AE1-A200-D37417C9040C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.LockProviders.SqlServer", "src\providers\WorkflowCore.LockProviders.SqlServer\WorkflowCore.LockProviders.SqlServer.csproj", "{AAE2E9F9-37EF-4AE1-A200-D37417C9040C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Sample13", "src\samples\WorkflowCore.Sample13\WorkflowCore.Sample13.csproj", "{77C49ACA-203E-428C-A4DB-114DFE454988}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample13", "src\samples\WorkflowCore.Sample13\WorkflowCore.Sample13.csproj", "{77C49ACA-203E-428C-A4DB-114DFE454988}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Providers.Azure", "src\providers\WorkflowCore.Providers.Azure\WorkflowCore.Providers.Azure.csproj", "{A2374B7C-4198-40B3-B8FE-FAC3DB3F2539}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Providers.Azure", "src\providers\WorkflowCore.Providers.Azure\WorkflowCore.Providers.Azure.csproj", "{A2374B7C-4198-40B3-B8FE-FAC3DB3F2539}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReleaseNotes", "ReleaseNotes", "{38ECB00C-3F3B-4442-8408-ACE3B37FFAA8}"
 	ProjectSection(SolutionItems) = preProject
 		ReleaseNotes\1.2.8.md = ReleaseNotes\1.2.8.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Sample14", "src\samples\WorkflowCore.Sample14\WorkflowCore.Sample14.csproj", "{6BC66637-B42A-4334-ADFB-DBEC9F29D293}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -239,6 +241,10 @@ Global
 		{A2374B7C-4198-40B3-B8FE-FAC3DB3F2539}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2374B7C-4198-40B3-B8FE-FAC3DB3F2539}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2374B7C-4198-40B3-B8FE-FAC3DB3F2539}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BC66637-B42A-4334-ADFB-DBEC9F29D293}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BC66637-B42A-4334-ADFB-DBEC9F29D293}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BC66637-B42A-4334-ADFB-DBEC9F29D293}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BC66637-B42A-4334-ADFB-DBEC9F29D293}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -282,5 +288,6 @@ Global
 		{AAE2E9F9-37EF-4AE1-A200-D37417C9040C} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
 		{77C49ACA-203E-428C-A4DB-114DFE454988} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
 		{A2374B7C-4198-40B3-B8FE-FAC3DB3F2539} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
+		{6BC66637-B42A-4334-ADFB-DBEC9F29D293} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
 	EndGlobalSection
 EndGlobal

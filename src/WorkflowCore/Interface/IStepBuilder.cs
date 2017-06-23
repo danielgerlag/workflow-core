@@ -25,8 +25,8 @@ namespace WorkflowCore.Interface
         /// <summary>
         /// Specify the next step in the workflow
         /// </summary>
-        /// <typeparam name="TStep"></typeparam>
-        /// <param name="stepSetup"></param>
+        /// <typeparam name="TStep">The type of the step to execute</typeparam>
+        /// <param name="stepSetup">Configure additional parameters for this step</param>
         /// <returns></returns>
         IStepBuilder<TData, TStep> Then<TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null) where TStep : IStepBody;
 
@@ -73,7 +73,7 @@ namespace WorkflowCore.Interface
         /// Map properties on the step to properties on the workflow data object before the step executes
         /// </summary>
         /// <typeparam name="TInput"></typeparam>
-        /// <param name="stepProperty"></param>
+        /// <param name="stepProperty">The property on the step</param>
         /// <param name="value"></param>
         /// <returns></returns>
         IStepBuilder<TData, TStepBody> Input<TInput>(Expression<Func<TStepBody, TInput>> stepProperty, Expression<Func<TData, IStepExecutionContext, TInput>> value);
@@ -88,21 +88,30 @@ namespace WorkflowCore.Interface
         IStepBuilder<TData, TStepBody> Output<TOutput>(Expression<Func<TData, TOutput>> dataProperty, Expression<Func<TStepBody, TOutput>> value);
 
         /// <summary>
-        /// Put the workflow to sleep until to specified event is published
+        /// Wait here until to specified event is published
         /// </summary>
-        /// <param name="eventName"></param>
-        /// <param name="eventKey"></param>
-        /// <param name="effectiveDate"></param>
+        /// <param name="eventName">The name used to identify the kind of event to wait for</param>
+        /// <param name="eventKey">A specific key value within the context of the event to wait for</param>
+        /// <param name="effectiveDate">Listen for events as of this effective date</param>
         /// <returns></returns>
         IStepBuilder<TData, WaitFor> WaitFor(string eventName, Expression<Func<TData, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null);
+
+        /// <summary>
+        /// Wait here until to specified event is published
+        /// </summary>
+        /// <param name="eventName">The name used to identify the kind of event to wait for</param>
+        /// <param name="eventKey">A specific key value within the context of the event to wait for</param>
+        /// <param name="effectiveDate">Listen for events as of this effective date</param>
+        /// <returns></returns>
+        IStepBuilder<TData, WaitFor> WaitFor(string eventName, Expression<Func<TData, IStepExecutionContext, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null);
 
         IStepBuilder<TData, TStep> End<TStep>(string name) where TStep : IStepBody;
 
         /// <summary>
         /// Configure the behavior when this step throws an unhandled exception
         /// </summary>
-        /// <param name="behavior"></param>
-        /// <param name="retryInterval"></param>
+        /// <param name="behavior">What action to take when this step throws an unhandled exception</param>
+        /// <param name="retryInterval">If the behavior is retry, how often</param>
         /// <returns></returns>
         IStepBuilder<TData, TStepBody> OnError(WorkflowErrorHandling behavior, TimeSpan? retryInterval = null);
 
@@ -122,21 +131,21 @@ namespace WorkflowCore.Interface
         /// <summary>
         /// Execute a block of steps, once for each item in a collection in a parallel foreach
         /// </summary>
-        /// <param name="collection"></param>
+        /// <param name="collection">Resolves a collection for iterate over</param>
         /// <returns></returns>
         IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection);
 
         /// <summary>
         /// Repeat a block of steps until a condition becomes true
         /// </summary>
-        /// <param name="condition"></param>
+        /// <param name="condition">Resolves a condition to break out of the while loop</param>
         /// <returns></returns>
         IContainerStepBuilder<TData, While, While> While(Expression<Func<TData, bool>> condition);
 
         /// <summary>
         /// Execute a block of steps if a condition is true
         /// </summary>
-        /// <param name="condition"></param>
+        /// <param name="condition">Resolves a condition to evaluate</param>
         /// <returns></returns>
         IContainerStepBuilder<TData, If, If> If(Expression<Func<TData, bool>> condition);
 
@@ -156,15 +165,15 @@ namespace WorkflowCore.Interface
         /// <summary>
         /// Schedule a block of steps to execute in parallel sometime in the future
         /// </summary>
-        /// <param name="time"></param>
+        /// <param name="time">The time span to wait before executing the block</param>
         /// <returns></returns>
         IContainerStepBuilder<TData, Schedule, TStepBody> Schedule(Expression<Func<TData, TimeSpan>> time);
 
         /// <summary>
         /// Schedule a block of steps to execute in parallel sometime in the future at a recurring interval
         /// </summary>
-        /// <param name="interval"></param>
-        /// <param name="until"></param>
+        /// <param name="interval">The time span to wait between recurring executions</param>
+        /// <param name="until">Resolves a condition to stop the recurring task</param>
         /// <returns></returns>
         IContainerStepBuilder<TData, Recur, TStepBody> Recur(Expression<Func<TData, TimeSpan>> interval, Expression<Func<TData, bool>> until);
     }

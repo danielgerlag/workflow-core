@@ -25,11 +25,11 @@ namespace WorkflowCore.Sample04
             host.Start();
 
             var initialData = new MyDataClass();
-            host.StartWorkflow("EventSampleWorkflow", 1, initialData);
+            var workflowId = host.StartWorkflow("EventSampleWorkflow", 1, initialData).Result;
 
             Console.WriteLine("Enter value to publish");
             string value = Console.ReadLine();
-            host.PublishEvent("MyEvent", "0", value);
+            host.PublishEvent("MyEvent", workflowId, value);
 
             Console.ReadLine();
             host.Stop();
@@ -40,7 +40,7 @@ namespace WorkflowCore.Sample04
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
-            services.AddWorkflow(x => x.UsePollInterval(TimeSpan.FromSeconds(2)));
+            services.AddWorkflow();
             //services.AddWorkflow(x => x.UseMongoDB(@"mongodb://localhost:27017", "workflow"));
             //services.AddWorkflow(x => x.UseSqlServer(@"Server=.\SQLEXPRESS;Database=WorkflowCore;Trusted_Connection=True;", true, true));
             //services.AddWorkflow(x => x.UsePostgreSQL(@"Server=127.0.0.1;Port=5432;Database=workflow;User Id=postgres;", true, true));

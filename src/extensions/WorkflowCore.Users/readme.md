@@ -7,7 +7,7 @@ Provides extensions for [Workflow Core](../../README.md) to enable human workflo
 Install the NuGet package "WorkflowCore.Users"
 
 ```
-PM> Install-Package WorkflowCore.Users -Pre
+PM> Install-Package WorkflowCore.Users
 ```
 
 ## Usage
@@ -22,22 +22,15 @@ public class HumanWorkflow : IWorkflow
     public void Build(IWorkflowBuilder<object> builder)
     {
         builder
-            .StartWith(context => ExecutionResult.Next())
-            .UserStep("Do you approve", data => "MYDOMAIN\\user", x => x.Name("Approval Step"))           
-                .When("yes", "I approve")
-                    .Then(context =>
-                    {
-                        Console.WriteLine("You approved");
-                        return ExecutionResult.Next();
-                    })
-                .End<UserStep>("Approval Step")            
-                .When("no", "I do not approve")
-                    .Then(context =>
-                    {
-                        Console.WriteLine("You did not approve");
-                        return ExecutionResult.Next();
-                    })
-                .End<UserStep>("Approval Step");
+            .StartWith(context => .WriteLine("start"))
+                .UserTask("Do you approve", data => "MYDOMAIN\\user")
+                    .WithOption("yes", "I approve").Do(then => then
+                        .StartWith(context => Console.WriteLine("You approved"))
+                    )
+                    .WithOption("no", "I do not approve").Do(then => then
+                        .StartWith(context => Console.WriteLine("You did not approve"))
+                    )
+                .Then(context => Console.WriteLine("end"));
     }
   }
 ```

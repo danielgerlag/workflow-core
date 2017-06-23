@@ -122,6 +122,18 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
+        public IStepBuilder<TData, WaitFor> WaitFor(string eventName, Expression<Func<TData, IStepExecutionContext, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null)
+        {
+            var newStep = new WorkflowStep<WaitFor>();
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, WaitFor>(WorkflowBuilder, newStep);
+            stepBuilder.Input((step) => step.EventName, (data) => eventName);
+            stepBuilder.Input((step) => step.EventKey, eventKey);
+            stepBuilder.Input((step) => step.EffectiveDate, effectiveDate);
+            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            return stepBuilder;
+        }
+
         public IStepBuilder<TData, TStep> End<TStep>(string name) where TStep : IStepBody
         {
             var ancestor = IterateParents(Step.Id, name);
@@ -283,7 +295,7 @@ namespace WorkflowCore.Services
             }
             
             WorkflowBuilder.AddStep(newStep);
-            var stepBuilder = new SkipStepBuilder<TData, When, OutcomeSwitch>(WorkflowBuilder, newStep, switchBuilder);
+            var stepBuilder = new ReturnStepBuilder<TData, When, OutcomeSwitch>(WorkflowBuilder, newStep, switchBuilder);
             
             switchBuilder.Step.Children.Add(newStep.Id);
 
@@ -316,7 +328,7 @@ namespace WorkflowCore.Services
             newStep.Inputs.Add(mapping);
 
             WorkflowBuilder.AddStep(newStep);
-            var stepBuilder = new SkipStepBuilder<TData, Schedule, TStepBody>(WorkflowBuilder, newStep, this);
+            var stepBuilder = new ReturnStepBuilder<TData, Schedule, TStepBody>(WorkflowBuilder, newStep, this);
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
 
             return stepBuilder;
@@ -324,14 +336,14 @@ namespace WorkflowCore.Services
 
         public IContainerStepBuilder<TData, Recur, TStepBody> Recur(Expression<Func<TData, TimeSpan>> interval, Expression<Func<TData, bool>> until)
         {
-            var newStep = new WorkflowStep<Recur>();
+            var newStep = new CancellableStep<Recur, TData>(until);
             Expression<Func<Recur, TimeSpan>> intervalExpr = (x => x.Interval);
             Expression<Func<Recur, bool>> untilExpr = (x => x.StopCondition);
             newStep.Inputs.Add(new DataMapping() { Source = interval, Target = intervalExpr });
             newStep.Inputs.Add(new DataMapping() { Source = until, Target = untilExpr });
 
             WorkflowBuilder.AddStep(newStep);
-            var stepBuilder = new SkipStepBuilder<TData, Recur, TStepBody>(WorkflowBuilder, newStep, this);
+            var stepBuilder = new ReturnStepBuilder<TData, Recur, TStepBody>(WorkflowBuilder, newStep, this);
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
 
             return stepBuilder;

@@ -39,9 +39,9 @@ namespace WorkflowCore.Sample08
 
                 Thread.Sleep(500);
                 Console.WriteLine();
-                Console.WriteLine("Choosing " + item.Options.Last().Key);
+                Console.WriteLine("Choosing " + item.Options.First().Key);
 
-                host.PublishUserAction(openItems.First().Key, "MYDOMAIN\\me", item.Options.Last().Value).Wait();
+                host.PublishUserAction(openItems.First().Key, "MYDOMAIN\\me", item.Options.First().Value).Wait();
             }
 
             Console.ReadLine();
