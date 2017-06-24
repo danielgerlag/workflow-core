@@ -6,7 +6,7 @@ Workflow Core is a light weight workflow engine targeting .NET Standard.  Think:
 
 ## Documentation
 
-See [Full Documentation here.](https://github.com/danielgerlag/workflow-core/wiki)
+See [Tutorial here.](https://github.com/danielgerlag/workflow-core/wiki)
 
 ## Fluent API
 

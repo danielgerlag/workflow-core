@@ -54,7 +54,7 @@ namespace WorkflowCore.Interface
         public static IUserTaskBuilder<TData> UserTask<TData, TStepBody>(this IStepBuilder<TData, TStepBody> builder, string userPrompt, Expression<Func<TData, string>> assigner, Action<IStepBuilder<TData, UserTask>> stepSetup = null)
             where TStepBody : IStepBody
         {
-            var newStep = new UserTaskWrapper();
+            var newStep = new UserTaskStep();
             builder.WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new UserTaskBuilder<TData>(builder.WorkflowBuilder, newStep);
             stepBuilder.Input(step => step.AssignedPrincipal, assigner);

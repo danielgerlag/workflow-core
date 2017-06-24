@@ -18,10 +18,12 @@ namespace WorkflowCore.Users.Primitives
         public const string ExtPrompt = "Prompt";
         public const string ExtUserOptions = "UserOptions";
         private readonly Dictionary<string, string> _options;
+        private readonly IEnumerable<EscalateStep> _escalations;
 
-        public UserTask(Dictionary<string, string> options)
+        public UserTask(Dictionary<string, string> options, IEnumerable<EscalateStep> escalations)
         {
             _options = options;
+            _escalations = escalations;
         }
 
         public override ExecutionResult Run(IStepExecutionContext context)
@@ -34,6 +36,8 @@ namespace WorkflowCore.Users.Primitives
 
                 var effectiveDate = DateTime.Now.ToUniversalTime();
                 var eventKey = context.Workflow.Id + "." + context.ExecutionPointer.Id;
+
+                SetupEscalations(context);
 
                 return ExecutionResult.WaitForEvent(EventName, eventKey, effectiveDate);
             }
@@ -68,6 +72,21 @@ namespace WorkflowCore.Users.Primitives
             }
 
             throw new ArgumentException("PersistenceData");
+        }
+
+        private void SetupEscalations(IStepExecutionContext context)
+        {
+            foreach (var esc in _escalations)
+            {
+                context.Workflow.ExecutionPointers.Add(new ExecutionPointer()
+                {
+                    Active = true,
+                    Id = Guid.NewGuid().ToString(),
+                    PredecessorId = context.ExecutionPointer.Id,
+                    StepId = esc.Id,
+                    StepName = esc.Name
+                });
+            }
         }
     }
 }

@@ -23,22 +23,14 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             public void Build(IWorkflowBuilder<object> builder)
             {
                 builder
-                .StartWith(context => ExecutionResult.Next())
-                .UserStep("Do you approve", data => "user1", x => x.Name("Approval Step"))
-                    .When("yes", "I approve")
-                        .Then(context =>
-                        {
-                            ApproveStepTicker++;
-                            return ExecutionResult.Next();
-                        })
-                    .End<UserStep>("Approval Step")
-                    .When("no", "I do not approve")
-                        .Then(context =>
-                        {
-                            DisapproveStepTicker++;
-                            return ExecutionResult.Next();
-                        })
-                    .End<UserStep>("Approval Step");
+                    .StartWith(context => ExecutionResult.Next())
+                    .UserTask("Do you approve", data => @"user1")
+                        .WithOption("yes", "I approve").Do(then => then
+                            .StartWith(context => ApproveStepTicker++)
+                        )
+                        .WithOption("no", "I do not approve").Do(then => then
+                            .StartWith(context => DisapproveStepTicker++)
+                    );
             }
         }
 

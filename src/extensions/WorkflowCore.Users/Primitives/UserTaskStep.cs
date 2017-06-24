@@ -8,14 +8,16 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Users.Primitives
 {
-    public class UserTaskWrapper : WorkflowStep<UserTask>
+    public class UserTaskStep : WorkflowStep<UserTask>
     {
 
         public Dictionary<string, string> Options { get; set; } = new Dictionary<string, string>();
 
+        public List<EscalateStep> Escalations { get; set; } = new List<EscalateStep>();
+
         public override IStepBody ConstructBody(IServiceProvider serviceProvider)
         {
-            return new UserTask(Options);
+            return new UserTask(Options, Escalations);
         }
     }
 }

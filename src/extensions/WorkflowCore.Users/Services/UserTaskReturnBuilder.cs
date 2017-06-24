@@ -26,7 +26,7 @@ namespace WorkflowCore.Users.Services
         public IUserTaskBuilder<TData> Do(Action<IWorkflowBuilder<TData>> builder)
         {
             builder.Invoke(WorkflowBuilder);
-            Step.Children.Add(Step.Id + 1); //TODO: make more elegant                        
+            Step.Children.Add(Step.Id + 1); //TODO: make more elegant
 
             return _referenceBuilder;
         }

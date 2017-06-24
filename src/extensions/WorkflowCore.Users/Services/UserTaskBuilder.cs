@@ -13,9 +13,9 @@ namespace WorkflowCore.Users.Services
 {
     public class UserTaskBuilder<TData> : StepBuilder<TData, UserTask>, IUserTaskBuilder<TData>
     {
-        private UserTaskWrapper _wrapper;
+        private readonly UserTaskStep _wrapper;
 
-        public UserTaskBuilder(IWorkflowBuilder<TData> workflowBuilder, UserTaskWrapper step) 
+        public UserTaskBuilder(IWorkflowBuilder<TData> workflowBuilder, UserTaskStep step) 
             : base (workflowBuilder, step)
         {
             _wrapper = step;
@@ -40,6 +40,27 @@ namespace WorkflowCore.Users.Services
             _wrapper.Options[label] = value;
 
             return stepBuilder;
+        }
+
+        public IUserTaskBuilder<TData> WithEscalation(Expression<Func<TData, TimeSpan>> after, Expression<Func<TData, string>> newUser, Action<IWorkflowBuilder<TData>> action = null)
+        {
+            var newStep = new EscalateStep();
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, Escalate>(WorkflowBuilder, newStep);
+            stepBuilder.Input(step => step.TimeOut, after);
+            stepBuilder.Input(step => step.NewUser, newUser);
+
+            _wrapper.Escalations.Add(newStep);
+
+            if (action != null)
+            {
+                var lastStep = WorkflowBuilder.LastStep;
+                action.Invoke(WorkflowBuilder);
+                if (WorkflowBuilder.LastStep > lastStep)
+                    newStep.Outcomes.Add(new StepOutcome() { NextStep = lastStep + 1 });
+            }
+
+            return this;
         }
     }
 }

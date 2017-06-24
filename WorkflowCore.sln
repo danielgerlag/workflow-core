@@ -93,7 +93,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReleaseNotes", "ReleaseNote
 		ReleaseNotes\1.2.8.md = ReleaseNotes\1.2.8.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Sample14", "src\samples\WorkflowCore.Sample14\WorkflowCore.Sample14.csproj", "{6BC66637-B42A-4334-ADFB-DBEC9F29D293}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample14", "src\samples\WorkflowCore.Sample14\WorkflowCore.Sample14.csproj", "{6BC66637-B42A-4334-ADFB-DBEC9F29D293}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Testing", "test\WorkflowCore.Testing\WorkflowCore.Testing.csproj", "{62A9709E-27DA-42EE-B94F-5AF431D86354}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -245,6 +247,10 @@ Global
 		{6BC66637-B42A-4334-ADFB-DBEC9F29D293}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6BC66637-B42A-4334-ADFB-DBEC9F29D293}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6BC66637-B42A-4334-ADFB-DBEC9F29D293}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62A9709E-27DA-42EE-B94F-5AF431D86354}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62A9709E-27DA-42EE-B94F-5AF431D86354}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62A9709E-27DA-42EE-B94F-5AF431D86354}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62A9709E-27DA-42EE-B94F-5AF431D86354}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -289,5 +295,6 @@ Global
 		{77C49ACA-203E-428C-A4DB-114DFE454988} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
 		{A2374B7C-4198-40B3-B8FE-FAC3DB3F2539} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
 		{6BC66637-B42A-4334-ADFB-DBEC9F29D293} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
+		{62A9709E-27DA-42EE-B94F-5AF431D86354} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
 	EndGlobalSection
 EndGlobal
