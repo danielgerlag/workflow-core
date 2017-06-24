@@ -117,7 +117,10 @@ namespace WorkflowCore.Services
             var stepBuilder = new StepBuilder<TData, WaitFor>(WorkflowBuilder, newStep);
             stepBuilder.Input((step) => step.EventName, (data) => eventName);
             stepBuilder.Input((step) => step.EventKey, eventKey);
-            stepBuilder.Input((step) => step.EffectiveDate, effectiveDate);
+
+            if (effectiveDate != null)
+                stepBuilder.Input((step) => step.EffectiveDate, effectiveDate);
+
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
             return stepBuilder;
         }
@@ -129,7 +132,10 @@ namespace WorkflowCore.Services
             var stepBuilder = new StepBuilder<TData, WaitFor>(WorkflowBuilder, newStep);
             stepBuilder.Input((step) => step.EventName, (data) => eventName);
             stepBuilder.Input((step) => step.EventKey, eventKey);
-            stepBuilder.Input((step) => step.EffectiveDate, effectiveDate);
+
+            if (effectiveDate != null)
+                stepBuilder.Input((step) => step.EffectiveDate, effectiveDate);
+
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
             return stepBuilder;
         }
