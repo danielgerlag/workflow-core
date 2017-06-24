@@ -10,17 +10,17 @@ using WorkflowCore.Primitives;
 
 namespace WorkflowCore.Services
 {
-    public class SkipStepBuilder<TData, TStepBody, TParentStep> : IContainerStepBuilder<TData, TStepBody, TParentStep>
+    public class ReturnStepBuilder<TData, TStepBody, TParentStep> : IContainerStepBuilder<TData, TStepBody, TParentStep>
         where TStepBody : IStepBody
         where TParentStep : IStepBody
     {
-        private IStepBuilder<TData, TParentStep> _referenceBuilder;
+        private readonly IStepBuilder<TData, TParentStep> _referenceBuilder;
 
         public IWorkflowBuilder<TData> WorkflowBuilder { get; private set; }
 
         public WorkflowStep<TStepBody> Step { get; set; }
 
-        public SkipStepBuilder(IWorkflowBuilder<TData> workflowBuilder, WorkflowStep<TStepBody> step, IStepBuilder<TData, TParentStep> referenceBuilder)
+        public ReturnStepBuilder(IWorkflowBuilder<TData> workflowBuilder, WorkflowStep<TStepBody> step, IStepBuilder<TData, TParentStep> referenceBuilder)
         {
             WorkflowBuilder = workflowBuilder;
             Step = step;

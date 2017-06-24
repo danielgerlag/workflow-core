@@ -1,0 +1,25 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Text;
+using WorkflowCore.Interface;
+using WorkflowCore.Models;
+
+namespace WorkflowCore.Users.Primitives
+{
+    public class EscalateStep : WorkflowStep<Escalate>
+    {
+        
+        public override void AfterWorkflowIteration(WorkflowExecutorResult executorResult, WorkflowDefinition defintion, WorkflowInstance workflow, ExecutionPointer executionPointer)
+        {
+            base.AfterWorkflowIteration(executorResult, defintion, workflow, executionPointer);
+            var taskStep = workflow.ExecutionPointers.Find(x => x.Id == executionPointer.PredecessorId);
+
+            if (taskStep.EventPublished)
+            {
+                executionPointer.EndTime = DateTime.Now.ToUniversalTime();
+                executionPointer.Active = false;
+            }
+        }
+    }
+}

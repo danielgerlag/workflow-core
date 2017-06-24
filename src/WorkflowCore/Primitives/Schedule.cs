@@ -16,7 +16,6 @@ namespace WorkflowCore.Primitives
             if (context.PersistenceData == null)
                 return ExecutionResult.Sleep(Period, new SchedulePersistenceData() { Elapsed = false });
             
-
             if (context.PersistenceData is SchedulePersistenceData)
             {
                 if (!((SchedulePersistenceData) context.PersistenceData).Elapsed)

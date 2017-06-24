@@ -13,6 +13,6 @@ namespace WorkflowCore.Users.Models
 
         public string AssignedPrincipal { get; set; }
 
-        public Dictionary<string, object> Options { get; set; } = new Dictionary<string, object>();
+        public Dictionary<string, string> Options { get; set; } = new Dictionary<string, string>();
     }
 }

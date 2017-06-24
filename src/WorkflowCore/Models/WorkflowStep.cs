@@ -42,6 +42,18 @@ namespace WorkflowCore.Models
         {            
         }
 
+        /// <summary>
+        /// Called after every workflow execution round,
+        /// every exectuon pointer with no end time, even if this step was not executed in this round
+        /// </summary>
+        /// <param name="executorResult"></param>
+        /// <param name="defintion"></param>
+        /// <param name="workflow"></param>
+        /// <param name="executionPointer"></param>
+        public virtual void AfterWorkflowIteration(WorkflowExecutorResult executorResult, WorkflowDefinition defintion, WorkflowInstance workflow, ExecutionPointer executionPointer)
+        {
+        }
+
         public virtual IStepBody ConstructBody(IServiceProvider serviceProvider)
         {
             IStepBody body = (serviceProvider.GetService(BodyType) as IStepBody);
@@ -51,7 +63,6 @@ namespace WorkflowCore.Models
                 if (stepCtor != null)
                     body = (stepCtor.Invoke(null) as IStepBody);
             }
-
             return body;
         }
 
@@ -62,11 +73,7 @@ namespace WorkflowCore.Models
     public class WorkflowStep<TStepBody> : WorkflowStep
         where TStepBody : IStepBody 
     {
-        public override Type BodyType
-        {
-            get { return typeof(TStepBody); }
-        }
-                                
+        public override Type BodyType => typeof(TStepBody);
     }
 
     

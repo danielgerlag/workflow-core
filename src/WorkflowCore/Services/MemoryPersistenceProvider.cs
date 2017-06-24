@@ -45,7 +45,7 @@ namespace WorkflowCore.Services
             lock (_instances)
             {
                 var now = DateTime.Now.ToUniversalTime().Ticks;
-                return _instances.Where(x => x.NextExecution.HasValue && x.NextExecution <= now).Select(x => x.Id);
+                return _instances.Where(x => x.NextExecution.HasValue && x.NextExecution <= now).Select(x => x.Id).ToList();
             }
         }
 

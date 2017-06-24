@@ -75,7 +75,7 @@ namespace WorkflowCore.Services
                             });
                             continue;
                         }
-                        
+
                         IStepExecutionContext context = new StepExecutionContext()
                         {
                             Workflow = workflow,
@@ -100,7 +100,7 @@ namespace WorkflowCore.Services
                         var result = body.Run(context);
 
                         ProcessOutputs(workflow, step, body);
-                        ProcessExecutionResult(workflow, def, pointer, step, result);
+                        ProcessExecutionResult(workflow, def, pointer, step, result, wfResult);
                         step.AfterExecute(wfResult, context, result, pointer);
                     }
                     catch (Exception ex)
@@ -145,23 +145,40 @@ namespace WorkflowCore.Services
                 }
 
             }
+            ProcessAfterExecutionIteration(workflow, def, wfResult);
             DetermineNextExecutionTime(workflow);
 
             return wfResult;
         }
 
-        private void ProcessExecutionResult(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, ExecutionResult result)
+        private void ProcessExecutionResult(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, ExecutionResult result, WorkflowExecutorResult workflowResult)
         {
             //TODO: refactor this into it's own class
             pointer.PersistenceData = result.PersistenceData;
             pointer.Outcome = result.OutcomeValue;
             if (result.SleepFor.HasValue)
                 pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(result.SleepFor.Value);
-            
+
+            if (!string.IsNullOrEmpty(result.EventName))
+            {
+                pointer.EventName = result.EventName;
+                pointer.EventKey = result.EventKey;
+                pointer.Active = false;
+
+                workflowResult.Subscriptions.Add(new EventSubscription()
+                {
+                    WorkflowId = workflow.Id,
+                    StepId = pointer.StepId,
+                    EventName = pointer.EventName,
+                    EventKey = pointer.EventKey,
+                    SubscribeAsOf = result.EventAsOf
+                });
+            }
+
             if (result.Proceed)
             {
                 pointer.Active = false;
-                pointer.EndTime = DateTime.Now.ToUniversalTime();                
+                pointer.EndTime = DateTime.Now.ToUniversalTime();
 
                 foreach (var outcomeTarget in step.Outcomes.Where(x => object.Equals(x.GetValue(workflow.Data), result.OutcomeValue) || x.GetValue(workflow.Data) == null))
                 {
@@ -217,7 +234,7 @@ namespace WorkflowCore.Services
                     default:
                         throw new ArgumentException();
                 }
-                
+
                 step.BodyType.GetProperty(member.Member.Name).SetValue(body, resolvedValue);
             }
         }
@@ -230,6 +247,17 @@ namespace WorkflowCore.Services
                 var resolvedValue = output.Source.Compile().DynamicInvoke(body);
                 var data = workflow.Data;
                 data.GetType().GetProperty(member.Member.Name).SetValue(data, resolvedValue);
+            }
+        }
+
+        private void ProcessAfterExecutionIteration(WorkflowInstance workflow, WorkflowDefinition workflowDef, WorkflowExecutorResult workflowResult)
+        {
+            var pointers = workflow.ExecutionPointers.Where(x => x.EndTime == null);
+
+            foreach (var pointer in pointers)
+            {
+                var step = workflowDef.Steps.First(x => x.Id == pointer.StepId);
+                step?.AfterWorkflowIteration(workflowResult, workflowDef, workflow, pointer);
             }
         }
 
@@ -258,9 +286,15 @@ namespace WorkflowCore.Services
                 {
                     if (workflow.ExecutionPointers.Where(x => pointer.Children.Contains(x.Id)).All(x => IsBranchComplete(workflow.ExecutionPointers, x.Id)))
                     {
-                        workflow.NextExecution = 0;
-                        return;
-                    }                    
+                        if (!pointer.SleepUntil.HasValue)
+                        {
+                            workflow.NextExecution = 0;
+                            return;
+                        }
+
+                        long pointerSleep = pointer.SleepUntil.Value.ToUniversalTime().Ticks;
+                        workflow.NextExecution = Math.Min(pointerSleep, workflow.NextExecution ?? pointerSleep);
+                    }
                 }
             }
 
@@ -268,7 +302,7 @@ namespace WorkflowCore.Services
             {
                 workflow.Status = WorkflowStatus.Complete;
                 workflow.CompleteTime = DateTime.Now.ToUniversalTime();
-            }            
+            }
         }
 
         private bool IsBranchComplete(IEnumerable<ExecutionPointer> pointers, string rootId)

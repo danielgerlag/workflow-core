@@ -18,22 +18,18 @@ namespace WorkflowCore.Sample08
         {
             builder
                 .StartWith(context => ExecutionResult.Next())
-                .UserStep("Do you approve", data => "MYDOMAIN\\user", x => x.Name("Approval Step"))            
-                    .When("yes", "I approve")
-                        .Then(context =>
-                        {
-                            Console.WriteLine("You approved");
-                            return ExecutionResult.Next();
-                        })
-                    .End<UserStep>("Approval Step")            
-                    .When("no", "I do not approve")
-                        .Then(context =>
-                        {
-                            Console.WriteLine("You did not approve");
-                            return ExecutionResult.Next();
-                        })
-                    .End<UserStep>("Approval Step");
-
+                .UserTask("Do you approve", data => @"domain\bob")
+                    .WithOption("yes", "I approve").Do(then => then
+                        .StartWith(context => Console.WriteLine("You approved"))
+                    )
+                    .WithOption("no", "I do not approve").Do(then => then
+                        .StartWith(context => Console.WriteLine("You did not approve"))
+                    )
+                    .WithEscalation(x => TimeSpan.FromSeconds(20), x => @"domain\frank", action => action
+                        .StartWith(context => Console.WriteLine("Escalated task"))
+                        .Then(context => Console.WriteLine("Sending notification..."))
+                        )
+                .Then(context => Console.WriteLine("end"));
         }
     }
 }

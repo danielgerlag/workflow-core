@@ -24,6 +24,8 @@ namespace WorkflowCore.Sample08
             Console.WriteLine("Starting workflow...");
             string workflowId = host.StartWorkflow("HumanWorkflow").Result;
 
+            var timer = new Timer(new TimerCallback((state) => { PrintOptions(host, workflowId); }), null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
+
             Thread.Sleep(1000);
             Console.WriteLine();
             Console.WriteLine("Open user actions are");
@@ -37,15 +39,31 @@ namespace WorkflowCore.Sample08
                     Console.WriteLine(" - " + option.Key + " : " + option.Value + ", ");
                 }
 
-                Thread.Sleep(500);
+                //Thread.Sleep(500);
+                
+                Console.ReadLine();
                 Console.WriteLine();
-                Console.WriteLine("Choosing " + item.Options.Last().Key);
+                Console.WriteLine("Choosing " + item.Options.First().Key);
 
-                host.PublishUserAction(openItems.First().Key, "MYDOMAIN\\me", item.Options.Last().Value).Wait();
+                host.PublishUserAction(openItems.First().Key, @"domain\john", item.Options.First().Value).Wait();
             }
 
             Console.ReadLine();
             host.Stop();
+        }
+
+        private static void PrintOptions(IWorkflowHost host, string workflowId)
+        {
+            var openItems = host.GetOpenUserActions(workflowId);
+            foreach (var item in openItems)
+            {
+                Console.WriteLine(item.Prompt + ", Assigned to " + item.AssignedPrincipal);
+                Console.WriteLine("Options are ");
+                foreach (var option in item.Options)
+                {
+                    Console.WriteLine(" - " + option.Key + " : " + option.Value + ", ");
+                }
+            }
         }
 
         private static IServiceProvider ConfigureServices()

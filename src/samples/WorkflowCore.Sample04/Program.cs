@@ -25,11 +25,11 @@ namespace WorkflowCore.Sample04
             host.Start();
 
             var initialData = new MyDataClass();
-            host.StartWorkflow("EventSampleWorkflow", 1, initialData);
+            var workflowId = host.StartWorkflow("EventSampleWorkflow", 1, initialData).Result;
 
             Console.WriteLine("Enter value to publish");
             string value = Console.ReadLine();
-            host.PublishEvent("MyEvent", "0", value);
+            host.PublishEvent("MyEvent", workflowId, value);
 
             Console.ReadLine();
             host.Stop();
