@@ -4,11 +4,12 @@ using System.Collections.Generic;
 using System.Text;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
+using WorkflowCore.Testing;
 using Xunit;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
-    public class EndStepScenario : BaseScenario<EndStepScenario.ScenarioWorkflow, Object>
+    public class EndStepScenario : WorkflowTest<EndStepScenario.ScenarioWorkflow, Object>
     {
         internal static int StartStepCounter = 0;
         internal static int MidStepCounter = 0;
@@ -42,20 +43,18 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             }
         }
 
+        public EndStepScenario()
+        {
+            Setup();
+        }
+
         [Fact]
         public void Scenario()
         {
-            var workflowId = Host.StartWorkflow("EndStepScenario").Result;
-            var instance = PersistenceProvider.GetWorkflowInstance(workflowId).Result;
-            int counter = 0;
-            while ((instance.Status == WorkflowStatus.Runnable) && (counter < 300))
-            {
-                System.Threading.Thread.Sleep(100);
-                counter++;
-                instance = PersistenceProvider.GetWorkflowInstance(workflowId).Result;
-            }
+            var workflowId = StartWorkflow(null);
+            WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
-            instance.Status.Should().Be(WorkflowStatus.Complete);
+            GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
             StartStepCounter.Should().Be(1);
             MidStepCounter.Should().Be(1);
             EndStepCounter.Should().Be(0);

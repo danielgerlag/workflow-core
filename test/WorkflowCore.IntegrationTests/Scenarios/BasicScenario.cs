@@ -5,56 +5,59 @@ using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using Xunit;
 using FluentAssertions;
+using WorkflowCore.Testing;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
-    public class BasicScenario : BaseScenario<BasicScenario.BasicWorkflow, Object>
+    public class BasicWorkflow : IWorkflow
     {
-        static int Step1Ticker = 0;
-        static int Step2Ticker = 0;
+        internal static int Step1Ticker = 0;
+        internal static int Step2Ticker = 0;
 
-        public class Step1 : StepBody
+        public string Id => "BasicWorkflow";
+        public int Version => 1;
+        public void Build(IWorkflowBuilder<Object> builder)
         {
-            public override ExecutionResult Run(IStepExecutionContext context)
-            {
-                Step1Ticker++;
-                return ExecutionResult.Next();
-            }
+            builder
+                .StartWith<Step1>()
+                .Then(context =>
+                {
+                    Step2Ticker++;
+                    return ExecutionResult.Next();
+                });
+
         }
+    }
 
-        public class BasicWorkflow : IWorkflow
+    internal class Step1 : StepBody
+    {
+        public override ExecutionResult Run(IStepExecutionContext context)
         {
-            public string Id => "BasicWorkflow";
-            public int Version => 1;
-            public void Build(IWorkflowBuilder<Object> builder)
-            {
-                builder
-                    .StartWith<Step1>()
-                    .Then(context =>
-                    {
-                        Step2Ticker++;
-                        return ExecutionResult.Next();
-                    });
+            BasicWorkflow.Step1Ticker++;
+            return ExecutionResult.Next();
+        }
+    }
 
-            }
+    public class BasicScenario : WorkflowTest<BasicWorkflow, Object>
+    {   
+        public BasicScenario()
+        {
+            Setup();
         }
 
         [Fact]
         public void Scenario()
         {
-            var workflowId = Host.StartWorkflow("BasicWorkflow").Result;
-            var instance = PersistenceProvider.GetWorkflowInstance(workflowId).Result;
-            int counter = 0;
-            while ((instance.Status == WorkflowStatus.Runnable) && (counter < 300))
-            {
-                System.Threading.Thread.Sleep(100);
-                counter++;
-                instance = PersistenceProvider.GetWorkflowInstance(workflowId).Result;
-            }
+            BasicWorkflow.Step1Ticker = 0;
+            BasicWorkflow.Step2Ticker = 0;
 
-            instance.Status.Should().Be(WorkflowStatus.Complete);
-            Step1Ticker.Should().Be(1);
-            Step2Ticker.Should().Be(1);
+            var workflowId = StartWorkflow(null);
+            WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
+
+            GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
+            UnhandledStepErrors.Count.Should().Be(0);
+            BasicWorkflow.Step1Ticker.Should().Be(1);
+            BasicWorkflow.Step2Ticker.Should().Be(1);
         }
     }
 }

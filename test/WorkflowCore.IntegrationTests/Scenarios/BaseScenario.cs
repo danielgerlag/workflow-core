@@ -7,6 +7,7 @@ using WorkflowCore.Interface;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
+    [Obsolete]
     public abstract class BaseScenario<TWorkflow, TData> : IDisposable
         where TWorkflow : IWorkflow<TData>, new()
         where TData : class, new()

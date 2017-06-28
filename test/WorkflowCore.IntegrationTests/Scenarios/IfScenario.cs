@@ -6,18 +6,19 @@ using WorkflowCore.Models;
 using Xunit;
 using FluentAssertions;
 using System.Threading;
+using WorkflowCore.Testing;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
-    public class IfScenario : BaseScenario<IfScenario.IfWorkflow, IfScenario.MyDataClass>
+    public class IfScenario : WorkflowTest<IfScenario.IfWorkflow, IfScenario.MyDataClass>
     {
-        static int Step1Ticker = 0;
-        static int Step2Ticker = 0;
-        static int If1Ticker = 0;
-        static int If2Ticker = 0;
-        static int If3Ticker = 0;
-        static DateTime LastIfBlock;
-        static DateTime AfterIfBlock;
+        internal static int Step1Ticker = 0;
+        internal static int Step2Ticker = 0;
+        internal static int If1Ticker = 0;
+        internal static int If2Ticker = 0;
+        internal static int If3Ticker = 0;
+        internal static DateTime LastIfBlock;
+        internal static DateTime AfterIfBlock;
 
         public class MyDataClass
         {
@@ -69,18 +70,16 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             }
         }
 
+        public IfScenario()
+        {
+            Setup();
+        }
+
         [Fact]
         public void Scenario()
         {
-            var workflowId = Host.StartWorkflow("IfWorkflow", new MyDataClass() { Counter = 2 }).Result;
-            var instance = PersistenceProvider.GetWorkflowInstance(workflowId).Result;
-            int counter = 0;
-            while ((instance.Status == WorkflowStatus.Runnable) && (counter < 300))
-            {
-                Thread.Sleep(100);
-                counter++;
-                instance = PersistenceProvider.GetWorkflowInstance(workflowId).Result;
-            }
+            var workflowId = StartWorkflow(new MyDataClass() { Counter = 2 });
+            WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
             Step1Ticker.Should().Be(1);
             Step2Ticker.Should().Be(1);
@@ -91,7 +90,8 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
             AfterIfBlock.Should().BeAfter(LastIfBlock);
 
-            instance.Status.Should().Be(WorkflowStatus.Complete);
+            GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
+            UnhandledStepErrors.Count.Should().Be(0);
         }
     }
 }

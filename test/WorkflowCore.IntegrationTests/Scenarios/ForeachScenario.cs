@@ -5,16 +5,17 @@ using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using Xunit;
 using FluentAssertions;
+using WorkflowCore.Testing;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
-    public class ForeachScenario : BaseScenario<ForeachScenario.ForeachWorkflow, ForeachScenario.MyDataClass>
+    public class ForeachScenario : WorkflowTest<ForeachScenario.ForeachWorkflow, ForeachScenario.MyDataClass>
     {
-        static int Step1Ticker = 0;
-        static int Step2Ticker = 0;
-        static int Step3Ticker = 0;
-        static int AfterLoopValue = 0;
-        static int CheckSum = 0;
+        internal static int Step1Ticker = 0;
+        internal static int Step2Ticker = 0;
+        internal static int Step3Ticker = 0;
+        internal static int AfterLoopValue = 0;
+        internal static int CheckSum = 0;
 
         public class DoSomething : StepBody
         {
@@ -54,25 +55,24 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             }
         }
 
+        public ForeachScenario()
+        {
+            Setup();
+        }
+
         [Fact]
         public void Scenario()
         {
-            var workflowId = Host.StartWorkflow("ForeachWorkflow").Result;
-            var instance = PersistenceProvider.GetWorkflowInstance(workflowId).Result;
-            int counter = 0;
-            while ((instance.Status == WorkflowStatus.Runnable) && (counter < 300))
-            {
-                System.Threading.Thread.Sleep(100);
-                counter++;
-                instance = PersistenceProvider.GetWorkflowInstance(workflowId).Result;
-            }
+            var workflowId = StartWorkflow(null);
+            WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
             Step1Ticker.Should().Be(1);
             Step2Ticker.Should().Be(3);
             Step3Ticker.Should().Be(1);
             AfterLoopValue.Should().Be(3);
             CheckSum.Should().Be(7);
-            instance.Status.Should().Be(WorkflowStatus.Complete);
+            GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
+            UnhandledStepErrors.Count.Should().Be(0);
         }
     }
 }

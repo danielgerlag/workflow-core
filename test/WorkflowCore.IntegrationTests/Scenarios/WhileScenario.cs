@@ -6,18 +6,19 @@ using WorkflowCore.Models;
 using Xunit;
 using FluentAssertions;
 using System.Threading;
+using WorkflowCore.Testing;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
-    public class WhileScenario : BaseScenario<WhileScenario.WhileWorkflow, WhileScenario.MyDataClass>
+    public class WhileScenario : WorkflowTest<WhileScenario.WhileWorkflow, WhileScenario.MyDataClass>
     {
-        static int Step1Ticker = 0;
-        static int Step2Ticker = 0;
-        static int Step3Ticker = 0;
-        static int AfterLoopValue = 0;
+        internal static int Step1Ticker = 0;
+        internal static int Step2Ticker = 0;
+        internal static int Step3Ticker = 0;
+        internal static int AfterLoopValue = 0;
 
-        static DateTime LastWhileBlock;
-        static DateTime AfterWhileBlock;
+        internal static DateTime LastWhileBlock;
+        internal static DateTime AfterWhileBlock;
 
         public class DoSomething : StepBody
         {
@@ -43,19 +44,12 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             public void Build(IWorkflowBuilder<MyDataClass> builder)
             {
                 builder
-                    .StartWith(context =>
-                    {
-                        Step1Ticker++;
-                        return ExecutionResult.Next();
-                    })
+                    .StartWith(context => Step1Ticker++)
                     .While(x => x.Counter < 3).Do(x => x
                         .StartWith<DoSomething>()
                             .Output(data => data.Counter, step => step.Counter)
-                        .Then(context =>
-                        {
-                            LastWhileBlock = DateTime.Now;
-                            return ExecutionResult.Next();
-                        })
+                        .Then(context => Thread.Sleep(500))
+                        .Then(context => LastWhileBlock = DateTime.Now)
                     )                    
                     .Then(context =>
                     {
@@ -67,25 +61,24 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             }
         }
 
+        public WhileScenario()
+        {
+            Setup();
+        }
+
         [Fact]
         public void Scenario()
         {
-            var workflowId = Host.StartWorkflow("WhileWorkflow", new MyDataClass() { Counter = 0 }).Result;
-            var instance = PersistenceProvider.GetWorkflowInstance(workflowId).Result;
-            int counter = 0;
-            while ((instance.Status == WorkflowStatus.Runnable) && (counter < 300))
-            {
-                System.Threading.Thread.Sleep(100);
-                counter++;
-                instance = PersistenceProvider.GetWorkflowInstance(workflowId).Result;
-            }
+            var workflowId = StartWorkflow(new MyDataClass() { Counter = 0 });
+            WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
                         
             Step1Ticker.Should().Be(1);
             Step2Ticker.Should().Be(3);
             Step3Ticker.Should().Be(1);
             AfterLoopValue.Should().Be(3);
             AfterWhileBlock.Should().BeAfter(LastWhileBlock);
-            instance.Status.Should().Be(WorkflowStatus.Complete);
+            GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
+            UnhandledStepErrors.Count.Should().Be(0);
         }
     }
 }

@@ -10,7 +10,7 @@ namespace WorkflowCore.Tests.MongoDB.Scenarios
     [Collection("Mongo collection")]
     public class MongoBasicScenario : BasicScenario
     {        
-        protected override void Configure(IServiceCollection services)
+        protected override void ConfigureServices(IServiceCollection services)
         {
             services.AddWorkflow(x => x.UseMongoDB($"mongodb://localhost:{DockerSetup.Port}", "integration-tests"));
         }

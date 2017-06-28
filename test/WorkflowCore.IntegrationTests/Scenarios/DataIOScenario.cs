@@ -5,10 +5,11 @@ using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using Xunit;
 using FluentAssertions;
+using WorkflowCore.Testing;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
-    public class DataIOScenario : BaseScenario<DataIOScenario.DataIOWorkflow, DataIOScenario.MyDataClass>
+    public class DataIOScenario : WorkflowTest<DataIOScenario.DataIOWorkflow, DataIOScenario.MyDataClass>
     {
         public class AddNumbers : StepBody
         {
@@ -44,21 +45,20 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             }
         }
 
+        public DataIOScenario()
+        {
+            Setup();
+        }
+
         [Fact]
         public void Scenario()
         {
-            var workflowId = Host.StartWorkflow("DataIOWorkflow", new MyDataClass() { Value1 = 2, Value2 = 3 }).Result;
-            var instance = PersistenceProvider.GetWorkflowInstance(workflowId).Result;
-            int counter = 0;
-            while ((instance.Status == WorkflowStatus.Runnable) && (counter < 300))
-            {
-                System.Threading.Thread.Sleep(100);
-                counter++;
-                instance = PersistenceProvider.GetWorkflowInstance(workflowId).Result;
-            }
+            var workflowId = StartWorkflow(new MyDataClass() { Value1 = 2, Value2 = 3 });
+            WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
-            instance.Status.Should().Be(WorkflowStatus.Complete);
-            (instance.Data as MyDataClass).Value3.Should().Be(5);
+            GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
+            UnhandledStepErrors.Count.Should().Be(0);
+            GetData(workflowId).Value3.Should().Be(5);
         }
     }
 }

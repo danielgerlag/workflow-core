@@ -6,20 +6,21 @@ using WorkflowCore.Models;
 using Xunit;
 using FluentAssertions;
 using System.Linq;
+using WorkflowCore.Testing;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
-    public class ParallelScenario : BaseScenario<ParallelScenario.ParallelWorkflow, ParallelScenario.MyDataClass>
+    public class ParallelScenario : WorkflowTest<ParallelScenario.ParallelWorkflow, ParallelScenario.MyDataClass>
     {
-        private static int StartStepTicker = 0;
-        private static int EndStepTicker = 0;
+        internal static int StartStepTicker = 0;
+        internal static int EndStepTicker = 0;
 
-        private static int Step11Ticker = 0;
-        private static int Step12Ticker = 0;
-        private static int Step21Ticker = 0;
-        private static int Step22Ticker = 0;
-        private static int Step31Ticker = 0;
-        private static int Step32Ticker = 0;
+        internal static int Step11Ticker = 0;
+        internal static int Step12Ticker = 0;
+        internal static int Step21Ticker = 0;
+        internal static int Step22Ticker = 0;
+        internal static int Step31Ticker = 0;
+        internal static int Step32Ticker = 0;
 
         public class MyDataClass
         {
@@ -55,7 +56,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                             Step21Ticker++;
                             return ExecutionResult.Next();
                         })
-                        .WaitFor("MyEvent", data => "0")
+                        .WaitFor("MyEventInParallel", data => "0")
                         .Then(x =>
                         {
                             Step22Ticker++;
@@ -81,32 +82,33 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             }
         }
 
+        public ParallelScenario()
+        {
+            Setup();
+        }
+
         [Fact]
         public void Scenario()
         {
-            var workflowId = Host.StartWorkflow("ParallelWorkflow", new MyDataClass()).Result;
+            var workflowId = StartWorkflow(new MyDataClass());
 
-            int counter = 0;
-            while ((Step12Ticker == 0) && (Step32Ticker == 0) && (PersistenceProvider.GetSubcriptions("MyEvent", "0", DateTime.MaxValue).Result.Count() == 0) && (counter < 150))
+            var counter = 0;
+            while ((Step12Ticker == 0) && (Step32Ticker == 0) && (counter < 150))
             {
                 System.Threading.Thread.Sleep(200);
                 counter++;
             }
+
+            WaitForEventSubscription("MyEventInParallel", "0", TimeSpan.FromSeconds(30));
 
             Step22Ticker.Should().Be(0);
 
-            Host.PublishEvent("MyEvent", "0", "Pass");
+            Host.PublishEvent("MyEventInParallel", "0", "Pass");
 
-            var instance = PersistenceProvider.GetWorkflowInstance(workflowId).Result;
-            counter = 0;
-            while ((instance.Status == WorkflowStatus.Runnable) && (counter < 150))
-            {
-                System.Threading.Thread.Sleep(200);
-                counter++;
-                instance = PersistenceProvider.GetWorkflowInstance(workflowId).Result;
-            }
+            WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
-            instance.Status.Should().Be(WorkflowStatus.Complete);
+            GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
+            UnhandledStepErrors.Count.Should().Be(0);
             StartStepTicker.Should().Be(1);
             EndStepTicker.Should().Be(1);
             Step11Ticker.Should().Be(1);
