@@ -114,6 +114,8 @@ There are several persistence providers available as separate Nuget packages.
 
 * [Human(User) Workflow](src/samples/WorkflowCore.Sample08)
 
+* [Testing](src/samples/WorkflowCore.TestSample01)
+
 
 ## Authors
 

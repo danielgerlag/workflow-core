@@ -7,7 +7,7 @@ Provides support to persist workflows running on [Workflow Core](../../README.md
 Install the NuGet package "WorkflowCore.Persistence.SqlServer"
 
 ```
-PM> Install-Package WorkflowCore.Persistence.SqlServer -Pre
+PM> Install-Package WorkflowCore.Persistence.SqlServer
 ```
 
 ## Usage

@@ -7,7 +7,7 @@ Provides support to persist workflows running on [Workflow Core](../../README.md
 Install the NuGet package "WorkflowCore.Persistence.MongoDB"
 
 ```
-PM> Install-Package WorkflowCore.Persistence.MongoDB -Pre
+PM> Install-Package WorkflowCore.Persistence.MongoDB
 ```
 
 ## Usage

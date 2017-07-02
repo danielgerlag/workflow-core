@@ -19,7 +19,7 @@ namespace WorkflowCore.Testing
         protected IPersistenceProvider PersistenceProvider;
         protected List<StepError> UnhandledStepErrors = new List<StepError>();
 
-        protected void Setup()
+        protected virtual void Setup()
         {
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
