@@ -10,7 +10,7 @@ namespace WorkflowCore.Tests.SqlServer
     {
         string _connectionString;
 
-        public SqlServerPersistenceProviderFixture(SqlServerSetup setup)
+        public SqlServerPersistenceProviderFixture(DockerSetup setup)
         {
             _connectionString = setup.ConnectionString;
         }
