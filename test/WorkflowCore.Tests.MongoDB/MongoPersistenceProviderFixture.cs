@@ -12,9 +12,9 @@ namespace WorkflowCore.Tests.MongoDB
     [Collection("Mongo collection")]
     public class MongoPersistenceProviderFixture : BasePersistenceFixture
     {
-        DockerSetup _dockerSetup;
+        MongoDockerSetup _dockerSetup;
 
-        public MongoPersistenceProviderFixture(DockerSetup dockerSetup)
+        public MongoPersistenceProviderFixture(MongoDockerSetup dockerSetup)
         {
             _dockerSetup = dockerSetup;
         }
@@ -23,7 +23,7 @@ namespace WorkflowCore.Tests.MongoDB
         {
             get
             {
-                var client = new MongoClient(_dockerSetup.ConnectionString);
+                var client = new MongoClient(MongoDockerSetup.ConnectionString);
                 var db = client.GetDatabase("workflow-tests");
                 return new MongoPersistenceProvider(db);
             }

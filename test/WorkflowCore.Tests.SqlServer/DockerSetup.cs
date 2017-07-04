@@ -38,8 +38,8 @@ namespace WorkflowCore.Tests.SqlServer
             env.Add("ACCEPT_EULA=Y");
             env.Add($"SA_PASSWORD={SqlPassword}");
 
-            //docker.Images.PullImageAsync(new ImagesPullParameters() { Parent = ImageName, Tag = "latest" }, null).Wait();
-            docker.Images.CreateImageAsync(new ImagesCreateParameters() { Parent = ImageName, Tag = "latest", }, null).Wait();
+            docker.Images.PullImageAsync(new ImagesPullParameters() { Parent = ImageName, Tag = "latest" }, null).Wait();
+            //docker.Images.CreateImageAsync(new ImagesCreateParameters() { Parent = ImageName, Tag = "latest", }, null).Wait();
 
             var container = docker.Containers.CreateContainerAsync(new CreateContainerParameters()
             {
@@ -48,14 +48,18 @@ namespace WorkflowCore.Tests.SqlServer
                 HostConfig = hostCfg,
                 Env = env
             }).Result;
-            
+
+
             bool started = docker.Containers.StartContainerAsync(container.ID, new ContainerStartParameters()).Result;
             if (started)
             {
                 containerId = container.ID;
                 Console.Write("Waiting 10 seconds for SQL Server to start in the docker container...");
-                Thread.Sleep(10000); //allow time for SQL to start
+                Thread.Sleep(15000); //allow time for SQL to start
                 Console.WriteLine("10 seconds are up.");
+                //var ct = new CancellationToken();
+                //var waitResult = docker.Containers.WaitContainerAsync(container.ID, ct).Result;
+
 
                 Console.WriteLine("Docker container started: " + containerId);
                 ConnectionString = $"Server=127.0.0.1,{Port};Database=workflowcore-tests;User Id=sa;Password={SqlPassword};";
