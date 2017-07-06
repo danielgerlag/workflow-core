@@ -3,6 +3,7 @@ using Docker.DotNet.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
@@ -55,8 +56,7 @@ namespace Docker.Testify
 	        hostCfg.PortBindings = new Dictionary<string, IList<PortBinding>>();
 	        hostCfg.PortBindings.Add($"{InternalPort}/tcp", new PortBinding[] { pb });
 
-            //await docker.Images.PullImageAsync(new ImagesPullParameters() { Parent = ImageName, Tag = ImageTag }, null);
-	        Process.Start("docker", $"pull {ImageName}:{ImageTag}").WaitForExit();
+            await PullImage(ImageName, ImageTag);	        
 
             var container = await docker.Containers.CreateContainerAsync(new CreateContainerParameters()
 	        {
@@ -98,6 +98,25 @@ namespace Docker.Testify
 	        {
 	            Debug.WriteLine("Docker container failed");
 	        }
+        }
+
+        public async Task PullImage(string name, string tag)
+        {
+            var images = docker.Images.ListImagesAsync(new ImagesListParameters()).Result;
+            var exists = images
+                .Where(x => x.RepoTags != null)
+                .Any(x => x.RepoTags.Contains($"{name}:{tag}"));
+
+            if (exists)
+                return;
+
+            var stream = await docker.Images.PullImageAsync(new ImagesPullParameters() { Parent = name, Tag = tag }, null);
+            
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                while (!reader.EndOfStream)
+                    Debug.WriteLine(reader.ReadLine());
+            }
         }
 
 		public void Dispose()
