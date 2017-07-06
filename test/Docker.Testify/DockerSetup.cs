@@ -2,87 +2,127 @@
 using Docker.DotNet.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Docker.Testify
 {
 	public abstract class DockerSetup : IDisposable
-	{		
-        public abstract string ImageName { get; }
-        public abstract string ContainerName { get; }
-        public abstract int ExternalPort { get; }
+	{
+	    public abstract string ImageName { get; }
+	    public virtual string ContainerPrefix => "tests";
         public abstract int InternalPort { get; }
 
         public virtual string ImageTag => "latest";
         public virtual TimeSpan TimeOut => TimeSpan.FromSeconds(30);
         public virtual IList<string> EnvironmentVariables => new List<string>();
+	    public int ExternalPort { get; }
 
-        public abstract bool TestReady();
-        public abstract void ContainerReady();
+	    public abstract bool TestReady();
+        public abstract void PublishConnectionInfo();
 
-		protected DockerClient docker;
+        protected readonly DockerClient docker;
 		protected string containerId;
 
-		public DockerSetup()
-		{
-			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+	    protected DockerSetup()
+	    {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 				docker = new DockerClientConfiguration(new Uri("npipe://./pipe/docker_engine")).CreateClient();
 			else
 				docker = new DockerClientConfiguration(new Uri("unix:///var/run/docker.sock")).CreateClient();
 
-			HostConfig hostCfg = new HostConfig();
-			PortBinding pb = new PortBinding();
-			pb.HostIP = "0.0.0.0";
-			pb.HostPort = ExternalPort.ToString();
-			hostCfg.PortBindings = new Dictionary<string, IList<PortBinding>>();
-            hostCfg.PortBindings.Add($"{InternalPort}/tcp", new PortBinding[] { pb });
+		    ExternalPort = GetFreePort();
 
-			docker.Images.PullImageAsync(new ImagesPullParameters() { Parent = ImageName, Tag = ImageTag }, null).Wait();
-			
-			var container = docker.Containers.CreateContainerAsync(new CreateContainerParameters()
-			{
-                Image = $"{ImageName}:{ImageTag}",
-                Name = $"{ContainerName}-{Guid.NewGuid()}",
-				HostConfig = hostCfg,
-				Env = EnvironmentVariables
-			}).Result;
+	        Debug.WriteLine($"Selected port {ExternalPort}");
 
-            Console.WriteLine("Starting docker container...");
-			bool started = docker.Containers.StartContainerAsync(container.ID, new ContainerStartParameters()).Result;
-			if (started)
-			{				
-				Console.WriteLine("Waiting service to start in the docker container...");
-
-                var counter = 0;
-                var ready = false;
-
-                while ((counter < (TimeOut.TotalSeconds)) && (!ready))
-                {
-                    Thread.Sleep(1000);
-                    ready = TestReady();
-                }
-                if (ready)
-                {
-                    Console.WriteLine($"Docker container started: {container.ID}");
-                    ContainerReady();
-                }
-                else
-                {
-                    Console.WriteLine("Docker container timeout waiting for service");
-                }
-			}
-			else
-			{
-				Console.WriteLine("Docker container failed");
-			}
+            StartContainer().Wait();
 		}
+
+	    public async Task StartContainer()
+	    {
+	        var hostCfg = new HostConfig();
+	        var pb = new PortBinding
+	        {
+	            HostIP = "0.0.0.0",
+	            HostPort = ExternalPort.ToString()
+	        };
+
+	        hostCfg.PortBindings = new Dictionary<string, IList<PortBinding>>();
+	        hostCfg.PortBindings.Add($"{InternalPort}/tcp", new PortBinding[] { pb });
+
+            //await docker.Images.PullImageAsync(new ImagesPullParameters() { Parent = ImageName, Tag = ImageTag }, null);
+	        Process.Start("docker", $"pull {ImageName}:{ImageTag}").WaitForExit();
+
+            var container = await docker.Containers.CreateContainerAsync(new CreateContainerParameters()
+	        {
+	            Image = $"{ImageName}:{ImageTag}",
+	            Name = $"{ContainerPrefix}-{Guid.NewGuid()}",
+	            HostConfig = hostCfg,
+	            Env = EnvironmentVariables
+	        });
+
+	        Debug.WriteLine("Starting docker container...");
+	        var started = await docker.Containers.StartContainerAsync(container.ID, new ContainerStartParameters());
+	        if (started)
+	        {
+	            containerId = container.ID;
+	            PublishConnectionInfo();
+
+                Debug.WriteLine("Waiting service to start in the docker container...");
+                
+	            var ready = false;
+	            var expiryTime = DateTime.Now.Add(TimeOut);
+
+	            while ((DateTime.Now < expiryTime) && (!ready))
+	            {
+	                await Task.Delay(1000);
+	                ready = TestReady();
+	            }
+
+                if (ready)
+	            {
+	                Debug.WriteLine($"Docker container started: {container.ID}");
+	            }
+	            else
+	            {
+	                Debug.WriteLine("Docker container timeout waiting for service");
+	                throw new TimeoutException();
+	            }
+	        }
+	        else
+	        {
+	            Debug.WriteLine("Docker container failed");
+	        }
+        }
 
 		public void Dispose()
 		{
-			docker.Containers.KillContainerAsync(containerId, new ContainerKillParameters()).Wait();
-			docker.Containers.RemoveContainerAsync(containerId, new ContainerRemoveParameters() { Force = true }).Wait();
+		    docker.Containers.KillContainerAsync(containerId, new ContainerKillParameters()).Wait();
+		    docker.Containers.RemoveContainerAsync(containerId, new ContainerRemoveParameters() { Force = true }).Wait();
 		}
-	}
+
+	    private int GetFreePort()
+	    {
+	        const int startRange = 1000;
+	        const int endRange = 10000;
+	        var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+	        var tcpPorts = ipGlobalProperties.GetActiveTcpListeners();
+	        var udpPorts = ipGlobalProperties.GetActiveUdpListeners();
+
+	        var result = startRange;
+
+	        while (((tcpPorts.Any(x => x.Port == result)) || (udpPorts.Any(x => x.Port == result))) && result <= endRange)
+	            result++;
+
+	        if (result > endRange)
+	            throw new PortsInUseException();
+
+            return result;
+	    }
+    }
 }

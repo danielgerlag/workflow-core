@@ -5,27 +5,21 @@ using WorkflowCore.Interface;
 using WorkflowCore.Persistence.PostgreSQL;
 using WorkflowCore.UnitTests;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace WorkflowCore.Tests.PostgreSQL
 {
     [Collection("Postgres collection")]
     public class PostgresPersistenceProviderFixture : BasePersistenceFixture
     {
-        DockerSetup _dockerSetup;
+        private readonly IPersistenceProvider _subject;
+        protected override IPersistenceProvider Subject => _subject;
 
-        public PostgresPersistenceProviderFixture(DockerSetup dockerSetup)
+        public PostgresPersistenceProviderFixture(PostgresDockerSetup dockerSetup, ITestOutputHelper output)
         {
-            _dockerSetup = dockerSetup;
-        }
-
-        protected override IPersistenceProvider Subject
-        {
-            get
-            {                
-                var db = new PostgresPersistenceProvider(_dockerSetup.ConnectionString, true, true);
-                db.EnsureStoreExists();
-                return db;
-            }
+            output.WriteLine($"Connecting on {PostgresDockerSetup.ConnectionString}");
+            _subject = new PostgresPersistenceProvider(PostgresDockerSetup.ConnectionString, true, true);
+            _subject.EnsureStoreExists();
         }
     }
 }

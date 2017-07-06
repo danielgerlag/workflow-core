@@ -12,15 +12,12 @@ namespace WorkflowCore.Tests.MongoDB
 {    
     public class MongoDockerSetup : DockerSetup
     {
-        
         public static string ConnectionString { get; set; }
 
         public override string ImageName => "mongo";
-        public override string ContainerName => "mongo-workflow-tests";
-        public override int ExternalPort => 28017;
         public override int InternalPort => 27017;
 
-        public override void ContainerReady()
+        public override void PublishConnectionInfo()
         {
             ConnectionString = $"mongodb://localhost:{ExternalPort}";
         }

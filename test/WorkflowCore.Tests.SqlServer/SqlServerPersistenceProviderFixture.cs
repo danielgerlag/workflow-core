@@ -8,11 +8,11 @@ namespace WorkflowCore.Tests.SqlServer
     [Collection("SqlServer collection")]
     public class SqlServerPersistenceProviderFixture : BasePersistenceFixture
     {
-        string _connectionString;
+        private readonly string _connectionString;
 
-        public SqlServerPersistenceProviderFixture(DockerSetup setup)
+        public SqlServerPersistenceProviderFixture(SqlDockerSetup setup)
         {
-            _connectionString = setup.ConnectionString;
+            _connectionString = SqlDockerSetup.ConnectionString;
         }
 
         protected override IPersistenceProvider Subject
