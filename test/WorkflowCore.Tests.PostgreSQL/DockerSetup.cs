@@ -5,59 +5,45 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using Docker.Testify;
+using Npgsql;
 using Xunit;
 
 namespace WorkflowCore.Tests.PostgreSQL
 {
-    public class DockerSetup : IDisposable
+    public class PostgresDockerSetup : DockerSetup
     {
-        public static int Port = 5433;
-        DockerClient docker;
-        string containerId;
+        public static string ConnectionString { get; set; }
+        public static string ScenarioConnectionString { get; set; }
 
-        public string ConnectionString { get; private set; }
+        public override string ImageName => "postgres";
+        public override int InternalPort => 5432;
 
-        public DockerSetup()
+        public override void PublishConnectionInfo()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                docker = new DockerClientConfiguration(new Uri("npipe://./pipe/docker_engine")).CreateClient();
-            else
-                docker = new DockerClientConfiguration(new Uri("unix:///var/run/docker.sock")).CreateClient();
-
-            HostConfig hostCfg = new HostConfig();
-            PortBinding pb = new PortBinding();
-            pb.HostIP = "0.0.0.0";
-            pb.HostPort = Port.ToString();
-            hostCfg.PortBindings = new Dictionary<string, IList<PortBinding>>();
-            hostCfg.PortBindings.Add("5432/tcp", new PortBinding[] { pb });
-
-            docker.Images.PullImageAsync(new ImagesPullParameters() { Parent = "postgres", Tag = "latest" }, null).Wait();
-            var container = docker.Containers.CreateContainerAsync(new CreateContainerParameters() { Image = "postgres:latest", Name = "workflow-postgres-tests", HostConfig = hostCfg }).Result;
-            bool started = docker.Containers.StartContainerAsync(container.ID, new ContainerStartParameters()).Result;
-            if (started)
-            {
-                containerId = container.ID;
-                Console.WriteLine("Docker container started: " + containerId);
-                Console.Write("Waiting 10 seconds for Postgres to start in the docker container...");
-                Thread.Sleep(10000); //allow time for PG to start
-                Console.WriteLine("10 seconds are up.");
-                ConnectionString = $"Server=127.0.0.1;Port={Port};Database=workflow;User Id=postgres;";
-            }
-            else
-            {
-                Console.WriteLine("Docker container failed");
-            }
+            ConnectionString = $"Server=127.0.0.1;Port={ExternalPort};Database=workflow;User Id=postgres;";
+            ScenarioConnectionString = $"Server=127.0.0.1;Port={ExternalPort};Database=workflow-scenarios;User Id=postgres;";
         }
 
-        public void Dispose()
+        public override bool TestReady()
         {
-            docker.Containers.KillContainerAsync(containerId, new ContainerKillParameters()).Wait();
-            docker.Containers.RemoveContainerAsync(containerId, new ContainerRemoveParameters() { Force = true }).Wait();
-        }        
-    }
+            try
+            {
+                var connection = new NpgsqlConnection($"Server=127.0.0.1;Port={ExternalPort};Database=postgres;User Id=postgres;");
+                connection.Open();
+                connection.Close();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
 
+        }
+    }
+    
     [CollectionDefinition("Postgres collection")]
-    public class PostgresCollection : ICollectionFixture<DockerSetup>
+    public class PostgresCollection : ICollectionFixture<PostgresDockerSetup>
     {        
     }
 

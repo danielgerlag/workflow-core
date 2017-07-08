@@ -12,7 +12,7 @@ namespace WorkflowCore.Tests.MongoDB.Scenarios
     {        
         protected override void Configure(IServiceCollection services)
         {
-            services.AddWorkflow(x => x.UseMongoDB($"mongodb://localhost:{DockerSetup.Port}", "integration-tests"));
+            services.AddWorkflow(x => x.UseMongoDB(MongoDockerSetup.ConnectionString, "integration-tests"));
         }
     }
 }

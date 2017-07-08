@@ -5,14 +5,14 @@ using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.IntegrationTests.Scenarios;
 using Xunit;
 
-namespace WorkflowCore.Tests.PostgreSQL.Scenarios
+namespace WorkflowCore.Tests.SqlServer.Scenarios
 {
-    [Collection("Postgres collection")]
-    public class PostgresEventScenario : EventScenario
+    [Collection("SqlServer collection")]
+    public class SqlServerDataScenario : DataIOScenario
     {        
         protected override void ConfigureServices(IServiceCollection services)
         {
-            services.AddWorkflow(x => x.UsePostgreSQL(PostgresDockerSetup.ScenarioConnectionString, true, true));
+            services.AddWorkflow(x => x.UseSqlServer(SqlDockerSetup.ScenarioConnectionString, true, true));
         }
     }
 }

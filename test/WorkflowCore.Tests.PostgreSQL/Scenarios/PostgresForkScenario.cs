@@ -12,7 +12,7 @@ namespace WorkflowCore.Tests.PostgreSQL.Scenarios
     {        
         protected override void Configure(IServiceCollection services)
         {
-            services.AddWorkflow(x => x.UsePostgreSQL($"Server=127.0.0.1;Port={DockerSetup.Port};Database=workflow;User Id=postgres;", true, true));
+            services.AddWorkflow(x => x.UsePostgreSQL(PostgresDockerSetup.ScenarioConnectionString, true, true));
         }
     }
 }
