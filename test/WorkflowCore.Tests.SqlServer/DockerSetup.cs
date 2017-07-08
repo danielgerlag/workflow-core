@@ -18,6 +18,7 @@ namespace WorkflowCore.Tests.SqlServer
 
         public override string ImageName => "microsoft/mssql-server-linux";
         public override int InternalPort => 1433;
+        public override TimeSpan TimeOut => TimeSpan.FromSeconds(60);
 
         public const string SqlPassword = "I@mJustT3st1ing";
 
@@ -33,7 +34,7 @@ namespace WorkflowCore.Tests.SqlServer
         {
             try
             {
-                var client = new SqlConnection($"Server=127.0.0.1,{ExternalPort};Database=workflowcore-tests;User Id=sa;Password={SqlPassword};");
+                var client = new SqlConnection($"Server=127.0.0.1,{ExternalPort};Database=master;User Id=sa;Password={SqlPassword};");
                 client.Open();
                 client.Close();
                 return true;
