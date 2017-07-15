@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using WorkflowCore.Interface;
 
 namespace WorkflowCore.Sample14
 {
@@ -8,7 +9,18 @@ namespace WorkflowCore.Sample14
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var serviceProvider = ConfigureServices();
+
+            //start the workflow host
+            var host = serviceProvider.GetService<IWorkflowHost>();
+            host.RegisterWorkflow<RecurSampleWorkflow, MyData>();
+            host.Start();
+
+            Console.WriteLine("Starting workflow...");
+            var workflowId = host.StartWorkflow("recur-sample").Result;
+
+            Console.ReadLine();
+            host.Stop();
         }
 
         private static IServiceProvider ConfigureServices()

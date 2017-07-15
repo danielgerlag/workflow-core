@@ -13,9 +13,10 @@ namespace WorkflowCore.Services
 {
     public class WorkflowHost : IWorkflowHost, IDisposable
     {                
-        protected List<IBackgroundWorker> _workers = new List<IBackgroundWorker>();
         protected bool _shutdown = true;        
         protected IServiceProvider _serviceProvider;
+
+        private readonly IEnumerable<IBackgroundTask> _backgroundTasks;
 
         public event StepErrorEventHandler OnStepError;
 
@@ -27,7 +28,7 @@ namespace WorkflowCore.Services
         public IQueueProvider QueueProvider { get; private set; }
         public ILogger Logger { get; private set; }
 
-        public WorkflowHost(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, WorkflowOptions options, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider)
+        public WorkflowHost(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, WorkflowOptions options, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IEnumerable<IBackgroundTask> backgroundTasks)
         {
             PersistenceStore = persistenceStore;
             QueueProvider = queueProvider;
@@ -36,6 +37,7 @@ namespace WorkflowCore.Services
             _serviceProvider = serviceProvider;
             Registry = registry;
             LockProvider = lockProvider;
+            _backgroundTasks = backgroundTasks;
             persistenceStore.EnsureStoreExists();
         }
 
@@ -94,35 +96,22 @@ namespace WorkflowCore.Services
             _shutdown = false;
             QueueProvider.Start().Wait();
             LockProvider.Start().Wait();
-            for (int i = 0; i < Options.ThreadCount; i++)
-            {
-                Logger.LogInformation("Starting worker thread #{0}", i);
-                IWorkflowThread thread = _serviceProvider.GetService<IWorkflowThread>();
-                _workers.Add(thread);
-                thread.Start();
-            }
 
-            Logger.LogInformation("Starting publish thread");
-            IEventThread pubThread = _serviceProvider.GetService<IEventThread>();
-            _workers.Add(pubThread);
-            pubThread.Start();
+            Logger.LogInformation("Starting backgroud tasks");
 
-            Logger.LogInformation("Starting poller");
-            IRunnablePoller poller = _serviceProvider.GetService<IRunnablePoller>();
-            _workers.Add(poller);
-            poller.Start();
+            foreach (var task in _backgroundTasks)
+                task.Start();
         }
 
         public void Stop()
         {
             _shutdown = true;            
             
-            Logger.LogInformation("Stopping worker threads");
-            foreach (var th in _workers)
+            Logger.LogInformation("Stopping background tasks");
+            foreach (var th in _backgroundTasks)
                 th.Stop();
-
-            _workers.Clear();
-            Logger.LogInformation("Worker threads stopped");
+            
+            Logger.LogInformation("Worker tasks stopped");
             
             QueueProvider.Stop();
             LockProvider.Stop();

@@ -9,7 +9,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services
 {
-    class RunnablePoller : IRunnablePoller
+    class RunnablePoller : IBackgroundTask
     {
         private readonly IPersistenceProvider _persistenceStore;
         private readonly IDistributedLockProvider _lockProvider;

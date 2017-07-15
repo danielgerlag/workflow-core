@@ -12,7 +12,6 @@ namespace WorkflowCore.Models
         internal Func<IServiceProvider, IPersistenceProvider> PersistanceFactory;
         internal Func<IServiceProvider, IQueueProvider> QueueFactory;
         internal Func<IServiceProvider, IDistributedLockProvider> LockFactory;
-        internal int ThreadCount;
         internal TimeSpan PollInterval;
         internal TimeSpan IdleTime;
         internal TimeSpan ErrorRetryInterval;        
@@ -20,9 +19,8 @@ namespace WorkflowCore.Models
         public WorkflowOptions()
         {
             //set defaults
-            ThreadCount = Environment.ProcessorCount;
             PollInterval = TimeSpan.FromSeconds(10);
-            IdleTime = TimeSpan.FromMilliseconds(500);
+            IdleTime = TimeSpan.FromMilliseconds(100);
             ErrorRetryInterval = TimeSpan.FromSeconds(60);            
 
             QueueFactory = new Func<IServiceProvider, IQueueProvider>(sp => new SingleNodeQueueProvider());
@@ -43,11 +41,6 @@ namespace WorkflowCore.Models
         public void UseQueueProvider(Func<IServiceProvider, IQueueProvider> factory)
         {
             QueueFactory = factory;
-        }
-
-        public void UseThreads(int count)
-        {
-            ThreadCount = count;
         }
 
         public void UsePollInterval(TimeSpan interval)

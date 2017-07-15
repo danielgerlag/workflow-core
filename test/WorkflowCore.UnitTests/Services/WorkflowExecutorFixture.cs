@@ -80,7 +80,7 @@ namespace WorkflowCore.UnitTests.Services
 
             Registry = serviceProvider.GetService<IWorkflowRegistry>();
 
-            Subject = new WorkflowExecutor(Host, Registry, serviceProvider, loggerFactory);            
+            Subject = new WorkflowExecutor(Host, Registry, serviceProvider, new DateTimeProvider(), loggerFactory);            
         }
 
         [Fact]

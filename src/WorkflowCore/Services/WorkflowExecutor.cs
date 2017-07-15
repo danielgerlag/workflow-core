@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
@@ -12,25 +13,27 @@ namespace WorkflowCore.Services
 {
     public class WorkflowExecutor : IWorkflowExecutor
     {
-
-        protected readonly IWorkflowHost _host;
+        
         protected readonly IWorkflowRegistry _registry;
         protected readonly IServiceProvider _serviceProvider;
+        protected readonly IDateTimeProvider _datetimeProvider;
         protected readonly ILogger _logger;
 
-        public WorkflowExecutor(IWorkflowHost host, IWorkflowRegistry registry, IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
+        private IWorkflowHost Host => _serviceProvider.GetService<IWorkflowHost>();
+
+        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IDateTimeProvider datetimeProvider, ILoggerFactory loggerFactory)
         {
-            _host = host;
             _serviceProvider = serviceProvider;
             _registry = registry;
+            _datetimeProvider = datetimeProvider;
             _logger = loggerFactory.CreateLogger<WorkflowExecutor>();
         }
 
-        public WorkflowExecutorResult Execute(WorkflowInstance workflow, WorkflowOptions options)
+        public async Task<WorkflowExecutorResult> Execute(WorkflowInstance workflow, WorkflowOptions options)
         {
-            WorkflowExecutorResult wfResult = new WorkflowExecutorResult();
+            var wfResult = new WorkflowExecutorResult();
 
-            List<ExecutionPointer> exePointers = new List<ExecutionPointer>(workflow.ExecutionPointers.Where(x => x.Active && (!x.SleepUntil.HasValue || x.SleepUntil < DateTime.Now.ToUniversalTime())));
+            var exePointers = new List<ExecutionPointer>(workflow.ExecutionPointers.Where(x => x.Active && (!x.SleepUntil.HasValue || x.SleepUntil < _datetimeProvider.Now.ToUniversalTime())));
             var def = _registry.GetDefinition(workflow.WorkflowDefinitionId, workflow.Version);
             if (def == null)
             {
@@ -51,12 +54,12 @@ namespace WorkflowCore.Services
                                 continue;
                             case ExecutionPipelineDirective.EndWorkflow:
                                 workflow.Status = WorkflowStatus.Complete;
-                                workflow.CompleteTime = DateTime.Now.ToUniversalTime();
+                                workflow.CompleteTime = _datetimeProvider.Now.ToUniversalTime();
                                 continue;
                         }
 
                         if (!pointer.StartTime.HasValue)
-                            pointer.StartTime = DateTime.Now;
+                            pointer.StartTime = _datetimeProvider.Now.ToUniversalTime();
 
                         _logger.LogDebug("Starting step {0} on workflow {1}", step.Name, workflow.Id);
 
@@ -65,12 +68,12 @@ namespace WorkflowCore.Services
                         if (body == null)
                         {
                             _logger.LogError("Unable to construct step body {0}", step.BodyType.ToString());
-                            pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(options.ErrorRetryInterval);
+                            pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(options.ErrorRetryInterval);
                             wfResult.Errors.Add(new ExecutionError()
                             {
                                 WorkflowId = workflow.Id,
                                 ExecutionPointerId = pointer.Id,
-                                ErrorTime = DateTime.Now.ToUniversalTime(),
+                                ErrorTime = _datetimeProvider.Now.ToUniversalTime(),
                                 Message = String.Format("Unable to construct step body {0}", step.BodyType.ToString())
                             });
                             continue;
@@ -93,7 +96,7 @@ namespace WorkflowCore.Services
                                 continue;
                             case ExecutionPipelineDirective.EndWorkflow:
                                 workflow.Status = WorkflowStatus.Complete;
-                                workflow.CompleteTime = DateTime.Now.ToUniversalTime();
+                                workflow.CompleteTime = _datetimeProvider.Now.ToUniversalTime();
                                 continue;
                         }
 
@@ -111,14 +114,14 @@ namespace WorkflowCore.Services
                         {
                             WorkflowId = workflow.Id,
                             ExecutionPointerId = pointer.Id,
-                            ErrorTime = DateTime.Now.ToUniversalTime(),
+                            ErrorTime = _datetimeProvider.Now.ToUniversalTime(),
                             Message = ex.Message
                         });
 
                         switch (step.ErrorBehavior ?? def.DefaultErrorBehavior)
                         {
                             case WorkflowErrorHandling.Retry:
-                                pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(step.RetryInterval ?? def.DefaultErrorRetryInterval ?? options.ErrorRetryInterval);
+                                pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(step.RetryInterval ?? def.DefaultErrorRetryInterval ?? options.ErrorRetryInterval);
                                 break;
                             case WorkflowErrorHandling.Suspend:
                                 workflow.Status = WorkflowStatus.Suspended;
@@ -128,18 +131,18 @@ namespace WorkflowCore.Services
                                 break;
                         }
 
-                        _host.ReportStepError(workflow, step, ex);
+                        Host.ReportStepError(workflow, step, ex);
                     }
                 }
                 else
                 {
                     _logger.LogError("Unable to find step {0} in workflow definition", pointer.StepId);
-                    pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(options.ErrorRetryInterval);
+                    pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(options.ErrorRetryInterval);
                     wfResult.Errors.Add(new ExecutionError()
                     {
                         WorkflowId = workflow.Id,
                         ExecutionPointerId = pointer.Id,
-                        ErrorTime = DateTime.Now.ToUniversalTime(),
+                        ErrorTime = _datetimeProvider.Now.ToUniversalTime(),
                         Message = String.Format("Unable to find step {0} in workflow definition", pointer.StepId)
                     });
                 }
@@ -157,7 +160,7 @@ namespace WorkflowCore.Services
             pointer.PersistenceData = result.PersistenceData;
             pointer.Outcome = result.OutcomeValue;
             if (result.SleepFor.HasValue)
-                pointer.SleepUntil = DateTime.Now.ToUniversalTime().Add(result.SleepFor.Value);
+                pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(result.SleepFor.Value);
 
             if (!string.IsNullOrEmpty(result.EventName))
             {
@@ -178,7 +181,7 @@ namespace WorkflowCore.Services
             if (result.Proceed)
             {
                 pointer.Active = false;
-                pointer.EndTime = DateTime.Now.ToUniversalTime();
+                pointer.EndTime = _datetimeProvider.Now.ToUniversalTime();
 
                 foreach (var outcomeTarget in step.Outcomes.Where(x => object.Equals(x.GetValue(workflow.Data), result.OutcomeValue) || x.GetValue(workflow.Data) == null))
                 {
@@ -301,7 +304,7 @@ namespace WorkflowCore.Services
             if ((workflow.NextExecution == null) && (workflow.ExecutionPointers.All(x => x.EndTime != null)))
             {
                 workflow.Status = WorkflowStatus.Complete;
-                workflow.CompleteTime = DateTime.Now.ToUniversalTime();
+                workflow.CompleteTime = _datetimeProvider.Now.ToUniversalTime();
             }
         }
 

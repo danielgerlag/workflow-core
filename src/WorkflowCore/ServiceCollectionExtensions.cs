@@ -23,13 +23,16 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IDistributedLockProvider>(options.LockFactory);
             services.AddSingleton<IWorkflowRegistry, WorkflowRegistry>();
             services.AddSingleton<WorkflowOptions>(options);
+
+            services.AddTransient<IBackgroundTask, WorkflowTask>();
+            services.AddTransient<IBackgroundTask, EventTask>();
+            services.AddTransient<IBackgroundTask, RunnablePoller>();
+
             services.AddSingleton<IWorkflowHost, WorkflowHost>();
             services.AddTransient<IWorkflowExecutor, WorkflowExecutor>();
             services.AddTransient<IWorkflowBuilder, WorkflowBuilder>();
-            services.AddTransient<IWorkflowThread, WorkflowThread>();
-            services.AddTransient<IEventThread, EventThread>();
-            services.AddTransient<IRunnablePoller, RunnablePoller>();
-            
+            services.AddTransient<IDateTimeProvider, DateTimeProvider>();
+
             services.AddTransient<Foreach>();
         }
     }
