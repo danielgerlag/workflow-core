@@ -100,7 +100,7 @@ namespace WorkflowCore.Services
                                 continue;
                         }
 
-                        var result = body.Run(context);
+                        var result = await body.RunAsync(context);
 
                         ProcessOutputs(workflow, step, body);
                         ProcessExecutionResult(workflow, def, pointer, step, result, wfResult);
