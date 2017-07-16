@@ -7,7 +7,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Sample03.Steps
 {
-    public class AddNumbers : StepBody
+    public class AddNumbers : StepBodyAsync
     {
         public int Input1 { get; set; }
 
@@ -16,7 +16,7 @@ namespace WorkflowCore.Sample03.Steps
         public int Output { get; set; }
 
 
-        public override ExecutionResult Run(IStepExecutionContext context)
+        public override async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
         {
             Output = (Input1 + Input2);
             return ExecutionResult.Next();

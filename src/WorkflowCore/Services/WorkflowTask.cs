@@ -16,7 +16,7 @@ namespace WorkflowCore.Services
         private readonly IWorkflowExecutor _executor;
         private readonly IQueueProvider _queueProvider;
         private readonly ILogger _logger;
-        private readonly Task _task;
+        private readonly IList<Task> _tasks;
         private readonly WorkflowOptions _options;
         private readonly IDateTimeProvider _datetimeProvider;
         private bool _shutdown = true;
@@ -29,7 +29,11 @@ namespace WorkflowCore.Services
             _options = options;
             _logger = loggerFactory.CreateLogger<WorkflowTask>();
             _lockProvider = lockProvider;
-            _task = new Task(RunWorkflows);
+
+            _tasks = new List<Task>();
+            for (int i = 0; i < Environment.ProcessorCount; i++)
+                _tasks.Add(new Task(RunWorkflows));
+
             _datetimeProvider = datetimeProvider;
             persistenceStore.EnsureStoreExists();
         }
@@ -37,13 +41,15 @@ namespace WorkflowCore.Services
         public void Start()
         {
             _shutdown = false;
-            _task.Start();
+            foreach (var task in _tasks)
+                task.Start();
         }
 
         public void Stop()
         {
             _shutdown = true;
-            _task.Wait();
+            foreach (var task in _tasks)
+                task.Wait();
         }
 
         /// <summary>
@@ -56,8 +62,9 @@ namespace WorkflowCore.Services
                 try
                 {
                     var workflowId = await _queueProvider.DequeueWork(QueueType.Workflow);
+                    
                     if (workflowId != null)
-                        Parallel.Invoke(() => ProcessWorkflow(workflowId));
+                        await ProcessWorkflow(workflowId);
                     else
                         await Task.Delay(_options.IdleTime);  //no work
                 }
@@ -68,7 +75,7 @@ namespace WorkflowCore.Services
             }
         }
 
-        private async void ProcessWorkflow(string workflowId)
+        private async Task ProcessWorkflow(string workflowId)
         {
             try
             {

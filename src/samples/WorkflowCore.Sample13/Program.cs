@@ -17,7 +17,7 @@ namespace WorkflowCore.Sample13
             host.Start();
 
             Console.WriteLine("Starting workflow...");
-            string workflowId = host.StartWorkflow("parallel-sample").Result;
+            host.StartWorkflow("parallel-sample");            
 
             Console.ReadLine();
             host.Stop();
