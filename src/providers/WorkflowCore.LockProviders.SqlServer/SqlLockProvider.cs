@@ -30,14 +30,14 @@ namespace WorkflowCore.LockProviders.SqlServer
         }
 
 
-        public async Task<bool> AcquireLock(string Id)
+        public async Task<bool> AcquireLock(string Id, CancellationToken cancellationToken)
         {
             if (_mutex.WaitOne())
             {
                 try
                 {
                     var connection = new SqlConnection(_connectionString);
-                    await connection.OpenAsync();
+                    await connection.OpenAsync(cancellationToken);
                     try
                     {
                         var cmd = connection.CreateCommand();
@@ -49,7 +49,7 @@ namespace WorkflowCore.LockProviders.SqlServer
                         cmd.Parameters.AddWithValue("@LockTimeout", 0);
                         var returnParameter = cmd.Parameters.Add("RetVal", SqlDbType.Int);
                         returnParameter.Direction = ParameterDirection.ReturnValue;
-                        await cmd.ExecuteNonQueryAsync();
+                        await cmd.ExecuteNonQueryAsync(cancellationToken);
                         var result = Convert.ToInt32(returnParameter.Value);
 
                         switch (result)

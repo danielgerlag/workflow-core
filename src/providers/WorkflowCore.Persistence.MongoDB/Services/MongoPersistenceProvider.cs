@@ -13,7 +13,6 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Persistence.MongoDB.Services
 {
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public class MongoPersistenceProvider : IPersistenceProvider
     {
 
@@ -91,37 +90,13 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             }
         }
 
-        private IMongoCollection<WorkflowInstance> WorkflowInstances
-        {
-            get
-            {
-                return _database.GetCollection<WorkflowInstance>("wfc.workflows");
-            }
-        }
+        private IMongoCollection<WorkflowInstance> WorkflowInstances => _database.GetCollection<WorkflowInstance>("wfc.workflows");
 
-        private IMongoCollection<EventSubscription> EventSubscriptions
-        {
-            get
-            {
-                return _database.GetCollection<EventSubscription>("wfc.subscriptions");
-            }
-        }
+        private IMongoCollection<EventSubscription> EventSubscriptions => _database.GetCollection<EventSubscription>("wfc.subscriptions");
 
-        private IMongoCollection<Event> Events
-        {
-            get
-            {
-                return _database.GetCollection<Event>("wfc.events");
-            }
-        }
+        private IMongoCollection<Event> Events => _database.GetCollection<Event>("wfc.events");
 
-        private IMongoCollection<ExecutionError> ExecutionErrors
-        {
-            get
-            {
-                return _database.GetCollection<ExecutionError>("wfc.execution_errors");
-            }
-        }
+        private IMongoCollection<ExecutionError> ExecutionErrors => _database.GetCollection<ExecutionError>("wfc.execution_errors");
 
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
         {
@@ -137,14 +112,17 @@ namespace WorkflowCore.Persistence.MongoDB.Services
         public async Task<IEnumerable<string>> GetRunnableInstances()
         {
             var now = DateTime.Now.ToUniversalTime().Ticks;
-            return WorkflowInstances.AsQueryable()
-                .Where(x => x.NextExecution.HasValue && (x.NextExecution <= now) && (x.Status == WorkflowStatus.Runnable))
-                .Select(x => x.Id).ToList();
+            var query = WorkflowInstances
+                .Find(x => x.NextExecution.HasValue && (x.NextExecution <= now) && (x.Status == WorkflowStatus.Runnable))
+                .Project(x => x.Id);
+
+            return await query.ToListAsync();
         }
 
         public async Task<WorkflowInstance> GetWorkflowInstance(string Id)
         {
-            return WorkflowInstances.AsQueryable().First(x => x.Id == Id);
+            var result = await WorkflowInstances.FindAsync(x => x.Id == Id);
+            return await result.FirstAsync();
         }
         
         public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take)
@@ -184,8 +162,10 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                 
         public async Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf)
         {
-            return EventSubscriptions.AsQueryable()
-                .Where(x => x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf).ToList();
+            var query = EventSubscriptions
+                .Find(x => x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf);
+
+            return await query.ToListAsync();
         }
 
         public async Task<string> CreateEvent(Event newEvent)
@@ -196,18 +176,18 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         public async Task<Event> GetEvent(string id)
         {
-            return Events.AsQueryable().First(x => x.Id == id);
+            var result = await Events.FindAsync(x => x.Id == id);
+            return await result.FirstAsync();
         }
 
         public async Task<IEnumerable<string>> GetRunnableEvents()
         {
             var now = DateTime.Now.ToUniversalTime();
+            var query = Events
+                .Find(x => !x.IsProcessed && x.EventTime <= now)
+                .Project(x => x.Id);
 
-            return Events.AsQueryable()
-                .Where(x => !x.IsProcessed)
-                .Where(x => x.EventTime <= now)
-                .Select(x => x.Id)
-                .ToList();
+            return await query.ToListAsync();
         }
 
         public async Task MarkEventProcessed(string id)
@@ -220,11 +200,11 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         public async Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf)
         {
-            return Events.AsQueryable()
-                .Where(x => x.EventName == eventName && x.EventKey == eventKey)
-                .Where(x => x.EventTime >= asOf)
-                .Select(x => x.Id)
-                .ToList();
+            var query = Events
+                .Find(x => x.EventName == eventName && x.EventKey == eventKey && x.EventTime >= asOf)
+                .Project(x => x.Id);
+            
+            return await query.ToListAsync();
         }
 
         public async Task MarkEventUnprocessed(string id)
@@ -237,9 +217,8 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         public async Task PersistErrors(IEnumerable<ExecutionError> errors)
         {
-            if (errors.Count() > 0)
+            if (errors.Any())
                 await ExecutionErrors.InsertManyAsync(errors);
         }
     }
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }

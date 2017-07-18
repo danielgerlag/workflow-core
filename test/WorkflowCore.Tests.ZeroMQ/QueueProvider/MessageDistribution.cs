@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.QueueProviders.ZeroMQ.Services;
@@ -35,9 +36,9 @@ namespace WorkflowCore.Tests.ZeroMQ.QueueProvider
 
         It should_be_dequeued_once_on_any_peer = () =>
         {
-            var result1 = Peer1.DequeueWork(QueueType.Workflow).Result;
-            var result2 = Peer2.DequeueWork(QueueType.Workflow).Result;
-            var result3 = Peer3.DequeueWork(QueueType.Workflow).Result;
+            var result1 = Peer1.DequeueWork(QueueType.Workflow, new CancellationToken()).Result;
+            var result2 = Peer2.DequeueWork(QueueType.Workflow, new CancellationToken()).Result;
+            var result3 = Peer3.DequeueWork(QueueType.Workflow, new CancellationToken()).Result;
             var oneResult = (result1 == "Task 1") ^ (result2 == "Task 1") ^ (result3 == "Task 1");
             oneResult.ShouldBeTrue();
         };

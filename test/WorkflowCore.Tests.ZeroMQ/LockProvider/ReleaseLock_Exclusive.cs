@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.LockProviders.ZeroMQ.Services;
@@ -24,12 +25,12 @@ namespace WorkflowCore.Tests.ZeroMQ.LockProvider
             Peer2.Start();
             Peer3.Start();
             System.Threading.Thread.Sleep(1000);
-            Peer1.AcquireLock("lock1").Wait();
+            Peer1.AcquireLock("lock1", new CancellationToken()).Wait();
         };
 
         Because of = () => Peer2.ReleaseLock("lock1").Wait();
 
-        It should_not_be_lockable_on_peer2 = () => Peer2.AcquireLock("lock1").Result.ShouldBeFalse();
+        It should_not_be_lockable_on_peer2 = () => Peer2.AcquireLock("lock1", new CancellationToken()).Result.ShouldBeFalse();
 
         Cleanup after = () =>
         {

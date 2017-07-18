@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Models;
 
@@ -25,7 +26,9 @@ namespace WorkflowCore.Interface
         /// If the queue is empty, NULL is returned
         /// </summary>
         /// <returns></returns>
-        Task<string> DequeueWork(QueueType queue);                
+        Task<string> DequeueWork(QueueType queue, CancellationToken cancellationToken);
+
+        bool IsDequeueBlocking { get; }
 
         Task Start();
         Task Stop();

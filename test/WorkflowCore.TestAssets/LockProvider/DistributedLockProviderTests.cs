@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using WorkflowCore.Interface;
 using NUnit;
 using FluentAssertions;
@@ -26,9 +27,9 @@ namespace WorkflowCore.TestAssets.LockProvider
         {
             const string lock1 = "lock1";
             const string lock2 = "lock2";
-            await Subject.AcquireLock(lock2);
+            await Subject.AcquireLock(lock2, new CancellationToken());
 
-            var acquired = await Subject.AcquireLock(lock1);
+            var acquired = await Subject.AcquireLock(lock1, new CancellationToken());
 
             acquired.Should().Be(true);
         }
@@ -37,9 +38,9 @@ namespace WorkflowCore.TestAssets.LockProvider
         public async void DoesNotAcquireWhenLocked()
         {
             const string lock1 = "lock1";
-            await Subject.AcquireLock(lock1);
+            await Subject.AcquireLock(lock1, new CancellationToken());
 
-            var acquired = await Subject.AcquireLock(lock1);
+            var acquired = await Subject.AcquireLock(lock1, new CancellationToken());
 
             acquired.Should().Be(false);
         }
@@ -48,11 +49,11 @@ namespace WorkflowCore.TestAssets.LockProvider
         public async void ReleasesLock()
         {
             const string lock1 = "lock1";
-            await Subject.AcquireLock(lock1);
+            await Subject.AcquireLock(lock1, new CancellationToken());
 
             await Subject.ReleaseLock(lock1);
 
-            var available = await Subject.AcquireLock(lock1);
+            var available = await Subject.AcquireLock(lock1, new CancellationToken());
             available.Should().Be(true);
         }
 

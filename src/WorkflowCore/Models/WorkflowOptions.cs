@@ -20,7 +20,7 @@ namespace WorkflowCore.Models
         {
             //set defaults
             PollInterval = TimeSpan.FromSeconds(10);
-            IdleTime = TimeSpan.FromMilliseconds(500);
+            IdleTime = TimeSpan.FromMilliseconds(100);
             ErrorRetryInterval = TimeSpan.FromSeconds(60);            
 
             QueueFactory = new Func<IServiceProvider, IQueueProvider>(sp => new SingleNodeQueueProvider());

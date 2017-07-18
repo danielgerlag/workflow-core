@@ -49,7 +49,7 @@ namespace WorkflowCore.Services
         {
             try
             {
-                if (await _lockProvider.AcquireLock("poll runnables"))
+                if (await _lockProvider.AcquireLock("poll runnables", new CancellationToken()))
                 {
                     try
                     {
@@ -74,7 +74,7 @@ namespace WorkflowCore.Services
 
             try
             {
-                if (await _lockProvider.AcquireLock("unprocessed events"))
+                if (await _lockProvider.AcquireLock("unprocessed events", new CancellationToken()))
                 {
                     try
                     {

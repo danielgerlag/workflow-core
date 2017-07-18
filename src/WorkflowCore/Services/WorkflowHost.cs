@@ -156,7 +156,7 @@ namespace WorkflowCore.Services
 
         public async Task<bool> SuspendWorkflow(string workflowId)
         {
-            if (await LockProvider.AcquireLock(workflowId))
+            if (await LockProvider.AcquireLock(workflowId, new CancellationToken()))
             {
                 try
                 {
@@ -179,7 +179,7 @@ namespace WorkflowCore.Services
 
         public async Task<bool> ResumeWorkflow(string workflowId)
         {
-            if (await LockProvider.AcquireLock(workflowId))
+            if (await LockProvider.AcquireLock(workflowId, new CancellationToken()))
             {
                 bool requeue = false;
                 try
@@ -206,7 +206,7 @@ namespace WorkflowCore.Services
 
         public async Task<bool> TerminateWorkflow(string workflowId)
         {
-            if (await LockProvider.AcquireLock(workflowId))
+            if (await LockProvider.AcquireLock(workflowId, new CancellationToken()))
             {
                 try
                 {

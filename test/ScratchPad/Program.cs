@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.LockProviders.ZeroMQ.Services;
@@ -30,9 +31,9 @@ namespace ScratchPad
             Peer1.QueueWork("Task 3", QueueType.Workflow).Wait();
             System.Threading.Thread.Sleep(100);
 
-            var value1 = Peer1.DequeueWork(QueueType.Workflow).Result;
-            var value2 = Peer2.DequeueWork(QueueType.Workflow).Result;
-            var value3 = Peer3.DequeueWork(QueueType.Workflow).Result;
+            var value1 = Peer1.DequeueWork(QueueType.Workflow, new CancellationToken()).Result;
+            var value2 = Peer2.DequeueWork(QueueType.Workflow, new CancellationToken()).Result;
+            var value3 = Peer3.DequeueWork(QueueType.Workflow, new CancellationToken()).Result;
             
             Console.ReadLine();
         }

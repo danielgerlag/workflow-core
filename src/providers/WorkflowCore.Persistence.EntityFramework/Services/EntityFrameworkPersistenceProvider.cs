@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Persistence.EntityFramework.Models;
@@ -10,13 +11,13 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace WorkflowCore.Persistence.EntityFramework.Services
 {
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public abstract class EntityFrameworkPersistenceProvider : DbContext, IPersistenceProvider
     {
         protected readonly bool _canCreateDB;
         protected readonly bool _canMigrateDB;
+        private readonly AutoResetEvent _mutex = new AutoResetEvent(true);
 
-        public EntityFrameworkPersistenceProvider(bool canCreateDB, bool canMigrateDB)
+        protected EntityFrameworkPersistenceProvider(bool canCreateDB, bool canMigrateDB)
         {
             _canCreateDB = canCreateDB;
             _canMigrateDB = canMigrateDB;            
@@ -68,56 +69,67 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
 
         public async Task<string> CreateEventSubscription(EventSubscription subscription)
         {
-            lock (this)
+            _mutex.WaitOne();
+            try
             {
                 subscription.Id = Guid.NewGuid().ToString();
                 var persistable = subscription.ToPersistable();
                 var result = Set<PersistedSubscription>().Add(persistable);
-                SaveChanges();
+                await SaveChangesAsync();
                 Entry(persistable).State = EntityState.Detached;
                 return subscription.Id;
+            }
+            finally
+            {
+                _mutex.Set();
             }
         }
 
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
         {
-            lock (this)
+            _mutex.WaitOne();
+            try
             {
                 workflow.Id = Guid.NewGuid().ToString();
                 var persistable = workflow.ToPersistable();
                 var result = Set<PersistedWorkflow>().Add(persistable);
-                SaveChanges();
+                await SaveChangesAsync();
                 Entry(persistable).State = EntityState.Detached;
                 return workflow.Id;
+            }
+            finally
+            {
+                _mutex.Set();
             }
         }
 
         public async Task<IEnumerable<string>> GetRunnableInstances()
         {
-            lock (this)
+            _mutex.WaitOne();
+            try
             {
                 var now = DateTime.Now.ToUniversalTime().Ticks;
-                var raw = Set<PersistedWorkflow>()
+                var raw = await Set<PersistedWorkflow>()
                     .Where(x => x.NextExecution.HasValue && (x.NextExecution <= now) && (x.Status == WorkflowStatus.Runnable))
                     .Select(x => x.InstanceId)
-                    .ToList();
+                    .ToListAsync();
 
-                List<string> result = new List<string>();
-
-                foreach (var s in raw)
-                    result.Add(s.ToString());
-
-                return result;
+                return raw.Select(s => s.ToString()).ToList();
+            }
+            finally
+            {
+                _mutex.Set();
             }
         }
 
         public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take)
         {
-            lock (this)
+            _mutex.WaitOne();
+            try
             {
                 IQueryable<PersistedWorkflow> query = Set<PersistedWorkflow>()
                     .Include(wf => wf.ExecutionPointers)
-                        .ThenInclude(ep => ep.ExtensionAttributes)
+                    .ThenInclude(ep => ep.ExtensionAttributes)
                     .Include(wf => wf.ExecutionPointers)
                     .AsQueryable();
 
@@ -133,7 +145,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 if (createdTo.HasValue)
                     query = query.Where(x => x.CreateTime <= createdTo.Value);
 
-                var rawResult = query.Skip(skip).Take(take).ToList();
+                var rawResult = await query.Skip(skip).Take(take).ToListAsync();
                 List<WorkflowInstance> result = new List<WorkflowInstance>();
 
                 foreach (var item in rawResult)
@@ -141,41 +153,51 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
 
                 return result;
             }
+            finally
+            {
+                _mutex.Set();
+            }
         }
         
         public async Task<WorkflowInstance> GetWorkflowInstance(string Id)
         {
-            lock (this)
+            _mutex.WaitOne();
+            try
             {
-                Guid uid = new Guid(Id);
-                var raw = Set<PersistedWorkflow>()
+                var uid = new Guid(Id);
+                var raw = await Set<PersistedWorkflow>()
                     .Include(wf => wf.ExecutionPointers)
-                        .ThenInclude(ep => ep.ExtensionAttributes)
+                    .ThenInclude(ep => ep.ExtensionAttributes)
                     .Include(wf => wf.ExecutionPointers)
-                    .First(x => x.InstanceId == uid);
+                    .FirstAsync(x => x.InstanceId == uid);
 
                 if (raw == null)
                     return null;
 
                 return raw.ToWorkflowInstance();
             }
+            finally
+            {
+                _mutex.Set();
+            }
         }
 
         public async Task PersistWorkflow(WorkflowInstance workflow)
         {
-            lock (this)
+            _mutex.WaitOne();
+            try
             {
-                Guid uid = new Guid(workflow.Id);
-                var existingEntity = Set<PersistedWorkflow>()
+                var uid = new Guid(workflow.Id);
+                var existingEntity = await Set<PersistedWorkflow>()
                     .Where(x => x.InstanceId == uid)
                     .Include(wf => wf.ExecutionPointers)
-                        .ThenInclude(ep => ep.ExtensionAttributes)
+                    .ThenInclude(ep => ep.ExtensionAttributes)
                     .Include(wf => wf.ExecutionPointers)
                     .AsTracking()
-                    .First();
+                    .FirstAsync();
 
                 var persistable = workflow.ToPersistable(existingEntity);
-                SaveChanges();
+                await SaveChangesAsync();
                 Entry(persistable).State = EntityState.Detached;
                 foreach (var ep in persistable.ExecutionPointers)
                 {
@@ -183,19 +205,28 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
 
                     foreach (var attr in ep.ExtensionAttributes)
                         Entry(attr).State = EntityState.Detached;
-                    
+
                 }
+            }
+            finally
+            {
+                _mutex.Set();
             }
         }
 
         public async Task TerminateSubscription(string eventSubscriptionId)
         {
-            lock (this)
+            _mutex.WaitOne();
+            try
             {
-                Guid uid = new Guid(eventSubscriptionId);
-                var existing = Set<PersistedSubscription>().First(x => x.SubscriptionId == uid);
+                var uid = new Guid(eventSubscriptionId);
+                var existing = await Set<PersistedSubscription>().FirstAsync(x => x.SubscriptionId == uid);
                 Set<PersistedSubscription>().Remove(existing);
-                SaveChanges();
+                await SaveChangesAsync();
+            }
+            finally
+            {
+                _mutex.Set();
             }
         }
                 
@@ -216,132 +247,165 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
 
         public async Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf)
         {
-            lock (this)
+            _mutex.WaitOne();
+            try
             {
-                var raw = Set<PersistedSubscription>().Where(x => x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf).ToList();
+                var raw = await Set<PersistedSubscription>()
+                    .Where(x => x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf)
+                    .ToListAsync();
 
-                List<EventSubscription> result = new List<EventSubscription>();
-                foreach (var item in raw)
-                    result.Add(item.ToEventSubscription());
-
-                return result;
+                return raw.Select(item => item.ToEventSubscription()).ToList();
+            }
+            finally
+            {
+                _mutex.Set();
             }
         }
 
         public async Task<string> CreateEvent(Event newEvent)
         {
-            lock (this)
+            _mutex.WaitOne();
+            try
             {
                 newEvent.Id = Guid.NewGuid().ToString();
                 var persistable = newEvent.ToPersistable();
                 var result = Set<PersistedEvent>().Add(persistable);
-                SaveChanges();
+                await SaveChangesAsync();
                 Entry(persistable).State = EntityState.Detached;
                 return newEvent.Id;
+            }
+            finally
+            {
+                _mutex.Set();
             }
         }
 
         public async Task<Event> GetEvent(string id)
         {
-            lock (this)
+            _mutex.WaitOne();
+            try
             {
                 Guid uid = new Guid(id);
-                var raw = Set<PersistedEvent>()                    
-                    .First(x => x.EventId == uid);
+                var raw = await Set<PersistedEvent>()
+                    .FirstAsync(x => x.EventId == uid);
 
                 if (raw == null)
                     return null;
 
                 return raw.ToEvent();
             }
+            finally
+            {
+                _mutex.Set();
+            }
         }
 
         public async Task<IEnumerable<string>> GetRunnableEvents()
         {
             var now = DateTime.Now.ToUniversalTime();
-
-            lock (this)
+            _mutex.WaitOne();
+            try
             {
-                var raw = Set<PersistedEvent>()
+                var raw = await Set<PersistedEvent>()
                     .Where(x => !x.IsProcessed)
                     .Where(x => x.EventTime <= now)
                     .Select(x => x.EventId)
-                    .ToList();
+                    .ToListAsync();
 
-                List<string> result = new List<string>();
-
-                foreach (var s in raw)
-                    result.Add(s.ToString());
-
-                return result;
+                return raw.Select(s => s.ToString()).ToList();
+            }
+            finally
+            {
+                _mutex.Set();
             }
         }
 
         public async Task MarkEventProcessed(string id)
         {
-            lock (this)
+            _mutex.WaitOne();
+            try
             {
-                Guid uid = new Guid(id);
-                var existingEntity = Set<PersistedEvent>()
+                var uid = new Guid(id);
+                var existingEntity = await Set<PersistedEvent>()
                     .Where(x => x.EventId == uid)
                     .AsTracking()
-                    .First();
+                    .FirstAsync();
 
                 existingEntity.IsProcessed = true;
-                SaveChanges();
-                Entry(existingEntity).State = EntityState.Detached;                
+                await SaveChangesAsync();
+                Entry(existingEntity).State = EntityState.Detached;
+            }
+            finally
+            {
+                _mutex.Set();
             }
         }
 
         public async Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf)
         {
-            lock (this)
+            _mutex.WaitOne();
+            try
             {
-                var raw = Set<PersistedEvent>()
+                var raw = await Set<PersistedEvent>()
                     .Where(x => x.EventName == eventName && x.EventKey == eventKey)
                     .Where(x => x.EventTime >= asOf)
                     .Select(x => x.EventId)
-                    .ToList();
+                    .ToListAsync();
 
-                List<string> result = new List<string>();
+                var result = new List<string>();
 
                 foreach (var s in raw)
                     result.Add(s.ToString());
 
                 return result;
             }
+            finally
+            {
+                _mutex.Set();
+            }
         }
 
         public async Task MarkEventUnprocessed(string id)
         {
-            lock (this)
+            _mutex.WaitOne();
+            try
             {
-                Guid uid = new Guid(id);
-                var existingEntity = Set<PersistedEvent>()
+                var uid = new Guid(id);
+                var existingEntity = await Set<PersistedEvent>()
                     .Where(x => x.EventId == uid)
                     .AsTracking()
-                    .First();
+                    .FirstAsync();
 
                 existingEntity.IsProcessed = false;
-                SaveChanges();
+                await SaveChangesAsync();
                 Entry(existingEntity).State = EntityState.Detached;
+            }
+            finally
+            {
+                _mutex.Set();
             }
         }
 
         public async Task PersistErrors(IEnumerable<ExecutionError> errors)
         {
-            if (errors.Count() > 0)
+            _mutex.WaitOne();
+            try
             {
-                lock (this)
+                var executionErrors = errors as ExecutionError[] ?? errors.ToArray();
+                if (executionErrors.Any())
                 {
-                    foreach (var error in errors)
+                    foreach (var error in executionErrors)
                     {
                         Set<PersistedExecutionError>().Add(error.ToPersistable());
                     }
-                    SaveChanges();
+                    await SaveChangesAsync();
+
                 }
+            }
+            finally
+            {
+                _mutex.Set();
             }
         }
     }
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }
