@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
@@ -17,8 +17,7 @@ namespace WorkflowCore.Services
         protected readonly IQueueProvider QueueProvider;
         protected readonly ILogger Logger;
         protected readonly WorkflowOptions Options;
-        protected Task DispatchTask;
-        private SemaphoreSlim _semaphore;
+        protected Task DispatchTask;        
         private CancellationTokenSource _cancellationTokenSource;
 
         protected QueueTaskDispatcher(IQueueProvider queueProvider, ILoggerFactory loggerFactory, WorkflowOptions options)
@@ -36,7 +35,7 @@ namespace WorkflowCore.Services
                 throw new InvalidOperationException();
 
             _cancellationTokenSource = new CancellationTokenSource();
-            _semaphore = new SemaphoreSlim(MaxConcurrentItems);
+                        
             DispatchTask = new Task(Execute);
             DispatchTask.Start();
         }
@@ -45,41 +44,38 @@ namespace WorkflowCore.Services
         {
             _cancellationTokenSource.Cancel();
             DispatchTask.Wait();
-
-            for (var i = 0; i < MaxConcurrentItems; i++)
-                _semaphore.Wait();
-
             DispatchTask = null;
         }
 
         private async void Execute()
         {
             var cancelToken = _cancellationTokenSource.Token;
+            var opts = new ExecutionDataflowBlockOptions()
+            {
+                MaxDegreeOfParallelism = MaxConcurrentItems,
+                BoundedCapacity = MaxConcurrentItems + 1
+            };
+
+            var actionBlock = new ActionBlock<string>(ExecuteItem, opts);
+
             while (!cancelToken.IsCancellationRequested)
             {
                 try
                 {
-                    await _semaphore.WaitAsync(cancelToken);
-                    string item;
-                    try
+                    if (SpinWait.SpinUntil(() => actionBlock.InputCount == 0, Options.IdleTime))
                     {
-                        item = await QueueProvider.DequeueWork(Queue, cancelToken);
-                    }
-                    catch
-                    {
-                        _semaphore.Release();
-                        throw;
-                    }
+                        var item = await QueueProvider.DequeueWork(Queue, cancelToken);
 
-                    if (item == null)
-                    {
-                        _semaphore.Release();
-                        if (!QueueProvider.IsDequeueBlocking)
-                            await Task.Delay(Options.IdleTime, cancelToken);
-                        continue;
-                    }
+                        if (item == null)
+                        {
+                            if (!QueueProvider.IsDequeueBlocking)
+                                await Task.Delay(Options.IdleTime, cancelToken);
+                            continue;
+                        }
 
-                    new Task(() => ExecuteItem(item, cancelToken)).Start();
+                        if (!actionBlock.Post(item))
+                            await QueueProvider.QueueWork(item, Queue);
+                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -89,13 +85,15 @@ namespace WorkflowCore.Services
                     Logger.LogError(ex.Message);
                 }
             }
+            actionBlock.Complete();
+            await actionBlock.Completion;
         }
 
-        private async void ExecuteItem(string itemId, CancellationToken cancellationToken)
+        private async Task ExecuteItem(string itemId)
         {
             try
             {
-                await ProcessItem(itemId, cancellationToken);
+                await ProcessItem(itemId, _cancellationTokenSource.Token);
             }
             catch (OperationCanceledException)
             {
@@ -104,10 +102,6 @@ namespace WorkflowCore.Services
             catch (Exception ex)
             {
                 Logger.LogError($"Error executing item {itemId} - {ex.Message}");
-            }
-            finally
-            {
-                _semaphore.Release();
             }
         }
     }
