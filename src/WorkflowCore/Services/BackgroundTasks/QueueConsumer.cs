@@ -1,15 +1,14 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
-namespace WorkflowCore.Services
+namespace WorkflowCore.Services.BackgroundTasks
 {
-    public abstract class QueueTaskDispatcher : IBackgroundTask
+    internal abstract class QueueConsumer : IBackgroundTask
     {
         protected abstract QueueType Queue { get; }
         protected virtual int MaxConcurrentItems => Math.Max(Environment.ProcessorCount, 2);
@@ -20,7 +19,7 @@ namespace WorkflowCore.Services
         protected Task DispatchTask;        
         private CancellationTokenSource _cancellationTokenSource;
 
-        protected QueueTaskDispatcher(IQueueProvider queueProvider, ILoggerFactory loggerFactory, WorkflowOptions options)
+        protected QueueConsumer(IQueueProvider queueProvider, ILoggerFactory loggerFactory, WorkflowOptions options)
         {
             QueueProvider = queueProvider;
             Options = options;
@@ -62,20 +61,20 @@ namespace WorkflowCore.Services
             {
                 try
                 {
-                    if (SpinWait.SpinUntil(() => actionBlock.InputCount == 0, Options.IdleTime))
+                    if (!SpinWait.SpinUntil(() => actionBlock.InputCount == 0, Options.IdleTime))
+                        continue;
+
+                    var item = await QueueProvider.DequeueWork(Queue, cancelToken);
+
+                    if (item == null)
                     {
-                        var item = await QueueProvider.DequeueWork(Queue, cancelToken);
-
-                        if (item == null)
-                        {
-                            if (!QueueProvider.IsDequeueBlocking)
-                                await Task.Delay(Options.IdleTime, cancelToken);
-                            continue;
-                        }
-
-                        if (!actionBlock.Post(item))
-                            await QueueProvider.QueueWork(item, Queue);
+                        if (!QueueProvider.IsDequeueBlocking)
+                            await Task.Delay(Options.IdleTime, cancelToken);
+                        continue;
                     }
+
+                    if (!actionBlock.Post(item))
+                        await QueueProvider.QueueWork(item, Queue);
                 }
                 catch (OperationCanceledException)
                 {

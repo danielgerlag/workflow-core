@@ -94,6 +94,7 @@ namespace WorkflowCore.Services
         public void Start()
         {            
             _shutdown = false;
+            PersistenceStore.EnsureStoreExists();
             QueueProvider.Start().Wait();
             LockProvider.Start().Wait();
 

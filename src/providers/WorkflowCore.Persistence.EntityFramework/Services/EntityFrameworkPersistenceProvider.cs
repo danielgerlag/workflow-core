@@ -103,12 +103,12 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             }
         }
 
-        public async Task<IEnumerable<string>> GetRunnableInstances()
+        public async Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt)
         {
             _mutex.WaitOne();
             try
             {
-                var now = DateTime.Now.ToUniversalTime().Ticks;
+                var now = asAt.ToUniversalTime().Ticks;
                 var raw = await Set<PersistedWorkflow>()
                     .Where(x => x.NextExecution.HasValue && (x.NextExecution <= now) && (x.Status == WorkflowStatus.Runnable))
                     .Select(x => x.InstanceId)
@@ -300,9 +300,9 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             }
         }
 
-        public async Task<IEnumerable<string>> GetRunnableEvents()
+        public async Task<IEnumerable<string>> GetRunnableEvents(DateTime asAt)
         {
-            var now = DateTime.Now.ToUniversalTime();
+            var now = asAt.ToUniversalTime();
             _mutex.WaitOne();
             try
             {

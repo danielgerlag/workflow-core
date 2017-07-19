@@ -1,16 +1,14 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
-namespace WorkflowCore.Services
+namespace WorkflowCore.Services.BackgroundTasks
 {
-    class EventTaskDispatcher : QueueTaskDispatcher, IBackgroundTask
+    internal class EventConsumer : QueueConsumer, IBackgroundTask
     {
         private readonly IPersistenceProvider _persistenceStore;
         private readonly IDistributedLockProvider _lockProvider;
@@ -18,7 +16,7 @@ namespace WorkflowCore.Services
 
         protected override QueueType Queue => QueueType.Event;
 
-        public EventTaskDispatcher(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, WorkflowOptions options, IDateTimeProvider datetimeProvider)
+        public EventConsumer(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, WorkflowOptions options, IDateTimeProvider datetimeProvider)
             : base(queueProvider, loggerFactory, options)
         {
             _persistenceStore = persistenceStore;

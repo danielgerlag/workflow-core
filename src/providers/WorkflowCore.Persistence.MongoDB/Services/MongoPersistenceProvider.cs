@@ -109,9 +109,9 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             await WorkflowInstances.ReplaceOneAsync(x => x.Id == workflow.Id, workflow);
         }
 
-        public async Task<IEnumerable<string>> GetRunnableInstances()
+        public async Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt)
         {
-            var now = DateTime.Now.ToUniversalTime().Ticks;
+            var now = asAt.ToUniversalTime().Ticks;
             var query = WorkflowInstances
                 .Find(x => x.NextExecution.HasValue && (x.NextExecution <= now) && (x.Status == WorkflowStatus.Runnable))
                 .Project(x => x.Id);
@@ -180,9 +180,9 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             return await result.FirstAsync();
         }
 
-        public async Task<IEnumerable<string>> GetRunnableEvents()
+        public async Task<IEnumerable<string>> GetRunnableEvents(DateTime asAt)
         {
-            var now = DateTime.Now.ToUniversalTime();
+            var now = asAt.ToUniversalTime();
             var query = Events
                 .Find(x => !x.IsProcessed && x.EventTime <= now)
                 .Project(x => x.Id);

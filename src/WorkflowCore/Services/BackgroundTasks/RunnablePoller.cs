@@ -1,15 +1,13 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
-namespace WorkflowCore.Services
+namespace WorkflowCore.Services.BackgroundTasks
 {
-    class RunnablePoller : IBackgroundTask
+    internal class RunnablePoller : IBackgroundTask
     {
         private readonly IPersistenceProvider _persistenceStore;
         private readonly IDistributedLockProvider _lockProvider;
@@ -54,7 +52,7 @@ namespace WorkflowCore.Services
                     try
                     {
                         _logger.LogInformation("Polling for runnable workflows");                        
-                        var runnables = await _persistenceStore.GetRunnableInstances();
+                        var runnables = await _persistenceStore.GetRunnableInstances(DateTime.Now);
                         foreach (var item in runnables)
                         {
                             _logger.LogDebug("Got runnable instance {0}", item);
@@ -79,7 +77,7 @@ namespace WorkflowCore.Services
                     try
                     {
                         _logger.LogInformation("Polling for unprocessed events");                        
-                        var events = await _persistenceStore.GetRunnableEvents();
+                        var events = await _persistenceStore.GetRunnableEvents(DateTime.Now);
                         foreach (var item in events.ToList())
                         {
                             _logger.LogDebug($"Got unprocessed event {item}");
