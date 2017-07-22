@@ -18,10 +18,6 @@ namespace WorkflowCore.Sample03.Steps
 
         public override async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
         {
-            if (Input1 == 2)
-                await Task.Delay(2000);
-                //System.Threading.Thread.Sleep(2000);
-
             Output = (Input1 + Input2);
             return ExecutionResult.Next();
         }

@@ -28,7 +28,6 @@ namespace WorkflowCore.Sample03
             };
 
             host.StartWorkflow("PassingDataWorkflow", 1, initialData);
-            host.StartWorkflow("PassingDataWorkflow", 1, new MyDataClass() { Value1 = 3, Value2 = 4 });
 
             Console.ReadLine();
             host.Stop();

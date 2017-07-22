@@ -14,7 +14,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder
-                .HasAnnotation("ProductVersion", "1.1.1")
+                .HasAnnotation("ProductVersion", "1.1.2")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedEvent", b =>
@@ -219,6 +219,9 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                         .HasMaxLength(200);
 
                     b.Property<long?>("NextExecution");
+
+                    b.Property<string>("Reference")
+                        .HasMaxLength(200);
 
                     b.Property<int>("Status");
 

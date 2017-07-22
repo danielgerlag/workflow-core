@@ -9,9 +9,10 @@ using WorkflowCore.Models;
 namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 {
     [DbContext(typeof(PostgresPersistenceProvider))]
-    partial class PostgresPersistenceProviderModelSnapshot : ModelSnapshot
+    [Migration("20170722200412_WfReference")]
+    partial class WfReference
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)

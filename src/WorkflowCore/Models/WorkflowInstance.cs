@@ -16,6 +16,8 @@ namespace WorkflowCore.Models
 
         public string Description { get; set; }
 
+        public string Reference { get; set; }
+
         public List<ExecutionPointer> ExecutionPointers { get; set; } = new List<ExecutionPointer>();
 
         public long? NextExecution { get; set; }

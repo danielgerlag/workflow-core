@@ -37,6 +37,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                 x.MapProperty(y => y.Data)
                     .SetSerializer(new DataObjectSerializer());
                 x.MapProperty(y => y.Description);
+                x.MapProperty(y => y.Reference);
                 x.MapProperty(y => y.WorkflowDefinitionId);
                 x.MapProperty(y => y.Version);
                 x.MapProperty(y => y.NextExecution);
