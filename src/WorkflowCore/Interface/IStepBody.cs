@@ -8,6 +8,6 @@ namespace WorkflowCore.Interface
 {
     public interface IStepBody
     {        
-        ExecutionResult Run(IStepExecutionContext context);
+        Task<ExecutionResult> RunAsync(IStepExecutionContext context);
     }
 }

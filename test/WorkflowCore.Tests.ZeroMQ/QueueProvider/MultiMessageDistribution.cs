@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.QueueProviders.ZeroMQ.Services;
@@ -39,9 +40,9 @@ namespace WorkflowCore.Tests.ZeroMQ.QueueProvider
         {            
             string[] results = new string[] 
             {
-                Peer1.DequeueWork(QueueType.Workflow).Result,
-                Peer2.DequeueWork(QueueType.Workflow).Result,
-                Peer3.DequeueWork(QueueType.Workflow).Result
+                Peer1.DequeueWork(QueueType.Workflow, new CancellationToken()).Result,
+                Peer2.DequeueWork(QueueType.Workflow, new CancellationToken()).Result,
+                Peer3.DequeueWork(QueueType.Workflow, new CancellationToken()).Result
             };
 
             results.ShouldContain("Task 1");

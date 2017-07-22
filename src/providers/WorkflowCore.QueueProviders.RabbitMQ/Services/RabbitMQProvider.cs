@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -17,6 +18,8 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
         private readonly IConnectionFactory _connectionFactory;
         private IConnection _connection = null;
         private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
+
+        public bool IsDequeueBlocking => false;
 
         public RabbitMQProvider(IConnectionFactory connectionFactory)
         {
@@ -36,7 +39,7 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
             }
         }
 
-        public async Task<string> DequeueWork(QueueType queue)
+        public async Task<string> DequeueWork(QueueType queue, CancellationToken cancellationToken)
         {
             if (_connection == null)
                 throw new Exception("RabbitMQ provider not running");

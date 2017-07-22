@@ -17,7 +17,7 @@ namespace WorkflowCore.Services
     {   
         private List<string> _locks = new List<string>();
      
-        public async Task<bool> AcquireLock(string Id)
+        public async Task<bool> AcquireLock(string Id, CancellationToken cancellationToken)
         {
             lock (_locks)
             {

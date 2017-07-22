@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage;
@@ -14,6 +15,8 @@ namespace WorkflowCore.Providers.Azure.Services
         private readonly ILogger _logger;
         private readonly CloudQueue _workflowQueue;
         private readonly CloudQueue _eventQueue;
+
+        public bool IsDequeueBlocking => false;
 
         public AzureStorageQueueProvider(string connectionString, ILoggerFactory logFactory)
         {
@@ -40,7 +43,7 @@ namespace WorkflowCore.Providers.Azure.Services
             }
         }
 
-        public async Task<string> DequeueWork(QueueType queue)
+        public async Task<string> DequeueWork(QueueType queue, CancellationToken cancellationToken)
         {
             CloudQueue cloudQueue = null;
             switch (queue)
@@ -55,7 +58,7 @@ namespace WorkflowCore.Providers.Azure.Services
 
             if (cloudQueue == null)
                 return null;
-
+            
             var msg = await cloudQueue.GetMessageAsync();
 
             if (msg == null)

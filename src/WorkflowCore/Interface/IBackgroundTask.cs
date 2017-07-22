@@ -1,7 +1,7 @@
 ﻿
 namespace WorkflowCore.Interface
 {
-    public interface IBackgroundWorker
+    public interface IBackgroundTask
     {
         void Start();
         void Stop();

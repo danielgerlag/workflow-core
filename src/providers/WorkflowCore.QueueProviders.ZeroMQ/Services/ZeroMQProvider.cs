@@ -27,7 +27,8 @@ namespace WorkflowCore.QueueProviders.ZeroMQ.Services
         private List<string> _peerConnectionStrings;
         private string _localConnectionString;
         private bool _active = false;
-        
+
+        public bool IsDequeueBlocking => false;
         public ZeroMQProvider(int port, IEnumerable<string> peers, bool canTakeWork, ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<ZeroMQProvider>();
@@ -55,7 +56,7 @@ namespace WorkflowCore.QueueProviders.ZeroMQ.Services
             }
         }
 
-        public async Task<string> DequeueWork(QueueType queue)
+        public async Task<string> DequeueWork(QueueType queue, CancellationToken cancellationToken)
         {
             if (SelectQueue(queue).TryDequeue(out string id))
                 return id;

@@ -16,22 +16,24 @@ namespace WorkflowCore.Services
     public class SingleNodeQueueProvider : IQueueProvider
     {
                 
-        private ConcurrentQueue<string> _runQueue = new ConcurrentQueue<string>();
-        private ConcurrentQueue<string> _eventQueue = new ConcurrentQueue<string>();        
+        private readonly BlockingCollection<string> _runQueue = new BlockingCollection<string>();
+        private readonly BlockingCollection<string> _eventQueue = new BlockingCollection<string>();
+
+        public bool IsDequeueBlocking => true;
 
         public async Task QueueWork(string id, QueueType queue)
         {
-            SelectQueue(queue).Enqueue(id);
+            SelectQueue(queue).Add(id);
         }
 
-        public async Task<string> DequeueWork(QueueType queue)
+        public async Task<string> DequeueWork(QueueType queue, CancellationToken cancellationToken)
         {
-            if (SelectQueue(queue).TryDequeue(out string id))
+            if (SelectQueue(queue).TryTake(out string id, 100, cancellationToken))
                 return id;
 
             return null;
         }
-        
+
         public async Task Start()
         {
         }
@@ -44,7 +46,7 @@ namespace WorkflowCore.Services
         {            
         }
 
-        private ConcurrentQueue<string> SelectQueue(QueueType queue)
+        private BlockingCollection<string> SelectQueue(QueueType queue)
         {
             switch (queue)
             {

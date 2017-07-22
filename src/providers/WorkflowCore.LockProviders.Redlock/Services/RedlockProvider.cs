@@ -36,7 +36,7 @@ namespace WorkflowCore.LockProviders.Redlock.Services
                 this.redisMasterDictionary.Add(item.GetEndPoints().First().ToString(), item);
         }
 
-        public async Task<bool> AcquireLock(string Id)
+        public async Task<bool> AcquireLock(string Id, CancellationToken cancellationToken)
         {
             Lock lockObject = null;
             if (Lock(Id, TimeSpan.FromMinutes(30), out lockObject))

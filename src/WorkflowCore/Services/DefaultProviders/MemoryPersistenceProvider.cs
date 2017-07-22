@@ -40,11 +40,11 @@ namespace WorkflowCore.Services
             }
         }
 
-        public async Task<IEnumerable<string>> GetRunnableInstances()
+        public async Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt)
         {
             lock (_instances)
             {
-                var now = DateTime.Now.ToUniversalTime().Ticks;
+                var now = asAt.ToUniversalTime().Ticks;
                 return _instances.Where(x => x.NextExecution.HasValue && x.NextExecution <= now).Select(x => x.Id).ToList();
             }
         }
@@ -132,13 +132,13 @@ namespace WorkflowCore.Services
             }
         }
 
-        public async Task<IEnumerable<string>> GetRunnableEvents()
+        public async Task<IEnumerable<string>> GetRunnableEvents(DateTime asAt)
         {
             lock (_events)
             {
                 return _events
                     .Where(x => !x.IsProcessed)
-                    .Where(x => x.EventTime <= DateTime.Now.ToUniversalTime())
+                    .Where(x => x.EventTime <= asAt.ToUniversalTime())
                     .Select(x => x.Id)
                     .ToList();
             }

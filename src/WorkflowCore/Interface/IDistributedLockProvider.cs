@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace WorkflowCore.Interface
@@ -11,7 +12,7 @@ namespace WorkflowCore.Interface
     /// </remarks>
     public interface IDistributedLockProvider
     {
-        Task<bool> AcquireLock(string Id);
+        Task<bool> AcquireLock(string Id, CancellationToken cancellationToken);
 
         Task ReleaseLock(string Id);
 

@@ -7,7 +7,9 @@ using WorkflowCore.Interface;
 using WorkflowCore.Services;
 using WorkflowCore.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.ObjectPool;
 using WorkflowCore.Primitives;
+using WorkflowCore.Services.BackgroundTasks;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -23,13 +25,19 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IDistributedLockProvider>(options.LockFactory);
             services.AddSingleton<IWorkflowRegistry, WorkflowRegistry>();
             services.AddSingleton<WorkflowOptions>(options);
+
+            services.AddTransient<IBackgroundTask, WorkflowConsumer>();
+            services.AddTransient<IBackgroundTask, EventConsumer>();
+            services.AddTransient<IBackgroundTask, RunnablePoller>();
+
             services.AddSingleton<IWorkflowHost, WorkflowHost>();
             services.AddTransient<IWorkflowExecutor, WorkflowExecutor>();
             services.AddTransient<IWorkflowBuilder, WorkflowBuilder>();
-            services.AddTransient<IWorkflowThread, WorkflowThread>();
-            services.AddTransient<IEventThread, EventThread>();
-            services.AddTransient<IRunnablePoller, RunnablePoller>();
-            
+            services.AddTransient<IDateTimeProvider, DateTimeProvider>();
+
+            services.AddTransient<IPooledObjectPolicy<IPersistenceProvider>, InjectedObjectPoolPolicy<IPersistenceProvider>>();
+            services.AddTransient<IPooledObjectPolicy<IWorkflowExecutor>, InjectedObjectPoolPolicy<IWorkflowExecutor>>();
+
             services.AddTransient<Foreach>();
         }
     }

@@ -65,7 +65,6 @@ namespace WorkflowCore.Models
             }
             return body;
         }
-
     }
 
     public enum ExecutionPipelineDirective { Next = 0, Defer = 1, EndWorkflow = 2 }

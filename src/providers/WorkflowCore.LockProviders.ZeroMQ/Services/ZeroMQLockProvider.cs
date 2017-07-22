@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.LockProviders.ZeroMQ.Models;
@@ -41,7 +42,7 @@ namespace WorkflowCore.LockProviders.ZeroMQ.Services
             _server.ReceiveReady += Server_ReceiveReady;    
         }
         
-        public async Task<bool> AcquireLock(string Id)
+        public async Task<bool> AcquireLock(string Id, CancellationToken cancellationToken)
         {            
             if (_lockRegistry.Any(x => x.ResourceId == Id))
                 return false;

@@ -16,7 +16,7 @@ namespace WorkflowCore.Interface
 
         Task PersistWorkflow(WorkflowInstance workflow);
 
-        Task<IEnumerable<string>> GetRunnableInstances();
+        Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt);
 
         Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take);
 
@@ -32,7 +32,7 @@ namespace WorkflowCore.Interface
 
         Task<Event> GetEvent(string id);
 
-        Task<IEnumerable<string>> GetRunnableEvents();
+        Task<IEnumerable<string>> GetRunnableEvents(DateTime asAt);
 
         Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf);
 

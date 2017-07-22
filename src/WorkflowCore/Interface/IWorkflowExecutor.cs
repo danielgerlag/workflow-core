@@ -6,6 +6,6 @@ namespace WorkflowCore.Interface
 {
     public interface IWorkflowExecutor
     {
-        WorkflowExecutorResult Execute(WorkflowInstance workflow, WorkflowOptions options);
+        Task<WorkflowExecutorResult> Execute(WorkflowInstance workflow, WorkflowOptions options);
     }
 }

@@ -21,9 +21,11 @@ namespace WorkflowCore.Sample03
             host.RegisterWorkflow<PassingDataWorkflow, MyDataClass>();
             host.Start();
 
-            var initialData = new MyDataClass();
-            initialData.Value1 = 2;
-            initialData.Value2 = 3;
+            var initialData = new MyDataClass
+            {
+                Value1 = 2,
+                Value2 = 3
+            };
 
             host.StartWorkflow("PassingDataWorkflow", 1, initialData);
 
@@ -37,7 +39,7 @@ namespace WorkflowCore.Sample03
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
             services.AddWorkflow();
-            //services.AddWorkflow(x => x.UseSqlServer(@"Server=.;Database=WorkflowCore;Trusted_Connection=True;"));
+            //services.AddWorkflow(x => x.UseSqlServer(@"Server=.\SQLEXPRESS;Database=WorkflowCore;Trusted_Connection=True;", true, true));
             var serviceProvider = services.BuildServiceProvider();
 
             //config logging

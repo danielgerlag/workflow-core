@@ -15,7 +15,7 @@ namespace WorkflowCore.Sample14
         {
             builder
                 .StartWith(context => Console.WriteLine("Hello"))
-                .Recur(data => TimeSpan.FromMinutes(30), data => data.Counter > 5).Do(recur => recur
+                .Recur(data => TimeSpan.FromSeconds(5), data => data.Counter > 5).Do(recur => recur
                     .StartWith(context => Console.WriteLine("Doing recurring task"))
                 )
                 .Then(context => Console.WriteLine("Carry on"));
