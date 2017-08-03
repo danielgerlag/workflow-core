@@ -145,10 +145,10 @@ namespace WorkflowCore.Services
             var ancestor = IterateParents(Step.Id, name);
 
             if (ancestor == null)
-                throw new Exception(String.Format("Parent step of name {0} not found", name));
+                throw new InvalidOperationException($"Parent step of name {name} not found");
 
             if (!(ancestor is WorkflowStep<TStep>))
-                throw new Exception(String.Format("Parent step of name {0} is not of type {1}", name, typeof(TStep)));
+                throw new InvalidOperationException($"Parent step of name {name} is not of type {typeof(TStep)}");
 
             return new StepBuilder<TData, TStep>(WorkflowBuilder, (ancestor as WorkflowStep<TStep>));
         }

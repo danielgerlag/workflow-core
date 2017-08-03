@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using System.Reflection;
+using WorkflowCore.Exceptions;
 
 namespace WorkflowCore.Services
 {
@@ -61,11 +62,11 @@ namespace WorkflowCore.Services
             where TData : class
         {
             if (_shutdown)
-                throw new Exception("Host is not running");
+                throw new InvalidOperationException("Host is not running");
 
             var def = Registry.GetDefinition(workflowId, version);
             if (def == null)
-                throw new Exception(String.Format("Workflow {0} version {1} is not registered", workflowId, version));
+                throw new WorkflowNotRegisteredException(workflowId, version);
 
             var wf = new WorkflowInstance();
             wf.WorkflowDefinitionId = workflowId;
@@ -121,7 +122,7 @@ namespace WorkflowCore.Services
         public async Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null)
         {
             if (_shutdown)
-                throw new Exception("Host is not running");
+                throw new InvalidOperationException("Host is not running");
 
             Logger.LogDebug("Creating event {0} {1}", eventName, eventKey);
             Event evt = new Event();

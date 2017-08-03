@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
+using WorkflowCore.Exceptions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
@@ -36,7 +37,7 @@ namespace WorkflowCore.Primitives
                 }
             }
 
-            throw new Exception("Corrupt persistence data");
+            throw new CorruptPersistenceDataException();
         }
 
         private object GetPreviousOutcome(IStepExecutionContext context)

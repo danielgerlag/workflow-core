@@ -113,11 +113,11 @@ namespace WorkflowCore.QueueProviders.ZeroMQ.Services
         private void PushMessage(Message message)
         {
             if (!_active)
-                throw new Exception("ZeroMQ provider not started");
+                throw new InvalidOperationException("ZeroMQ provider not started");
 
             var str = JsonConvert.SerializeObject(message);
             if (!_nodeSocket.TrySendFrame(TimeSpan.FromSeconds(3), str))
-                throw new Exception("Unable to send message");
+                throw new InvalidOperationException("Unable to send message");
         }
         
         public void Dispose()

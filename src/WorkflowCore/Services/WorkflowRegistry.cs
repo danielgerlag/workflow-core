@@ -11,7 +11,7 @@ namespace WorkflowCore.Services
     {
 
         private readonly IServiceProvider _serviceProvider;
-        private List<Tuple<string, int, WorkflowDefinition>> _registry = new List<Tuple<string, int, WorkflowDefinition>>();
+        private readonly List<Tuple<string, int, WorkflowDefinition>> _registry = new List<Tuple<string, int, WorkflowDefinition>>();
 
         public WorkflowRegistry(IServiceProvider serviceProvider)
         {
@@ -40,7 +40,7 @@ namespace WorkflowCore.Services
         public void RegisterWorkflow(IWorkflow workflow)
         {
             if (_registry.Any(x => x.Item1 == workflow.Id && x.Item2 == workflow.Version))
-                throw new Exception(String.Format("Workflow {0} version {1} is already registered", workflow.Id, workflow.Version));
+                throw new InvalidOperationException($"Workflow {workflow.Id} version {workflow.Version} is already registered");
 
             var builder = (_serviceProvider.GetService(typeof(IWorkflowBuilder)) as IWorkflowBuilder).UseData<object>();            
             workflow.Build(builder);
@@ -52,7 +52,7 @@ namespace WorkflowCore.Services
             where TData : new()
         {
             if (_registry.Any(x => x.Item1 == workflow.Id && x.Item2 == workflow.Version))
-                throw new Exception(String.Format("Workflow {0} version {1} is already registed", workflow.Id, workflow.Version));
+                throw new InvalidOperationException($"Workflow {workflow.Id} version {workflow.Version} is already registed");
 
             var builder = (_serviceProvider.GetService(typeof(IWorkflowBuilder)) as IWorkflowBuilder).UseData<TData>();
             workflow.Build(builder);
