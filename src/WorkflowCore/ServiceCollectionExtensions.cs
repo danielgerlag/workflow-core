@@ -17,9 +17,11 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static void AddWorkflow(this IServiceCollection services, Action<WorkflowOptions> setupAction = null)
         {
-            WorkflowOptions options = new WorkflowOptions();
-            if (setupAction != null)
-                setupAction.Invoke(options);
+            if (services.Any(x => x.ServiceType == typeof(WorkflowOptions)))
+                throw new InvalidOperationException("Workflow services already registered");
+
+            var options = new WorkflowOptions();
+            setupAction?.Invoke(options);
             services.AddTransient<IPersistenceProvider>(options.PersistanceFactory);
             services.AddSingleton<IQueueProvider>(options.QueueFactory);
             services.AddSingleton<IDistributedLockProvider>(options.LockFactory);

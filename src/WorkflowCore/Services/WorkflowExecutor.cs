@@ -102,7 +102,9 @@ namespace WorkflowCore.Services
 
                         var result = await body.RunAsync(context);
 
-                        ProcessOutputs(workflow, step, body);
+                        if (result.Proceed)
+                            ProcessOutputs(workflow, step, body);
+
                         ProcessExecutionResult(workflow, def, pointer, step, result, wfResult);
                         step.AfterExecute(wfResult, context, result, pointer);
                     }
