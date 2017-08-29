@@ -324,7 +324,8 @@ namespace WorkflowCore.Services
 
             if (root.EndTime == null)
             {
-            }return false;
+                return false;
+            }
 
             var list = pointers.Where(x => x.PredecessorId == rootId).ToList();
 
