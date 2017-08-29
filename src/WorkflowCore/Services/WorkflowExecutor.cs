@@ -59,7 +59,9 @@ namespace WorkflowCore.Services
                         }
 
                         if (!pointer.StartTime.HasValue)
+                        {
                             pointer.StartTime = _datetimeProvider.Now.ToUniversalTime();
+                        }
 
                         _logger.LogDebug("Starting step {0} on workflow {1}", step.Name, workflow.Id);
 
@@ -103,7 +105,9 @@ namespace WorkflowCore.Services
                         var result = await body.RunAsync(context);
 
                         if (result.Proceed)
+                        {
                             ProcessOutputs(workflow, step, body);
+                        }
 
                         ProcessExecutionResult(workflow, def, pointer, step, result, wfResult);
                         step.AfterExecute(wfResult, context, result, pointer);
@@ -162,7 +166,9 @@ namespace WorkflowCore.Services
             pointer.PersistenceData = result.PersistenceData;
             pointer.Outcome = result.OutcomeValue;
             if (result.SleepFor.HasValue)
+            {
                 pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(result.SleepFor.Value);
+            }
 
             if (!string.IsNullOrEmpty(result.EventName))
             {
@@ -214,6 +220,7 @@ namespace WorkflowCore.Services
                             ContextItem = branch,
                             StepName = def.Steps.First(x => x.Id == childDefId).Name
                         });
+
                         pointer.Children.Add(childPointerId);
                     }
                 }
@@ -316,17 +323,19 @@ namespace WorkflowCore.Services
             var root = pointers.First(x => x.Id == rootId);
 
             if (root.EndTime == null)
-                return false;
+            {
+            }return false;
 
             var list = pointers.Where(x => x.PredecessorId == rootId).ToList();
 
             bool result = true;
 
             foreach (var item in list)
+            {
                 result = result && IsBranchComplete(pointers, item.Id);
+            }
 
             return result;
         }
-
     }
 }

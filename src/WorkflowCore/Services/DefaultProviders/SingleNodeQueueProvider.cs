@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
-using WorkflowCore.Models;
 
 namespace WorkflowCore.Services
 {
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+    #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+
     /// <summary>
     /// Single node in-memory implementation of IQueueProvider
     /// </summary>
@@ -59,5 +56,6 @@ namespace WorkflowCore.Services
         }
         
     }
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+
+    #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }

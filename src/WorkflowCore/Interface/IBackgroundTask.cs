@@ -1,5 +1,4 @@
-﻿
-namespace WorkflowCore.Interface
+﻿namespace WorkflowCore.Interface
 {
     public interface IBackgroundTask
     {

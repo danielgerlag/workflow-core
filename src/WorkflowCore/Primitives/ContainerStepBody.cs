@@ -1,10 +1,5 @@
-﻿using System;
-using System.Linq;
-using System.Collections;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Text;
-using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
 namespace WorkflowCore.Primitives
@@ -17,14 +12,18 @@ namespace WorkflowCore.Primitives
             var root = pointers.First(x => x.Id == rootId);
 
             if (root.EndTime == null)
-                return false;
+            {
+                return false;   
+            }
 
             var list = pointers.Where(x => x.PredecessorId == rootId).ToList();
 
             bool result = true;
 
             foreach (var item in list)
+            {
                 result = result && IsBranchComplete(pointers, item.Id);
+            }
 
             return result;
         }

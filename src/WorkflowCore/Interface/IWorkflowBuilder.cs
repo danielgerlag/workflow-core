@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Primitives;
 
@@ -15,7 +14,6 @@ namespace WorkflowCore.Interface
         WorkflowDefinition Build(string id, int version);
 
         void AddStep(WorkflowStep step);
-
     }
 
     public interface IWorkflowBuilder<TData> : IWorkflowBuilder
@@ -29,8 +27,5 @@ namespace WorkflowCore.Interface
         IEnumerable<WorkflowStep> GetUpstreamSteps(int id);
 
         IWorkflowBuilder<TData> UseDefaultErrorBehavior(WorkflowErrorHandling behavior, TimeSpan? retryInterval = null);
-
     }
-        
-
 }
