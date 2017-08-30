@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using WorkflowCore.Interface;
+
 
 namespace WorkflowCore.Models
 {
@@ -24,5 +22,10 @@ namespace WorkflowCore.Models
 
     }
 
-    public enum WorkflowErrorHandling { Retry = 0, Suspend = 1, Terminate = 2 }
+    public enum WorkflowErrorHandling 
+    { 
+        Retry = 0, 
+        Suspend = 1, 
+        Terminate = 2 
+    }
 }

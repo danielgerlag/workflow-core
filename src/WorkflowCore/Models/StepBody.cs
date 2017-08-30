@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 
@@ -8,7 +6,6 @@ namespace WorkflowCore.Models
 {
     public abstract class StepBody : IStepBody
     {
-
         public abstract ExecutionResult Run(IStepExecutionContext context);
 
         public Task<ExecutionResult> RunAsync(IStepExecutionContext context)
@@ -43,6 +40,5 @@ namespace WorkflowCore.Models
                 SleepFor = sleep
             };
         }
-
     }
 }

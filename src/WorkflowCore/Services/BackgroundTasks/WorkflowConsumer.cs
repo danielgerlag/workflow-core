@@ -59,7 +59,9 @@ namespace WorkflowCore.Services.BackgroundTasks
                         if ((workflow != null) && (result != null))
                         {
                             foreach (var sub in result.Subscriptions)
+                            {
                                 await SubscribeEvent(sub, persistenceStore);
+                            }
 
                             await persistenceStore.PersistErrors(result.Errors);
 
@@ -102,11 +104,15 @@ namespace WorkflowCore.Services.BackgroundTasks
             try
             {
                 if (!workflow.NextExecution.HasValue)
+                {
                     return;
+                }
 
                 var target = (workflow.NextExecution.Value - _datetimeProvider.Now.ToUniversalTime().Ticks);
                 if (target > 0)
+                {
                     await Task.Delay(TimeSpan.FromTicks(target), cancellationToken);
+                }
 
                 await QueueProvider.QueueWork(workflow.Id, QueueType.Workflow);
             }

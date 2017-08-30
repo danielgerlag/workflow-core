@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Services;
 
@@ -18,7 +15,6 @@ namespace WorkflowCore.Models
 
         public WorkflowOptions()
         {
-            //set defaults
             PollInterval = TimeSpan.FromSeconds(10);
             IdleTime = TimeSpan.FromMilliseconds(100);
             ErrorRetryInterval = TimeSpan.FromSeconds(60);            
@@ -52,8 +48,6 @@ namespace WorkflowCore.Models
         {
             ErrorRetryInterval = interval;
         }
-                
-
     }
         
 }

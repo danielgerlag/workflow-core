@@ -38,10 +38,14 @@ namespace WorkflowCore.Services.BackgroundTasks
                         var success = true;
 
                         foreach (var sub in subs.ToList())
+                        {
                             success = success && await SeedSubscription(evt, sub, cancellationToken);
+                        }
 
                         if (success)
+                        {
                             await _persistenceStore.MarkEventProcessed(itemId);
+                        }
                     }
                 }
                 finally

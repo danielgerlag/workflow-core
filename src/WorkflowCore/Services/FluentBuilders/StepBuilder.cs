@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Primitives;
@@ -37,7 +34,9 @@ namespace WorkflowCore.Services
             var stepBuilder = new StepBuilder<TData, TStep>(WorkflowBuilder, newStep);
 
             if (stepSetup != null)
+            {
                 stepSetup.Invoke(stepBuilder);
+            }
 
             newStep.Name = newStep.Name ?? typeof(TStep).Name;
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
@@ -119,7 +118,9 @@ namespace WorkflowCore.Services
             stepBuilder.Input((step) => step.EventKey, eventKey);
 
             if (effectiveDate != null)
+            {
                 stepBuilder.Input((step) => step.EffectiveDate, effectiveDate);
+            }
 
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
             return stepBuilder;
@@ -134,7 +135,9 @@ namespace WorkflowCore.Services
             stepBuilder.Input((step) => step.EventKey, eventKey);
 
             if (effectiveDate != null)
+            {
                 stepBuilder.Input((step) => step.EffectiveDate, effectiveDate);
+            }
 
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
             return stepBuilder;
@@ -145,10 +148,14 @@ namespace WorkflowCore.Services
             var ancestor = IterateParents(Step.Id, name);
 
             if (ancestor == null)
+            {
                 throw new InvalidOperationException($"Parent step of name {name} not found");
+            }
 
             if (!(ancestor is WorkflowStep<TStep>))
+            {
                 throw new InvalidOperationException($"Parent step of name {name} is not of type {typeof(TStep)}");
+            }
 
             return new StepBuilder<TData, TStep>(WorkflowBuilder, (ancestor as WorkflowStep<TStep>));
         }
@@ -162,20 +169,25 @@ namespace WorkflowCore.Services
 
         private WorkflowStep IterateParents(int id, string name)
         {
-            //todo: filter out circular paths
+            // Todo: filter out circular paths
             var upstream = WorkflowBuilder.GetUpstreamSteps(id);
             foreach (var parent in upstream)
             {
                 if (parent.Name == name)
+                {
                     return parent;
+                }
             }
 
             foreach (var parent in upstream)
             {
                 var result = IterateParents(parent.Id, name);
                 if (result != null)
+                {
                     return result;
+                }
             }
+
             return null;
         }
 
@@ -198,6 +210,7 @@ namespace WorkflowCore.Services
                 Source = period,
                 Target = inputExpr
             };
+
             newStep.Inputs.Add(mapping);
 
             WorkflowBuilder.AddStep(newStep);
@@ -261,6 +274,7 @@ namespace WorkflowCore.Services
                 Source = condition,
                 Target = inputExpr
             };
+
             newStep.Inputs.Add(mapping);
 
             WorkflowBuilder.AddStep(newStep);
@@ -280,6 +294,7 @@ namespace WorkflowCore.Services
                 Source = outcomeValue,
                 Target = inputExpr
             };
+
             newStep.Inputs.Add(mapping);
 
             IStepBuilder<TData, OutcomeSwitch> switchBuilder;
@@ -302,7 +317,6 @@ namespace WorkflowCore.Services
             
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new ReturnStepBuilder<TData, When, OutcomeSwitch>(WorkflowBuilder, newStep, switchBuilder);
-            
             switchBuilder.Step.Children.Add(newStep.Id);
 
             return stepBuilder;
@@ -331,6 +345,7 @@ namespace WorkflowCore.Services
                 Source = time,
                 Target = inputExpr
             };
+
             newStep.Inputs.Add(mapping);
 
             WorkflowBuilder.AddStep(newStep);

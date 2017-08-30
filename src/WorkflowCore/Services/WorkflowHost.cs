@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using System.Reflection;
@@ -21,7 +20,7 @@ namespace WorkflowCore.Services
 
         public event StepErrorEventHandler OnStepError;
 
-        //public dependencies to allow for extension method access
+        // Public dependencies to allow for extension method access.
         public IPersistenceProvider PersistenceStore { get; private set; }
         public IDistributedLockProvider LockProvider { get; private set; }
         public IWorkflowRegistry Registry { get; private set; }
@@ -62,31 +61,40 @@ namespace WorkflowCore.Services
             where TData : class
         {
             if (_shutdown)
+            {
                 throw new InvalidOperationException("Host is not running");
+            }
 
             var def = Registry.GetDefinition(workflowId, version);
             if (def == null)
+            {
                 throw new WorkflowNotRegisteredException(workflowId, version);
+            }
 
-            var wf = new WorkflowInstance();
-            wf.WorkflowDefinitionId = workflowId;
-            wf.Version = def.Version;
-            wf.Data = data;
-            wf.Description = def.Description;
-            wf.NextExecution = 0;
-            wf.CreateTime = DateTime.Now.ToUniversalTime();
-            wf.Status = WorkflowStatus.Runnable;
+            var wf = new WorkflowInstance
+            {
+                WorkflowDefinitionId = workflowId,
+                Version = def.Version,
+                Data = data,
+                Description = def.Description,
+                NextExecution = 0,
+                CreateTime = DateTime.Now.ToUniversalTime(),
+                Status = WorkflowStatus.Runnable
+            };
 
             if ((def.DataType != null) && (data == null))
+            {
                 wf.Data = def.DataType.GetConstructor(new Type[] { }).Invoke(null);
+            }
 
-            wf.ExecutionPointers.Add(new ExecutionPointer()
+            wf.ExecutionPointers.Add(new ExecutionPointer
             {
                 Id = Guid.NewGuid().ToString(),
                 StepId = 0,
                 Active = true,
                 StepName = def.Steps.First(x => x.Id == 0).Name
             });
+
             string id = await PersistenceStore.CreateNewWorkflow(wf);
             await QueueProvider.QueueWork(id, QueueType.Workflow);
             return id;
@@ -122,7 +130,9 @@ namespace WorkflowCore.Services
         public async Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null)
         {
             if (_shutdown)
+            {
                 throw new InvalidOperationException("Host is not running");
+            }
 
             Logger.LogDebug("Creating event {0} {1}", eventName, eventKey);
             Event evt = new Event();
@@ -169,6 +179,7 @@ namespace WorkflowCore.Services
                         await PersistenceStore.PersistWorkflow(wf);
                         return true;
                     }
+
                     return false;
                 }
                 finally
@@ -176,6 +187,7 @@ namespace WorkflowCore.Services
                     await LockProvider.ReleaseLock(workflowId);
                 }
             }
+
             return false;
         }
 
@@ -194,6 +206,7 @@ namespace WorkflowCore.Services
                         requeue = true;
                         return true;
                     }
+
                     return false;
                 }
                 finally
@@ -203,6 +216,7 @@ namespace WorkflowCore.Services
                         await QueueProvider.QueueWork(workflowId, QueueType.Workflow);
                 }                
             }
+
             return false;
         }
 
@@ -222,6 +236,7 @@ namespace WorkflowCore.Services
                     await LockProvider.ReleaseLock(workflowId);
                 }
             }
+
             return false;
         }
 

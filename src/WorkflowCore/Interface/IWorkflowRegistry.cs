@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using WorkflowCore.Models;
+﻿using WorkflowCore.Models;
 
 namespace WorkflowCore.Interface
 {
@@ -11,6 +7,5 @@ namespace WorkflowCore.Interface
         void RegisterWorkflow(IWorkflow workflow);
         void RegisterWorkflow<TData>(IWorkflow<TData> workflow) where TData : new();
         WorkflowDefinition GetDefinition(string workflowId, int? version = null);
-             
     }
 }

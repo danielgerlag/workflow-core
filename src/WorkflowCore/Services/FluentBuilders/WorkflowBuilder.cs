@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Primitives;
@@ -23,7 +22,6 @@ namespace WorkflowCore.Services
             IWorkflowBuilder<T> result = new WorkflowBuilder<T>(Steps);
             return result;
         }
-        
 
         public virtual WorkflowDefinition Build(string id, int version)
         {
@@ -66,7 +64,9 @@ namespace WorkflowCore.Services
             var stepBuilder = new StepBuilder<TData, TStep>(this, step);
 
             if (stepSetup != null)
+            {
                 stepSetup.Invoke(stepBuilder);
+            }
 
             step.Name = step.Name ?? typeof(TStep).Name;
             AddStep(step);

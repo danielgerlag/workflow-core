@@ -31,7 +31,9 @@ namespace WorkflowCore.Services.BackgroundTasks
         public virtual void Start()
         {
             if (DispatchTask != null)
+            {
                 throw new InvalidOperationException();
+            }
 
             _cancellationTokenSource = new CancellationTokenSource();
                         
@@ -62,7 +64,9 @@ namespace WorkflowCore.Services.BackgroundTasks
                 try
                 {
                     if (!SpinWait.SpinUntil(() => actionBlock.InputCount == 0, Options.IdleTime))
+                    {
                         continue;
+                    }
 
                     var item = await QueueProvider.DequeueWork(Queue, cancelToken);
 
@@ -74,7 +78,9 @@ namespace WorkflowCore.Services.BackgroundTasks
                     }
 
                     if (!actionBlock.Post(item))
+                    {
                         await QueueProvider.QueueWork(item, Queue);
+                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -84,6 +90,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     Logger.LogError(ex.Message);
                 }
             }
+
             actionBlock.Complete();
             await actionBlock.Completion;
         }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,7 +7,8 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services
 {
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+    #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+
     /// <summary>
     /// In-memory implementation of IPersistenceProvider for demo and testing purposes
     /// </summary>
@@ -64,16 +64,24 @@ namespace WorkflowCore.Services
                 var result = _instances.AsQueryable();
 
                 if (status.HasValue)
+                {
                     result = result.Where(x => x.Status == status.Value);
+                }
 
                 if (!String.IsNullOrEmpty(type))
+                {
                     result = result.Where(x => x.WorkflowDefinitionId == type);
+                }
 
                 if (createdFrom.HasValue)
+                {
                     result = result.Where(x => x.CreateTime >= createdFrom.Value);
+                }
 
                 if (createdTo.HasValue)
+                {
                     result = result.Where(x => x.CreateTime <= createdTo.Value);
+                }
 
                 return result.Skip(skip).Take(take).ToList();
             }
@@ -157,10 +165,10 @@ namespace WorkflowCore.Services
             lock (_events)
             {
                 return _events
-                .Where(x => x.EventName == eventName && x.EventKey == eventKey)
-                .Where(x => x.EventTime >= asOf)
-                .Select(x => x.Id)
-                .ToList();
+                    .Where(x => x.EventName == eventName && x.EventKey == eventKey)
+                    .Where(x => x.EventTime >= asOf)
+                    .Select(x => x.Id)
+                    .ToList();
             }
         }
 
@@ -170,7 +178,9 @@ namespace WorkflowCore.Services
             {
                 var evt = _events.FirstOrDefault(x => x.Id == id);
                 if (evt != null)
+                {
                     evt.IsProcessed = false;
+                }
             }
         }
 
@@ -182,5 +192,6 @@ namespace WorkflowCore.Services
             }
         }
     }
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+
+    #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }

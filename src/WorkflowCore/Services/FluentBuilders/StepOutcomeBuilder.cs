@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Primitives;
@@ -28,7 +24,9 @@ namespace WorkflowCore.Services
             var stepBuilder = new StepBuilder<TData, TStep>(WorkflowBuilder, step);
 
             if (stepSetup != null)
+            {
                 stepSetup.Invoke(stepBuilder);
+            }
 
             step.Name = step.Name ?? typeof(TStep).Name;
             Outcome.NextStep = step.Id;

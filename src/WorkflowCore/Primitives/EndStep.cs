@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
 namespace WorkflowCore.Primitives
@@ -10,7 +7,11 @@ namespace WorkflowCore.Primitives
     {
         public override Type BodyType => null;
 
-        public override ExecutionPipelineDirective InitForExecution(WorkflowExecutorResult executorResult, WorkflowDefinition defintion, WorkflowInstance workflow, ExecutionPointer executionPointer)
+        public override ExecutionPipelineDirective InitForExecution(
+            WorkflowExecutorResult executorResult, 
+            WorkflowDefinition defintion, 
+            WorkflowInstance workflow, 
+            ExecutionPointer executionPointer)
         {
             return ExecutionPipelineDirective.EndWorkflow;
         }

@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using WorkflowCore.Models;
 
 namespace WorkflowCore.Interface
 {
@@ -31,8 +28,8 @@ namespace WorkflowCore.Interface
         bool IsDequeueBlocking { get; }
 
         Task Start();
-        Task Stop();
 
+        Task Stop();
     }
 
     public enum QueueType { Workflow = 0, Event = 1 }

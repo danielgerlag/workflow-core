@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Threading.Tasks;
 using WorkflowCore.Interface;
 
 namespace WorkflowCore.Models
@@ -67,15 +64,16 @@ namespace WorkflowCore.Models
         }
     }
 
-    public enum ExecutionPipelineDirective { Next = 0, Defer = 1, EndWorkflow = 2 }
-
     public class WorkflowStep<TStepBody> : WorkflowStep
         where TStepBody : IStepBody 
     {
         public override Type BodyType => typeof(TStepBody);
     }
 
-    
-
-
+	public enum ExecutionPipelineDirective 
+    { 
+        Next = 0, 
+        Defer = 1, 
+        EndWorkflow = 2 
+    }
 }
