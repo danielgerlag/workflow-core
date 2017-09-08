@@ -14,9 +14,10 @@ namespace WorkflowCore.Services
     public class WorkflowHost : IWorkflowHost, IDisposable
     {                
         protected bool _shutdown = true;        
-        protected IServiceProvider _serviceProvider;
+        protected readonly IServiceProvider _serviceProvider;
 
         private readonly IEnumerable<IBackgroundTask> _backgroundTasks;
+        private readonly IWorkflowController _workflowController;
 
         public event StepErrorEventHandler OnStepError;
 
@@ -28,7 +29,7 @@ namespace WorkflowCore.Services
         public IQueueProvider QueueProvider { get; private set; }
         public ILogger Logger { get; private set; }
 
-        public WorkflowHost(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, WorkflowOptions options, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IEnumerable<IBackgroundTask> backgroundTasks)
+        public WorkflowHost(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, WorkflowOptions options, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IEnumerable<IBackgroundTask> backgroundTasks, IWorkflowController workflowController)
         {
             PersistenceStore = persistenceStore;
             QueueProvider = queueProvider;
@@ -38,66 +39,36 @@ namespace WorkflowCore.Services
             Registry = registry;
             LockProvider = lockProvider;
             _backgroundTasks = backgroundTasks;
+            _workflowController = workflowController;
             persistenceStore.EnsureStoreExists();
         }
 
         public Task<string> StartWorkflow(string workflowId, object data = null)
         {
-            return StartWorkflow(workflowId, null, data);
+            return _workflowController.StartWorkflow(workflowId, data);
         }
 
         public Task<string> StartWorkflow(string workflowId, int? version, object data = null)
         {
-            return StartWorkflow<object>(workflowId, version, data);
+            return _workflowController.StartWorkflow<object>(workflowId, version, data);
         }
 
-        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null) 
+        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null)
             where TData : class
         {
-            return StartWorkflow<TData>(workflowId, null, data);
+            return _workflowController.StartWorkflow<TData>(workflowId, null, data);
         }
 
-        public async Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null)
+
+        public Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null)
             where TData : class
         {
-            if (_shutdown)
-            {
-                throw new InvalidOperationException("Host is not running");
-            }
+            return _workflowController.StartWorkflow(workflowId, version, data);
+        }
 
-            var def = Registry.GetDefinition(workflowId, version);
-            if (def == null)
-            {
-                throw new WorkflowNotRegisteredException(workflowId, version);
-            }
-
-            var wf = new WorkflowInstance
-            {
-                WorkflowDefinitionId = workflowId,
-                Version = def.Version,
-                Data = data,
-                Description = def.Description,
-                NextExecution = 0,
-                CreateTime = DateTime.Now.ToUniversalTime(),
-                Status = WorkflowStatus.Runnable
-            };
-
-            if ((def.DataType != null) && (data == null))
-            {
-                wf.Data = def.DataType.GetConstructor(new Type[] { }).Invoke(null);
-            }
-
-            wf.ExecutionPointers.Add(new ExecutionPointer
-            {
-                Id = Guid.NewGuid().ToString(),
-                StepId = 0,
-                Active = true,
-                StepName = def.Steps.First(x => x.Id == 0).Name
-            });
-
-            string id = await PersistenceStore.CreateNewWorkflow(wf);
-            await QueueProvider.QueueWork(id, QueueType.Workflow);
-            return id;
+        public Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null)
+        {
+            return _workflowController.PublishEvent(eventName, eventKey, eventData, effectiveDate);
         }
 
         public void Start()
@@ -127,30 +98,6 @@ namespace WorkflowCore.Services
             LockProvider.Stop();
         }
         
-        public async Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null)
-        {
-            if (_shutdown)
-            {
-                throw new InvalidOperationException("Host is not running");
-            }
-
-            Logger.LogDebug("Creating event {0} {1}", eventName, eventKey);
-            Event evt = new Event();
-
-            if (effectiveDate.HasValue)
-                evt.EventTime = effectiveDate.Value.ToUniversalTime();
-            else
-                evt.EventTime = DateTime.Now.ToUniversalTime();
-
-            evt.EventData = eventData;
-            evt.EventKey = eventKey;
-            evt.EventName = eventName;
-            evt.IsProcessed = false;
-            string eventId = await PersistenceStore.CreateEvent(evt);
-
-            await QueueProvider.QueueWork(eventId, QueueType.Event);
-        }
-                
         public void RegisterWorkflow<TWorkflow>() 
             where TWorkflow : IWorkflow, new()
         {
@@ -166,80 +113,20 @@ namespace WorkflowCore.Services
             Registry.RegisterWorkflow<TData>(wf);
         }
 
-        public async Task<bool> SuspendWorkflow(string workflowId)
+        public Task<bool> SuspendWorkflow(string workflowId)
         {
-            if (await LockProvider.AcquireLock(workflowId, new CancellationToken()))
-            {
-                try
-                {
-                    var wf = await PersistenceStore.GetWorkflowInstance(workflowId);
-                    if (wf.Status == WorkflowStatus.Runnable)
-                    {
-                        wf.Status = WorkflowStatus.Suspended;
-                        await PersistenceStore.PersistWorkflow(wf);
-                        return true;
-                    }
-
-                    return false;
-                }
-                finally
-                {
-                    await LockProvider.ReleaseLock(workflowId);
-                }
-            }
-
-            return false;
+            return _workflowController.SuspendWorkflow(workflowId);
         }
 
-        public async Task<bool> ResumeWorkflow(string workflowId)
+        public Task<bool> ResumeWorkflow(string workflowId)
         {
-            if (await LockProvider.AcquireLock(workflowId, new CancellationToken()))
-            {
-                bool requeue = false;
-                try
-                {
-                    var wf = await PersistenceStore.GetWorkflowInstance(workflowId);
-                    if (wf.Status == WorkflowStatus.Suspended)
-                    {
-                        wf.Status = WorkflowStatus.Runnable;
-                        await PersistenceStore.PersistWorkflow(wf);
-                        requeue = true;
-                        return true;
-                    }
-
-                    return false;
-                }
-                finally
-                {
-                    await LockProvider.ReleaseLock(workflowId);
-                    if (requeue)
-                        await QueueProvider.QueueWork(workflowId, QueueType.Workflow);
-                }                
-            }
-
-            return false;
+            return _workflowController.ResumeWorkflow(workflowId);
         }
 
-        public async Task<bool> TerminateWorkflow(string workflowId)
+        public Task<bool> TerminateWorkflow(string workflowId)
         {
-            if (await LockProvider.AcquireLock(workflowId, new CancellationToken()))
-            {
-                try
-                {
-                    var wf = await PersistenceStore.GetWorkflowInstance(workflowId);                    
-                    wf.Status = WorkflowStatus.Terminated;
-                    await PersistenceStore.PersistWorkflow(wf);
-                    return true;                    
-                }
-                finally
-                {
-                    await LockProvider.ReleaseLock(workflowId);
-                }
-            }
-
-            return false;
+            return _workflowController.TerminateWorkflow(workflowId);
         }
-
 
         public void ReportStepError(WorkflowInstance workflow, WorkflowStep step, Exception exception)
         {
