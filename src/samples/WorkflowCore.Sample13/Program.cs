@@ -17,11 +17,13 @@ namespace WorkflowCore.Sample13
 
             //start the workflow host
             var host = serviceProvider.GetService<IWorkflowHost>();
-            host.RegisterWorkflow<ParallelWorkflow, MyData>();
+            var controller = serviceProvider.GetService<IWorkflowController>();
+            controller.RegisterWorkflow<ParallelWorkflow, MyData>();
+
             host.Start();
 
             Console.WriteLine("Starting workflow...");
-            host.StartWorkflow("parallel-sample");
+            controller.StartWorkflow("parallel-sample");
             
             Console.ReadLine();
             host.Stop();

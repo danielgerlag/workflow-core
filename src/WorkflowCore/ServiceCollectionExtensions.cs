@@ -32,6 +32,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<IBackgroundTask, EventConsumer>();
             services.AddTransient<IBackgroundTask, RunnablePoller>();
 
+            services.AddSingleton<IWorkflowController, WorkflowController>();
             services.AddSingleton<IWorkflowHost, WorkflowHost>();
             services.AddTransient<IWorkflowExecutor, WorkflowExecutor>();
             services.AddTransient<IWorkflowBuilder, WorkflowBuilder>();
