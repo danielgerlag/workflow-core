@@ -215,7 +215,6 @@ namespace WorkflowCore.Services
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, Delay>(WorkflowBuilder, newStep);
-
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
 
             return stepBuilder;
