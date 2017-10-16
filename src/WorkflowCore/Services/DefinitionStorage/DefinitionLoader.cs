@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.Extensions.PlatformAbstractions;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using WorkflowCore.Interface;
@@ -41,10 +43,10 @@ namespace WorkflowCore.Services.DefinitionStorage
             return result;
         }
 
-        //private Type FindType(string name)
-        //{
-        //    //System.
-        //}
+        private Type FindType(string name)
+        {
+            return Type.GetType(name);
+        }
 
     }
 }
