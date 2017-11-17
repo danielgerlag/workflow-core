@@ -106,6 +106,8 @@ There are several persistence providers available as separate Nuget packages.
 
 * [Parallel Tasks](src/samples/WorkflowCore.Sample13)
 
+* [Dependency Injection](src/samples/WorkflowCore.Sample15)
+
 * [Deferred execution & re-entrant steps](src/samples/WorkflowCore.Sample05)
 
 * [Looping](src/samples/WorkflowCore.Sample02)
