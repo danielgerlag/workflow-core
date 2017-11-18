@@ -11,5 +11,7 @@ namespace WorkflowCore.Models.DefinitionStorage.v1
         public WorkflowErrorHandling DefaultErrorBehavior { get; set; }
 
         public TimeSpan? DefaultErrorRetryInterval { get; set; }
+
+        public List<StepSourceV1> Steps { get; set; } = new List<StepSourceV1>();
     }
 }

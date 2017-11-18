@@ -97,6 +97,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.TestSample01",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Docker.Testify", "test\Docker.Testify\Docker.Testify.csproj", "{EC497168-5347-4E70-9D9E-9C2F826C1CDF}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScratchPad", "test\ScratchPad\ScratchPad.csproj", "{DBEB4EF2-B10A-4D4F-A96C-C9BA49B01BAA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -247,6 +249,10 @@ Global
 		{EC497168-5347-4E70-9D9E-9C2F826C1CDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC497168-5347-4E70-9D9E-9C2F826C1CDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC497168-5347-4E70-9D9E-9C2F826C1CDF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBEB4EF2-B10A-4D4F-A96C-C9BA49B01BAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBEB4EF2-B10A-4D4F-A96C-C9BA49B01BAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBEB4EF2-B10A-4D4F-A96C-C9BA49B01BAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBEB4EF2-B10A-4D4F-A96C-C9BA49B01BAA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -291,6 +297,7 @@ Global
 		{62A9709E-27DA-42EE-B94F-5AF431D86354} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
 		{0E3C1496-8E7C-411A-A536-C7C9CE4EED4E} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
 		{EC497168-5347-4E70-9D9E-9C2F826C1CDF} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
+		{DBEB4EF2-B10A-4D4F-A96C-C9BA49B01BAA} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DC0FA8D3-6449-4FDA-BB46-ECF58FAD23B4}

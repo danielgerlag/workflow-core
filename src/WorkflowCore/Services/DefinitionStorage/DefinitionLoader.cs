@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
@@ -9,7 +10,7 @@ using WorkflowCore.Models.DefinitionStorage.v1;
 
 namespace WorkflowCore.Services.DefinitionStorage
 {
-    public class DefinitionLoader
+    public class DefinitionLoader : IDefinitionLoader
     {
         private readonly IWorkflowRegistry _registry;
 
@@ -21,29 +22,41 @@ namespace WorkflowCore.Services.DefinitionStorage
 
         public void LoadDefinition(string json)
         {
-            
-            //DefinitionSourceV1 x
+            var source = JsonConvert.DeserializeObject<DefinitionSourceV1>(json);
+            var def = new StoredWorkflowDefinition(source);
+            _registry.RegisterWorkflow(def);
         }
 
-        private WorkflowDefinition Convert(DefinitionSourceV1 source)
-        {
-            var result = new WorkflowDefinition();
+        //private WorkflowDefinition Convert(DefinitionSourceV1 source)
+        //{
+        //    var result = new WorkflowDefinition
+        //    {
+        //        Id = source.Id,
+        //        Version = source.Version,
+        //        Steps = ConvertSteps(source.Steps),
+        //        DefaultErrorBehavior = source.DefaultErrorBehavior,
+        //        DefaultErrorRetryInterval = source.DefaultErrorRetryInterval,
+        //        Description = source.Description,
+        //        DataType = FindType(source.DataType)                
+        //    };
 
-            result.Id = source.Id;
-            result.Version = source.Version;
-            result.Steps = new List<WorkflowStep>();
-            result.DefaultErrorBehavior = source.DefaultErrorBehavior;
-            result.DefaultErrorRetryInterval = source.DefaultErrorRetryInterval;
-            result.Description = source.Description;
-            //source.DataType
-            //result.DataType
 
-            return result;
-        }
+        //    return result;
+        //}
+
+
+        //private List<WorkflowStep> ConvertSteps(ICollection<StepSourceV1> source)
+        //{
+        //    var result = new List<WorkflowStep>();
+
+
+
+        //    return result;
+        //}
 
         //private Type FindType(string name)
         //{
-        //    //System.
+        //    throw new NotImplementedException();
         //}
 
     }

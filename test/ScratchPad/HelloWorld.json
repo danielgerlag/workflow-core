@@ -1,0 +1,21 @@
+﻿{
+  "Id": "HelloWorld",
+  "Version": 1,
+  "Description": "",
+  "DataType": "System.Object",
+  "Steps": [
+    {
+      "Id": "Hello",
+      "StepType": "ScratchPad.HelloWorld, ScratchPad",
+      "Name": "Hello",
+      "NextStepId": "Bye",
+      "Inputs": [],
+      "Outputs": []
+    },
+    {
+      "Id": "Bye",
+      "StepType": "ScratchPad.GoodbyeWorld, ScratchPad",
+      "Name": "Bye"
+    }
+  ] 
+}

@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
-using WorkflowCore.LockProviders.ZeroMQ.Services;
-using WorkflowCore.QueueProviders.ZeroMQ.Services;
+using WorkflowCore.Models;
+using System.Text;
 
 namespace ScratchPad
 {
@@ -14,29 +15,70 @@ namespace ScratchPad
     {
         public static void Main(string[] args)
         {
-            LoggerFactory lf = new LoggerFactory();
-            lf.AddConsole(LogLevel.Debug);
+            //var s = typeof(HelloWorld).AssemblyQualifiedName;
 
-            IQueueProvider Peer1 = new ZeroMQProvider(4001, "localhost:4002;localhost:4003".Split(';'), true, lf);
-            IQueueProvider Peer2 = new ZeroMQProvider(4002, "localhost:4001;localhost:4003".Split(';'), true, lf);
-            IQueueProvider Peer3 = new ZeroMQProvider(4003, "localhost:4001;localhost:4002".Split(';'), true, lf);
 
-            Peer1.Start();            
-            Peer2.Start();            
-            Peer3.Start();
-            System.Threading.Thread.Sleep(500);
+            IServiceProvider serviceProvider = ConfigureServices();
 
-            Peer1.QueueWork("Task 1", QueueType.Workflow).Wait();
-            Peer1.QueueWork("Task 2", QueueType.Workflow).Wait();
-            Peer1.QueueWork("Task 3", QueueType.Workflow).Wait();
-            System.Threading.Thread.Sleep(100);
+            //start the workflow host
+            var host = serviceProvider.GetService<IWorkflowHost>();
+            var loader = serviceProvider.GetService<IDefinitionLoader>();
+            var str = ScratchPad.Properties.Resources.HelloWorld; //Encoding.UTF8.GetString(ScratchPad.Properties.Resources.HelloWorld);
 
-            var value1 = Peer1.DequeueWork(QueueType.Workflow, new CancellationToken()).Result;
-            var value2 = Peer2.DequeueWork(QueueType.Workflow, new CancellationToken()).Result;
-            var value3 = Peer3.DequeueWork(QueueType.Workflow, new CancellationToken()).Result;
-            
+            loader.LoadDefinition(str);
+
+            //host.RegisterWorkflow<HelloWorldWorkflow>();
+            host.Start();
+
+            host.StartWorkflow("HelloWorld", 1, null);
+
             Console.ReadLine();
+            host.Stop();
         }
+
+        private static IServiceProvider ConfigureServices()
+        {
+            //setup dependency injection
+            IServiceCollection services = new ServiceCollection();
+            services.AddLogging();
+            services.AddWorkflow();
+            //services.AddWorkflow(x => x.UseMongoDB(@"mongodb://localhost:27017", "workflow"));
+            services.AddTransient<GoodbyeWorld>();
+
+            var serviceProvider = services.BuildServiceProvider();
+
+            //config logging
+            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+            loggerFactory.AddDebug();
+            return serviceProvider;
+        }
+
+    }
+
+    public class HelloWorld : StepBody
+    {
+        public override ExecutionResult Run(IStepExecutionContext context)
+        {
+            Console.WriteLine("Hello world");
+            return ExecutionResult.Next();
+        }
+    }
+    public class GoodbyeWorld : StepBody
+    {
+        public override ExecutionResult Run(IStepExecutionContext context)
+        {
+            Console.WriteLine("Goodbye world");
+            return ExecutionResult.Next();
+        }
+    }
+
+    public class MyDataClass
+    {
+        public int Value1 { get; set; }
+
+        public int Value2 { get; set; }
+
+        public int Value3 { get; set; }
     }
 }
 
