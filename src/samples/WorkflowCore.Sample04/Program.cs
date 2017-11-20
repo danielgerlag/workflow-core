@@ -21,7 +21,8 @@ namespace WorkflowCore.Sample04
 
             //start the workflow host
             var host = serviceProvider.GetService<IWorkflowHost>();
-            host.RegisterWorkflow<EventSampleWorkflow, MyDataClass>();
+            //host.RegisterWorkflow<EventSampleWorkflow, MyDataClass>();
+            host.RegisterWorkflow<EventSampleWorkflow2, MyDataClass>();
             host.Start();
 
             var initialData = new MyDataClass();
@@ -29,7 +30,8 @@ namespace WorkflowCore.Sample04
 
             Console.WriteLine("Enter value to publish");
             string value = Console.ReadLine();
-            host.PublishEvent("MyEvent", workflowId, value);
+            //host.PublishEvent("MyEvent", workflowId, value);
+            host.PublishEvent("Event2", workflowId, value);
 
             Console.ReadLine();
             host.Stop();

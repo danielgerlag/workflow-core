@@ -104,6 +104,17 @@ namespace WorkflowCore.Interface
         /// <returns></returns>
         IStepBuilder<TData, WaitFor> WaitFor(string eventName, Expression<Func<TData, IStepExecutionContext, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null);
 
+        /// <summary>
+        /// Wait here until to specified event is published
+        /// </summary>
+        /// <param name="eventName">The name used to identify the kind of event to wait for</param>
+        /// <param name="eventKey">A specific key value within the context of the event to wait for</param>
+        /// <param name="until">A conditon that when true will cancel this WaitFor</param>
+        /// <param name="effectiveDate">Listen for events as of this effective date</param>
+        /// <returns></returns>
+        IStepBuilder<TData, WaitFor> WaitForWithCancel(string eventName, Expression<Func<TData, IStepExecutionContext, string>> eventKey, Expression<Func<TData, bool>> until, Expression<Func<TData, DateTime>> effectiveDate = null);
+
+
         IStepBuilder<TData, TStep> End<TStep>(string name) where TStep : IStepBody;
 
         /// <summary>

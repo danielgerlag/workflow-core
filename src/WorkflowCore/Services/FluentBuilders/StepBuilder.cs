@@ -143,6 +143,23 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
+        public IStepBuilder<TData, WaitFor> WaitForWithCancel(string eventName, Expression<Func<TData, IStepExecutionContext, string>> eventKey, Expression<Func<TData, bool>> until, Expression<Func<TData, DateTime>> effectiveDate = null)
+        {
+            var newStep = new CancellableStep<WaitFor, TData>(until);
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, WaitFor>(WorkflowBuilder, newStep);
+            stepBuilder.Input((step) => step.EventName, (data) => eventName);
+            stepBuilder.Input((step) => step.EventKey, eventKey);
+
+            if (effectiveDate != null)
+            {
+                stepBuilder.Input((step) => step.EffectiveDate, effectiveDate);
+            }
+
+            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            return stepBuilder;
+        }
+
         public IStepBuilder<TData, TStep> End<TStep>(string name) where TStep : IStepBody
         {
             var ancestor = IterateParents(Step.Id, name);
