@@ -109,9 +109,15 @@ namespace WorkflowCore.Services
             return this;
         }
 
-        public IStepBuilder<TData, WaitFor> WaitFor(string eventName, Expression<Func<TData, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null)
+        public IStepBuilder<TData, WaitFor> WaitFor(string eventName, Expression<Func<TData, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null, Expression<Func<TData, bool>> cancelCondition = null)
         {
-            var newStep = new WorkflowStep<WaitFor>();
+            WorkflowStep<WaitFor> newStep;
+
+            if (cancelCondition != null)
+                newStep = new CancellableStep<WaitFor, TData>(cancelCondition);
+            else
+                newStep = new WorkflowStep<WaitFor>();
+
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, WaitFor>(WorkflowBuilder, newStep);
             stepBuilder.Input((step) => step.EventName, (data) => eventName);
@@ -126,9 +132,15 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
-        public IStepBuilder<TData, WaitFor> WaitFor(string eventName, Expression<Func<TData, IStepExecutionContext, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null)
+        public IStepBuilder<TData, WaitFor> WaitFor(string eventName, Expression<Func<TData, IStepExecutionContext, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null, Expression<Func<TData, bool>> cancelCondition = null)
         {
-            var newStep = new WorkflowStep<WaitFor>();
+            WorkflowStep<WaitFor> newStep;
+
+            if (cancelCondition != null)
+                newStep = new CancellableStep<WaitFor, TData>(cancelCondition);
+            else
+                newStep = new WorkflowStep<WaitFor>();
+
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, WaitFor>(WorkflowBuilder, newStep);
             stepBuilder.Input((step) => step.EventName, (data) => eventName);
@@ -142,7 +154,7 @@ namespace WorkflowCore.Services
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
             return stepBuilder;
         }
-
+        
         public IStepBuilder<TData, TStep> End<TStep>(string name) where TStep : IStepBody
         {
             var ancestor = IterateParents(Step.Id, name);
