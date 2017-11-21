@@ -76,9 +76,9 @@ namespace WorkflowCore.Services.DefinitionStorage
             var stepType = FindType(step.StepType);
             var stepBuilderType = typeof(IStepBuilder<,>).MakeGenericType(_dataType, stepType);
             var configActionType = typeof(Action<>).MakeGenericType(stepBuilderType);
-            var genMethod = previous.GetType().GetMethod("Then", new Type[] { configActionType });
+            //var genMethod = previous.GetType().GetMethod("Then", new Type[] { configActionType });
             var m = previous.GetType().GetMethods();
-            //var genMethod = m.Single(x => x.Name == "Then" && x.ContainsGenericParameters);
+            var genMethod = m.Single(x => x.Name == "Then" && x.ContainsGenericParameters);
             var method = genMethod.MakeGenericMethod(stepType);
             var result = method.Invoke(builder, new object[] { null });
 
