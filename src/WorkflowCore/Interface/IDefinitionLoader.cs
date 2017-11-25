@@ -1,7 +1,9 @@
-﻿namespace WorkflowCore.Interface
+﻿using WorkflowCore.Models;
+
+namespace WorkflowCore.Interface
 {
     public interface IDefinitionLoader
     {
-        void LoadDefinition(string json);
+        WorkflowDefinition LoadDefinition(string json);
     }
 }

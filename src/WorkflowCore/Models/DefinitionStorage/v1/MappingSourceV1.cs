@@ -6,8 +6,8 @@ namespace WorkflowCore.Models.DefinitionStorage.v1
 {
     public class MappingSourceV1
     {
-        public string Source { get; set; }
+        public string Value { get; set; }
 
-        public string Target { get; set; }
+        public string Property { get; set; }
     }
 }

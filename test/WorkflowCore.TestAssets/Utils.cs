@@ -16,6 +16,11 @@ namespace WorkflowCore.TestAssets
             T result = JsonConvert.DeserializeObject<T>(str);
             return result;
         }
+
+        public static string GetTestDefinitionJson()
+        {
+            return Properties.Resources.ResourceManager.GetString("stored_definition");
+        }
     }
 }
 

@@ -257,7 +257,7 @@ namespace WorkflowCore.Services
         {
             var newStep = new WorkflowStep<While>();
 
-            Expression<Func<While, bool>> inputExpr = (x => x.ConditionResult);
+            Expression<Func<While, bool>> inputExpr = (x => x.Condition);
 
             var mapping = new DataMapping()
             {
@@ -278,7 +278,7 @@ namespace WorkflowCore.Services
         {
             var newStep = new WorkflowStep<If>();
 
-            Expression<Func<If, bool>> inputExpr = (x => x.ConditionResult);
+            Expression<Func<If, bool>> inputExpr = (x => x.Condition);
 
             var mapping = new DataMapping()
             {

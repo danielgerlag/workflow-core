@@ -30,7 +30,11 @@ namespace ScratchPad
             //host.RegisterWorkflow<HelloWorldWorkflow>();
             host.Start();
 
-            host.StartWorkflow("HelloWorld", 1, null);
+            host.StartWorkflow("HelloWorld", 1, new MyDataClass() { Value3 = "hi there" });
+
+            Console.WriteLine("Enter value to publish");
+            string value = Console.ReadLine();
+            host.PublishEvent("Event1", "Key1", value);
 
             Console.ReadLine();
             host.Stop();
@@ -72,13 +76,35 @@ namespace ScratchPad
         }
     }
 
+    public class PrintMessage : StepBody
+    {
+        public string Message { get; set; }
+
+        public override ExecutionResult Run(IStepExecutionContext context)
+        {
+            Console.WriteLine(Message);
+            return ExecutionResult.Next();
+        }
+    }
+
+    public class GenerateMessage : StepBody
+    {
+        public string Message { get; set; }
+
+        public override ExecutionResult Run(IStepExecutionContext context)
+        {
+            Message = "Generated message";
+            return ExecutionResult.Next();
+        }
+    }
+
     public class MyDataClass
     {
         public int Value1 { get; set; }
 
         public int Value2 { get; set; }
 
-        public int Value3 { get; set; }
+        public string Value3 { get; set; }
     }
 }
 
