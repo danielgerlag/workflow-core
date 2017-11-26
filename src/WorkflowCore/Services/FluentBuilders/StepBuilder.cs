@@ -348,8 +348,7 @@ namespace WorkflowCore.Services
         public IContainerStepBuilder<TData, Schedule, TStepBody> Schedule(Expression<Func<TData, TimeSpan>> time)
         {
             var newStep = new WorkflowStep<Schedule>();
-
-            Expression<Func<Schedule, TimeSpan>> inputExpr = (x => x.Period);
+            Expression<Func<Schedule, TimeSpan>> inputExpr = (x => x.Interval);
 
             var mapping = new DataMapping()
             {
