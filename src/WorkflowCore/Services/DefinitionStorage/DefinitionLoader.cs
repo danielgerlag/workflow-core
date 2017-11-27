@@ -11,6 +11,7 @@ using WorkflowCore.Models;
 using WorkflowCore.Primitives;
 using WorkflowCore.Models.DefinitionStorage;
 using WorkflowCore.Models.DefinitionStorage.v1;
+using WorkflowCore.Exceptions;
 
 namespace WorkflowCore.Services.DefinitionStorage
 {
@@ -22,7 +23,7 @@ namespace WorkflowCore.Services.DefinitionStorage
         {
             _registry = registry;
         }
-        
+                        
         public WorkflowDefinition LoadDefinition(string json)
         {
             var source = JsonConvert.DeserializeObject<DefinitionSourceV1>(json);
@@ -107,8 +108,14 @@ namespace WorkflowCore.Services.DefinitionStorage
 
             foreach (var step in result)
             {
+                if (result.Any(x => x.Tag == step.Tag && x.Id != step.Id))
+                    throw new WorkflowDefinitionLoadException($"Duplicate step Id {step.Tag}");
+
                 foreach (var outcome in step.Outcomes)
                 {
+                    if (result.All(x => x.Tag != outcome.Tag))
+                        throw new WorkflowDefinitionLoadException($"Cannot find step id {outcome.Tag}");
+
                     outcome.NextStep = result.Single(x => x.Tag == outcome.Tag).Id;
                 }
             }
@@ -137,8 +144,6 @@ namespace WorkflowCore.Services.DefinitionStorage
             {
                 var dataParameter = Expression.Parameter(dataType, "data");
                 var contextParameter = Expression.Parameter(typeof(IStepExecutionContext), "context");
-                
-                // https://github.com/StefH/System.Linq.Dynamic.Core/wiki/Dynamic-Expressions
                 var sourceExpr = DynamicExpressionParser.ParseLambda(new [] { dataParameter, contextParameter }, typeof(object), input.Value);
                 var targetExpr = Expression.Property(Expression.Parameter(stepType), input.Key);
 
@@ -168,7 +173,7 @@ namespace WorkflowCore.Services.DefinitionStorage
 
         private Type FindType(string name)
         {
-            return Type.GetType(name);
+            return Type.GetType(name, true, true);
         }
 
     }
