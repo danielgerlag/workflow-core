@@ -26,10 +26,6 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         static MongoPersistenceProvider()
         {
-            //BsonSerializer.RegisterDiscriminatorConvention(typeof(WorkflowStep), new AssemblyQualifiedDiscriminatorConvention());
-            //BsonSerializer.RegisterDiscriminatorConvention(typeof(Expression), new AssemblyQualifiedDiscriminatorConvention());
-            //BsonSerializer.RegisterSerializer(new DataMappingSerializer());
-
             BsonClassMap.RegisterClassMap<WorkflowInstance>(x =>
             {                
                 x.MapIdProperty(y => y.Id)                    
