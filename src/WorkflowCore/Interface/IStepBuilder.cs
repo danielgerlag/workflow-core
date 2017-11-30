@@ -84,7 +84,7 @@ namespace WorkflowCore.Interface
         /// <param name="dataProperty">Property on the data object</param>
         /// <param name="value"></param>
         /// <returns></returns>
-        IStepBuilder<TData, TStepBody> Output<TOutput>(Expression<Func<TData, TOutput>> dataProperty, Expression<Func<TStepBody, TOutput>> value);
+        IStepBuilder<TData, TStepBody> Output<TOutput>(Expression<Func<TData, TOutput>> dataProperty, Expression<Func<TStepBody, object>> value);
 
         /// <summary>
         /// Wait here until to specified event is published
