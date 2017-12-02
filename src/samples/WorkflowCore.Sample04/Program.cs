@@ -26,7 +26,7 @@ namespace WorkflowCore.Sample04
 
             var initialData = new MyDataClass();
             var workflowId = host.StartWorkflow("EventSampleWorkflow", 1, initialData).Result;
-
+            
             Console.WriteLine("Enter value to publish");
             string value = Console.ReadLine();
             host.PublishEvent("MyEvent", workflowId, value);
