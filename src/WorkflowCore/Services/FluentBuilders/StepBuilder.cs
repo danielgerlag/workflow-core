@@ -100,7 +100,7 @@ namespace WorkflowCore.Services
             return this;
         }
 
-        public IStepBuilder<TData, TStepBody> Output<TOutput>(Expression<Func<TData, TOutput>> dataProperty, Expression<Func<TStepBody, TOutput>> value)
+        public IStepBuilder<TData, TStepBody> Output<TOutput>(Expression<Func<TData, TOutput>> dataProperty, Expression<Func<TStepBody, object>> value)
         {
             var mapping = new DataMapping();
             mapping.Source = value;
