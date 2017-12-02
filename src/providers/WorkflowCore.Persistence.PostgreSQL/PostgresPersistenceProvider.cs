@@ -27,37 +27,37 @@ namespace WorkflowCore.Persistence.PostgreSQL
 
         protected override void ConfigureSubscriptionStorage(EntityTypeBuilder<PersistedSubscription> builder)
         {
-            builder.ForNpgsqlToTable("Subscription", "wfc");
+            builder.ToTable("Subscription", "wfc");
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
 
         protected override void ConfigureWorkflowStorage(EntityTypeBuilder<PersistedWorkflow> builder)
         {
-            builder.ForNpgsqlToTable("Workflow", "wfc");
+            builder.ToTable("Workflow", "wfc");
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
                 
         protected override void ConfigureExecutionPointerStorage(EntityTypeBuilder<PersistedExecutionPointer> builder)
         {
-            builder.ForNpgsqlToTable("ExecutionPointer", "wfc");
+            builder.ToTable("ExecutionPointer", "wfc");
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
 
         protected override void ConfigureExecutionErrorStorage(EntityTypeBuilder<PersistedExecutionError> builder)
         {
-            builder.ForNpgsqlToTable("ExecutionError", "wfc");
+            builder.ToTable("ExecutionError", "wfc");
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
 
         protected override void ConfigureExetensionAttributeStorage(EntityTypeBuilder<PersistedExtensionAttribute> builder)
         {
-            builder.ForNpgsqlToTable("ExtensionAttribute", "wfc");
+            builder.ToTable("ExtensionAttribute", "wfc");
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
 
         protected override void ConfigureEventStorage(EntityTypeBuilder<PersistedEvent> builder)
         {
-            builder.ForNpgsqlToTable("Event", "wfc");
+            builder.ToTable("Event", "wfc");
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
     }
