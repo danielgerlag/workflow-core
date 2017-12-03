@@ -13,6 +13,8 @@ namespace WorkflowCore.Models
 
         public string Name { get; set; }
 
+        public string Tag { get; set; }
+
         public List<int> Children { get; set; } = new List<int>();
 
         public List<StepOutcome> Outcomes { get; set; } = new List<StepOutcome>();

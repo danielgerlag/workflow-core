@@ -13,7 +13,7 @@ namespace WorkflowCore.Sample01
         public void Build(IWorkflowBuilder<object> builder)
         {
             builder                
-                .StartWith<HelloWorld>()
+                .StartWith<HelloWorld>()                
                 .Then<GoodbyeWorld>();
         }
 

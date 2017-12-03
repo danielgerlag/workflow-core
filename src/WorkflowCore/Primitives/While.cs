@@ -7,13 +7,13 @@ namespace WorkflowCore.Primitives
 {
     public class While : ContainerStepBody
     {
-        public bool ConditionResult { get; set; }                
+        public bool Condition { get; set; }                
 
         public override ExecutionResult Run(IStepExecutionContext context)
         {
             if (context.PersistenceData == null)
             {
-                if (ConditionResult)
+                if (Condition)
                 {
                     return ExecutionResult.Branch(new List<object>() { null }, new ControlPersistenceData() { ChildrenActive = true });
                 }

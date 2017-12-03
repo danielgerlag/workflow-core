@@ -1,0 +1,71 @@
+﻿{
+  "Id": "HelloWorld",
+  "Version": 1,
+  "Description": "",
+  "DataType": "ScratchPad.MyDataClass, ScratchPad",
+  "Steps": [
+    {
+      "Id": "Hello",
+      "StepType": "ScratchPad.HelloWorld, ScratchPad",
+      "NextStepId": "Generate"
+    },
+    {
+      "Id": "Generate",
+      "StepType": "ScratchPad.GenerateMessage, ScratchPad",
+      "NextStepId": "Print",
+      "Outputs": { "Value3": "step.Message" }
+    },
+    {
+      "Id": "Print",
+      "StepType": "ScratchPad.PrintMessage, ScratchPad",
+      "NextStepId": "If",
+      "Inputs": { "Message": "data.Value3 + \" - \" + DateTime.Now.ToString()" }
+    },
+
+    {
+      "Id": "If",
+      "StepType": "WorkflowCore.Primitives.If, WorkflowCore",
+      "NextStepId": "Bye",
+      "Inputs": { "Condition": "true" },
+      "Do": [
+        [
+          {
+            "Id": "do1",
+            "StepType": "ScratchPad.PrintMessage, ScratchPad",
+            "NextStepId": "do2",
+            "Inputs": { "Message": "\"inner 1\"" }
+          },
+          {
+            "Id": "do2",
+            "StepType": "ScratchPad.PrintMessage, ScratchPad",
+            "Inputs": { "Message": "\"inner 2\"" }
+          }
+        ],
+        [
+          {
+            "Id": "Wait",
+            "StepType": "WorkflowCore.Primitives.WaitFor, WorkflowCore",
+            "NextStepId": "Wait2",
+            "CancelCondition": "false",
+            "Inputs": {
+              "EventName": "\"Event1\"",
+              "EventKey": "\"Key1\"",
+              "EffectiveDate": "DateTime.Now"
+            }
+          },
+          {
+            "Id": "Wait2",
+            "StepType": "ScratchPad.PrintMessage, ScratchPad",
+            "Inputs": { "Message": "\"wait 2\"" }
+          }
+        ]
+
+      ]
+    },
+    
+    {
+      "Id": "Bye",
+      "StepType": "ScratchPad.GoodbyeWorld, ScratchPad"
+    }
+  ]
+}

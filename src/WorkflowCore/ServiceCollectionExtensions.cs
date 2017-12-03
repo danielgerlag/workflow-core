@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ObjectPool;
 using WorkflowCore.Primitives;
 using WorkflowCore.Services.BackgroundTasks;
+using WorkflowCore.Services.DefinitionStorage;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -40,6 +41,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddTransient<IPooledObjectPolicy<IPersistenceProvider>, InjectedObjectPoolPolicy<IPersistenceProvider>>();
             services.AddTransient<IPooledObjectPolicy<IWorkflowExecutor>, InjectedObjectPoolPolicy<IWorkflowExecutor>>();
+
+            services.AddTransient<IDefinitionLoader, DefinitionLoader>();
 
             services.AddTransient<Foreach>();
         }

@@ -1,10 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.6</TargetFramework>
-    <AssemblyName>WorkflowCore.TestAssets</AssemblyName>
-    <PackageId>WorkflowCore.TestAssets</PackageId>
-    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <AssemblyName>ScratchPad</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <PackageId>ScratchPad</PackageId>
+    <RuntimeFrameworkVersion>1.0.3</RuntimeFrameworkVersion>
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
@@ -12,22 +13,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="stored-definition.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="stored-definition.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\src\WorkflowCore\WorkflowCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="4.19.0" />
-    <PackageReference Include="Moq" Version="4.7.99" />
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
-    <PackageReference Include="NUnit" Version="3.6.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,7 +32,7 @@
 
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
+      <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>

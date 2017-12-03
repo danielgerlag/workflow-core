@@ -17,8 +17,8 @@
     <ProjectReference Include="..\WorkflowCore.TestAssets\WorkflowCore.TestAssets.csproj" />
     <ProjectReference Include="..\..\src\providers\WorkflowCore.Persistence.MongoDB\WorkflowCore.Persistence.MongoDB.csproj" />
     <ProjectReference Include="..\WorkflowCore.Testing\WorkflowCore.Testing.csproj" />
-    <ProjectReference Include="..\WorkflowCore.UnitTests\WorkflowCore.UnitTests.csproj" />
     <ProjectReference Include="..\Docker.Testify\Docker.Testify.csproj" />
+    <ProjectReference Include="..\WorkflowCore.UnitTests\WorkflowCore.UnitTests.csproj" />
   </ItemGroup>
 
   <ItemGroup>

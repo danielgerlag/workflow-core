@@ -227,7 +227,6 @@ namespace WorkflowCore.Services
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, Delay>(WorkflowBuilder, newStep);
-
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
 
             return stepBuilder;
@@ -258,7 +257,7 @@ namespace WorkflowCore.Services
         {
             var newStep = new WorkflowStep<While>();
 
-            Expression<Func<While, bool>> inputExpr = (x => x.ConditionResult);
+            Expression<Func<While, bool>> inputExpr = (x => x.Condition);
 
             var mapping = new DataMapping()
             {
@@ -279,7 +278,7 @@ namespace WorkflowCore.Services
         {
             var newStep = new WorkflowStep<If>();
 
-            Expression<Func<If, bool>> inputExpr = (x => x.ConditionResult);
+            Expression<Func<If, bool>> inputExpr = (x => x.Condition);
 
             var mapping = new DataMapping()
             {
@@ -349,8 +348,7 @@ namespace WorkflowCore.Services
         public IContainerStepBuilder<TData, Schedule, TStepBody> Schedule(Expression<Func<TData, TimeSpan>> time)
         {
             var newStep = new WorkflowStep<Schedule>();
-
-            Expression<Func<Schedule, TimeSpan>> inputExpr = (x => x.Period);
+            Expression<Func<Schedule, TimeSpan>> inputExpr = (x => x.Interval);
 
             var mapping = new DataMapping()
             {
