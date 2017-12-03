@@ -14,7 +14,10 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 {
     public class DataObjectSerializer : SerializerBase<object>
     {
-        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
+        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings()
+        {
+            TypeNameHandling = TypeNameHandling.All
+        };
         
         public override object Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
         {

@@ -16,7 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="stored-definition.json" />
+    <EmbeddedResource Include="stored-definition.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>

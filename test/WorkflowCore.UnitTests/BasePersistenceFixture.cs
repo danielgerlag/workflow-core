@@ -85,6 +85,7 @@ namespace WorkflowCore.UnitTests
             });
             var workflowId = Subject.CreateNewWorkflow(oldWorkflow).Result;
             var newWorkflow = Utils.DeepCopy(oldWorkflow);
+            newWorkflow.Data = oldWorkflow.Data;
             newWorkflow.NextExecution = 7;
             newWorkflow.ExecutionPointers.Add(new ExecutionPointer() { Id = Guid.NewGuid().ToString(), Active = true, StepId = 1 });
 
