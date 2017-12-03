@@ -32,8 +32,11 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             string str = JsonConvert.SerializeObject(value, SerializerSettings);
             var doc = BsonDocument.Parse(str);
             var typeElem = doc.GetElement("$type");
-            doc.InsertAt(0, new BsonElement("_t", typeElem.Value));
             doc.RemoveElement(typeElem);
+
+            if (doc.Elements.All(x => x.Name != "_t"))
+                doc.InsertAt(0, new BsonElement("_t", typeElem.Value));
+            
             BsonSerializer.Serialize(context.Writer, doc);
         }
     }

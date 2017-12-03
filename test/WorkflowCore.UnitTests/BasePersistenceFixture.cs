@@ -44,7 +44,7 @@ namespace WorkflowCore.UnitTests
         {
             var workflow = new WorkflowInstance()
             {
-                Data = new { Value1 = 7 },
+                Data = new TestData() { Value1 = 7 },
                 Description = "My Description",
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
@@ -69,7 +69,7 @@ namespace WorkflowCore.UnitTests
         {
             var oldWorkflow = new WorkflowInstance()
             {
-                Data = new { Value1 = 7 },
+                Data = new TestData() { Value1 = 7 },
                 Description = "My Description",
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
@@ -107,7 +107,7 @@ namespace WorkflowCore.UnitTests
                 {
                     var oldWorkflow = new WorkflowInstance()
                     {
-                        Data = new { Value1 = 7 },
+                        Data = new TestData() { Value1 = 7 },
                         Description = "My Description",
                         Status = WorkflowStatus.Runnable,
                         NextExecution = 0,
@@ -135,5 +135,10 @@ namespace WorkflowCore.UnitTests
                 action.ShouldNotThrow<InvalidOperationException>();
             });
         }
+    }
+
+    public class TestData
+    {
+        public int Value1 { get; set; }
     }
 }
