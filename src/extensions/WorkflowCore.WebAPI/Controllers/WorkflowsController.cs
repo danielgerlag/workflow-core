@@ -30,7 +30,7 @@ namespace WorkflowCore.WebAPI.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> Get(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take)
+        public async Task<IActionResult> Get(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take = 20)
         {
             var result = await _workflowStore.GetWorkflowInstances(status, type, createdFrom, createdTo, skip, take);
             return Json(result.ToList());

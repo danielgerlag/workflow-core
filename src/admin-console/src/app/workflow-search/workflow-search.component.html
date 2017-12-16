@@ -1,0 +1,65 @@
+<div class="dashboard-container mat-elevation-z8">
+  <mat-toolbar color="primary">
+      <i class="material-icons">error</i>
+      Workflows
+      <span class="toolbar-spacer"></span>
+      <button mat-button (click)="fetchData()">
+        <mat-icon>loop</mat-icon>
+      </button>
+  </mat-toolbar>
+
+<div class="dashboard-header">
+  <mat-form-field floatPlaceholder="never">
+    <input matInput #search placeholder="Search">      
+  </mat-form-field>    
+</div>
+
+<mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar>
+
+<mat-table #table [dataSource]="dataSource">
+
+  <ng-container matColumnDef="createTime">
+    <mat-header-cell *matHeaderCellDef> Create Time </mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{ row.create | date:'short':'+00' }} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="defintion">
+    <mat-header-cell *matHeaderCellDef> Type </mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.defintion}} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="version">
+    <mat-header-cell *matHeaderCellDef> Version </mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.version}} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="reference">
+    <mat-header-cell *matHeaderCellDef> Reference</mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.reference}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="status">
+    <mat-header-cell *matHeaderCellDef> Status </mat-header-cell>
+    <mat-cell *matCellDef="let row"> {{row.status}} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="actions">
+    <mat-header-cell *matHeaderCellDef></mat-header-cell>
+    <mat-cell *matCellDef="let row">
+      <button mat-raised-button color="primary" (click)="retry(row.id)">Retry</button>
+    </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>
+
+<mat-paginator #paginator
+              (page)="fetchData()"
+              [length]="20"
+              [pageIndex]="0"
+              [pageSize]="25"
+              [pageSizeOptions]="[5, 10, 25, 100]">
+</mat-paginator>
+
+</div>
