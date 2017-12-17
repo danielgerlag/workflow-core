@@ -30,37 +30,37 @@ namespace WorkflowCore.Persistence.SqlServer
 
         protected override void ConfigureSubscriptionStorage(EntityTypeBuilder<PersistedSubscription> builder)
         {
-            builder.ForSqlServerToTable("Subscription", "wfc");
+            builder.ToTable("Subscription", "wfc");
             builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
         }
 
         protected override void ConfigureWorkflowStorage(EntityTypeBuilder<PersistedWorkflow> builder)
         {
-            builder.ForSqlServerToTable("Workflow", "wfc");
+            builder.ToTable("Workflow", "wfc");
             builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
         }
         
         protected override void ConfigureExecutionPointerStorage(EntityTypeBuilder<PersistedExecutionPointer> builder)
         {
-            builder.ForSqlServerToTable("ExecutionPointer", "wfc");
+            builder.ToTable("ExecutionPointer", "wfc");
             builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
         }
 
         protected override void ConfigureExecutionErrorStorage(EntityTypeBuilder<PersistedExecutionError> builder)
         {
-            builder.ForSqlServerToTable("ExecutionError", "wfc");
+            builder.ToTable("ExecutionError", "wfc");
             builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
         }
 
         protected override void ConfigureExetensionAttributeStorage(EntityTypeBuilder<PersistedExtensionAttribute> builder)
         {
-            builder.ForSqlServerToTable("ExtensionAttribute", "wfc");
+            builder.ToTable("ExtensionAttribute", "wfc");
             builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
         }
 
         protected override void ConfigureEventStorage(EntityTypeBuilder<PersistedEvent> builder)
         {
-            builder.ForSqlServerToTable("Event", "wfc");
+            builder.ToTable("Event", "wfc");
             builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
         }
     }
