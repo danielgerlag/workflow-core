@@ -39,7 +39,8 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                             .WaitFor("Event2", (data, context) => context.Workflow.Id, null, data => !string.IsNullOrEmpty(data.StrValue))
                                 .Output(data => data.StrValue, step => step.EventData)
                             .Then(context => Event2Fired = true))
-                        .Join();
+                        .Join()
+                        .WaitFor("Event3", (data, context) => context.Workflow.Id, null);
             }
         }
 
@@ -55,6 +56,9 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             WaitForEventSubscription("Event1", workflowId, TimeSpan.FromSeconds(30));
             WaitForEventSubscription("Event2", workflowId, TimeSpan.FromSeconds(30));
             Host.PublishEvent("Event2", workflowId, "Pass");
+            WaitForEventSubscription("Event3", workflowId, TimeSpan.FromSeconds(30));
+            Host.PublishEvent("Event1", workflowId, "Fail");
+            Host.PublishEvent("Event3", workflowId, null);
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
             GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
