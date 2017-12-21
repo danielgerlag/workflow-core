@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Data.Common" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\WorkflowCore\WorkflowCore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Data.SqlClient">
+      <HintPath>..\..\..\..\..\Users\r.paterlini\.nuget\packages\system.data.sqlclient\4.3.1\ref\netstandard1.3\System.Data.SqlClient.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
