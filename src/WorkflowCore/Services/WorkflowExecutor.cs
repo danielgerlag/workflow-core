@@ -48,6 +48,7 @@ namespace WorkflowCore.Services
                 {
                     try
                     {
+                        pointer.Status = PointerStatus.Running;
                         switch (step.InitForExecution(wfResult, def, workflow, pointer))
                         {
                             case ExecutionPipelineDirective.Defer:
@@ -114,30 +115,7 @@ namespace WorkflowCore.Services
                     }
                     catch (Exception ex)
                     {
-                        pointer.RetryCount++;
-                        _logger.LogError("Workflow {0} raised error on step {1} Message: {2}", workflow.Id, pointer.StepId, ex.Message);
-                        wfResult.Errors.Add(new ExecutionError()
-                        {
-                            WorkflowId = workflow.Id,
-                            ExecutionPointerId = pointer.Id,
-                            ErrorTime = _datetimeProvider.Now.ToUniversalTime(),
-                            Message = ex.Message
-                        });
-
-                        switch (step.ErrorBehavior ?? def.DefaultErrorBehavior)
-                        {
-                            case WorkflowErrorHandling.Retry:
-                                pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(step.RetryInterval ?? def.DefaultErrorRetryInterval ?? options.ErrorRetryInterval);
-                                break;
-                            case WorkflowErrorHandling.Suspend:
-                                workflow.Status = WorkflowStatus.Suspended;
-                                break;
-                            case WorkflowErrorHandling.Terminate:
-                                workflow.Status = WorkflowStatus.Terminated;
-                                break;
-                        }
-
-                        Host.ReportStepError(workflow, step, ex);
+                        HandleStepException(workflow, options, wfResult, def, pointer, step, ex);
                     }
                 }
                 else
@@ -160,6 +138,59 @@ namespace WorkflowCore.Services
             return wfResult;
         }
 
+        private void HandleStepException(WorkflowInstance workflow, WorkflowOptions options, WorkflowExecutorResult wfResult, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, Exception ex)
+        {
+            pointer.RetryCount++;
+            pointer.Status = PointerStatus.Failed;
+            _logger.LogError("Workflow {0} raised error on step {1} Message: {2}", workflow.Id, pointer.StepId, ex.Message);
+            wfResult.Errors.Add(new ExecutionError()
+            {
+                WorkflowId = workflow.Id,
+                ExecutionPointerId = pointer.Id,
+                ErrorTime = _datetimeProvider.Now.ToUniversalTime(),
+                Message = ex.Message
+            });
+
+            if (step.CompensationStepId.HasValue)
+            {
+                pointer.Active = false;
+                pointer.EndTime = _datetimeProvider.Now.ToUniversalTime();
+                pointer.Status = PointerStatus.Failed;
+
+                var nextId = Guid.NewGuid().ToString();
+                workflow.ExecutionPointers.Add(new ExecutionPointer()
+                {
+                    Id = nextId,
+                    PredecessorId = pointer.Id,
+                    StepId = step.CompensationStepId.Value,
+                    Active = true,
+                    ContextItem = pointer.ContextItem,
+                    Status = PointerStatus.Pending,
+                    StepName = def.Steps.First(x => x.Id == step.CompensationStepId.Value).Name
+                });
+
+                pointer.SuccessorIds.Add(nextId);                
+            }
+            else
+            {
+
+                switch (step.ErrorBehavior ?? def.DefaultErrorBehavior)
+                {
+                    case WorkflowErrorHandling.Retry:                        
+                        pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(step.RetryInterval ?? def.DefaultErrorRetryInterval ?? options.ErrorRetryInterval);
+                        break;
+                    case WorkflowErrorHandling.Suspend:                        
+                        workflow.Status = WorkflowStatus.Suspended;
+                        break;
+                    case WorkflowErrorHandling.Terminate:                        
+                        workflow.Status = WorkflowStatus.Terminated;
+                        break;
+                }
+            }
+
+            Host.ReportStepError(workflow, step, ex);
+        }
+
         private void ProcessExecutionResult(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, ExecutionResult result, WorkflowExecutorResult workflowResult)
         {
             //TODO: refactor this into it's own class
@@ -168,6 +199,7 @@ namespace WorkflowCore.Services
             if (result.SleepFor.HasValue)
             {
                 pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(result.SleepFor.Value);
+                pointer.Status = PointerStatus.Sleeping;
             }
 
             if (!string.IsNullOrEmpty(result.EventName))
@@ -175,6 +207,7 @@ namespace WorkflowCore.Services
                 pointer.EventName = result.EventName;
                 pointer.EventKey = result.EventKey;
                 pointer.Active = false;
+                pointer.Status = PointerStatus.WaitingForEvent;
 
                 workflowResult.Subscriptions.Add(new EventSubscription()
                 {
@@ -190,18 +223,23 @@ namespace WorkflowCore.Services
             {
                 pointer.Active = false;
                 pointer.EndTime = _datetimeProvider.Now.ToUniversalTime();
+                pointer.Status = PointerStatus.Complete;
 
                 foreach (var outcomeTarget in step.Outcomes.Where(x => object.Equals(x.GetValue(workflow.Data), result.OutcomeValue) || x.GetValue(workflow.Data) == null))
                 {
+                    var nextId = Guid.NewGuid().ToString();
                     workflow.ExecutionPointers.Add(new ExecutionPointer()
                     {
-                        Id = Guid.NewGuid().ToString(),
+                        Id = nextId,
                         PredecessorId = pointer.Id,
                         StepId = outcomeTarget.NextStep,
                         Active = true,
                         ContextItem = pointer.ContextItem,
+                        Status = PointerStatus.Pending,
                         StepName = def.Steps.First(x => x.Id == outcomeTarget.NextStep).Name
                     });
+
+                    pointer.SuccessorIds.Add(nextId);
                 }
             }
             else
@@ -218,6 +256,7 @@ namespace WorkflowCore.Services
                             StepId = childDefId,
                             Active = true,
                             ContextItem = branch,
+                            Status = PointerStatus.Pending,
                             StepName = def.Steps.First(x => x.Id == childDefId).Name
                         });
 

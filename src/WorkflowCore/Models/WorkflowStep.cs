@@ -25,7 +25,9 @@ namespace WorkflowCore.Models
 
         public WorkflowErrorHandling? ErrorBehavior { get; set; }
 
-        public TimeSpan? RetryInterval { get; set; }                
+        public TimeSpan? RetryInterval { get; set; }
+
+        public int? CompensationStepId { get; set; }
 
         public virtual ExecutionPipelineDirective InitForExecution(WorkflowExecutorResult executorResult, WorkflowDefinition defintion, WorkflowInstance workflow, ExecutionPointer executionPointer)
         {

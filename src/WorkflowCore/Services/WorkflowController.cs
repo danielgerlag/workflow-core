@@ -75,6 +75,7 @@ namespace WorkflowCore.Services
                 Id = Guid.NewGuid().ToString(),
                 StepId = 0,
                 Active = true,
+                Status = PointerStatus.Pending,
                 StepName = Enumerable.First<WorkflowStep>(def.Steps, x => x.Id == 0).Name
             });
 
