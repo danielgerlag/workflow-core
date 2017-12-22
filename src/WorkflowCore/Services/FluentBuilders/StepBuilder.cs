@@ -333,12 +333,15 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
-        public IContainerStepBuilder<TData, Sequence, Sequence> Saga()
+        public IStepBuilder<TData, Saga> Saga(Action<IWorkflowBuilder<TData>> builder)
         {
-            var newStep = new WorkflowStep<Sequence>();            
+            var newStep = new WorkflowStep<Saga>();            
             WorkflowBuilder.AddStep(newStep);
-            var stepBuilder = new StepBuilder<TData, Sequence>(WorkflowBuilder, newStep);
+            var stepBuilder = new StepBuilder<TData, Saga>(WorkflowBuilder, newStep);
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            builder.Invoke(WorkflowBuilder);
+            stepBuilder.Step.Children.Add(stepBuilder.Step.Id + 1); //TODO: make more elegant
+
             return stepBuilder;
         }
 
@@ -392,7 +395,7 @@ namespace WorkflowCore.Services
         public IStepBuilder<TData, TStepBody> Do(Action<IWorkflowBuilder<TData>> builder)
         {
             builder.Invoke(WorkflowBuilder);
-            Step.Children.Add(Step.Id + 1); //TODO: make more elegant                        
+            Step.Children.Add(Step.Id + 1); //TODO: make more elegant
 
             return this;
         }

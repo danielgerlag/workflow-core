@@ -13,7 +13,6 @@ namespace WorkflowCore.Services
 {
     public class WorkflowExecutor : IWorkflowExecutor
     {
-
         protected readonly IWorkflowRegistry _registry;
         protected readonly IServiceProvider _serviceProvider;
         protected readonly IDateTimeProvider _datetimeProvider;
@@ -117,6 +116,15 @@ namespace WorkflowCore.Services
                     }
                     catch (Exception ex)
                     {
+                        _logger.LogError("Workflow {0} raised error on step {1} Message: {2}", workflow.Id, pointer.StepId, ex.Message);
+                        wfResult.Errors.Add(new ExecutionError()
+                        {
+                            WorkflowId = workflow.Id,
+                            ExecutionPointerId = pointer.Id,
+                            ErrorTime = _datetimeProvider.Now.ToUniversalTime(),
+                            Message = ex.Message
+                        });
+
                         _executionResultProcessor.HandleStepException(workflow, options, wfResult, def, pointer, step, ex);
                         Host.ReportStepError(workflow, step, ex);
                     }

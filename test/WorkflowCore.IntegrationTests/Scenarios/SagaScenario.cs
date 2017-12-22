@@ -31,7 +31,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             {
                 builder
                     .StartWith(context => ExecutionResult.Next())
-                    .Saga().Do(x => x
+                    .Saga(x => x
                         .StartWith(context => ExecutionResult.Next())
                         .Then(context =>
                         {

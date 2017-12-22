@@ -58,6 +58,7 @@ namespace WorkflowCore.UnitTests.Services
         protected IWorkflowHost Host;
         protected IPersistenceProvider PersistenceProvider;
         protected IWorkflowRegistry Registry;
+        protected IExecutionResultProcessor ResultProcesser;
         protected WorkflowOptions Options;
 
         public WorkflowExecutorFixture()
@@ -69,7 +70,8 @@ namespace WorkflowCore.UnitTests.Services
             Options = new WorkflowOptions();
             services.AddTransient<IWorkflowBuilder, WorkflowBuilder>();
             services.AddTransient<IWorkflowRegistry, WorkflowRegistry>();
-            
+            services.AddTransient<IExecutionResultProcessor, ExecutionResultProcessor>();
+
             Host = A.Fake<IWorkflowHost>();
             PersistenceProvider = A.Fake<IPersistenceProvider>();
             var serviceProvider = services.BuildServiceProvider();
@@ -79,8 +81,9 @@ namespace WorkflowCore.UnitTests.Services
             loggerFactory.AddConsole(LogLevel.Debug);
 
             Registry = serviceProvider.GetService<IWorkflowRegistry>();
+            ResultProcesser = serviceProvider.GetService<IExecutionResultProcessor>();
 
-            Subject = new WorkflowExecutor(Registry, serviceProvider, new DateTimeProvider(), loggerFactory);            
+            Subject = new WorkflowExecutor(Registry, serviceProvider, new DateTimeProvider(), ResultProcesser, loggerFactory);
         }
 
         [Fact]

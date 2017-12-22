@@ -167,7 +167,7 @@ namespace WorkflowCore.Interface
         /// Execute a sequence of steps in a container
         /// </summary>
         /// <returns></returns>
-        IContainerStepBuilder<TData, Sequence, Sequence> Saga();
+        IStepBuilder<TData, Saga> Saga(Action<IWorkflowBuilder<TData>> builder);
 
         /// <summary>
         /// Schedule a block of steps to execute in parallel sometime in the future
