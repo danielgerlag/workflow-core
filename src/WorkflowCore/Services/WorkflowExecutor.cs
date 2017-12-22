@@ -13,7 +13,7 @@ namespace WorkflowCore.Services
 {
     public class WorkflowExecutor : IWorkflowExecutor
     {
-        
+
         protected readonly IWorkflowRegistry _registry;
         protected readonly IServiceProvider _serviceProvider;
         protected readonly IDateTimeProvider _datetimeProvider;
@@ -115,7 +115,7 @@ namespace WorkflowCore.Services
                     }
                     catch (Exception ex)
                     {
-                        HandleStepException(workflow, options, wfResult, def, pointer, step, ex);
+                        HandleStepException(workflow, options, wfResult, def, pointer, step, wfResult, ex);
                     }
                 }
                 else
@@ -138,7 +138,7 @@ namespace WorkflowCore.Services
             return wfResult;
         }
 
-        private void HandleStepException(WorkflowInstance workflow, WorkflowOptions options, WorkflowExecutorResult wfResult, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, Exception ex)
+        private void HandleStepException(WorkflowInstance workflow, WorkflowOptions options, WorkflowExecutorResult wfResult, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, WorkflowExecutorResult workflowResult, Exception ex)
         {
             pointer.RetryCount++;
             pointer.Status = PointerStatus.Failed;
@@ -151,44 +151,52 @@ namespace WorkflowCore.Services
                 Message = ex.Message
             });
 
-            if (step.CompensationStepId.HasValue)
+            var compensatingStepId = FindScopeCompensationStepId(workflow, def, pointer);
+
+            switch (step.ErrorBehavior ?? (compensatingStepId.HasValue ? WorkflowErrorHandling.Compensate : def.DefaultErrorBehavior))
             {
-                pointer.Active = false;
-                pointer.EndTime = _datetimeProvider.Now.ToUniversalTime();
-                pointer.Status = PointerStatus.Failed;
-
-                var nextId = Guid.NewGuid().ToString();
-                workflow.ExecutionPointers.Add(new ExecutionPointer()
-                {
-                    Id = nextId,
-                    PredecessorId = pointer.Id,
-                    StepId = step.CompensationStepId.Value,
-                    Active = true,
-                    ContextItem = pointer.ContextItem,
-                    Status = PointerStatus.Pending,
-                    StepName = def.Steps.First(x => x.Id == step.CompensationStepId.Value).Name
-                });
-
-                pointer.SuccessorIds.Add(nextId);                
-            }
-            else
-            {
-
-                switch (step.ErrorBehavior ?? def.DefaultErrorBehavior)
-                {
-                    case WorkflowErrorHandling.Retry:                        
-                        pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(step.RetryInterval ?? def.DefaultErrorRetryInterval ?? options.ErrorRetryInterval);
-                        break;
-                    case WorkflowErrorHandling.Suspend:                        
-                        workflow.Status = WorkflowStatus.Suspended;
-                        break;
-                    case WorkflowErrorHandling.Terminate:                        
-                        workflow.Status = WorkflowStatus.Terminated;
-                        break;
-                }
+                case WorkflowErrorHandling.Retry:
+                    pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(step.RetryInterval ?? def.DefaultErrorRetryInterval ?? options.ErrorRetryInterval);
+                    break;
+                case WorkflowErrorHandling.Suspend:
+                    workflow.Status = WorkflowStatus.Suspended;
+                    break;
+                case WorkflowErrorHandling.Terminate:
+                    workflow.Status = WorkflowStatus.Terminated;
+                    break;
+                case WorkflowErrorHandling.Compensate:
+                    if (compensatingStepId.HasValue)
+                    {
+                        AddCompensationPointer(workflow, def, pointer, compensatingStepId.Value);
+                        if (step.CompensationStepId.HasValue)
+                            ProcessExecutionResult(workflow, def, pointer, step, ExecutionResult.Next(), wfResult);
+                    }
+                    break;
             }
 
             Host.ReportStepError(workflow, step, ex);
+        }
+
+        private void AddCompensationPointer(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, int compensationStepId)
+        {
+            pointer.Active = false;
+            pointer.EndTime = _datetimeProvider.Now.ToUniversalTime();
+            pointer.Status = PointerStatus.Failed;
+
+            var nextId = Guid.NewGuid().ToString();
+            workflow.ExecutionPointers.Add(new ExecutionPointer()
+            {
+                Id = nextId,
+                PredecessorId = pointer.Id,
+                StepId = compensationStepId,
+                Active = true,
+                ContextItem = pointer.ContextItem,
+                Status = PointerStatus.Pending,
+                StepName = def.Steps.First(x => x.Id == compensationStepId).Name,
+                Scope = new Stack<string>(pointer.Scope)
+            });
+
+            pointer.SuccessorIds.Add(nextId);
         }
 
         private void ProcessExecutionResult(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, ExecutionResult result, WorkflowExecutorResult workflowResult)
@@ -236,7 +244,8 @@ namespace WorkflowCore.Services
                         Active = true,
                         ContextItem = pointer.ContextItem,
                         Status = PointerStatus.Pending,
-                        StepName = def.Steps.First(x => x.Id == outcomeTarget.NextStep).Name
+                        StepName = def.Steps.First(x => x.Id == outcomeTarget.NextStep).Name,
+                        Scope = new Stack<string>(pointer.Scope)
                     });
 
                     pointer.SuccessorIds.Add(nextId);
@@ -249,6 +258,8 @@ namespace WorkflowCore.Services
                     foreach (var childDefId in step.Children)
                     {
                         var childPointerId = Guid.NewGuid().ToString();
+                        var childScope = new Stack<string>(pointer.Scope);
+                        childScope.Push(pointer.Id);
                         workflow.ExecutionPointers.Add(new ExecutionPointer()
                         {
                             Id = childPointerId,
@@ -257,7 +268,8 @@ namespace WorkflowCore.Services
                             Active = true,
                             ContextItem = branch,
                             Status = PointerStatus.Pending,
-                            StepName = def.Steps.First(x => x.Id == childDefId).Name
+                            StepName = def.Steps.First(x => x.Id == childDefId).Name,
+                            Scope = childScope
                         });
 
                         pointer.Children.Add(childPointerId);
@@ -376,6 +388,23 @@ namespace WorkflowCore.Services
             }
 
             return result;
+        }
+
+        private int? FindScopeCompensationStepId(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer currentPointer)
+        {
+            var scope = new Stack<string>(currentPointer.Scope);
+            scope.Push(currentPointer.Id);
+
+            while (scope.Count > 0)
+            {
+                var pointerId = scope.Pop();
+                var pointer = workflow.ExecutionPointers.First(x => x.Id == pointerId);
+                var step = def.Steps.First(x => x.Id == pointer.StepId);
+                if (step.CompensationStepId.HasValue)
+                    return step.CompensationStepId.Value;
+            }
+
+            return null;
         }
     }
 }

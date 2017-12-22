@@ -14,17 +14,18 @@ namespace WorkflowCore.Sample17
         {
             builder
                 .StartWith(context => Console.WriteLine("Hello"))
-                .Sequence().Do(seq => seq
+                .Saga().Do(seq => seq
                     .StartWith(context => Console.WriteLine("1"))
                     .Then(context =>
                     {
                         Console.WriteLine("2");
-                        //throw new Exception("boo");
+                        throw new Exception("boo");
                         Console.WriteLine("2.5");
-                    })
-                        .CompensateWith(context => Console.WriteLine("fail"))
-                    .Then(context => Console.WriteLine("3")))
-                    //.OnError(Models.WorkflowErrorHandling.)
+                    })                        
+                    .Then(context => Console.WriteLine("3"))
+                    )
+                    .CompensateWith(context => Console.WriteLine("fail"))
+                //.OnError(Models.WorkflowErrorHandling.)
                 .Then(context => Console.WriteLine("end"));
         }
     }

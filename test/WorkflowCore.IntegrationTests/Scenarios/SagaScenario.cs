@@ -10,7 +10,7 @@ using WorkflowCore.Testing;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
-    public class CompensationScenario : WorkflowTest<CompensationScenario.Workflow, CompensationScenario.MyDataClass>
+    public class SagaScenario : WorkflowTest<SagaScenario.Workflow, SagaScenario.MyDataClass>
     {
         public class MyDataClass
         {
@@ -21,32 +21,38 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         {
             public static bool Event1Fired = false;
             public static bool Event2Fired = false;
+            public static bool Event3Fired = false;
             public static bool TailEventFired = false;
             public static bool CompensationFired = false;
 
-            public string Id => "CompensationWorkflow";
+            public string Id => "SagaWorkflow";
             public int Version => 1;
             public void Build(IWorkflowBuilder<MyDataClass> builder)
             {
                 builder
                     .StartWith(context => ExecutionResult.Next())
-                    .Then(context =>
-                    {
-                        Event1Fired = true;
-                        if ((context.Workflow.Data as MyDataClass).ThrowException)
-                            throw new Exception();
-                        Event2Fired = true;
-                    })
+                    .Saga().Do(x => x
+                        .StartWith(context => ExecutionResult.Next())
+                        .Then(context =>
+                        {
+                            Event1Fired = true;
+                            if ((context.Workflow.Data as MyDataClass).ThrowException)
+                                throw new Exception();
+                            Event2Fired = true;
+                        })
+                        .Then(context => Event3Fired = true)
+                        )                    
                         .CompensateWith(context => CompensationFired = true)
                     .Then(context => TailEventFired = true);
             }
         }
 
-        public CompensationScenario()
+        public SagaScenario()
         {
             Setup();
             Workflow.Event1Fired = false;
             Workflow.Event2Fired = false;
+            Workflow.Event3Fired = false;
             Workflow.CompensationFired = false;
             Workflow.TailEventFired = false;
         }
@@ -61,6 +67,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             UnhandledStepErrors.Count.Should().Be(0);            
             Workflow.Event1Fired.Should().BeTrue();
             Workflow.Event2Fired.Should().BeTrue();
+            Workflow.Event3Fired.Should().BeTrue();
             Workflow.CompensationFired.Should().BeFalse();
             Workflow.TailEventFired.Should().BeTrue();
         }
@@ -75,6 +82,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             UnhandledStepErrors.Count.Should().Be(1);
             Workflow.Event1Fired.Should().BeTrue();
             Workflow.Event2Fired.Should().BeFalse();
+            Workflow.Event3Fired.Should().BeFalse();
             Workflow.CompensationFired.Should().BeTrue();
             Workflow.TailEventFired.Should().BeTrue();
         }

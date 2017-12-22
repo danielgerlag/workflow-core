@@ -333,7 +333,7 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
-        public IContainerStepBuilder<TData, Sequence, Sequence> Sequence()
+        public IContainerStepBuilder<TData, Sequence, Sequence> Saga()
         {
             var newStep = new WorkflowStep<Sequence>();            
             WorkflowBuilder.AddStep(newStep);

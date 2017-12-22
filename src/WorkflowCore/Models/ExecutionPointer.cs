@@ -44,6 +44,8 @@ namespace WorkflowCore.Models
         public PointerStatus Status { get; set; }
 
         public List<string> SuccessorIds { get; set; } = new List<string>();
+
+        public Stack<string> Scope { get; set; } = new Stack<string>();
     }
 
     public enum PointerStatus
