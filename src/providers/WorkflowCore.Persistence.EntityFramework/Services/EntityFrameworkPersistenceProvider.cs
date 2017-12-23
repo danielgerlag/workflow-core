@@ -250,6 +250,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             _mutex.WaitOne();
             try
             {
+                asOf = asOf.ToUniversalTime();
                 var raw = await Set<PersistedSubscription>()
                     .Where(x => x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf)
                     .ToListAsync();
@@ -306,6 +307,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             _mutex.WaitOne();
             try
             {
+                asAt = asAt.ToUniversalTime();
                 var raw = await Set<PersistedEvent>()
                     .Where(x => !x.IsProcessed)
                     .Where(x => x.EventTime <= now)
