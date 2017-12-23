@@ -29,6 +29,10 @@ namespace WorkflowCore.Models
 
         public int? CompensationStepId { get; set; }
 
+        public virtual bool ResumeChildrenAfterCompensation => true;
+
+        public virtual bool RevertChildrenAfterCompensation => false;
+
         public virtual ExecutionPipelineDirective InitForExecution(WorkflowExecutorResult executorResult, WorkflowDefinition defintion, WorkflowInstance workflow, ExecutionPointer executionPointer)
         {
             return ExecutionPipelineDirective.Next;
@@ -41,6 +45,10 @@ namespace WorkflowCore.Models
 
         public virtual void AfterExecute(WorkflowExecutorResult executorResult, IStepExecutionContext context, ExecutionResult stepResult, ExecutionPointer executionPointer)
         {            
+        }
+
+        public virtual void PrimeForRetry(ExecutionPointer pointer)
+        {
         }
 
         /// <summary>

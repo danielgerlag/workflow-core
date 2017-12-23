@@ -58,5 +58,11 @@ namespace WorkflowCore.Persistence.EntityFramework.Models
         public string PredecessorId { get; set; }
 
         public string Outcome { get; set; }
+
+        public PointerStatus Status { get; set; } = PointerStatus.Legacy;
+
+        public string SuccessorIds { get; set; }
+
+        public string Scope { get; set; }
     }
 }

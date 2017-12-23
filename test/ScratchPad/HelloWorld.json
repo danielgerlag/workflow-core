@@ -18,48 +18,54 @@
     {
       "Id": "Print",
       "StepType": "ScratchPad.PrintMessage, ScratchPad",
-      "NextStepId": "If",
+      "NextStepId": "saga",
       "Inputs": { "Message": "data.Value3 + \" - \" + DateTime.Now.ToString()" }
     },
 
     {
-      "Id": "If",
-      "StepType": "WorkflowCore.Primitives.If, WorkflowCore",
+      "Id": "saga",
+      "StepType": "WorkflowCore.Primitives.Sequence, WorkflowCore",
       "NextStepId": "Bye",
-      "Inputs": { "Condition": "true" },
+      "Saga": true,
       "Do": [
         [
           {
             "Id": "do1",
             "StepType": "ScratchPad.PrintMessage, ScratchPad",
             "NextStepId": "do2",
-            "Inputs": { "Message": "\"inner 1\"" }
+            "Inputs": { "Message": "\"inner 1\"" },
+            "CompensateWith": [
+              {
+                "Id": "comp0",
+                "StepType": "ScratchPad.PrintMessage, ScratchPad",
+                "Inputs": { "Message": "\"undoing do1\"" }
+              }
+            ]
           },
           {
             "Id": "do2",
-            "StepType": "ScratchPad.PrintMessage, ScratchPad",
-            "Inputs": { "Message": "\"inner 2\"" }
-          }
-        ],
-        [
-          {
-            "Id": "Wait",
-            "StepType": "WorkflowCore.Primitives.WaitFor, WorkflowCore",
-            "NextStepId": "Wait2",
-            "CancelCondition": "false",
-            "Inputs": {
-              "EventName": "\"Event1\"",
-              "EventKey": "\"Key1\"",
-              "EffectiveDate": "DateTime.Now"
-            }
+            "StepType": "ScratchPad.Throw, ScratchPad",
+            "NextStepId": "do3",
+            "CompensateWith": [
+              {
+                "Id": "comp1",
+                "NextStepId": "comp2",
+                "StepType": "ScratchPad.PrintMessage, ScratchPad",
+                "Inputs": { "Message": "\"undoing do2\"" }
+              },
+              {
+                "Id": "comp2",
+                "StepType": "ScratchPad.PrintMessage, ScratchPad",
+                "Inputs": { "Message": "\"still undoing do2\"" }
+              }
+            ]
           },
           {
-            "Id": "Wait2",
+            "Id": "do3",
             "StepType": "ScratchPad.PrintMessage, ScratchPad",
-            "Inputs": { "Message": "\"wait 2\"" }
+            "Inputs": { "Message": "\"inner 3\"" }
           }
         ]
-
       ]
     },
     

@@ -20,6 +20,10 @@ namespace WorkflowCore.Models.DefinitionStorage.v1
 
         public List<List<StepSourceV1>> Do { get; set; } = new List<List<StepSourceV1>>();
 
+        public List<StepSourceV1> CompensateWith { get; set; } = new List<StepSourceV1>();
+
+        public bool Saga { get; set; } = false;
+
         public string NextStepId { get; set; }
 
         public Dictionary<string, string> Inputs { get; set; } = new Dictionary<string, string>();

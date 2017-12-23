@@ -41,7 +41,7 @@ namespace WorkflowCore.Models
 
         public object Outcome { get; set; }
 
-        public PointerStatus Status { get; set; }
+        public PointerStatus Status { get; set; } = PointerStatus.Legacy;
 
         public List<string> SuccessorIds { get; set; } = new List<string>();
 
@@ -56,6 +56,7 @@ namespace WorkflowCore.Models
         Complete = 3,
         Sleeping = 4,
         WaitingForEvent = 5,
-        Failed = 6
+        Failed = 6,
+        Compensated = 7
     }
 }

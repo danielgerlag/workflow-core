@@ -12,9 +12,10 @@ using WorkflowCore.Persistence.SqlServer;
 namespace WorkflowCore.Persistence.SqlServer.Migrations
 {
     [DbContext(typeof(SqlServerPersistenceProvider))]
-    partial class SqlServerPersistenceProviderModelSnapshot : ModelSnapshot
+    [Migration("20171223020645_StepScope")]
+    partial class StepScope
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

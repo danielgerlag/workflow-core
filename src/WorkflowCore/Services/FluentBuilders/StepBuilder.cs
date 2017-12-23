@@ -333,11 +333,11 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
-        public IStepBuilder<TData, Saga> Saga(Action<IWorkflowBuilder<TData>> builder)
+        public IStepBuilder<TData, Sequence> Saga(Action<IWorkflowBuilder<TData>> builder)
         {
-            var newStep = new WorkflowStep<Saga>();            
+            var newStep = new SagaContainer<Sequence>();
             WorkflowBuilder.AddStep(newStep);
-            var stepBuilder = new StepBuilder<TData, Saga>(WorkflowBuilder, newStep);
+            var stepBuilder = new StepBuilder<TData, Sequence>(WorkflowBuilder, newStep);
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
             builder.Invoke(WorkflowBuilder);
             stepBuilder.Step.Children.Add(stepBuilder.Step.Id + 1); //TODO: make more elegant
@@ -434,6 +434,18 @@ namespace WorkflowCore.Services
             var stepBuilder = new StepBuilder<TData, ActionStepBody>(WorkflowBuilder, newStep);
             stepBuilder.Input(x => x.Body, x => body);
             Step.CompensationStepId = newStep.Id;
+            return this;
+        }
+
+        public IStepBuilder<TData, TStepBody> CompensateWithSequence(Action<IWorkflowBuilder<TData>> builder)
+        {
+            var newStep = new WorkflowStep<Sequence>();
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, Sequence>(WorkflowBuilder, newStep);
+            Step.CompensationStepId = newStep.Id;
+            builder.Invoke(WorkflowBuilder);
+            stepBuilder.Step.Children.Add(stepBuilder.Step.Id + 1); //TODO: make more elegant
+
             return this;
         }
     }

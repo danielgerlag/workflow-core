@@ -18,19 +18,21 @@ namespace WorkflowCore.Services
         protected readonly IDateTimeProvider _datetimeProvider;
         protected readonly ILogger _logger;
         private readonly IExecutionResultProcessor _executionResultProcessor;
+        private readonly WorkflowOptions _options;
 
         private IWorkflowHost Host => _serviceProvider.GetService<IWorkflowHost>();
 
-        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, ILoggerFactory loggerFactory)
+        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, WorkflowOptions options, ILoggerFactory loggerFactory)
         {
             _serviceProvider = serviceProvider;
             _registry = registry;
             _datetimeProvider = datetimeProvider;
+            _options = options;
             _logger = loggerFactory.CreateLogger<WorkflowExecutor>();
             _executionResultProcessor = executionResultProcessor;
         }
 
-        public async Task<WorkflowExecutorResult> Execute(WorkflowInstance workflow, WorkflowOptions options)
+        public async Task<WorkflowExecutorResult> Execute(WorkflowInstance workflow)
         {
             var wfResult = new WorkflowExecutorResult();
 
@@ -72,7 +74,7 @@ namespace WorkflowCore.Services
                         if (body == null)
                         {
                             _logger.LogError("Unable to construct step body {0}", step.BodyType.ToString());
-                            pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(options.ErrorRetryInterval);
+                            pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(_options.ErrorRetryInterval);
                             wfResult.Errors.Add(new ExecutionError()
                             {
                                 WorkflowId = workflow.Id,
@@ -125,14 +127,14 @@ namespace WorkflowCore.Services
                             Message = ex.Message
                         });
 
-                        _executionResultProcessor.HandleStepException(workflow, options, wfResult, def, pointer, step, ex);
+                        _executionResultProcessor.HandleStepException(workflow, def, pointer, step);
                         Host.ReportStepError(workflow, step, ex);
                     }
                 }
                 else
                 {
                     _logger.LogError("Unable to find step {0} in workflow definition", pointer.StepId);
-                    pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(options.ErrorRetryInterval);
+                    pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(_options.ErrorRetryInterval);
                     wfResult.Errors.Add(new ExecutionError()
                     {
                         WorkflowId = workflow.Id,

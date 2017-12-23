@@ -31,10 +31,7 @@ namespace ScratchPad
             host.Start();
 
             host.StartWorkflow("HelloWorld", 1, new MyDataClass() { Value3 = "hi there" });
-
-            Console.WriteLine("Enter value to publish");
-            string value = Console.ReadLine();
-            host.PublishEvent("Event1", "Key1", value);
+                        
 
             Console.ReadLine();
             host.Stop();
@@ -73,6 +70,15 @@ namespace ScratchPad
         {
             Console.WriteLine("Goodbye world");
             return ExecutionResult.Next();
+        }
+    }
+
+    public class Throw : StepBody
+    {
+        public override ExecutionResult Run(IStepExecutionContext context)
+        {
+            Console.WriteLine("throwing...");
+            throw new Exception("up");
         }
     }
 

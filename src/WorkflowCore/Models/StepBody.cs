@@ -11,7 +11,7 @@ namespace WorkflowCore.Models
         public Task<ExecutionResult> RunAsync(IStepExecutionContext context)
         {
             return Task.FromResult(Run(context));
-        }
+        }        
 
         protected ExecutionResult OutcomeResult(object value)
         {

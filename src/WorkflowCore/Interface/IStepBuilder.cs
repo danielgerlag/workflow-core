@@ -167,7 +167,7 @@ namespace WorkflowCore.Interface
         /// Execute a sequence of steps in a container
         /// </summary>
         /// <returns></returns>
-        IStepBuilder<TData, Saga> Saga(Action<IWorkflowBuilder<TData>> builder);
+        IStepBuilder<TData, Sequence> Saga(Action<IWorkflowBuilder<TData>> builder);
 
         /// <summary>
         /// Schedule a block of steps to execute in parallel sometime in the future
@@ -206,5 +206,13 @@ namespace WorkflowCore.Interface
         /// <param name="body"></param>
         /// <returns></returns>
         IStepBuilder<TData, TStepBody> CompensateWith(Action<IStepExecutionContext> body);
+
+        /// <summary>
+        /// Undo step if unhandled exception is thrown by this step
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <returns></returns>
+        IStepBuilder<TData, TStepBody> CompensateWithSequence(Action<IWorkflowBuilder<TData>> builder);
+        
     }
 }

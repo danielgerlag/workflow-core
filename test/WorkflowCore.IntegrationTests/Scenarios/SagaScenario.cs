@@ -23,7 +23,12 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             public static bool Event2Fired = false;
             public static bool Event3Fired = false;
             public static bool TailEventFired = false;
-            public static bool CompensationFired = false;
+            public static bool Compensation1Fired = false;
+            public static bool Compensation2Fired = false;
+            public static bool Compensation3Fired = false;
+            public static bool Compensation4Fired = false;
+            public static bool Compensation5Fired = false;
+            public static bool Compensation6Fired = false;
 
             public string Id => "SagaWorkflow";
             public int Version => 1;
@@ -31,8 +36,10 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             {
                 builder
                     .StartWith(context => ExecutionResult.Next())
+                        .CompensateWith(context => Compensation1Fired = true)
                     .Saga(x => x
                         .StartWith(context => ExecutionResult.Next())
+                            .CompensateWith(context => Compensation2Fired = true)
                         .Then(context =>
                         {
                             Event1Fired = true;
@@ -40,10 +47,13 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                                 throw new Exception();
                             Event2Fired = true;
                         })
+                            .CompensateWith(context => Compensation3Fired = true)
                         .Then(context => Event3Fired = true)
-                        )                    
-                        .CompensateWith(context => CompensationFired = true)
-                    .Then(context => TailEventFired = true);
+                            .CompensateWith(context => Compensation4Fired = true)
+                        )
+                        .CompensateWith(context => Compensation5Fired = true)
+                    .Then(context => TailEventFired = true)
+                        .CompensateWith(context => Compensation6Fired = true);
             }
         }
 
@@ -53,7 +63,12 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             Workflow.Event1Fired = false;
             Workflow.Event2Fired = false;
             Workflow.Event3Fired = false;
-            Workflow.CompensationFired = false;
+            Workflow.Compensation1Fired = false;
+            Workflow.Compensation2Fired = false;
+            Workflow.Compensation3Fired = false;
+            Workflow.Compensation4Fired = false;
+            Workflow.Compensation5Fired = false;
+            Workflow.Compensation6Fired = false;
             Workflow.TailEventFired = false;
         }
 
@@ -68,7 +83,12 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             Workflow.Event1Fired.Should().BeTrue();
             Workflow.Event2Fired.Should().BeTrue();
             Workflow.Event3Fired.Should().BeTrue();
-            Workflow.CompensationFired.Should().BeFalse();
+            Workflow.Compensation1Fired.Should().BeFalse();
+            Workflow.Compensation2Fired.Should().BeFalse();
+            Workflow.Compensation3Fired.Should().BeFalse();
+            Workflow.Compensation4Fired.Should().BeFalse();
+            Workflow.Compensation5Fired.Should().BeFalse();
+            Workflow.Compensation6Fired.Should().BeFalse();
             Workflow.TailEventFired.Should().BeTrue();
         }
 
@@ -83,7 +103,12 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             Workflow.Event1Fired.Should().BeTrue();
             Workflow.Event2Fired.Should().BeFalse();
             Workflow.Event3Fired.Should().BeFalse();
-            Workflow.CompensationFired.Should().BeTrue();
+            Workflow.Compensation1Fired.Should().BeTrue();
+            Workflow.Compensation2Fired.Should().BeTrue();
+            Workflow.Compensation3Fired.Should().BeTrue();
+            Workflow.Compensation4Fired.Should().BeFalse();
+            Workflow.Compensation5Fired.Should().BeTrue();
+            Workflow.Compensation6Fired.Should().BeFalse();
             Workflow.TailEventFired.Should().BeTrue();
         }
     }
