@@ -25,7 +25,6 @@ namespace WorkflowCore.Services
         public ExecutionPointer BuildNextPointer(WorkflowDefinition def, ExecutionPointer pointer, StepOutcome outcomeTarget)
         {
             var nextId = GenerateId();
-            pointer.SuccessorIds.Add(nextId);
             return new ExecutionPointer()
             {
                 Id = nextId,
@@ -62,7 +61,6 @@ namespace WorkflowCore.Services
         public ExecutionPointer BuildCompensationPointer(WorkflowDefinition def, ExecutionPointer pointer, ExecutionPointer exceptionPointer, int compensationStepId)
         {
             var nextId = GenerateId();
-            exceptionPointer.SuccessorIds.Add(nextId);
             return new ExecutionPointer()
             {
                 Id = nextId,

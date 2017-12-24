@@ -122,8 +122,6 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                     b.Property<string>("StepName")
                         .HasMaxLength(100);
 
-                    b.Property<string>("SuccessorIds");
-
                     b.Property<long>("WorkflowId");
 
                     b.HasKey("PersistenceId");

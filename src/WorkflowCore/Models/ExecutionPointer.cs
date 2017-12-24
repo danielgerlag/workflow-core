@@ -42,9 +42,7 @@ namespace WorkflowCore.Models
         public object Outcome { get; set; }
 
         public PointerStatus Status { get; set; } = PointerStatus.Legacy;
-
-        public List<string> SuccessorIds { get; set; } = new List<string>();
-
+        
         public Stack<string> Scope { get; set; } = new Stack<string>();
     }
 

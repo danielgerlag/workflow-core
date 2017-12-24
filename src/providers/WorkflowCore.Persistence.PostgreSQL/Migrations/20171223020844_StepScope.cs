@@ -19,13 +19,7 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                 schema: "wfc",
                 table: "ExecutionPointer",
                 nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.AddColumn<string>(
-                name: "SuccessorIds",
-                schema: "wfc",
-                table: "ExecutionPointer",
-                nullable: true);         
+                defaultValue: 0);        
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -39,11 +33,7 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                 name: "Status",
                 schema: "wfc",
                 table: "ExecutionPointer");
-
-            migrationBuilder.DropColumn(
-                name: "SuccessorIds",
-                schema: "wfc",
-                table: "ExecutionPointer");            
+            
         }
     }
 }

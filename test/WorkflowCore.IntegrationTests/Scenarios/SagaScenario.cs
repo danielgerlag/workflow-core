@@ -103,7 +103,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             Workflow.Event1Fired.Should().BeTrue();
             Workflow.Event2Fired.Should().BeFalse();
             Workflow.Event3Fired.Should().BeFalse();
-            Workflow.Compensation1Fired.Should().BeTrue();
+            Workflow.Compensation1Fired.Should().BeFalse();
             Workflow.Compensation2Fired.Should().BeTrue();
             Workflow.Compensation3Fired.Should().BeTrue();
             Workflow.Compensation4Fired.Should().BeFalse();

@@ -61,10 +61,6 @@ namespace WorkflowCore.Persistence.EntityFramework
                 persistedEP.Outcome = JsonConvert.SerializeObject(ep.Outcome, SerializerSettings);
                 persistedEP.Status = ep.Status;
 
-                persistedEP.SuccessorIds = string.Empty;
-                foreach (var item in ep.SuccessorIds)
-                    persistedEP.SuccessorIds += item + ";";
-
                 persistedEP.Scope = string.Empty;
                 foreach (var item in ep.Scope)
                     persistedEP.Scope += item + ";";
@@ -173,9 +169,6 @@ namespace WorkflowCore.Persistence.EntityFramework
                 pointer.EventData = JsonConvert.DeserializeObject(ep.EventData ?? string.Empty, SerializerSettings);
                 pointer.Outcome = JsonConvert.DeserializeObject(ep.Outcome ?? string.Empty, SerializerSettings);
                 pointer.Status = ep.Status;
-
-                if (!string.IsNullOrEmpty(ep.SuccessorIds))
-                    pointer.SuccessorIds = ep.SuccessorIds.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
 
                 if (!string.IsNullOrEmpty(ep.Scope))
                     pointer.Scope = new Stack<string>(ep.Scope.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
