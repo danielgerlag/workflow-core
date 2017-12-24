@@ -15,26 +15,17 @@ namespace WorkflowCore.Sample17
         public void Build(IWorkflowBuilder<object> builder)
         {
             builder
-                .StartWith(context => Console.WriteLine("Hello"))
-                    .CompensateWith(context => Console.WriteLine("undo hello"))
+                .StartWith(context => Console.WriteLine("Begin"))
                 .Saga(saga => saga
-                    .StartWith(context => Console.WriteLine("1"))
-                        .CompensateWith(context => Console.WriteLine("undo 1"))
-                    .Then(context =>
-                    {
-                        Console.WriteLine("2");                        
-                        throw new Exception("boo");
-                        Console.WriteLine("2.5");
-                    })
-                        .CompensateWith<CustomMessage>(x => x.Input(step => step.Message, data => "undo 2"))
-                    .Then(context => Console.WriteLine("3"))
-                    )
-                    //.CompensateWithSequence(comp => comp
-                    //    .StartWith(ctx => Console.WriteLine("fail saga1"))
-                    //    .Then(ctx => Console.WriteLine("fail saga2"))
-                    //    )
-                .OnError(Models.WorkflowErrorHandling.Retry, TimeSpan.FromSeconds(5))
-                .Then(context => Console.WriteLine("end"));
+                    .StartWith<Task1>()
+                        .CompensateWith<UndoTask1>()
+                    .Then<Task2>()
+                        .CompensateWith<UndoTask2>()
+                    .Then<Task3>()
+                        .CompensateWith<UndoTask3>()
+                )
+                    .OnError(Models.WorkflowErrorHandling.Retry, TimeSpan.FromSeconds(5))
+                .Then(context => Console.WriteLine("End"));
         }
     }
 }

@@ -40,7 +40,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                         .Then(context =>
                         {
                             Event1Fired++;
-                            if (Event1Fired == 2)
+                            if (Event1Fired < 3)
                                 throw new Exception();
                             Event2Fired++;
                         })
@@ -73,7 +73,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
             GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
-            UnhandledStepErrors.Count.Should().Be(1);
+            UnhandledStepErrors.Count.Should().Be(2);
             Workflow.Event1Fired.Should().Be(3);
             Workflow.Event2Fired.Should().Be(1);
             Workflow.Event3Fired.Should().Be(1);

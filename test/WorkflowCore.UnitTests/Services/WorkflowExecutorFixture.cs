@@ -67,12 +67,14 @@ namespace WorkflowCore.UnitTests.Services
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
 
-            //TODO: mock these dependencies
+            //TODO: mock these dependencies to make true unit tests
             Options = new WorkflowOptions();
             services.AddSingleton(Options);
             services.AddTransient<IWorkflowBuilder, WorkflowBuilder>();
             services.AddTransient<IWorkflowRegistry, WorkflowRegistry>();
             services.AddTransient<IExecutionResultProcessor, ExecutionResultProcessor>();
+            services.AddTransient<IExecutionPointerFactory, ExecutionPointerFactory>();
+            services.AddTransient<IDateTimeProvider, DateTimeProvider>();
 
             Host = A.Fake<IWorkflowHost>();
             PersistenceProvider = A.Fake<IPersistenceProvider>();

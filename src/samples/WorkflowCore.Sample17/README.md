@@ -1,71 +1,60 @@
-# Workflow Core 1.6.0
+﻿# Saga transaction with compensation sample
 
+Illustrates how to encapsulate a sequence of steps within a saga transaction and specify compensation steps for each.
 
-* Added Saga transaction feature
-* Added `.CompensateWith` feature
-
-
-#### Specifying compensation steps for each component of a saga transaction
-
-In this sample, if `Task2` throws an exception, then `UndoTask2` and `UndoTask1` will be triggered.
+In the sample, `Task2` will throw an exception, then `UndoTask2` and `UndoTask1` will be triggered.
 
 ```c#
 builder
-	.StartWith<SayHello>()
-		.CompensateWith<UndoHello>()
+	.StartWith(context => Console.WriteLine("Begin"))
 	.Saga(saga => saga
-		.StartWith<DoTask1>()
+		.StartWith<Task1>()
 			.CompensateWith<UndoTask1>()
-		.Then<DoTask2>()
+		.Then<Task2>()
 			.CompensateWith<UndoTask2>()
-		.Then<DoTask3>()
+		.Then<Task3>()
 			.CompensateWith<UndoTask3>()
 	)
-	.Then<SayGoodbye>();
+		.OnError(Models.WorkflowErrorHandling.Retry, TimeSpan.FromSeconds(5))
+	.Then(context => Console.WriteLine("End"));
 ```
 
-#### Retrying a failed transaction
+## Retry policy for failed saga transaction
 
-This particular example will retry the entire saga every 5 seconds
+This particular example will retry the saga every 5 seconds, but you could also simply fail completely, and process a master compensation task for the whole saga.
 
 ```c#
 builder
-	.StartWith<SayHello>()
-		.CompensateWith<UndoHello>()
+	.StartWith(context => Console.WriteLine("Begin"))
 	.Saga(saga => saga
-		.StartWith<DoTask1>()
+		.StartWith<Task1>()
 			.CompensateWith<UndoTask1>()
-		.Then<DoTask2>()
+		.Then<Task2>()
 			.CompensateWith<UndoTask2>()
-		.Then<DoTask3>()
+		.Then<Task3>()
 			.CompensateWith<UndoTask3>()
-	)		
-		.OnError(Models.WorkflowErrorHandling.Retry, TimeSpan.FromSeconds(5))
-	.Then<SayGoodbye>();
+	)
+		.CompensateWith<CleanUp>()
+	.Then(context => Console.WriteLine("End"));
 ```
 
-#### Compensating the entire transaction
+## Compensate entire saga transaction
 
 You could also only specify a master compensation step, as follows
 
 ```c#
 builder
-	.StartWith<SayHello>()
-		.CompensateWith<UndoHello>()
+	.StartWith(context => Console.WriteLine("Begin"))
 	.Saga(saga => saga
-		.StartWith<DoTask1>()
-		.Then<DoTask2>()
-		.Then<DoTask3>()
-	)		
-		.CompensateWithSequence(comp => comp
-            .StartWith<UndoTask1>()
-            .Then<UndoTask2>()
-			.Then<UndoTask3>()
-        )
-	.Then<SayGoodbye>();
+		.StartWith<Task1>()
+		.Then<Task2>()
+		.Then<Task3>()
+	)
+		.CompensateWith<UndoEverything>()
+	.Then(context => Console.WriteLine("End"));
 ```
 
-#### Passing parameters
+## Passing parameters to compensation steps
 
 Parameters can be passed to a compensation step as follows
 
@@ -78,8 +67,7 @@ builder
 	})
 ```
 
-
-### Expressing a saga in JSON
+## Expressing a saga in JSON
 
 A saga transaction can be expressed in JSON, by using the `WorkflowCore.Primitives.Sequence` step and setting the `Saga` parameter to `true`.
 
