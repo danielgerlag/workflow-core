@@ -72,17 +72,17 @@ public class MyWorkflow : IWorkflow
 
 ```c#
 builder
-	.StartWith<LogStart>()
-	.Saga(saga => saga
-		.StartWith<Task1>()
-			.CompensateWith<UndoTask1>()
-		.Then<Task2>()
-			.CompensateWith<UndoTask2>()
-		.Then<Task3>()
-			.CompensateWith<UndoTask3>()
-	)
-		.OnError(Models.WorkflowErrorHandling.Retry, TimeSpan.FromMinutes(10))
-	.Then<LogEnd>();
+    .StartWith<LogStart>()
+    .Saga(saga => saga
+        .StartWith<Task1>()
+            .CompensateWith<UndoTask1>()
+        .Then<Task2>()
+            .CompensateWith<UndoTask2>()
+        .Then<Task3>()
+            .CompensateWith<UndoTask3>()
+    )
+    .OnError(Models.WorkflowErrorHandling.Retry, TimeSpan.FromMinutes(10))
+    .Then<LogEnd>();
 ```
 
 ## Persistence
