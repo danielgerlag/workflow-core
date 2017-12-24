@@ -16,15 +16,17 @@ namespace WorkflowCore.Services
         private readonly IDistributedLockProvider _lockProvider;
         private readonly IWorkflowRegistry _registry;
         private readonly IQueueProvider _queueProvider;
+        private readonly IExecutionPointerFactory _pointerFactory;
         private readonly ILogger _logger;
 
 
-        public WorkflowController(IPersistenceProvider persistenceStore, IDistributedLockProvider lockProvider, IWorkflowRegistry registry, IQueueProvider queueProvider, ILoggerFactory loggerFactory)
+        public WorkflowController(IPersistenceProvider persistenceStore, IDistributedLockProvider lockProvider, IWorkflowRegistry registry, IQueueProvider queueProvider, IExecutionPointerFactory pointerFactory, ILoggerFactory loggerFactory)
         {
             _persistenceStore = persistenceStore;
             _lockProvider = lockProvider;
             _registry = registry;
             _queueProvider = queueProvider;
+            _pointerFactory = pointerFactory;
             _logger = loggerFactory.CreateLogger<WorkflowController>();
         }
 
@@ -70,13 +72,7 @@ namespace WorkflowCore.Services
                 wf.Data = TypeExtensions.GetConstructor(def.DataType, new Type[] { }).Invoke(null);
             }
 
-            wf.ExecutionPointers.Add(new ExecutionPointer
-            {
-                Id = Guid.NewGuid().ToString(),
-                StepId = 0,
-                Active = true,
-                StepName = Enumerable.First<WorkflowStep>(def.Steps, x => x.Id == 0).Name
-            });
+            wf.ExecutionPointers.Add(_pointerFactory.BuildStartingPointer(def));
 
             string id = await _persistenceStore.CreateNewWorkflow(wf);
             await _queueProvider.QueueWork(id, QueueType.Workflow);

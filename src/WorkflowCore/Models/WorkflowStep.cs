@@ -25,7 +25,13 @@ namespace WorkflowCore.Models
 
         public WorkflowErrorHandling? ErrorBehavior { get; set; }
 
-        public TimeSpan? RetryInterval { get; set; }                
+        public TimeSpan? RetryInterval { get; set; }
+
+        public int? CompensationStepId { get; set; }
+
+        public virtual bool ResumeChildrenAfterCompensation => true;
+
+        public virtual bool RevertChildrenAfterCompensation => false;
 
         public virtual ExecutionPipelineDirective InitForExecution(WorkflowExecutorResult executorResult, WorkflowDefinition defintion, WorkflowInstance workflow, ExecutionPointer executionPointer)
         {
@@ -39,6 +45,10 @@ namespace WorkflowCore.Models
 
         public virtual void AfterExecute(WorkflowExecutorResult executorResult, IStepExecutionContext context, ExecutionResult stepResult, ExecutionPointer executionPointer)
         {            
+        }
+
+        public virtual void PrimeForRetry(ExecutionPointer pointer)
+        {
         }
 
         /// <summary>

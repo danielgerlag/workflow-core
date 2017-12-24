@@ -58,6 +58,7 @@ namespace WorkflowCore.UnitTests.Services
         protected IWorkflowHost Host;
         protected IPersistenceProvider PersistenceProvider;
         protected IWorkflowRegistry Registry;
+        protected IExecutionResultProcessor ResultProcesser;
         protected WorkflowOptions Options;
 
         public WorkflowExecutorFixture()
@@ -66,10 +67,15 @@ namespace WorkflowCore.UnitTests.Services
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
 
+            //TODO: mock these dependencies to make true unit tests
             Options = new WorkflowOptions();
+            services.AddSingleton(Options);
             services.AddTransient<IWorkflowBuilder, WorkflowBuilder>();
             services.AddTransient<IWorkflowRegistry, WorkflowRegistry>();
-            
+            services.AddTransient<IExecutionResultProcessor, ExecutionResultProcessor>();
+            services.AddTransient<IExecutionPointerFactory, ExecutionPointerFactory>();
+            services.AddTransient<IDateTimeProvider, DateTimeProvider>();
+
             Host = A.Fake<IWorkflowHost>();
             PersistenceProvider = A.Fake<IPersistenceProvider>();
             var serviceProvider = services.BuildServiceProvider();
@@ -79,8 +85,9 @@ namespace WorkflowCore.UnitTests.Services
             loggerFactory.AddConsole(LogLevel.Debug);
 
             Registry = serviceProvider.GetService<IWorkflowRegistry>();
+            ResultProcesser = serviceProvider.GetService<IExecutionResultProcessor>();
 
-            Subject = new WorkflowExecutor(Registry, serviceProvider, new DateTimeProvider(), loggerFactory);            
+            Subject = new WorkflowExecutor(Registry, serviceProvider, new DateTimeProvider(), ResultProcesser, Options, loggerFactory);
         }
 
         [Fact]
@@ -106,7 +113,7 @@ namespace WorkflowCore.UnitTests.Services
             instance.ExecutionPointers.Add(executionPointer);
 
             //act
-            Subject.Execute(instance, Options);
+            Subject.Execute(instance);
 
             //assert
             executionPointer.EventName.Should().Be("MyEvent");
@@ -135,8 +142,8 @@ namespace WorkflowCore.UnitTests.Services
             });                        
 
             //act
-            Subject.Execute(instance, Options);
-            Subject.Execute(instance, Options);
+            Subject.Execute(instance);
+            Subject.Execute(instance);
 
             //assert
             StepExecutionTestWorkflow.Step1StepTicker.Should().Be(1);

@@ -333,6 +333,18 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
+        public IStepBuilder<TData, Sequence> Saga(Action<IWorkflowBuilder<TData>> builder)
+        {
+            var newStep = new SagaContainer<Sequence>();
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, Sequence>(WorkflowBuilder, newStep);
+            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            builder.Invoke(WorkflowBuilder);
+            stepBuilder.Step.Children.Add(stepBuilder.Step.Id + 1); //TODO: make more elegant
+
+            return stepBuilder;
+        }
+
         public IParallelStepBuilder<TData, Sequence> Parallel()
         {
             var newStep = new WorkflowStep<Sequence>();
@@ -383,7 +395,56 @@ namespace WorkflowCore.Services
         public IStepBuilder<TData, TStepBody> Do(Action<IWorkflowBuilder<TData>> builder)
         {
             builder.Invoke(WorkflowBuilder);
-            Step.Children.Add(Step.Id + 1); //TODO: make more elegant                        
+            Step.Children.Add(Step.Id + 1); //TODO: make more elegant
+
+            return this;
+        }
+
+        public IStepBuilder<TData, TStepBody> CompensateWith<TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null) where TStep : IStepBody
+        {
+            WorkflowStep<TStep> newStep = new WorkflowStep<TStep>();
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, TStep>(WorkflowBuilder, newStep);
+
+            if (stepSetup != null)
+            {
+                stepSetup.Invoke(stepBuilder);
+            }
+
+            newStep.Name = newStep.Name ?? typeof(TStep).Name;
+            Step.CompensationStepId = newStep.Id;
+
+            return this;
+        }
+
+        public IStepBuilder<TData, TStepBody> CompensateWith(Func<IStepExecutionContext, ExecutionResult> body)
+        {
+            WorkflowStepInline newStep = new WorkflowStepInline();
+            newStep.Body = body;
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, InlineStepBody>(WorkflowBuilder, newStep);
+            Step.CompensationStepId = newStep.Id;
+            return this;
+        }
+
+        public IStepBuilder<TData, TStepBody> CompensateWith(Action<IStepExecutionContext> body)
+        {
+            var newStep = new WorkflowStep<ActionStepBody>();
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, ActionStepBody>(WorkflowBuilder, newStep);
+            stepBuilder.Input(x => x.Body, x => body);
+            Step.CompensationStepId = newStep.Id;
+            return this;
+        }
+
+        public IStepBuilder<TData, TStepBody> CompensateWithSequence(Action<IWorkflowBuilder<TData>> builder)
+        {
+            var newStep = new WorkflowStep<Sequence>();
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, Sequence>(WorkflowBuilder, newStep);
+            Step.CompensationStepId = newStep.Id;
+            builder.Invoke(WorkflowBuilder);
+            stepBuilder.Step.Children.Add(stepBuilder.Step.Id + 1); //TODO: make more elegant
 
             return this;
         }
