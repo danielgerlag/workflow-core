@@ -11,6 +11,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/observable/fromEvent';
+import { WorkflowInstance } from '../../common/workflow-instance';
 
 @Component({
   selector: 'app-workflow-search',
@@ -18,6 +19,7 @@ import 'rxjs/add/observable/fromEvent';
   styleUrls: ['./workflow-search.component.css']
 })
 export class WorkflowSearchComponent implements OnInit {
+  workflowService: any;
 
   displayedColumns = ['createTime', 'definition', 'version', 'reference', 'status', 'actions'];
   dataChange: BehaviorSubject<any[]> = new BehaviorSubject<any[]>([]);

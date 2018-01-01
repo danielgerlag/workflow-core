@@ -8,6 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using System.Text;
+using WorkflowCore.WebAPI.Services;
+using Microsoft.Extensions.FileProviders;
 
 namespace ScratchPad
 {
@@ -16,9 +18,11 @@ namespace ScratchPad
         public static void Main(string[] args)
         {
             //var s = typeof(HelloWorld).AssemblyQualifiedName;
-
-
             IServiceProvider serviceProvider = ConfigureServices();
+
+
+            IFileProvider fp = new AdminConsoleProvider();
+            var dir = fp.GetDirectoryContents("");
 
             //start the workflow host
             var host = serviceProvider.GetService<IWorkflowHost>();

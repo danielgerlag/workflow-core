@@ -8,7 +8,7 @@ using WorkflowCore.Interface;
 
 namespace WorkflowCore.WebAPI.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class EventsController : Controller
     {
 

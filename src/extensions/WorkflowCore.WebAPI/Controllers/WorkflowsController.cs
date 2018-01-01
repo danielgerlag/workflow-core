@@ -11,7 +11,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.WebAPI.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class WorkflowsController : Controller
     {
 

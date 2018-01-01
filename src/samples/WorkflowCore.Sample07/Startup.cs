@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
+using WorkflowCore.WebAPI.Services;
 
 namespace WorkflowCore.Sample07
 {
@@ -40,10 +41,12 @@ namespace WorkflowCore.Sample07
 
             app.UseMvc();
 
-            //var fp = new EmbeddedFileProvider(typeof(ClassLibrary1.Class1).GetTypeInfo().Assembly, "ClassLibrary1.Content");
-            //var opts = new StaticFileOptions();
-            //opts.FileProvider = fp;
-            //app.UseStaticFiles(opts);
+            var fp = new AdminConsoleProvider();
+            var opts = new StaticFileOptions();
+            opts.FileProvider = fp;
+            //opts.RequestPath = new PathString("/app");
+            opts.ServeUnknownFileTypes = true;
+            app.UseStaticFiles(opts);
         }
     }
 }
