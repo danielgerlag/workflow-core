@@ -59,6 +59,11 @@ namespace WorkflowCore.Persistence.EntityFramework
                 persistedEP.EventPublished = ep.EventPublished;
                 persistedEP.EventData = JsonConvert.SerializeObject(ep.EventData, SerializerSettings);
                 persistedEP.Outcome = JsonConvert.SerializeObject(ep.Outcome, SerializerSettings);
+                persistedEP.Status = ep.Status;
+
+                persistedEP.Scope = string.Empty;
+                foreach (var item in ep.Scope)
+                    persistedEP.Scope += item + ";";
 
                 foreach (var attr in ep.ExtensionAttributes)
                 {
@@ -96,7 +101,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.EventName = instance.EventName;
             result.StepId = instance.StepId;
             result.WorkflowId = instance.WorkflowId;
-            result.SubscribeAsOf = instance.SubscribeAsOf;
+            result.SubscribeAsOf = DateTime.SpecifyKind(instance.SubscribeAsOf, DateTimeKind.Utc);
 
             return result;
         }
@@ -107,7 +112,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.EventId = new Guid(instance.Id);
             result.EventKey = instance.EventKey;
             result.EventName = instance.EventName;
-            result.EventTime = instance.EventTime;
+            result.EventTime = DateTime.SpecifyKind(instance.EventTime, DateTimeKind.Utc);
             result.IsProcessed = instance.IsProcessed;
             result.EventData = JsonConvert.SerializeObject(instance.EventData, SerializerSettings);
 
@@ -125,9 +130,10 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.Version = instance.Version;
             result.WorkflowDefinitionId = instance.WorkflowDefinitionId;
             result.Status = instance.Status;
-            result.CreateTime = instance.CreateTime;
-            result.CompleteTime = instance.CompleteTime;
-            
+            result.CreateTime = DateTime.SpecifyKind(instance.CreateTime, DateTimeKind.Utc);
+            if (result.CompleteTime.HasValue)
+                result.CompleteTime = DateTime.SpecifyKind(instance.CompleteTime.Value, DateTimeKind.Utc);
+
             foreach (var ep in instance.ExecutionPointers)
             {
                 var pointer = new ExecutionPointer();
@@ -136,10 +142,18 @@ namespace WorkflowCore.Persistence.EntityFramework
                 pointer.Id = ep.Id;
                 pointer.StepId = ep.StepId;
                 pointer.Active = ep.Active;
-                pointer.SleepUntil = ep.SleepUntil;
+
+                if (ep.SleepUntil.HasValue)
+                    pointer.SleepUntil = DateTime.SpecifyKind(ep.SleepUntil.Value, DateTimeKind.Utc);
+
                 pointer.PersistenceData = JsonConvert.DeserializeObject(ep.PersistenceData ?? string.Empty, SerializerSettings);
-                pointer.StartTime = ep.StartTime;
-                pointer.EndTime = ep.EndTime;
+
+                if (ep.StartTime.HasValue)
+                    pointer.StartTime = DateTime.SpecifyKind(ep.StartTime.Value, DateTimeKind.Utc);
+
+                if (ep.EndTime.HasValue)
+                    pointer.EndTime = DateTime.SpecifyKind(ep.EndTime.Value, DateTimeKind.Utc);
+
                 pointer.StepName = ep.StepName;
 
                 pointer.RetryCount = ep.RetryCount;
@@ -154,6 +168,10 @@ namespace WorkflowCore.Persistence.EntityFramework
                 pointer.EventPublished = ep.EventPublished;
                 pointer.EventData = JsonConvert.DeserializeObject(ep.EventData ?? string.Empty, SerializerSettings);
                 pointer.Outcome = JsonConvert.DeserializeObject(ep.Outcome ?? string.Empty, SerializerSettings);
+                pointer.Status = ep.Status;
+
+                if (!string.IsNullOrEmpty(ep.Scope))
+                    pointer.Scope = new Stack<string>(ep.Scope.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
 
                 foreach (var attr in ep.ExtensionAttributes)
                 {
@@ -172,7 +190,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.EventName = instance.EventName;
             result.StepId = instance.StepId;
             result.WorkflowId = instance.WorkflowId;
-            result.SubscribeAsOf = instance.SubscribeAsOf;
+            result.SubscribeAsOf = DateTime.SpecifyKind(instance.SubscribeAsOf, DateTimeKind.Utc);
 
             return result;
         }
@@ -183,7 +201,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.Id = instance.EventId.ToString();
             result.EventKey = instance.EventKey;
             result.EventName = instance.EventName;
-            result.EventTime = instance.EventTime;
+            result.EventTime = DateTime.SpecifyKind(instance.EventTime, DateTimeKind.Utc);
             result.IsProcessed = instance.IsProcessed;
             result.EventData = JsonConvert.DeserializeObject(instance.EventData, SerializerSettings);
 

@@ -44,7 +44,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                             var executor = _executorPool.Get();
                             try
                             {
-                                result = await executor.Execute(workflow, Options);
+                                result = await executor.Execute(workflow);
                             }
                             finally
                             {

@@ -59,7 +59,8 @@ namespace WorkflowCore.Services.DefinitionStorage
             int i = 0;
             var stack = new Stack<StepSourceV1>(source.Reverse<StepSourceV1>());
             var parents = new List<StepSourceV1>();
-            
+            var compensatables = new List<StepSourceV1>();
+
             while (stack.Count > 0)
             {
                 var nextStep = stack.Pop();
@@ -76,7 +77,13 @@ namespace WorkflowCore.Services.DefinitionStorage
                     var cancelExpr = DynamicExpressionParser.ParseLambda(new[] { dataParameter }, typeof(bool), nextStep.CancelCondition);
                     targetStep = (containerType.GetConstructor(new Type[] { cancelExprType }).Invoke(new[] { cancelExpr }) as WorkflowStep);
                 }
-                
+
+                if (nextStep.Saga)  //TODO: cancellable saga???
+                {
+                    containerType = typeof(SagaContainer<>).MakeGenericType(stepType);
+                    targetStep = (containerType.GetConstructor(new Type[] { }).Invoke(null) as WorkflowStep);
+                }
+
                 targetStep.Id = i;
                 targetStep.Name = nextStep.Name;
                 targetStep.ErrorBehavior = nextStep.ErrorBehavior;
@@ -97,7 +104,16 @@ namespace WorkflowCore.Services.DefinitionStorage
                     if (nextStep.Do.Count > 0)
                         parents.Add(nextStep);
                 }
-                
+
+                if (nextStep.CompensateWith != null)
+                {
+                    foreach (var compChild in nextStep.CompensateWith.Reverse<StepSourceV1>())
+                        stack.Push(compChild);
+
+                    if (nextStep.CompensateWith.Count > 0)
+                        compensatables.Add(nextStep);
+                }
+
                 if (!string.IsNullOrEmpty(nextStep.NextStepId))
                     targetStep.Outcomes.Add(new StepOutcome() { Tag = $"{nextStep.NextStepId}" });
 
@@ -132,6 +148,18 @@ namespace WorkflowCore.Services.DefinitionStorage
                         .Select(x => x.Id)
                         .Take(1)
                         .ToList());
+                }
+            }
+
+            foreach (var item in compensatables)
+            {
+                var target = result.Single(x => x.Tag == item.Id);
+                var tag = item.CompensateWith.Select(x => x.Id).FirstOrDefault();
+                if (tag != null)
+                {
+                    var compStep = result.FirstOrDefault(x => x.Tag == tag);
+                    if (compStep != null)
+                        target.CompensationStepId = compStep.Id;
                 }
             }
 

@@ -15,7 +15,6 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 {
     public class MongoPersistenceProvider : IPersistenceProvider
     {
-
         private readonly IMongoDatabase _database;
 
         public MongoPersistenceProvider(IMongoDatabase database)

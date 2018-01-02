@@ -5,6 +5,6 @@ namespace WorkflowCore.Interface
 {
     public interface IStepBody
     {        
-        Task<ExecutionResult> RunAsync(IStepExecutionContext context);
+        Task<ExecutionResult> RunAsync(IStepExecutionContext context);        
     }
 }

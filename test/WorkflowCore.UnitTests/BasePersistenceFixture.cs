@@ -55,7 +55,8 @@ namespace WorkflowCore.UnitTests
             {
                 Id = Guid.NewGuid().ToString(),
                 Active = true,
-                StepId = 0
+                StepId = 0,
+                SleepUntil = new DateTime(2000, 1, 1).ToUniversalTime()                
             });
             var workflowId = Subject.CreateNewWorkflow(workflow).Result;
 

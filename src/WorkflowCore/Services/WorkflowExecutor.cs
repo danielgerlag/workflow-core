@@ -13,23 +13,26 @@ namespace WorkflowCore.Services
 {
     public class WorkflowExecutor : IWorkflowExecutor
     {
-        
         protected readonly IWorkflowRegistry _registry;
         protected readonly IServiceProvider _serviceProvider;
         protected readonly IDateTimeProvider _datetimeProvider;
         protected readonly ILogger _logger;
+        private readonly IExecutionResultProcessor _executionResultProcessor;
+        private readonly WorkflowOptions _options;
 
         private IWorkflowHost Host => _serviceProvider.GetService<IWorkflowHost>();
 
-        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IDateTimeProvider datetimeProvider, ILoggerFactory loggerFactory)
+        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, WorkflowOptions options, ILoggerFactory loggerFactory)
         {
             _serviceProvider = serviceProvider;
             _registry = registry;
             _datetimeProvider = datetimeProvider;
+            _options = options;
             _logger = loggerFactory.CreateLogger<WorkflowExecutor>();
+            _executionResultProcessor = executionResultProcessor;
         }
 
-        public async Task<WorkflowExecutorResult> Execute(WorkflowInstance workflow, WorkflowOptions options)
+        public async Task<WorkflowExecutorResult> Execute(WorkflowInstance workflow)
         {
             var wfResult = new WorkflowExecutorResult();
 
@@ -48,6 +51,7 @@ namespace WorkflowCore.Services
                 {
                     try
                     {
+                        pointer.Status = PointerStatus.Running;
                         switch (step.InitForExecution(wfResult, def, workflow, pointer))
                         {
                             case ExecutionPipelineDirective.Defer:
@@ -70,7 +74,7 @@ namespace WorkflowCore.Services
                         if (body == null)
                         {
                             _logger.LogError("Unable to construct step body {0}", step.BodyType.ToString());
-                            pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(options.ErrorRetryInterval);
+                            pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(_options.ErrorRetryInterval);
                             wfResult.Errors.Add(new ExecutionError()
                             {
                                 WorkflowId = workflow.Id,
@@ -109,12 +113,11 @@ namespace WorkflowCore.Services
                             ProcessOutputs(workflow, step, body);
                         }
 
-                        ProcessExecutionResult(workflow, def, pointer, step, result, wfResult);
+                        _executionResultProcessor.ProcessExecutionResult(workflow, def, pointer, step, result, wfResult);
                         step.AfterExecute(wfResult, context, result, pointer);
                     }
                     catch (Exception ex)
                     {
-                        pointer.RetryCount++;
                         _logger.LogError("Workflow {0} raised error on step {1} Message: {2}", workflow.Id, pointer.StepId, ex.Message);
                         wfResult.Errors.Add(new ExecutionError()
                         {
@@ -124,26 +127,14 @@ namespace WorkflowCore.Services
                             Message = ex.Message
                         });
 
-                        switch (step.ErrorBehavior ?? def.DefaultErrorBehavior)
-                        {
-                            case WorkflowErrorHandling.Retry:
-                                pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(step.RetryInterval ?? def.DefaultErrorRetryInterval ?? options.ErrorRetryInterval);
-                                break;
-                            case WorkflowErrorHandling.Suspend:
-                                workflow.Status = WorkflowStatus.Suspended;
-                                break;
-                            case WorkflowErrorHandling.Terminate:
-                                workflow.Status = WorkflowStatus.Terminated;
-                                break;
-                        }
-
+                        _executionResultProcessor.HandleStepException(workflow, def, pointer, step);
                         Host.ReportStepError(workflow, step, ex);
                     }
                 }
                 else
                 {
                     _logger.LogError("Unable to find step {0} in workflow definition", pointer.StepId);
-                    pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(options.ErrorRetryInterval);
+                    pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(_options.ErrorRetryInterval);
                     wfResult.Errors.Add(new ExecutionError()
                     {
                         WorkflowId = workflow.Id,
@@ -158,73 +149,6 @@ namespace WorkflowCore.Services
             DetermineNextExecutionTime(workflow);
 
             return wfResult;
-        }
-
-        private void ProcessExecutionResult(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, ExecutionResult result, WorkflowExecutorResult workflowResult)
-        {
-            //TODO: refactor this into it's own class
-            pointer.PersistenceData = result.PersistenceData;
-            pointer.Outcome = result.OutcomeValue;
-            if (result.SleepFor.HasValue)
-            {
-                pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(result.SleepFor.Value);
-            }
-
-            if (!string.IsNullOrEmpty(result.EventName))
-            {
-                pointer.EventName = result.EventName;
-                pointer.EventKey = result.EventKey;
-                pointer.Active = false;
-
-                workflowResult.Subscriptions.Add(new EventSubscription()
-                {
-                    WorkflowId = workflow.Id,
-                    StepId = pointer.StepId,
-                    EventName = pointer.EventName,
-                    EventKey = pointer.EventKey,
-                    SubscribeAsOf = result.EventAsOf
-                });
-            }
-
-            if (result.Proceed)
-            {
-                pointer.Active = false;
-                pointer.EndTime = _datetimeProvider.Now.ToUniversalTime();
-
-                foreach (var outcomeTarget in step.Outcomes.Where(x => object.Equals(x.GetValue(workflow.Data), result.OutcomeValue) || x.GetValue(workflow.Data) == null))
-                {
-                    workflow.ExecutionPointers.Add(new ExecutionPointer()
-                    {
-                        Id = Guid.NewGuid().ToString(),
-                        PredecessorId = pointer.Id,
-                        StepId = outcomeTarget.NextStep,
-                        Active = true,
-                        ContextItem = pointer.ContextItem,
-                        StepName = def.Steps.First(x => x.Id == outcomeTarget.NextStep).Name
-                    });
-                }
-            }
-            else
-            {
-                foreach (var branch in result.BranchValues)
-                {
-                    foreach (var childDefId in step.Children)
-                    {
-                        var childPointerId = Guid.NewGuid().ToString();
-                        workflow.ExecutionPointers.Add(new ExecutionPointer()
-                        {
-                            Id = childPointerId,
-                            PredecessorId = pointer.Id,
-                            StepId = childDefId,
-                            Active = true,
-                            ContextItem = branch,
-                            StepName = def.Steps.First(x => x.Id == childDefId).Name
-                        });
-
-                        pointer.Children.Add(childPointerId);
-                    }
-                }
-            }
         }
 
         private void ProcessInputs(WorkflowInstance workflow, WorkflowStep step, IStepBody body, IStepExecutionContext context)

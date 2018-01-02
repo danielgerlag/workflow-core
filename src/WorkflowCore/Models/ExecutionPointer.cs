@@ -40,5 +40,21 @@ namespace WorkflowCore.Models
         public string PredecessorId { get; set; }
 
         public object Outcome { get; set; }
+
+        public PointerStatus Status { get; set; } = PointerStatus.Legacy;
+        
+        public Stack<string> Scope { get; set; } = new Stack<string>();
+    }
+
+    public enum PointerStatus
+    {
+        Legacy = 0,
+        Pending = 1,
+        Running = 2,
+        Complete = 3,
+        Sleeping = 4,
+        WaitingForEvent = 5,
+        Failed = 6,
+        Compensated = 7
     }
 }

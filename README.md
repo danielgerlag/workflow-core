@@ -53,7 +53,7 @@ public class MyWorkflow : IWorkflow
 }
 ```
 
-* Resilient service orchestration
+* Saga Transactions
 
 ```c#
 public class MyWorkflow : IWorkflow
@@ -68,6 +68,21 @@ public class MyWorkflow : IWorkflow
                 .OnError(WorkflowErrorHandling.Retry, TimeSpan.FromMinutes(10));
     }
 }
+```
+
+```c#
+builder
+    .StartWith<LogStart>()
+    .Saga(saga => saga
+        .StartWith<Task1>()
+            .CompensateWith<UndoTask1>()
+        .Then<Task2>()
+            .CompensateWith<UndoTask2>()
+        .Then<Task3>()
+            .CompensateWith<UndoTask3>()
+    )
+    .OnError(Models.WorkflowErrorHandling.Retry, TimeSpan.FromMinutes(10))
+    .Then<LogEnd>();
 ```
 
 ## Persistence
@@ -105,6 +120,8 @@ There are several persistence providers available as separate Nuget packages.
 * [Events](src/samples/WorkflowCore.Sample04)
 
 * [Parallel Tasks](src/samples/WorkflowCore.Sample13)
+
+* [Saga Transactions (with compensation)](src/samples/WorkflowCore.Sample17)
 
 * [Scheduled Background Tasks](src/samples/WorkflowCore.Sample16)
 

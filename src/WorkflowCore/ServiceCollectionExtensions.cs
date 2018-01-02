@@ -38,6 +38,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<IWorkflowExecutor, WorkflowExecutor>();
             services.AddTransient<IWorkflowBuilder, WorkflowBuilder>();
             services.AddTransient<IDateTimeProvider, DateTimeProvider>();
+            services.AddTransient<IExecutionResultProcessor, ExecutionResultProcessor>();
+            services.AddTransient<IExecutionPointerFactory, ExecutionPointerFactory>();
 
             services.AddTransient<IPooledObjectPolicy<IPersistenceProvider>, InjectedObjectPoolPolicy<IPersistenceProvider>>();
             services.AddTransient<IPooledObjectPolicy<IWorkflowExecutor>, InjectedObjectPoolPolicy<IWorkflowExecutor>>();
