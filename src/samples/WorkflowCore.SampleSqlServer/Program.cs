@@ -30,7 +30,7 @@ namespace WorkflowCore.SampleSqlServer
             host.RegisterWorkflow<HelloWorldWorkflow>();
             host.Start();
 
-            host.StartWorkflow("HelloWorld", 1, null);
+            host.StartWorkflow("HelloWorld", 1, new HelloWorldData {ID=123});
 
             Console.ReadLine();
             host.Stop();

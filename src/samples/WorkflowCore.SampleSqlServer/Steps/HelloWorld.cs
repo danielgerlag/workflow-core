@@ -14,7 +14,11 @@ namespace WorkflowCore.SampleSqlServer.Steps
     {
         public override ExecutionResult Run(IStepExecutionContext context)
         {
-            Console.WriteLine("Hello world");
+            var data = (HelloWorldData)context.Workflow.Data;
+
+            Console.WriteLine("Hello world " + data.ID);
+
+            data.ID++;
 
             return ExecutionResult.Next();
         }

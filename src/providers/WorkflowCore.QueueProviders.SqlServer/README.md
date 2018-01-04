@@ -17,7 +17,7 @@ PM> Install-Package WorkflowCore.QueueProviders.SqlServer -Pre
 Use the .UseSqlServerQueue extension method when building your service provider.
 
 ```C#
-services.AddWorkflow(x => x.UseSqlServerQueue(sp => new SqlServerQueueProvider(connectionString, workflowHostName, canCreateDB));
+services.AddWorkflow(x => x.UseSqlServerQueue(sp => new SqlServerQueueProvider(connectionString, workflowHostName, canMigrateDB));
 
 ```
 
