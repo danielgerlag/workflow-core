@@ -1,35 +1,43 @@
 ﻿#region using
 
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 using FluentAssertions;
-
-using Microsoft.Extensions.Logging;
 
 using WorkflowCore.Interface;
 using WorkflowCore.QueueProviders.SqlServer.Services;
 
 using Xunit;
+using Xunit.Abstractions;
 
 #endregion
 
 namespace WorkflowCore.Tests.SqlServer
 {
-    //[Collection("SqlServer collection")]
+    [Collection("SqlServerBroker collection")]
     public class SqlServerQueueProviderFixture : IDisposable
     {
-        readonly SqlServerQueueProvider _qb;
+        #region Init
 
-        public SqlServerQueueProviderFixture( /*SqlDockerSetup setup*/ )
+        readonly SqlServerQueueProvider _qb;
+        private readonly ITestOutputHelper _console;
+
+        public SqlServerQueueProviderFixture(ITestOutputHelper output)
         {
-            var connectionString = "Server=(local);Database=wfc;User Id=wfc;Password=wfc;"; //SqlDockerSetup.ConnectionString;
+            _console = output;
+            var connectionString = "Server=(local);Database=wfc;User Id=wfc;Password=wfc;";
 
             _qb = new SqlServerQueueProvider(connectionString, "UnitTest", true);
             _qb.Start().Wait();
 
             while (_qb.DequeueWork(QueueType.Event, CancellationToken.None).Result != null) { }
+
             while (_qb.DequeueWork(QueueType.Workflow, CancellationToken.None).Result != null) { }
         }
 
@@ -38,8 +46,12 @@ namespace WorkflowCore.Tests.SqlServer
             _qb.Dispose();
         }
 
+        #endregion
+
+        #region QueueDeque
+
         [Fact]
-        public void Test()
+        public void QueueDequeTest()
         {
             var id = Guid.NewGuid().ToString();
 
@@ -55,6 +67,74 @@ namespace WorkflowCore.Tests.SqlServer
             var res = _qb.DequeueWork(queueType, CancellationToken.None).Result;
 
             res.Should().Be(id);
+        }
+
+        #endregion
+
+        [Fact]
+        public void MultiTest()
+        {
+            const int countEvent = 250;
+            const int countThread = 10;
+            const QueueType queueType = QueueType.Event;
+
+            var guids = new ConcurrentDictionary<string, int>();
+
+
+            bool stop = false;
+            var sw = Stopwatch.StartNew();
+
+            _console.WriteLine("Start dequeue task");
+            var thDeque = new List<Task>();
+            for (int i = 0; i < countThread; i++)
+            {
+                Task t = Task.Factory.StartNew(() =>
+                {
+                    _console.WriteLine("-> Dequeue task " + Task.CurrentId);
+                    while (!stop)
+                    {
+                        var id = _qb.DequeueWork(queueType, CancellationToken.None).Result;
+                        if (id != null) guids.AddOrUpdate(id, 0, (key, oldval) => oldval + 1);
+                    }
+
+                    _console.WriteLine("<- Dequeue task " + Task.CurrentId);
+                });
+                thDeque.Add(t);
+            }
+
+            _console.WriteLine("Start enqueue task");
+            var thEnque = new List<Task>();
+            for (int i = 0; i < countThread; i++)
+            {
+                Task t = Task.Factory.StartNew(() =>
+                {
+                    _console.WriteLine("-> Enqueue task " + Task.CurrentId);
+
+                    for (int j = 0; j < countEvent; j++)
+                    {
+                        var guid = Guid.NewGuid().ToString();
+                        guids.TryAdd(guid, 0);
+                        _qb.QueueWork(guid, queueType).Wait();
+                    }
+
+                    _console.WriteLine("<- Enqueue task " + Task.CurrentId);
+                });
+                thEnque.Add(t);
+            }
+
+            Task.WaitAll(thEnque.ToArray());
+            _console.WriteLine("Enqueue complete " + sw.ElapsedMilliseconds + " msec");
+
+            stop = true;
+            Task.WaitAll(thDeque.ToArray());
+            _console.WriteLine("Dequeue complete " + sw.ElapsedMilliseconds + " msec");
+
+            foreach (var guid in guids)
+            {
+                guid.Value.Should().Be(1);
+            }
+
+            _console.WriteLine("MultiTest complete " + (guids.Count/(sw.ElapsedMilliseconds/1000.0)) + " msg/sec");
         }
     }
 }

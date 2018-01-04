@@ -7,15 +7,25 @@ using System.Linq;
 
 namespace WorkflowCore.QueueProviders.SqlServer.Services
 {
+    /// <summary>
+    /// Build names for SSSB objects
+    /// </summary>
+    /// <remarks>
+    /// Message type and contract are global, service name and queue different for every workflow host
+    /// </remarks>
     public class SqlServerNames
     {
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <param name="workflowHostName"></param>
         public SqlServerNames(string workflowHostName)
         {
-            WorkflowMessageType = $"//workflow-core/{workflowHostName}/workflow";
-            EventMessageType = $"//workflow-core/{workflowHostName}/event";
+            WorkflowMessageType = "//workflow-core/workflow";
+            EventMessageType = "//workflow-core/event";
 
-            EventContractName = $"//workflow-core/{workflowHostName}/eventContract";
-            WorkflowContractName = $"//workflow-core/{workflowHostName}/workflowContract";
+            EventContractName = "//workflow-core/eventContract";
+            WorkflowContractName = "//workflow-core/workflowContract";
 
             InitiatorEventServiceName = $"//workflow-core/{workflowHostName}/initiatorEventService";
             TargetEventServiceName = $"//workflow-core/{workflowHostName}/targetEventService";
@@ -27,23 +37,23 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             WorkflowQueueName = $"//workflow-core/{workflowHostName}/workflowQueue";
         }
 
-        public string WorkflowContractName { get;  }
+        public string WorkflowContractName { get; }
 
-        public string TargetEventServiceName { get;  }
+        public string TargetEventServiceName { get; }
 
-        public string InitiatorEventServiceName { get;  }
+        public string InitiatorEventServiceName { get; }
 
-        public string WorkflowQueueName { get;  }
+        public string WorkflowQueueName { get; }
 
-        public string EventQueueName { get;  }
+        public string EventQueueName { get; }
 
-        public string TargetWorkflowServiceName { get;  }
+        public string TargetWorkflowServiceName { get; }
 
-        public string InitiatorWorkflowServiceName { get;  }
+        public string InitiatorWorkflowServiceName { get; }
 
-        public string EventContractName { get;  }
+        public string EventContractName { get; }
 
-        public string EventMessageType { get;  }
+        public string EventMessageType { get; }
 
         public string WorkflowMessageType { get; }
     }

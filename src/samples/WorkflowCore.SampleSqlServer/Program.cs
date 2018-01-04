@@ -38,15 +38,14 @@ namespace WorkflowCore.SampleSqlServer
 
         private static IServiceProvider ConfigureServices()
         {
-            //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
 
             services.AddWorkflow(x =>
                 {
-                    x.UseSqlServerQueue(_connectionString, "SampleSqlServer", true);
                     x.UseSqlServer(_connectionString, false, true);
                     x.UseSqlServerLocking(_connectionString);
+                    x.UseSqlServerQueue(_connectionString, true);
                 }
             );
 
@@ -57,6 +56,7 @@ namespace WorkflowCore.SampleSqlServer
             //config logging
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             loggerFactory.AddDebug(LogLevel.Debug);
+
             return serviceProvider;
         }
     }

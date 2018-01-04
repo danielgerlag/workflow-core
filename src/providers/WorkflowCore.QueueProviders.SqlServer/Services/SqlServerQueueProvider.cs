@@ -6,8 +6,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Microsoft.Extensions.Logging;
-
 using WorkflowCore.Interface;
 
 #endregion
@@ -18,12 +16,13 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
     {
         readonly string _connectionString;
         readonly string _workflowHostName;
+
         readonly bool _canMigrateDb;
-        SqlConnection _cn;
+
         readonly SqlServerNames _names;
         //private ILogger _lg;
 
-        public SqlServerQueueProvider(string connectionString, string workflowHostName, bool canMigrateDb/*, ILoggerFactory logFactory*/)
+        public SqlServerQueueProvider(string connectionString, string workflowHostName, bool canMigrateDb /*, ILoggerFactory logFactory*/)
         {
             //_lg = logFactory.CreateLogger<SqlServerQueueProvider>();
 
@@ -39,8 +38,6 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
 
         public async Task Start()
         {
-            _cn = new SqlConnection(_connectionString);
-
             if (_canMigrateDb)
             {
                 var mig = new SqlServerQueueProviderMigrator(_connectionString, _workflowHostName);
@@ -50,7 +47,6 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
 
         public async Task Stop()
         {
-            _cn.Close();
         }
 
         public void Dispose()
@@ -58,10 +54,18 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             Stop().Wait();
         }
 
-
+        /// <inheritdoc />
+        /// <summary>
+        /// Write a new id to the specified queue
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="queue"></param>
+        /// <returns></returns>
         public async Task QueueWork(string id, QueueType queue)
         {
-            var cn = new SqlConnection(_connectionString);
+            if (String.IsNullOrEmpty(id)) throw new ArgumentNullException(nameof(id), "Param id must not be null");
+
+            SqlConnection cn = null;
             try
             {
                 string msgType, initiatorService, targetService, contractName;
@@ -83,7 +87,6 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
 DECLARE @InitDlgHandle UNIQUEIDENTIFIER
 BEGIN TRAN 
 
---Determine the Initiator Service, Target Service and the Contract 
 BEGIN DIALOG @InitDlgHandle
 FROM SERVICE
 [{initiatorService}]
@@ -93,16 +96,14 @@ ON CONTRACT
 [{contractName}]
 WITH ENCRYPTION=OFF; 
 
---Send the Message
 SEND ON CONVERSATION @InitDlgHandle 
-MESSAGE TYPE
-[{msgType}]
+MESSAGE TYPE [{msgType}]
 (@RequestMessage);
 
 COMMIT TRAN
 ";
 
-
+                cn = new SqlConnection(_connectionString);
                 cn.Open();
                 using (var cmd = SqlConnectionHelper.CreateCommand(cn, null, sql))
                 {
@@ -111,13 +112,20 @@ COMMIT TRAN
                 }
             } finally
             {
-                cn.Close();
+                cn?.Close();
             }
         }
 
+        /// <inheritdoc />
+        /// <summary>
+        /// Get an id from the specified queue.
+        /// </summary>
+        /// <param name="queue"></param>
+        /// <param name="cancellationToken">cancellationToken</param>
+        /// <returns>Next id from queue, null if no message arrives in one second.</returns>
         public async Task<string> DequeueWork(QueueType queue, CancellationToken cancellationToken)
         {
-            var cn = new SqlConnection(_connectionString);
+            SqlConnection cn = null;
             try
             {
                 var queueName = queue == QueueType.Workflow ? _names.WorkflowQueueName : _names.EventQueueName;
@@ -140,7 +148,8 @@ TIMEOUT 1000;
 SELECT cast(@Message as nvarchar(max))
 COMMIT TRAN 
 ";
-                
+
+                cn = new SqlConnection(_connectionString);
                 cn.Open();
                 using (var cmd = SqlConnectionHelper.CreateCommand(cn, null, sql))
                 {
@@ -149,7 +158,7 @@ COMMIT TRAN
                 }
             } finally
             {
-                cn.Close();
+                cn?.Close();
             }
         }
     }

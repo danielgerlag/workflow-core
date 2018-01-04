@@ -17,7 +17,7 @@ It require a SQL Server database available with this connection string:
     
         "Server=(local);Database=wfc;User Id=wfc;Password=wfc;"
 
-and SQL Server Service Broker enabled.
+and SQL Server Service Broker enabled (this command must be executed in single user mode).
 
 ```sql
 	ALTER DATABASE wcf SET ENABLE_BROKER
