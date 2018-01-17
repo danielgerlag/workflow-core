@@ -12,18 +12,31 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
+        /// <summary>
+        /// Use SQL Server as a queue provider
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="connectionString"></param>
+        /// <param name="workflowHostName"></param>
+        /// <param name="canMigrateDb">Autogenerate required service broker objects</param>
+        /// <returns></returns>
         public static WorkflowOptions UseSqlServerQueue(this WorkflowOptions options, string connectionString, string workflowHostName,
-            bool canCreateDb = false)
+            bool canMigrateDb = false)
         {
-            options.UseQueueProvider(sp =>
-                new SqlServerQueueProvider(connectionString, workflowHostName, canCreateDb /*, sp.GetService<ILoggerFactory>()*/));
+            options.UseQueueProvider(sp => new SqlServerQueueProvider(connectionString, workflowHostName, canMigrateDb));
             return options;
         }
 
-        public static WorkflowOptions UseSqlServerQueue(this WorkflowOptions options, string connectionString, bool canCreateDb = false)
+        /// <summary>
+        /// Use SQL Server as a queue provider (use 'default' as workflowHostName)
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="connectionString"></param>
+        /// <param name="canMigrateDb">Autogenerate required service broker objects</param>
+        /// <returns></returns>
+        public static WorkflowOptions UseSqlServerQueue(this WorkflowOptions options, string connectionString, bool canMigrateDb = false)
         {
-            options.UseQueueProvider(sp =>
-                new SqlServerQueueProvider(connectionString, "default", canCreateDb /*, sp.GetService<ILoggerFactory>()*/));
+            options.UseQueueProvider(sp => new SqlServerQueueProvider(connectionString, "default", canMigrateDb));
             return options;
         }
     }

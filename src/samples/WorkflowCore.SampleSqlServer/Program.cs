@@ -27,19 +27,42 @@ namespace WorkflowCore.SampleSqlServer
 
             //start the workflow host
             var host = serviceProvider.GetService<IWorkflowHost>();
-            host.RegisterWorkflow<HelloWorldWorkflow>();
+            host.RegisterWorkflow<HelloWorldWorkflow, HelloWorldData>();
             host.Start();
 
-            host.StartWorkflow("HelloWorld", 1, new HelloWorldData {ID=123});
 
-            Console.ReadLine();
-            host.Stop();
+            while (true)
+            {
+                Console.WriteLine("\nS:start E:event: Q:quit");
+                var key = Console.ReadKey(true);
+                switch (key.KeyChar)
+                {
+                    case 'S':
+                        var id = host.StartWorkflow("HelloWorld", 1, new HelloWorldData {ID=123});
+                        Console.WriteLine(id.Result);
+                        break;
+
+                    case 'E':
+                        Console.Write("EventID:");
+                        var idIn = Console.ReadLine();
+                        host.PublishEvent("Go", "0", int.Parse(idIn));
+                        break;
+
+                    case 'Q':
+                        host.Stop();
+                        Environment.Exit(0);
+                        break;
+
+                }
+            }
         }
 
         private static IServiceProvider ConfigureServices()
         {
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
+
+            //services.AddWorkflow();
 
             services.AddWorkflow(x =>
                 {

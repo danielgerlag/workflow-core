@@ -25,7 +25,7 @@ namespace WorkflowCore.SampleSqlServer.Steps
         {
             var data = (HelloWorldData)context.Workflow.Data;
 
-            Console.WriteLine("Goodbye world " + data.ID);
+            Console.WriteLine($"Goodbye world {data.ID} {data.EventId}");
             _logger.LogInformation("Hi there!");
 
             return ExecutionResult.Next();

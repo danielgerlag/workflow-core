@@ -10,14 +10,22 @@ using WorkflowCore.SampleSqlServer.Steps;
 
 namespace WorkflowCore.SampleSqlServer
 {
-    public class HelloWorldWorkflow : IWorkflow
+    public class HelloWorldData
     {
-        public void Build(IWorkflowBuilder<object> builder)
+        public int ID { get; set; }
+        public long EventId { get; set; }
+    }
+
+    public class HelloWorldWorkflow : IWorkflow<HelloWorldData>
+    {
+        public void Build(IWorkflowBuilder<HelloWorldData> builder)
         {
             var stepBuilder = builder
                 .StartWith<HelloWorld>()
-                .Delay(o => TimeSpan.FromSeconds(2))
-                .Then<GoodbyeWorld>();
+                .WaitFor("Go", data => "0")
+                    .Output(data => data.EventId, step => step.EventData)
+                .Then<GoodbyeWorld>()
+                .EndWorkflow();
         }
 
         public string Id => "HelloWorld";
