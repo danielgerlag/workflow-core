@@ -2,7 +2,9 @@
 
 using System;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,6 +24,9 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
 
         readonly IBrokerNamesProvider _names;
 
+        private readonly string _queueWork;
+        private readonly string _dequeueWork;
+
         public SqlServerQueueProvider(string connectionString, string workflowHostName, bool canMigrateDb, bool canCreateDb)
         {
             _connectionString = connectionString;
@@ -31,7 +36,21 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             _names = new BrokerNamesProvider(workflowHostName);
 
             IsDequeueBlocking = true;
+
+            _queueWork = GetFromResource("QueueWork");
+            _dequeueWork = GetFromResource("DequeueWork");
         }
+
+        private static string GetFromResource(string file)
+        {
+            var resName = $"WorkflowCore.QueueProviders.SqlServer.Services.{file}.sql";
+
+            using (var reader = new StreamReader(Assembly.GetExecutingAssembly().GetManifestResourceStream(resName)))
+            {
+                return reader.ReadToEnd();
+            }
+        }
+
 
         public bool IsDequeueBlocking { get; }
 
@@ -82,25 +101,10 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                     contractName = _names.EventContractName;
                 }
 
-                var sql = $@"
-DECLARE @InitDlgHandle UNIQUEIDENTIFIER
-BEGIN TRAN 
-
-BEGIN DIALOG @InitDlgHandle
-FROM SERVICE
-[{initiatorService}]
-TO SERVICE
-'{targetService}'
-ON CONTRACT
-[{contractName}]
-WITH ENCRYPTION=OFF; 
-
-SEND ON CONVERSATION @InitDlgHandle 
-MESSAGE TYPE [{msgType}]
-(@RequestMessage);
-
-COMMIT TRAN
-";
+                var sql = _queueWork.Replace("{initiatorService}",initiatorService)
+                    .Replace("{targetService}",targetService)
+                    .Replace("{contractName}", contractName)
+                    .Replace("{msgType}", msgType);
 
                 cn = new SqlConnection(_connectionString);
                 cn.Open();
@@ -129,24 +133,7 @@ COMMIT TRAN
             {
                 var queueName = queue == QueueType.Workflow ? _names.WorkflowQueueName : _names.EventQueueName;
 
-                var sql = $@"
-DECLARE @TargetDlgHandle UNIQUEIDENTIFIER
-DECLARE @Message varbinary(max)
-DECLARE @MessageName Sysname 
-
-BEGIN TRAN; 
-
-WAITFOR (
-    RECEIVE TOP(1)
-    @TargetDlgHandle=Conversation_Handle
-    ,@Message=Message_Body
-    ,@MessageName=Message_Type_Name
-    FROM [{queueName}]),  
-TIMEOUT 1000;   
-
-SELECT cast(@Message as nvarchar(max))
-COMMIT TRAN 
-";
+                var sql = _dequeueWork.Replace("{queueName}", queueName);
 
                 cn = new SqlConnection(_connectionString);
                 cn.Open();

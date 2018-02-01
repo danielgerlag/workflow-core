@@ -5,6 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Services\DequeueWork.sql" />
+    <None Remove="Services\QueueWork.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Services\DequeueWork.sql" />
+    <EmbeddedResource Include="Services\QueueWork.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Data.Common" Version="4.3.0" />
   </ItemGroup>
 
