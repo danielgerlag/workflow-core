@@ -3,6 +3,7 @@
 using System;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 #endregion
 
@@ -22,6 +23,8 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
         }
 
 
+        #region Migrate
+
         internal void MigrateDb()
         {
             var cn = new SqlConnection(_connectionString);
@@ -30,7 +33,6 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                 cn.Open();
                 var tx = cn.BeginTransaction();
 
-                EnableBroker(cn, tx);
                 CreateMessageType(cn, tx, _names.WorkflowMessageType);
                 CreateMessageType(cn, tx, _names.EventMessageType);
 
@@ -121,18 +123,93 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             }
         }
 
-        private static void EnableBroker(SqlConnection cn, SqlTransaction tx)
+        #endregion
+
+        public void CreateDb()
         {
-            var cmdtext = @"select is_broker_enabled from sys.databases where name = @name";
-            using (var cmd = SqlConnectionHelper.CreateCommand(cn, tx, cmdtext, cn.Database))
+            var pattern = ";Database=(.[^;]+);";
+
+            var regex = new Regex(pattern);
+            var db = regex.Match(_connectionString).Groups[1].Value;
+
+            var masterCn = _connectionString.Replace(db, "master");
+
+            var dbPresente = false;
+            var cn = new SqlConnection(masterCn);
+            try
             {
-                bool isBrokerEnabled = (bool)cmd.ExecuteScalar();
-                if (isBrokerEnabled) return;
+                cn.Open();
+
+                var cmd = cn.CreateCommand();
+                cmd.CommandText = "select name from sys.databases where name = @dbname";
+                cmd.Parameters.AddWithValue("@dbname", db);
+                var found=cmd.ExecuteScalar();
+                dbPresente = (found != null);
+            }
+            finally
+            {
+                cn.Close();
             }
 
-            var msg =
-                $"Service Broker not enabled on database {cn.Database}. Execute 'ALTER DATABASE {cn.Database} SET ENABLE_BROKER' in single user mode ";
-            throw new InvalidOperationException(msg);
+            if (!dbPresente)
+            {
+                cn = new SqlConnection(masterCn);
+                try
+                {
+                    cn.Open();
+                    //var tx = cn.BeginTransaction();
+
+                    var cmd = cn.CreateCommand();
+                    //cmd.Transaction = tx;
+                    cmd.CommandText = "create database [" + db + "]";
+                    cmd.ExecuteNonQuery();
+                }
+                finally
+                {
+                    cn.Close();
+                }
+            }
+
+            EnableBroker(masterCn, db);
+        }
+
+        private static void EnableBroker(string masterCn, string db)
+        {
+            var cn = new SqlConnection(masterCn);
+            try
+            {
+                cn.Open();
+                var tx = cn.BeginTransaction();
+
+                var cmdtext = @"select is_broker_enabled from sys.databases where name = @name";
+                var cmd = SqlConnectionHelper.CreateCommand(cn, tx, cmdtext, db);
+
+                bool isBrokerEnabled = (bool)cmd.ExecuteScalar();
+                if (isBrokerEnabled) return;
+
+                tx.Commit();
+            }
+            finally
+            {
+                cn.Close();
+            }
+
+            cn = new SqlConnection(masterCn);
+            try
+            {
+                cn.Open();
+                var tx = cn.BeginTransaction();
+
+                var cmdtext = $"ALTER DATABASE [{db}] SET ENABLE_BROKER;";
+                var cmd = SqlConnectionHelper.CreateCommand(cn, tx, cmdtext);
+
+                cmd.ExecuteScalar();
+                tx.Commit();
+            }
+            finally
+            {
+                cn.Close();
+            }
         }
     }
 }

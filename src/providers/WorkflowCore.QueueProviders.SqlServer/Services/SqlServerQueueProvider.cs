@@ -18,14 +18,16 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
         readonly string _workflowHostName;
 
         readonly bool _canMigrateDb;
+        readonly bool _canCreateDb;
 
         readonly SqlServerNames _names;
 
-        public SqlServerQueueProvider(string connectionString, string workflowHostName, bool canMigrateDb)
+        public SqlServerQueueProvider(string connectionString, string workflowHostName, bool canMigrateDb, bool canCreateDb)
         {
             _connectionString = connectionString;
             _workflowHostName = workflowHostName;
             _canMigrateDb = canMigrateDb;
+            _canCreateDb = canCreateDb;
             _names = new SqlServerNames(workflowHostName);
 
             IsDequeueBlocking = true;
@@ -35,11 +37,10 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
 
         public async Task Start()
         {
-            if (_canMigrateDb)
-            {
-                var mig = new SqlServerQueueProviderMigrator(_connectionString, _workflowHostName);
-                mig.MigrateDb();
-            }
+            var mig = new SqlServerQueueProviderMigrator(_connectionString, _workflowHostName);
+
+            if (_canCreateDb) mig.CreateDb();
+            if (_canMigrateDb) mig.MigrateDb();
         }
 
         public async Task Stop()

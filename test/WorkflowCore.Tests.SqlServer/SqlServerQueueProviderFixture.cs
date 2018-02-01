@@ -20,20 +20,20 @@ using Xunit.Abstractions;
 
 namespace WorkflowCore.Tests.SqlServer
 {
-    [Collection("SqlServerBroker collection")]
+    [Collection("SqlServer collection")]
     public class SqlServerQueueProviderFixture : IDisposable
     {
         #region Init
 
-        readonly SqlServerQueueProvider _qb;
+        private readonly SqlServerQueueProvider _qb;
         private readonly ITestOutputHelper _console;
 
-        public SqlServerQueueProviderFixture(ITestOutputHelper output)
+        public SqlServerQueueProviderFixture(ITestOutputHelper output, SqlDockerSetup setup)
         {
             _console = output;
-            var connectionString = "Server=(local);Database=wfc;User Id=wfc;Password=wfc;";
+            var connectionString = SqlDockerSetup.ConnectionString; 
 
-            _qb = new SqlServerQueueProvider(connectionString, "UnitTest", true);
+            _qb = new SqlServerQueueProvider(connectionString, "UnitTest", true, true);
             _qb.Start().Wait();
 
             while (_qb.DequeueWork(QueueType.Event, CancellationToken.None).Result != null)
