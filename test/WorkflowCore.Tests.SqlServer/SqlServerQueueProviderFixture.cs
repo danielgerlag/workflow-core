@@ -57,7 +57,7 @@ namespace WorkflowCore.Tests.SqlServer
         #region QueueDeque
 
         [Fact]
-        public void QueueDequeTest()
+        public void ShouldEnqueueAndDequeueAMessage()
         {
             var id = Guid.NewGuid().ToString();
 
@@ -78,7 +78,7 @@ namespace WorkflowCore.Tests.SqlServer
         #endregion
 
         [Fact]
-        public void MultiTest()
+        public void ShouldEnqueueAndDequeueManyMessageOnManyThread()
         {
             const int countEvent = 250;
             const int countThread = 10;
