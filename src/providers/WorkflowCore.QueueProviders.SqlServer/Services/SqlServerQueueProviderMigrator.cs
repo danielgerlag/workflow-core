@@ -13,13 +13,13 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
     {
         readonly string _connectionString;
 
-        readonly SqlServerNames _names;
+        readonly IBrokerNamesProvider _names;
 
         public SqlServerQueueProviderMigrator(string connectionString, string workflowHostName)
         {
             _connectionString = connectionString;
 
-            _names = new SqlServerNames(workflowHostName);
+            _names = new BrokerNamesProvider(workflowHostName);
         }
 
 
@@ -134,7 +134,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
 
             var masterCn = _connectionString.Replace(db, "master");
 
-            var dbPresente = false;
+            bool dbPresente;
             var cn = new SqlConnection(masterCn);
             try
             {
@@ -157,10 +157,8 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                 try
                 {
                     cn.Open();
-                    //var tx = cn.BeginTransaction();
-
+                    
                     var cmd = cn.CreateCommand();
-                    //cmd.Transaction = tx;
                     cmd.CommandText = "create database [" + db + "]";
                     cmd.ExecuteNonQuery();
                 }

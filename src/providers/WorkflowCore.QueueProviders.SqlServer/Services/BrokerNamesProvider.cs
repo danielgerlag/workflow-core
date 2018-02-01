@@ -8,18 +8,34 @@ using System.Linq;
 namespace WorkflowCore.QueueProviders.SqlServer.Services
 {
     /// <summary>
+    /// Base interface for <see cref="BrokerNamesProvider"/>
+    /// </summary>
+    public interface IBrokerNamesProvider {
+        string WorkflowContractName { get; }
+        string TargetEventServiceName { get; }
+        string InitiatorEventServiceName { get; }
+        string WorkflowQueueName { get; }
+        string EventQueueName { get; }
+        string TargetWorkflowServiceName { get; }
+        string InitiatorWorkflowServiceName { get; }
+        string EventContractName { get; }
+        string EventMessageType { get; }
+        string WorkflowMessageType { get; }
+    }
+
+    /// <summary>
     /// Build names for SSSB objects
     /// </summary>
     /// <remarks>
     /// Message type and contract are global, service name and queue different for every workflow host
     /// </remarks>
-    public class SqlServerNames
+    public class BrokerNamesProvider : IBrokerNamesProvider
     {
         /// <summary>
         /// ctor
         /// </summary>
         /// <param name="workflowHostName"></param>
-        public SqlServerNames(string workflowHostName)
+        public BrokerNamesProvider(string workflowHostName)
         {
             WorkflowMessageType = "//workflow-core/workflow";
             EventMessageType = "//workflow-core/event";

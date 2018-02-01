@@ -20,7 +20,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
         readonly bool _canMigrateDb;
         readonly bool _canCreateDb;
 
-        readonly SqlServerNames _names;
+        readonly IBrokerNamesProvider _names;
 
         public SqlServerQueueProvider(string connectionString, string workflowHostName, bool canMigrateDb, bool canCreateDb)
         {
@@ -28,7 +28,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             _workflowHostName = workflowHostName;
             _canMigrateDb = canMigrateDb;
             _canCreateDb = canCreateDb;
-            _names = new SqlServerNames(workflowHostName);
+            _names = new BrokerNamesProvider(workflowHostName);
 
             IsDequeueBlocking = true;
         }
