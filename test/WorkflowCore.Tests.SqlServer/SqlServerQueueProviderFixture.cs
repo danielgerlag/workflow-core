@@ -36,9 +36,15 @@ namespace WorkflowCore.Tests.SqlServer
             _qb = new SqlServerQueueProvider(connectionString, "UnitTest", true);
             _qb.Start().Wait();
 
-            while (_qb.DequeueWork(QueueType.Event, CancellationToken.None).Result != null) { }
+            while (_qb.DequeueWork(QueueType.Event, CancellationToken.None).Result != null)
+            {
+                // Empty queue before test
+            }
 
-            while (_qb.DequeueWork(QueueType.Workflow, CancellationToken.None).Result != null) { }
+            while (_qb.DequeueWork(QueueType.Workflow, CancellationToken.None).Result != null)
+            {
+                // Empty queue before test
+            }
         }
 
         public void Dispose()

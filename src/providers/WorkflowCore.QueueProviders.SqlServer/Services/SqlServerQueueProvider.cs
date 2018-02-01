@@ -20,12 +20,9 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
         readonly bool _canMigrateDb;
 
         readonly SqlServerNames _names;
-        //private ILogger _lg;
 
-        public SqlServerQueueProvider(string connectionString, string workflowHostName, bool canMigrateDb /*, ILoggerFactory logFactory*/)
+        public SqlServerQueueProvider(string connectionString, string workflowHostName, bool canMigrateDb)
         {
-            //_lg = logFactory.CreateLogger<SqlServerQueueProvider>();
-
             _connectionString = connectionString;
             _workflowHostName = workflowHostName;
             _canMigrateDb = canMigrateDb;
@@ -47,6 +44,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
 
         public async Task Stop()
         {
+            // Do nothing
         }
 
         public void Dispose()

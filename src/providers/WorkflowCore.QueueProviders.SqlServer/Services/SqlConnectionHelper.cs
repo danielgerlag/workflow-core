@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace WorkflowCore.QueueProviders.SqlServer.Services
 {
-    public class SqlConnectionHelper
+    public static class SqlConnectionHelper
     {
         internal static SqlCommand CreateCommand(SqlConnection cn, SqlTransaction tx, string cmdtext, string name = null)
         {
