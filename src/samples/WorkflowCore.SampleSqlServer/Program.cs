@@ -68,7 +68,7 @@ namespace WorkflowCore.SampleSqlServer
                 {
                     x.UseSqlServer(_connectionString, false, true);
                     x.UseSqlServerLocking(_connectionString);
-                    x.UseSqlServerQueue(_connectionString, true);
+                    x.UseSqlServerBroker(_connectionString, true);
                 }
             );
 

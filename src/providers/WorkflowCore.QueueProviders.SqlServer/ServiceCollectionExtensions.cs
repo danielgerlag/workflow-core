@@ -20,7 +20,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="workflowHostName"></param>
         /// <param name="canMigrateDb">Autogenerate required service broker objects</param>
         /// <returns></returns>
-        public static WorkflowOptions UseSqlServerQueue(this WorkflowOptions options, string connectionString, string workflowHostName,
+        public static WorkflowOptions UseSqlServerBroker(this WorkflowOptions options, string connectionString, string workflowHostName,
             bool canMigrateDb = false, bool canCreateDb = false)
         {
             options.UseQueueProvider(sp => new SqlServerQueueProvider(connectionString, workflowHostName, canMigrateDb, canCreateDb));
@@ -34,7 +34,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="connectionString"></param>
         /// <param name="canMigrateDb">Autogenerate required service broker objects</param>
         /// <returns></returns>
-        public static WorkflowOptions UseSqlServerQueue(this WorkflowOptions options, string connectionString, bool canMigrateDb = false, bool canCreateDb = false)
+        public static WorkflowOptions UseSqlServerBroker(this WorkflowOptions options, string connectionString, bool canMigrateDb = false, bool canCreateDb = false)
         {
             options.UseQueueProvider(sp => new SqlServerQueueProvider(connectionString, "default", canMigrateDb, canCreateDb));
             return options;
