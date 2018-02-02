@@ -8,7 +8,19 @@ using System.Linq;
 
 namespace WorkflowCore.QueueProviders.SqlServer.Services
 {
-    public static class SqlConnectionHelper
+    public interface ISqlCommandExecutor {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cn"></param>
+        /// <param name="tx"></param>
+        /// <param name="cmdtext"></param>
+        /// <param name="name">Add this value to parameter @name</param>
+        /// <returns></returns>
+        SqlCommand CreateCommand(SqlConnection cn, SqlTransaction tx, string cmdtext, string name = null);
+    }
+
+    public class SqlCommandExecutor : ISqlCommandExecutor
     {
         /// <summary>
         /// 
@@ -18,7 +30,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
         /// <param name="cmdtext"></param>
         /// <param name="name">Add this value to parameter @name</param>
         /// <returns></returns>
-        internal static SqlCommand CreateCommand(SqlConnection cn, SqlTransaction tx, string cmdtext, string name = null)
+        public SqlCommand CreateCommand(SqlConnection cn, SqlTransaction tx, string cmdtext, string name = null)
         {
             var cmd = cn.CreateCommand();
             cmd.Transaction = tx;

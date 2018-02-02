@@ -7,6 +7,7 @@
   <ItemGroup>
     <None Remove="Services\DequeueWork.sql" />
     <None Remove="Services\QueueWork.sql" />
+    <None Remove="Services\SqlServerQueueProviderOption.cs~RF7cacba9.TMP" />
   </ItemGroup>
 
   <ItemGroup>

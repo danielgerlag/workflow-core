@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 using FluentAssertions;
 
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
 using WorkflowCore.Interface;
 using WorkflowCore.QueueProviders.SqlServer.Services;
 
@@ -27,13 +30,16 @@ namespace WorkflowCore.Tests.SqlServer
 
         private readonly SqlServerQueueProvider _qb;
         private readonly ITestOutputHelper _console;
+        private static ServiceProvider _serviceProvider;
 
         public SqlServerQueueProviderFixture(ITestOutputHelper output, SqlDockerSetup setup)
         {
             _console = output;
-            var connectionString = SqlDockerSetup.ConnectionString; 
+            var connectionString = SqlDockerSetup.ConnectionString;
+            ConfigureServices();
 
-            _qb = new SqlServerQueueProvider(connectionString, "UnitTest", true, true);
+            var opt = new SqlServerQueueProviderOption(connectionString, "UnitTest", true, true);
+            _qb = new SqlServerQueueProvider(_serviceProvider, opt);
             _qb.Start().Wait();
 
             while (_qb.DequeueWork(QueueType.Event, CancellationToken.None).Result != null)
@@ -45,6 +51,12 @@ namespace WorkflowCore.Tests.SqlServer
             {
                 // Empty queue before test
             }
+        }
+
+        private static void ConfigureServices()
+        {
+            IServiceCollection services = new ServiceCollection();
+            _serviceProvider = services.BuildServiceProvider();
         }
 
         public void Dispose()

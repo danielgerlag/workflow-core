@@ -9,23 +9,31 @@ using System.Text.RegularExpressions;
 
 namespace WorkflowCore.QueueProviders.SqlServer.Services
 {
-    public class SqlServerQueueProviderMigrator
+    public interface ISqlServerQueueProviderMigrator
+    {
+        void MigrateDb();
+        void CreateDb();
+    }
+
+    public class SqlServerQueueProviderMigrator : ISqlServerQueueProviderMigrator
     {
         readonly string _connectionString;
 
         readonly IBrokerNamesProvider _names;
+        private readonly ISqlCommandExecutor _sqlCommandExecutor;
 
-        public SqlServerQueueProviderMigrator(string connectionString, string workflowHostName)
+        public SqlServerQueueProviderMigrator(string connectionString, IBrokerNamesProvider names, ISqlCommandExecutor sqlCommandExecutor)
         {
             _connectionString = connectionString;
 
-            _names = new BrokerNamesProvider(workflowHostName);
+            _names = names;
+            _sqlCommandExecutor = sqlCommandExecutor;
         }
 
 
         #region Migrate
 
-        internal void MigrateDb()
+        public void MigrateDb()
         {
             var cn = new SqlConnection(_connectionString);
             try
@@ -55,10 +63,10 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             }
         }
 
-        private static void CreateService(SqlConnection cn, SqlTransaction tx, string name, string queueName, string contractName)
+        private void CreateService(SqlConnection cn, SqlTransaction tx, string name, string queueName, string contractName)
         {
             var cmdtext = @"select name from sys.services where name=@name";
-            using (var cmd = SqlConnectionHelper.CreateCommand(cn, tx, cmdtext, name))
+            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext, name))
             {
                 var n = (string)cmd.ExecuteScalar();
 
@@ -66,16 +74,16 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             }
 
             cmdtext = $"CREATE SERVICE [{name}] ON QUEUE [{queueName}]([{contractName}]);";
-            using (var cmd = SqlConnectionHelper.CreateCommand(cn, tx, cmdtext))
+            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext))
             {
                 cmd.ExecuteNonQuery();
             }
         }
 
-        private static void CreateQueue(SqlConnection cn, SqlTransaction tx, string queueName)
+        private void CreateQueue(SqlConnection cn, SqlTransaction tx, string queueName)
         {
             var cmdtext = @"select name from sys.service_queues where name=@name";
-            using (var cmd = SqlConnectionHelper.CreateCommand(cn, tx, cmdtext, queueName))
+            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext, queueName))
             {
                 var n = (string)cmd.ExecuteScalar();
 
@@ -83,16 +91,16 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             }
 
             cmdtext = $"CREATE QUEUE [{queueName}];";
-            using (var cmd = SqlConnectionHelper.CreateCommand(cn, tx, cmdtext))
+            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext))
             {
                 cmd.ExecuteNonQuery();
             }
         }
 
-        private static void CreateContract(SqlConnection cn, SqlTransaction tx, string contractName, string messageName)
+        private void CreateContract(SqlConnection cn, SqlTransaction tx, string contractName, string messageName)
         {
             var cmdtext = @"select name from sys.service_contracts where name=@name";
-            using (var cmd = SqlConnectionHelper.CreateCommand(cn, tx, cmdtext, contractName))
+            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext, contractName))
             {
                 var n = (string)cmd.ExecuteScalar();
 
@@ -100,16 +108,16 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             }
 
             cmdtext = $"CREATE CONTRACT [{contractName}] ( [{messageName}] SENT BY INITIATOR);";
-            using (var cmd = SqlConnectionHelper.CreateCommand(cn, tx, cmdtext))
+            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext))
             {
                 cmd.ExecuteNonQuery();
             }
         }
 
-        private static void CreateMessageType(SqlConnection cn, SqlTransaction tx, string message)
+        private void CreateMessageType(SqlConnection cn, SqlTransaction tx, string message)
         {
             var cmdtext = @"select name from sys.service_message_types where name=@name";
-            using (var cmd = SqlConnectionHelper.CreateCommand(cn, tx, cmdtext, message))
+            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext, message))
             {
                 var n = (string)cmd.ExecuteScalar();
 
@@ -117,7 +125,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             }
 
             cmdtext = $"CREATE MESSAGE TYPE [{message}] VALIDATION = NONE;";
-            using (var cmd = SqlConnectionHelper.CreateCommand(cn, tx, cmdtext))
+            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext))
             {
                 cmd.ExecuteNonQuery();
             }
@@ -143,10 +151,9 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                 var cmd = cn.CreateCommand();
                 cmd.CommandText = "select name from sys.databases where name = @dbname";
                 cmd.Parameters.AddWithValue("@dbname", db);
-                var found=cmd.ExecuteScalar();
+                var found = cmd.ExecuteScalar();
                 dbPresente = (found != null);
-            }
-            finally
+            } finally
             {
                 cn.Close();
             }
@@ -157,12 +164,11 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                 try
                 {
                     cn.Open();
-                    
+
                     var cmd = cn.CreateCommand();
                     cmd.CommandText = "create database [" + db + "]";
                     cmd.ExecuteNonQuery();
-                }
-                finally
+                } finally
                 {
                     cn.Close();
                 }
@@ -171,7 +177,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             EnableBroker(masterCn, db);
         }
 
-        private static void EnableBroker(string masterCn, string db)
+        private void EnableBroker(string masterCn, string db)
         {
             var cn = new SqlConnection(masterCn);
             try
@@ -180,14 +186,13 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                 var tx = cn.BeginTransaction();
 
                 var cmdtext = @"select is_broker_enabled from sys.databases where name = @name";
-                var cmd = SqlConnectionHelper.CreateCommand(cn, tx, cmdtext, db);
+                var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext, db);
 
                 bool isBrokerEnabled = (bool)cmd.ExecuteScalar();
                 if (isBrokerEnabled) return;
 
                 tx.Commit();
-            }
-            finally
+            } finally
             {
                 cn.Close();
             }
@@ -199,12 +204,11 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                 var tx = cn.BeginTransaction();
 
                 var cmdtext = $"ALTER DATABASE [{db}] SET ENABLE_BROKER;";
-                var cmd = SqlConnectionHelper.CreateCommand(cn, tx, cmdtext);
+                var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext);
 
                 cmd.ExecuteScalar();
                 tx.Commit();
-            }
-            finally
+            } finally
             {
                 cn.Close();
             }

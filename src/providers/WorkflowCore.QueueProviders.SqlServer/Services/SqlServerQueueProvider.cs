@@ -8,6 +8,8 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.DependencyInjection;
+
 using WorkflowCore.Interface;
 
 #endregion
@@ -17,23 +19,29 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
     public class SqlServerQueueProvider : IQueueProvider
     {
         readonly string _connectionString;
-        readonly string _workflowHostName;
 
         readonly bool _canMigrateDb;
         readonly bool _canCreateDb;
 
-        readonly IBrokerNamesProvider _names;
+        private readonly IBrokerNamesProvider _names;
+        private readonly ISqlServerQueueProviderMigrator _migrator;
+        private readonly ISqlCommandExecutor _sqlCommandExecutor;
 
         private readonly string _queueWork;
         private readonly string _dequeueWork;
 
-        public SqlServerQueueProvider(string connectionString, string workflowHostName, bool canMigrateDb, bool canCreateDb)
+        public SqlServerQueueProvider(IServiceProvider serviceProvider, SqlServerQueueProviderOption opt)
         {
-            _connectionString = connectionString;
-            _workflowHostName = workflowHostName;
-            _canMigrateDb = canMigrateDb;
-            _canCreateDb = canCreateDb;
-            _names = new BrokerNamesProvider(workflowHostName);
+            _connectionString = opt.ConnectionString;
+            _canMigrateDb = opt.CanMigrateDb;
+            _canCreateDb = opt.CanCreateDb;
+
+            _names = serviceProvider.GetService<IBrokerNamesProvider>()
+                     ?? new BrokerNamesProvider(opt.WorkflowHostName);
+            _sqlCommandExecutor = serviceProvider.GetService<ISqlCommandExecutor>()
+                                  ?? new SqlCommandExecutor();
+            _migrator = serviceProvider.GetService<ISqlServerQueueProviderMigrator>()
+                        ?? new SqlServerQueueProviderMigrator(opt.ConnectionString, _names, _sqlCommandExecutor);
 
             IsDequeueBlocking = true;
 
@@ -56,10 +64,8 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
 
         public async Task Start()
         {
-            var mig = new SqlServerQueueProviderMigrator(_connectionString, _workflowHostName);
-
-            if (_canCreateDb) mig.CreateDb();
-            if (_canMigrateDb) mig.MigrateDb();
+            if (_canCreateDb) _migrator.CreateDb();
+            if (_canMigrateDb) _migrator.MigrateDb();
         }
 
         public async Task Stop()
@@ -101,14 +107,14 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                     contractName = _names.EventContractName;
                 }
 
-                var sql = _queueWork.Replace("{initiatorService}",initiatorService)
-                    .Replace("{targetService}",targetService)
+                var sql = _queueWork.Replace("{initiatorService}", initiatorService)
+                    .Replace("{targetService}", targetService)
                     .Replace("{contractName}", contractName)
                     .Replace("{msgType}", msgType);
 
                 cn = new SqlConnection(_connectionString);
                 cn.Open();
-                using (var cmd = SqlConnectionHelper.CreateCommand(cn, null, sql))
+                using (var cmd = _sqlCommandExecutor.CreateCommand(cn, null, sql))
                 {
                     cmd.Parameters.AddWithValue("@RequestMessage", id);
                     await cmd.ExecuteNonQueryAsync();
@@ -137,7 +143,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
 
                 cn = new SqlConnection(_connectionString);
                 cn.Open();
-                using (var cmd = SqlConnectionHelper.CreateCommand(cn, null, sql))
+                using (var cmd = _sqlCommandExecutor.CreateCommand(cn, null, sql))
                 {
                     var msg = await cmd.ExecuteScalarAsync(cancellationToken);
                     return msg is DBNull ? null : (string)msg;
