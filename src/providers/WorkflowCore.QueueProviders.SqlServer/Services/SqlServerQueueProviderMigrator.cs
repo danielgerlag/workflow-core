@@ -135,12 +135,12 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
 
         public void CreateDb()
         {
-            var pattern = ";Database=(.[^;]+);";
+            var pattern = "Database=(.[^;]+);";
 
             var regex = new Regex(pattern);
             var db = regex.Match(_connectionString).Groups[1].Value;
 
-            var masterCn = _connectionString.Replace(db, "master");
+            var masterCn = _connectionString.Replace(regex.Match(_connectionString).Groups[0].Value, "Database=master;");
 
             bool dbPresente;
             var cn = new SqlConnection(masterCn);
