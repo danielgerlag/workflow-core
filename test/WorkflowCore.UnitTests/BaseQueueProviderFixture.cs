@@ -19,7 +19,7 @@ using Xunit.Abstractions;
 
 namespace WorkflowCore.UnitTests
 {
-    public class BaseQueueProviderFixture
+    public abstract class BaseQueueProviderFixture
     {
         protected IQueueProvider QueueProvider;
         protected ITestOutputHelper Console;
