@@ -62,6 +62,8 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
 
         public bool IsDequeueBlocking { get; }
 
+#pragma warning disable CS1998
+
         public async Task Start()
         {
             if (_canCreateDb) _migrator.CreateDb();
@@ -72,6 +74,8 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
         {
             // Do nothing
         }
+
+#pragma warning restore CS1998
 
         public void Dispose()
         {
@@ -107,15 +111,19 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                     contractName = _names.EventContractName;
                 }
 
-                var sql = _queueWork.Replace("{initiatorService}", initiatorService)
-                    .Replace("{targetService}", targetService)
-                    .Replace("{contractName}", contractName)
-                    .Replace("{msgType}", msgType);
+                //var sql = _queueWork.Replace("{initiatorService}", initiatorService)
+                //    .Replace("{targetService}", targetService)
+                //    .Replace("{contractName}", contractName)
+                //    .Replace("{msgType}", msgType);
 
                 cn = new SqlConnection(_connectionString);
                 cn.Open();
-                using (var cmd = _sqlCommandExecutor.CreateCommand(cn, null, sql))
+                using (var cmd = _sqlCommandExecutor.CreateCommand(cn, null, _queueWork))
                 {
+                    cmd.Parameters.AddWithValue("@initiatorService", initiatorService);
+                    cmd.Parameters.AddWithValue("@targetService", targetService);
+                    cmd.Parameters.AddWithValue("@contractName", contractName);
+                    cmd.Parameters.AddWithValue("@msgType", msgType);
                     cmd.Parameters.AddWithValue("@RequestMessage", id);
                     await cmd.ExecuteNonQueryAsync();
                 }
