@@ -66,8 +66,10 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
         private void CreateService(SqlConnection cn, SqlTransaction tx, string name, string queueName, string contractName)
         {
             var cmdtext = @"select name from sys.services where name=@name";
-            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext, name))
+            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext))
             {
+                cmd.Parameters.AddWithValue("@name", name);
+
                 var n = (string)cmd.ExecuteScalar();
 
                 if (!String.IsNullOrEmpty(n)) return;
@@ -83,8 +85,10 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
         private void CreateQueue(SqlConnection cn, SqlTransaction tx, string queueName)
         {
             var cmdtext = @"select name from sys.service_queues where name=@name";
-            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext, queueName))
+            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext))
             {
+                cmd.Parameters.AddWithValue("@name", queueName);
+
                 var n = (string)cmd.ExecuteScalar();
 
                 if (!String.IsNullOrEmpty(n)) return;
@@ -100,8 +104,10 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
         private void CreateContract(SqlConnection cn, SqlTransaction tx, string contractName, string messageName)
         {
             var cmdtext = @"select name from sys.service_contracts where name=@name";
-            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext, contractName))
+            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext))
             {
+                cmd.Parameters.AddWithValue("@name", contractName);
+
                 var n = (string)cmd.ExecuteScalar();
 
                 if (!String.IsNullOrEmpty(n)) return;
@@ -117,8 +123,10 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
         private void CreateMessageType(SqlConnection cn, SqlTransaction tx, string message)
         {
             var cmdtext = @"select name from sys.service_message_types where name=@name";
-            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext, message))
+            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext))
             {
+                cmd.Parameters.AddWithValue("@name", message);
+
                 var n = (string)cmd.ExecuteScalar();
 
                 if (!String.IsNullOrEmpty(n)) return;
@@ -186,7 +194,9 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                 var tx = cn.BeginTransaction();
 
                 var cmdtext = @"select is_broker_enabled from sys.databases where name = @name";
-                var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext, db);
+                
+                var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext);
+                cmd.Parameters.AddWithValue("@name", db);
 
                 bool isBrokerEnabled = (bool)cmd.ExecuteScalar();
                 if (isBrokerEnabled) return;

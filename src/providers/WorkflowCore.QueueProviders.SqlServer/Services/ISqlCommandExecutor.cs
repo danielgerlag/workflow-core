@@ -15,8 +15,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
         /// <param name="cn"></param>
         /// <param name="tx"></param>
         /// <param name="cmdtext"></param>
-        /// <param name="name">Add this value to parameter @name</param>
         /// <returns></returns>
-        SqlCommand CreateCommand(SqlConnection cn, SqlTransaction tx, string cmdtext, string name = null);
+        SqlCommand CreateCommand(SqlConnection cn, SqlTransaction tx, string cmdtext);
     }
 }

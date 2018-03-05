@@ -111,11 +111,6 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                     contractName = _names.EventContractName;
                 }
 
-                //var sql = _queueWork.Replace("{initiatorService}", initiatorService)
-                //    .Replace("{targetService}", targetService)
-                //    .Replace("{contractName}", contractName)
-                //    .Replace("{msgType}", msgType);
-
                 cn = new SqlConnection(_connectionString);
                 cn.Open();
                 using (var cmd = _sqlCommandExecutor.CreateCommand(cn, null, _queueWork))
