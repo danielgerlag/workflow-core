@@ -2,6 +2,7 @@
 
 using System;
 using System.Linq;
+using WorkflowCore.Interface;
 
 #endregion
 
@@ -12,15 +13,6 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
     /// </summary>
     public interface IBrokerNamesProvider
     {
-        string WorkflowContractName { get; }
-        string TargetEventServiceName { get; }
-        string InitiatorEventServiceName { get; }
-        string WorkflowQueueName { get; }
-        string EventQueueName { get; }
-        string TargetWorkflowServiceName { get; }
-        string InitiatorWorkflowServiceName { get; }
-        string EventContractName { get; }
-        string EventMessageType { get; }
-        string WorkflowMessageType { get; }
+        BrokerNames GetByQueue(QueueType queue);
     }
 }

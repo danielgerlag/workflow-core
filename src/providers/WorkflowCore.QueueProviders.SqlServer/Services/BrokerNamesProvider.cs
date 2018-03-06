@@ -2,11 +2,29 @@
 
 using System;
 using System.Linq;
+using WorkflowCore.Interface;
 
 #endregion
 
 namespace WorkflowCore.QueueProviders.SqlServer.Services
 {
+    public class BrokerNames
+    {
+        public BrokerNames(string msgType, string initiatorService, string targetService, string contractName, string queueName)
+        {
+            MsgType = msgType;
+            InitiatorService = initiatorService;
+            TargetService = targetService;
+            ContractName = contractName;
+            QueueName = queueName;
+        }
+
+        public string MsgType { get; }
+        public string InitiatorService { get; }
+        public string TargetService { get; }
+        public string ContractName { get; }
+        public string QueueName { get; }
+    }
     /// <summary>
     /// Build names for SSSB objects
     /// </summary>
@@ -15,46 +33,46 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
     /// </remarks>
     public class BrokerNamesProvider : IBrokerNamesProvider
     {
+        readonly BrokerNames _workFlowNames;
+        readonly BrokerNames _eventNames;
+
         /// <summary>
         /// ctor
         /// </summary>
         /// <param name="workflowHostName"></param>
         public BrokerNamesProvider(string workflowHostName)
         {
-            WorkflowMessageType = "//workflow-core/workflow";
-            EventMessageType = "//workflow-core/event";
+            var workflowMessageType = "//workflow-core/workflow";
+            var eventMessageType = "//workflow-core/event";
 
-            EventContractName = "//workflow-core/eventContract";
-            WorkflowContractName = "//workflow-core/workflowContract";
+            var eventContractName = "//workflow-core/eventContract";
+            var workflowContractName = "//workflow-core/workflowContract";
 
-            InitiatorEventServiceName = $"//workflow-core/{workflowHostName}/initiatorEventService";
-            TargetEventServiceName = $"//workflow-core/{workflowHostName}/targetEventService";
+            var initiatorEventServiceName = $"//workflow-core/{workflowHostName}/initiatorEventService";
+            var targetEventServiceName = $"//workflow-core/{workflowHostName}/targetEventService";
 
-            InitiatorWorkflowServiceName = $"//workflow-core/{workflowHostName}/initiatorWorkflowService";
-            TargetWorkflowServiceName = $"//workflow-core/{workflowHostName}/targetWorkflowService";
+            var initiatorWorkflowServiceName = $"//workflow-core/{workflowHostName}/initiatorWorkflowService";
+            var targetWorkflowServiceName = $"//workflow-core/{workflowHostName}/targetWorkflowService";
 
-            EventQueueName = $"//workflow-core/{workflowHostName}/eventQueue";
-            WorkflowQueueName = $"//workflow-core/{workflowHostName}/workflowQueue";
+            var eventQueueName = $"//workflow-core/{workflowHostName}/eventQueue";
+            var workflowQueueName = $"//workflow-core/{workflowHostName}/workflowQueue";
+            
+            _workFlowNames = new BrokerNames(workflowMessageType, initiatorWorkflowServiceName, targetWorkflowServiceName, workflowContractName, eventQueueName);
+            _eventNames = new BrokerNames(eventMessageType, initiatorEventServiceName, targetEventServiceName, eventContractName, workflowQueueName);
         }
 
-        public string WorkflowContractName { get; }
+        public BrokerNames GetByQueue(QueueType queue)
+        {
+            switch (queue)
+            {
+                case QueueType.Workflow:
+                    return _workFlowNames;
+                case QueueType.Event:
+                    return _eventNames;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(queue), queue, null);
+            }
 
-        public string TargetEventServiceName { get; }
-
-        public string InitiatorEventServiceName { get; }
-
-        public string WorkflowQueueName { get; }
-
-        public string EventQueueName { get; }
-
-        public string TargetWorkflowServiceName { get; }
-
-        public string InitiatorWorkflowServiceName { get; }
-
-        public string EventContractName { get; }
-
-        public string EventMessageType { get; }
-
-        public string WorkflowMessageType { get; }
+        }
     }
 }

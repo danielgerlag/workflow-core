@@ -96,29 +96,16 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             SqlConnection cn = null;
             try
             {
-                string msgType, initiatorService, targetService, contractName;
-                if (queue == QueueType.Workflow)
-                {
-                    msgType = _names.WorkflowMessageType;
-                    initiatorService = _names.InitiatorWorkflowServiceName;
-                    targetService = _names.TargetWorkflowServiceName;
-                    contractName = _names.WorkflowContractName;
-                } else
-                {
-                    msgType = _names.EventMessageType;
-                    initiatorService = _names.InitiatorEventServiceName;
-                    targetService = _names.TargetEventServiceName;
-                    contractName = _names.EventContractName;
-                }
-
+                var par = _names.GetByQueue(queue);
+                
                 cn = new SqlConnection(_connectionString);
                 cn.Open();
                 using (var cmd = _sqlCommandExecutor.CreateCommand(cn, null, _queueWork))
                 {
-                    cmd.Parameters.AddWithValue("@initiatorService", initiatorService);
-                    cmd.Parameters.AddWithValue("@targetService", targetService);
-                    cmd.Parameters.AddWithValue("@contractName", contractName);
-                    cmd.Parameters.AddWithValue("@msgType", msgType);
+                    cmd.Parameters.AddWithValue("@initiatorService", par.InitiatorService);
+                    cmd.Parameters.AddWithValue("@targetService", par.TargetService);
+                    cmd.Parameters.AddWithValue("@contractName", par.ContractName);
+                    cmd.Parameters.AddWithValue("@msgType", par.MsgType);
                     cmd.Parameters.AddWithValue("@RequestMessage", id);
                     await cmd.ExecuteNonQueryAsync();
                 }
@@ -140,9 +127,9 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             SqlConnection cn = null;
             try
             {
-                var queueName = queue == QueueType.Workflow ? _names.WorkflowQueueName : _names.EventQueueName;
-
-                var sql = _dequeueWork.Replace("{queueName}", queueName);
+                var par = _names.GetByQueue(queue);
+                
+                var sql = _dequeueWork.Replace("{queueName}", par.QueueName);
 
                 cn = new SqlConnection(_connectionString);
                 cn.Open();

@@ -4,6 +4,7 @@ using System;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text.RegularExpressions;
+using WorkflowCore.Interface;
 
 #endregion
 
@@ -17,9 +18,9 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
 
     public class SqlServerQueueProviderMigrator : ISqlServerQueueProviderMigrator
     {
-        readonly string _connectionString;
+        private readonly string _connectionString;
 
-        readonly IBrokerNamesProvider _names;
+        private readonly IBrokerNamesProvider _names;
         private readonly ISqlCommandExecutor _sqlCommandExecutor;
 
         public SqlServerQueueProviderMigrator(string connectionString, IBrokerNamesProvider names, ISqlCommandExecutor sqlCommandExecutor)
@@ -41,21 +42,24 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                 cn.Open();
                 var tx = cn.BeginTransaction();
 
-                CreateMessageType(cn, tx, _names.WorkflowMessageType);
-                CreateMessageType(cn, tx, _names.EventMessageType);
+                var n = new[]
+                {
+                    _names.GetByQueue(QueueType.Workflow),
+                    _names.GetByQueue(QueueType.Event)
+                };
 
-                CreateContract(cn, tx, _names.EventContractName, _names.EventMessageType);
-                CreateContract(cn, tx, _names.WorkflowContractName, _names.WorkflowMessageType);
+                foreach (var item in n)
+                {
+                    CreateMessageType(cn, tx, item.MsgType);
 
-                CreateQueue(cn, tx, _names.EventQueueName);
-                CreateQueue(cn, tx, _names.WorkflowQueueName);
+                    CreateContract(cn, tx, item.ContractName, item.MsgType);
 
-                CreateService(cn, tx, _names.InitiatorEventServiceName, _names.EventQueueName, _names.EventContractName);
-                CreateService(cn, tx, _names.TargetEventServiceName, _names.EventQueueName, _names.EventContractName);
+                    CreateQueue(cn, tx, item.QueueName);
 
-                CreateService(cn, tx, _names.InitiatorWorkflowServiceName, _names.WorkflowQueueName, _names.WorkflowContractName);
-                CreateService(cn, tx, _names.TargetWorkflowServiceName, _names.WorkflowQueueName, _names.WorkflowContractName);
-
+                    CreateService(cn, tx, item.InitiatorService, item.QueueName, item.ContractName);
+                    CreateService(cn, tx, item.TargetService, item.QueueName, item.ContractName);
+                }
+                
                 tx.Commit();
             } finally
             {
