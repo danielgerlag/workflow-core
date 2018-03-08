@@ -8,8 +8,6 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Microsoft.Extensions.DependencyInjection;
-
 using WorkflowCore.Interface;
 
 #endregion
@@ -30,18 +28,14 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
         private readonly string _queueWork;
         private readonly string _dequeueWork;
 
-        public SqlServerQueueProvider(IServiceProvider serviceProvider, SqlServerQueueProviderOption opt)
+        public SqlServerQueueProvider(SqlServerQueueProviderOption opt, IBrokerNamesProvider names, ISqlServerQueueProviderMigrator migrator, ISqlCommandExecutor sqlCommandExecutor)
         {
+            _names = names;
+            _migrator = migrator;
+            _sqlCommandExecutor = sqlCommandExecutor;
             _connectionString = opt.ConnectionString;
             _canMigrateDb = opt.CanMigrateDb;
             _canCreateDb = opt.CanCreateDb;
-
-            _names = serviceProvider.GetService<IBrokerNamesProvider>()
-                     ?? new BrokerNamesProvider(opt.WorkflowHostName);
-            _sqlCommandExecutor = serviceProvider.GetService<ISqlCommandExecutor>()
-                                  ?? new SqlCommandExecutor();
-            _migrator = serviceProvider.GetService<ISqlServerQueueProviderMigrator>()
-                        ?? new SqlServerQueueProviderMigrator(opt.ConnectionString, _names, _sqlCommandExecutor);
 
             IsDequeueBlocking = true;
 

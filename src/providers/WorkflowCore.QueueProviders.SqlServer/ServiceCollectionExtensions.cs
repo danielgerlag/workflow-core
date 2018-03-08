@@ -14,36 +14,36 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Use SQL Server as a queue provider
+        ///     Use SQL Server as a queue provider
         /// </summary>
         /// <param name="options"></param>
-        /// <param name="connectionString"></param>
-        /// <param name="workflowHostName"></param>
-        /// <param name="canMigrateDb">Autogenerate required service broker objects</param>
-        /// <param name="canCreateDb"></param>
+        /// <param name="opt"></param>
         /// <returns></returns>
-        public static WorkflowOptions UseSqlServerBroker(this WorkflowOptions options, string connectionString, string workflowHostName,
-            bool canMigrateDb = false, bool canCreateDb = false)
+        public static WorkflowOptions UseSqlServerBroker(this WorkflowOptions options, SqlServerQueueProviderOption opt)
         {
             options.UseQueueProvider(sp =>
             {
-                var opt = new SqlServerQueueProviderOption(connectionString, workflowHostName, canMigrateDb, canCreateDb);
-                return new SqlServerQueueProvider(sp,opt);
+                var names = sp.GetService<IBrokerNamesProvider>()
+                            ?? new BrokerNamesProvider(opt.WorkflowHostName);
+                var sqlCommandExecutor = sp.GetService<ISqlCommandExecutor>()
+                                         ?? new SqlCommandExecutor();
+                var migrator = sp.GetService<ISqlServerQueueProviderMigrator>()
+                               ?? new SqlServerQueueProviderMigrator(opt.ConnectionString, names, sqlCommandExecutor);
+
+                return new SqlServerQueueProvider(opt, names, migrator, sqlCommandExecutor);
             });
             return options;
         }
 
         /// <summary>
-        /// Use SQL Server as a queue provider (use 'default' as workflowHostName)
+        ///     Use SQL Server as a queue provider (use 'default' as workflowHostName)
         /// </summary>
         /// <param name="options"></param>
         /// <param name="connectionString"></param>
-        /// <param name="canMigrateDb">Autogenerate required service broker objects</param>
-        /// <param name="canCreateDb"></param>
         /// <returns></returns>
-        public static WorkflowOptions UseSqlServerBroker(this WorkflowOptions options, string connectionString, bool canMigrateDb = false, bool canCreateDb = false)
+        public static WorkflowOptions UseSqlServerBroker(this WorkflowOptions options, string connectionString)
         {
-            UseSqlServerBroker(options, connectionString, "default", canMigrateDb, canCreateDb);
+            UseSqlServerBroker(options, new SqlServerQueueProviderOption {ConnectionString = connectionString});
             return options;
         }
     }

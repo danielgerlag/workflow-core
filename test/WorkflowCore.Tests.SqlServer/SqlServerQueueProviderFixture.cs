@@ -3,8 +3,7 @@
 using System;
 using System.Linq;
 
-using Microsoft.Extensions.DependencyInjection;
-
+using WorkflowCore.QueueProviders.SqlServer;
 using WorkflowCore.QueueProviders.SqlServer.Services;
 using WorkflowCore.UnitTests;
 
@@ -18,25 +17,25 @@ namespace WorkflowCore.Tests.SqlServer
     [Collection("SqlServer collection")]
     public class SqlServerQueueProviderFixture : BaseQueueProviderFixture, IDisposable
     {
-        private static ServiceProvider _serviceProvider;
-
         public SqlServerQueueProviderFixture(ITestOutputHelper output, SqlDockerSetup setup)
         {
             Console = output;
             var connectionString = SqlDockerSetup.ConnectionString;
-            ConfigureServices();
+        
+            var opt = new SqlServerQueueProviderOption {
+                ConnectionString = connectionString,
+                WorkflowHostName = "UnitTest",
+                CanCreateDb = true,
+                CanMigrateDb = true
+            };
+            var names = new BrokerNamesProvider(opt.WorkflowHostName);
+            var sqlCommandExecutor = new SqlCommandExecutor();
+            var migrator = new SqlServerQueueProviderMigrator(opt.ConnectionString, names, sqlCommandExecutor);
 
-            var opt = new SqlServerQueueProviderOption(connectionString, "UnitTest", true, true);
-            QueueProvider = new SqlServerQueueProvider(_serviceProvider, opt);
+            QueueProvider = new SqlServerQueueProvider(opt,names,migrator,sqlCommandExecutor);
             QueueProvider.Start().Wait();
 
             Setup();
-        }
-
-        private static void ConfigureServices()
-        {
-            IServiceCollection services = new ServiceCollection();
-            _serviceProvider = services.BuildServiceProvider();
         }
 
         public void Dispose()
