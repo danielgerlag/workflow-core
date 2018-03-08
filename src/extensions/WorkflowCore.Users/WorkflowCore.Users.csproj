@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <AssemblyTitle>Workflow Core extensions for human workflow</AssemblyTitle>
-    <VersionPrefix>1.1.0</VersionPrefix>
+    <VersionPrefix>1.6.0</VersionPrefix>
     <Authors>Daniel Gerlag</Authors>
     <TargetFramework>netstandard1.3</TargetFramework>
     <AssemblyName>WorkflowCore.Users</AssemblyName>
@@ -18,9 +18,9 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <Description>Provides extensions for Workflow Core to enable human workflows.</Description>
-    <Version>1.3.0</Version>
-    <AssemblyVersion>1.3.0.0</AssemblyVersion>
-    <FileVersion>1.3.0.0</FileVersion>
+    <Version>1.6.0</Version>
+    <AssemblyVersion>1.6.0.0</AssemblyVersion>
+    <FileVersion>1.6.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
