@@ -15,6 +15,7 @@ namespace WorkflowCore.Testing
         where TWorkflow : IWorkflow<TData>, new()
         where TData : class, new()
     {
+        protected IDefinitionLoader DefinitionLoader;
         protected IWorkflowHost Host;
         protected IPersistenceProvider PersistenceProvider;
         protected List<StepError> UnhandledStepErrors = new List<StepError>();
@@ -33,6 +34,7 @@ namespace WorkflowCore.Testing
             //loggerFactory.AddConsole(LogLevel.Debug);
 
             PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
+            DefinitionLoader = serviceProvider.GetRequiredService<IDefinitionLoader>();
             Host = serviceProvider.GetService<IWorkflowHost>();
             Host.RegisterWorkflow<TWorkflow, TData>();
             Host.OnStepError += Host_OnStepError;

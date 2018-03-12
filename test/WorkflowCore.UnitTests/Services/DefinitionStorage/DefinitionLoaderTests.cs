@@ -23,7 +23,7 @@ namespace WorkflowCore.UnitTests.Services.DefinitionStorage
         public DefinitionLoaderTests()
         {
             _registry = A.Fake<IWorkflowRegistry>();
-            _subject = new DefinitionLoader(_registry);
+            _subject = new DefinitionLoader(_registry, null);
         }
 
         [Fact(DisplayName = "Should register workflow")]

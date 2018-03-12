@@ -5,11 +5,10 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
+
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Primitives;
-using WorkflowCore.Models.DefinitionStorage;
 using WorkflowCore.Models.DefinitionStorage.v1;
 using WorkflowCore.Exceptions;
 
@@ -18,10 +17,12 @@ namespace WorkflowCore.Services.DefinitionStorage
     public class DefinitionLoader : IDefinitionLoader
     {
         private readonly IWorkflowRegistry _registry;
+        private readonly IServiceProvider _serviceProvider;
 
-        public DefinitionLoader(IWorkflowRegistry registry)
+        public DefinitionLoader(IWorkflowRegistry registry, IServiceProvider serviceProvider)
         {
             _registry = registry;
+            _serviceProvider = serviceProvider;
         }
                         
         public WorkflowDefinition LoadDefinition(string json)
@@ -66,22 +67,47 @@ namespace WorkflowCore.Services.DefinitionStorage
                 var nextStep = stack.Pop();
 
                 var stepType = FindType(nextStep.StepType);
-                var containerType = typeof(WorkflowStep<>).MakeGenericType(stepType);
-                var targetStep = (containerType.GetConstructor(new Type[] { }).Invoke(null) as WorkflowStep);
-
-                if (!string.IsNullOrEmpty(nextStep.CancelCondition))
+                WorkflowStep targetStep;
+                if (typeof(WorkflowStep).IsAssignableFrom(stepType))
                 {
-                    containerType = typeof(CancellableStep<,>).MakeGenericType(stepType, dataType);
-                    var cancelExprType = typeof(Expression<>).MakeGenericType(typeof(Func<,>).MakeGenericType(dataType, typeof(bool)));
-                    var dataParameter = Expression.Parameter(dataType, "data");
-                    var cancelExpr = DynamicExpressionParser.ParseLambda(new[] { dataParameter }, typeof(bool), nextStep.CancelCondition);
-                    targetStep = (containerType.GetConstructor(new Type[] { cancelExprType }).Invoke(new[] { cancelExpr }) as WorkflowStep);
+                    targetStep = (WorkflowStep)_serviceProvider?.GetService(stepType);
+                    if (targetStep == null)
+                    {
+                        targetStep = (WorkflowStep) Activator.CreateInstance(stepType);
+                    }
+
+                    if (nextStep.Properties != null)
+                    {
+                        foreach (var property in nextStep.Properties.Properties())
+                        {
+                            var propertyInfo = stepType.GetProperty(property.Name);
+                            var propertyValue = property.Value.ToObject(propertyInfo.PropertyType);
+                            propertyInfo.SetValue(targetStep, propertyValue);
+                        }
+                    }
+
+                    stepType = FindGenericWorkflowStepTypeArgument(stepType);
                 }
-
-                if (nextStep.Saga)  //TODO: cancellable saga???
+                else
                 {
-                    containerType = typeof(SagaContainer<>).MakeGenericType(stepType);
+                    var containerType = typeof(WorkflowStep<>).MakeGenericType(stepType);
                     targetStep = (containerType.GetConstructor(new Type[] { }).Invoke(null) as WorkflowStep);
+
+                    if (!string.IsNullOrEmpty(nextStep.CancelCondition))
+                    {
+                        containerType = typeof(CancellableStep<,>).MakeGenericType(stepType, dataType);
+                        var cancelExprType = typeof(Expression<>).MakeGenericType(typeof(Func<,>).MakeGenericType(dataType, typeof(bool)));
+                        var dataParameter = Expression.Parameter(dataType, "data");
+                        var cancelExpr = DynamicExpressionParser.ParseLambda(new[] { dataParameter }, typeof(bool), nextStep.CancelCondition);
+                        targetStep = (containerType.GetConstructor(new Type[] { cancelExprType }).Invoke(new[] { cancelExpr }) as WorkflowStep);
+                    }
+
+                    if (nextStep.Saga)  //TODO: cancellable saga???
+                    {
+                        containerType = typeof(SagaContainer<>).MakeGenericType(stepType);
+                        targetStep = (containerType.GetConstructor(new Type[] { }).Invoke(null) as WorkflowStep);
+                    }
+
                 }
 
                 targetStep.Id = i;
@@ -204,5 +230,24 @@ namespace WorkflowCore.Services.DefinitionStorage
             return Type.GetType(name, true, true);
         }
 
+        private Type FindGenericWorkflowStepTypeArgument(Type workflowType)
+        {
+            var previousType = workflowType;
+            while (previousType != typeof(WorkflowStep))
+            {
+                var testType = previousType.GetTypeInfo().BaseType;
+                if (testType.IsConstructedGenericType)
+                {
+                    if (testType.GetGenericTypeDefinition() == typeof(WorkflowStep<>))
+                    {
+                        return testType.GetGenericArguments()[0];
+                    }
+                }
+
+                previousType = testType;
+            }
+
+            return null;
+        }
     }
 }

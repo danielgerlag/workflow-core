@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
+using Newtonsoft.Json.Linq;
+
 namespace WorkflowCore.Models.DefinitionStorage.v1
 {
     public class StepSourceV1
@@ -30,6 +32,6 @@ namespace WorkflowCore.Models.DefinitionStorage.v1
 
         public Dictionary<string, string> Outputs { get; set; } = new Dictionary<string, string>();
 
-        
+        public JObject Properties { get; set; }
     }
 }
