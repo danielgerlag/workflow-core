@@ -25,6 +25,28 @@ public class MyWorkflow : IWorkflow
 }
 ```
 
+## JSON Workflow Definitions
+
+Define your workflows in JSON
+
+```json
+{
+  "Id": "HelloWorld",
+  "Version": 1,
+  "Steps": [
+    {
+      "Id": "Hello",
+      "StepType": "MyApp.HelloWorld, MyApp",
+      "NextStepId": "Bye"
+    },        
+    {
+      "Id": "Bye",
+      "StepType": "MyApp.GoodbyeWorld, MyApp"
+    }
+  ]
+}
+```
+
 ### Sample use cases
 
 * New user workflow
