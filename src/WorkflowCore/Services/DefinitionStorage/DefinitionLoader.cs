@@ -24,7 +24,7 @@ namespace WorkflowCore.Services.DefinitionStorage
             _registry = registry;
             _serviceProvider = serviceProvider;
         }
-                        
+
         public WorkflowDefinition LoadDefinition(string json)
         {
             var source = JsonConvert.DeserializeObject<DefinitionSourceV1>(json);
@@ -144,7 +144,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                     targetStep.Outcomes.Add(new StepOutcome() { Tag = $"{nextStep.NextStepId}" });
 
                 result.Add(targetStep);
-                
+
                 i++;
             }
 
@@ -230,7 +230,7 @@ namespace WorkflowCore.Services.DefinitionStorage
             return Type.GetType(name, true, true);
         }
 
-        private Type FindGenericWorkflowStepTypeArgument(Type workflowType)
+        private static Type FindGenericWorkflowStepTypeArgument(Type workflowType)
         {
             var previousType = workflowType;
             while (previousType != typeof(WorkflowStep))

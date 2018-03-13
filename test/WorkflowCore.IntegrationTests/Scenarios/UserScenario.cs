@@ -78,7 +78,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         {
             var data = new ApprovalData();
             var workflowId = await Host.StartWorkflow<ApprovalData>("HumanWorkflowJson", data);
-            await Scenario(workflowId, data);
+            await Scenario(workflowId, data).ConfigureAwait(false);
         }
 
         private async Task Scenario(string workflowId, ApprovalData data)
