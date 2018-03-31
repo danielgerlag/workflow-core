@@ -80,6 +80,16 @@ namespace WorkflowCore.Models
         where TStepBody : IStepBody 
     {
         public override Type BodyType => typeof(TStepBody);
+
+        public List<Action<TStepBody, IStepExecutionContext, ExecutionPointer>> PreExectionActions = new List<Action<TStepBody, IStepExecutionContext, ExecutionPointer>>();
+
+        public override ExecutionPipelineDirective BeforeExecute(WorkflowExecutorResult executorResult, IStepExecutionContext context, ExecutionPointer executionPointer, IStepBody body)
+        {
+            foreach (var action in PreExectionActions)
+                action((TStepBody)body, context, executionPointer);
+
+            return base.BeforeExecute(executorResult, context, executionPointer, body);
+        }
     }
 
 	public enum ExecutionPipelineDirective 

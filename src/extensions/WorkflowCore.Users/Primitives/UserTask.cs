@@ -13,17 +13,18 @@ namespace WorkflowCore.Users.Primitives
 
         public string Prompt { get; set; }
 
+        public Dictionary<string, string> Options { get; set; } = new Dictionary<string, string>();
+
+        public List<Escalation> Escalations { get; set; } = new List<Escalation>();
+
         public const string EventName = "UserAction";
         public const string ExtAssignPrincipal = "AssignedPrincipal";
         public const string ExtPrompt = "Prompt";
         public const string ExtUserOptions = "UserOptions";
-        private readonly Dictionary<string, string> _options;
-        private readonly IEnumerable<EscalateStep> _escalations;
+        
 
-        public UserTask(Dictionary<string, string> options, IEnumerable<EscalateStep> escalations)
+        public UserTask()
         {
-            _options = options;
-            _escalations = escalations;
         }
 
         public override ExecutionResult Run(IStepExecutionContext context)
@@ -32,7 +33,7 @@ namespace WorkflowCore.Users.Primitives
             {
                 context.ExecutionPointer.ExtensionAttributes[ExtAssignPrincipal] = AssignedPrincipal;
                 context.ExecutionPointer.ExtensionAttributes[ExtPrompt] = Prompt;
-                context.ExecutionPointer.ExtensionAttributes[ExtUserOptions] = _options;
+                context.ExecutionPointer.ExtensionAttributes[ExtUserOptions] = Options;
 
                 var effectiveDate = DateTime.Now.ToUniversalTime();
                 var eventKey = context.Workflow.Id + "." + context.ExecutionPointer.Id;

@@ -13,12 +13,12 @@ namespace WorkflowCore.Users.Services
 {
     public class UserTaskBuilder<TData> : StepBuilder<TData, UserTask>, IUserTaskBuilder<TData>
     {
-        private readonly UserTaskStep _wrapper;
+        private readonly WorkflowStep<UserTask> _step;
 
-        public UserTaskBuilder(IWorkflowBuilder<TData> workflowBuilder, UserTaskStep step) 
+        public UserTaskBuilder(IWorkflowBuilder<TData> workflowBuilder, WorkflowStep<UserTask> step) 
             : base (workflowBuilder, step)
         {
-            _wrapper = step;
+            _step = step;
         }
 
         public IUserTaskReturnBuilder<TData> WithOption(string value, string label)
@@ -37,7 +37,10 @@ namespace WorkflowCore.Users.Services
             var stepBuilder = new UserTaskReturnBuilder<TData>(WorkflowBuilder, newStep, this);
 
             Step.Children.Add(newStep.Id);
-            _wrapper.Options[label] = value;
+            _step.PreExectionActions.Add(new Action<UserTask, IStepExecutionContext, ExecutionPointer>((userTask, context, pointer) =>
+            {
+                userTask.Options[label] = value;
+            }));
 
             return stepBuilder;
         }
@@ -49,6 +52,11 @@ namespace WorkflowCore.Users.Services
             var stepBuilder = new StepBuilder<TData, Escalate>(WorkflowBuilder, newStep);
             stepBuilder.Input(step => step.TimeOut, after);
             stepBuilder.Input(step => step.NewUser, newUser);
+
+            _step.PreExectionActions.Add(new Action<UserTask, IStepExecutionContext, ExecutionPointer>((userTask, context, pointer) =>
+            {
+                userTask.Options[label] = value;
+            }));
 
             _wrapper.Escalations.Add(newStep);
 

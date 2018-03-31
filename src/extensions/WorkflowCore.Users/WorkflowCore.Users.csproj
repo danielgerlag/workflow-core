@@ -18,7 +18,7 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <Description>Provides extensions for Workflow Core to enable human workflows.</Description>
-    <Version>1.6.0</Version>
+    <Version>1.6.1</Version>
     <AssemblyVersion>1.6.0.0</AssemblyVersion>
     <FileVersion>1.6.0.0</FileVersion>
   </PropertyGroup>
