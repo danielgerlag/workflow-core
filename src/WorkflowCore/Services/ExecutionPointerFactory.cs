@@ -10,7 +10,7 @@ namespace WorkflowCore.Services
     public class ExecutionPointerFactory : IExecutionPointerFactory
     {
 
-        public ExecutionPointer BuildStartingPointer(WorkflowDefinition def)
+        public ExecutionPointer BuildGenesisPointer(WorkflowDefinition def)
         {
             return new ExecutionPointer
             {

@@ -18,8 +18,7 @@ namespace WorkflowCore.Services
         private readonly IQueueProvider _queueProvider;
         private readonly IExecutionPointerFactory _pointerFactory;
         private readonly ILogger _logger;
-
-
+        
         public WorkflowController(IPersistenceProvider persistenceStore, IDistributedLockProvider lockProvider, IWorkflowRegistry registry, IQueueProvider queueProvider, IExecutionPointerFactory pointerFactory, ILoggerFactory loggerFactory)
         {
             _persistenceStore = persistenceStore;
@@ -72,7 +71,7 @@ namespace WorkflowCore.Services
                 wf.Data = TypeExtensions.GetConstructor(def.DataType, new Type[] { }).Invoke(null);
             }
 
-            wf.ExecutionPointers.Add(_pointerFactory.BuildStartingPointer(def));
+            wf.ExecutionPointers.Add(_pointerFactory.BuildGenesisPointer(def));
 
             string id = await _persistenceStore.CreateNewWorkflow(wf);
             await _queueProvider.QueueWork(id, QueueType.Workflow);
@@ -148,8 +147,6 @@ namespace WorkflowCore.Services
                 if (requeue)
                     await _queueProvider.QueueWork(workflowId, QueueType.Workflow);
             }
-
-            return false;
         }
 
         public async Task<bool> TerminateWorkflow(string workflowId)
