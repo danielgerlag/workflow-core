@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Services\DequeueWork.sql" />
+    <None Remove="Services\QueueWork.sql" />
+    <None Remove="Services\SqlServerQueueProviderOption.cs~RF7cacba9.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Services\DequeueWork.sql" />
+    <EmbeddedResource Include="Services\QueueWork.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Data.Common" Version="4.3.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\WorkflowCore\WorkflowCore.csproj" />
+  </ItemGroup>
+
+</Project>
