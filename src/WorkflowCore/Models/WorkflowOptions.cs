@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using WorkflowCore.Interface;
 using WorkflowCore.Services;
 
@@ -11,10 +12,13 @@ namespace WorkflowCore.Models
         internal Func<IServiceProvider, IDistributedLockProvider> LockFactory;
         internal TimeSpan PollInterval;
         internal TimeSpan IdleTime;
-        internal TimeSpan ErrorRetryInterval;        
+        internal TimeSpan ErrorRetryInterval;
 
-        public WorkflowOptions()
+        public IServiceCollection Services { get; private set; }
+
+        public WorkflowOptions(IServiceCollection services)
         {
+            Services = services;
             PollInterval = TimeSpan.FromSeconds(10);
             IdleTime = TimeSpan.FromMilliseconds(100);
             ErrorRetryInterval = TimeSpan.FromSeconds(60);            

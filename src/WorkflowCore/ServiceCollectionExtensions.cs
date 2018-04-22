@@ -21,7 +21,7 @@ namespace Microsoft.Extensions.DependencyInjection
             if (services.Any(x => x.ServiceType == typeof(WorkflowOptions)))
                 throw new InvalidOperationException("Workflow services already registered");
 
-            var options = new WorkflowOptions();
+            var options = new WorkflowOptions(services);
             setupAction?.Invoke(options);
             services.AddTransient<IPersistenceProvider>(options.PersistanceFactory);
             services.AddSingleton<IQueueProvider>(options.QueueFactory);

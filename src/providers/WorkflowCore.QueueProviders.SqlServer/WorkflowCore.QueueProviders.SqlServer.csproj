@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Roberto Paterlini</Authors>
+    <Description>Queue provider for Workflow-core using SQL Server Service Broker</Description>
+    <Company />
+    <Version>1.0.0-alpha</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,11 +15,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Services\DequeueWork.sql" />
-    <EmbeddedResource Include="Services\QueueWork.sql" />
+    <EmbeddedResource Include="SqlCommands\DequeueWork.sql" />
+    <EmbeddedResource Include="SqlCommands\QueueWork.sql" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="1.1.1" />
     <PackageReference Include="System.Data.Common" Version="4.3.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.3.1" />
   </ItemGroup>

@@ -28,7 +28,7 @@ namespace WorkflowCore.UnitTests.Services
             PointerFactory = A.Fake<IExecutionPointerFactory>();
             DateTimeProvider = A.Fake<IDateTimeProvider>();
 
-            Options = new WorkflowOptions();
+            Options = new WorkflowOptions(A.Fake<IServiceCollection>());
 
             A.CallTo(() => DateTimeProvider.Now).Returns(DateTime.Now);
 

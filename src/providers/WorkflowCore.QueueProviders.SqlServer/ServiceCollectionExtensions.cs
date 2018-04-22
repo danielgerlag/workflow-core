@@ -1,10 +1,11 @@
 ﻿#region using
 
 using System;
-using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 
 using WorkflowCore.Models;
 using WorkflowCore.QueueProviders.SqlServer;
+using WorkflowCore.QueueProviders.SqlServer.Interfaces;
 using WorkflowCore.QueueProviders.SqlServer.Services;
 
 #endregion
@@ -12,38 +13,31 @@ using WorkflowCore.QueueProviders.SqlServer.Services;
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtensions
-    {
+    {        
         /// <summary>
         ///     Use SQL Server as a queue provider
         /// </summary>
         /// <param name="options"></param>
-        /// <param name="opt"></param>
-        /// <returns></returns>
-        public static WorkflowOptions UseSqlServerBroker(this WorkflowOptions options, SqlServerQueueProviderOption opt)
-        {
-            options.UseQueueProvider(sp =>
-            {
-                var names = sp.GetService<IBrokerNamesProvider>()
-                            ?? new BrokerNamesProvider(opt.WorkflowHostName);
-                var sqlCommandExecutor = sp.GetService<ISqlCommandExecutor>()
-                                         ?? new SqlCommandExecutor();
-                var migrator = sp.GetService<ISqlServerQueueProviderMigrator>()
-                               ?? new SqlServerQueueProviderMigrator(opt.ConnectionString, names, sqlCommandExecutor);
-
-                return new SqlServerQueueProvider(opt, names, migrator, sqlCommandExecutor);
-            });
-            return options;
-        }
-
-        /// <summary>
-        ///     Use SQL Server as a queue provider (use 'default' as workflowHostName)
-        /// </summary>
-        /// <param name="options"></param>
         /// <param name="connectionString"></param>
         /// <returns></returns>
-        public static WorkflowOptions UseSqlServerBroker(this WorkflowOptions options, string connectionString)
+        public static WorkflowOptions UseSqlServerBroker(this WorkflowOptions options, string connectionString, bool canCreateDb, bool canMigrateDb)
         {
-            UseSqlServerBroker(options, new SqlServerQueueProviderOption {ConnectionString = connectionString});
+            options.Services.AddTransient<IQueueConfigProvider, QueueConfigProvider>();
+            options.Services.AddTransient<ISqlCommandExecutor, SqlCommandExecutor>();
+            options.Services.AddTransient<ISqlServerQueueProviderMigrator, SqlServerQueueProviderMigrator>();
+
+            var sqlOptions = new SqlServerQueueProviderOptions()
+            {
+                ConnectionString = connectionString,
+                CanCreateDb = canCreateDb,
+                CanMigrateDb = canMigrateDb
+            };
+
+            options.UseQueueProvider(sp =>
+            {
+                return new SqlServerQueueProvider(sqlOptions, sp.GetService<IQueueConfigProvider>(), sp.GetService<ISqlServerQueueProviderMigrator>(), sp.GetService<ISqlCommandExecutor>());
+            });
+
             return options;
         }
     }

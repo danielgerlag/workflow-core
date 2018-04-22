@@ -6,29 +6,24 @@ using System.Linq;
 using System.Text.RegularExpressions;
 
 using WorkflowCore.Interface;
+using WorkflowCore.QueueProviders.SqlServer.Interfaces;
 
 #endregion
 
 namespace WorkflowCore.QueueProviders.SqlServer.Services
-{
-    public interface ISqlServerQueueProviderMigrator
-    {
-        void MigrateDb();
-        void CreateDb();
-    }
+{    
 
     public class SqlServerQueueProviderMigrator : ISqlServerQueueProviderMigrator
     {
         private readonly string _connectionString;
 
-        private readonly IBrokerNamesProvider _names;
+        private readonly IQueueConfigProvider _configProvider;
         private readonly ISqlCommandExecutor _sqlCommandExecutor;
 
-        public SqlServerQueueProviderMigrator(string connectionString, IBrokerNamesProvider names, ISqlCommandExecutor sqlCommandExecutor)
+        public SqlServerQueueProviderMigrator(string connectionString, IQueueConfigProvider configProvider, ISqlCommandExecutor sqlCommandExecutor)
         {
             _connectionString = connectionString;
-
-            _names = names;
+            _configProvider = configProvider;
             _sqlCommandExecutor = sqlCommandExecutor;
         }
 
@@ -38,18 +33,17 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
         public void MigrateDb()
         {
             var cn = new SqlConnection(_connectionString);
+            cn.Open();
+            var tx = cn.BeginTransaction();
             try
             {
-                cn.Open();
-                var tx = cn.BeginTransaction();
-
-                var n = new[]
+                var queueConfigurations = new[]
                 {
-                    _names.GetByQueue(QueueType.Workflow),
-                    _names.GetByQueue(QueueType.Event)
+                    _configProvider.GetByQueue(QueueType.Workflow),
+                    _configProvider.GetByQueue(QueueType.Event)
                 };
 
-                foreach (var item in n)
+                foreach (var item in queueConfigurations)
                 {
                     CreateMessageType(cn, tx, item.MsgType);
 
@@ -62,7 +56,13 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                 }
                 
                 tx.Commit();
-            } finally
+            }
+            catch
+            {
+                tx.Rollback();
+                throw;
+            }
+            finally
             {
                 cn.Close();
             }
@@ -71,162 +71,108 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
         private void CreateService(SqlConnection cn, SqlTransaction tx, string name, string queueName, string contractName)
         {
             var cmdtext = @"select name from sys.services where name=@name";
-            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext))
-            {
-                cmd.Parameters.AddWithValue("@name", name);
+            var existing = _sqlCommandExecutor.ExecuteScalar<string>(cn, tx, cmdtext, new SqlParameter("@name", name));
 
-                var n = (string)cmd.ExecuteScalar();
-
-                if (!String.IsNullOrEmpty(n)) return;
-            }
-
-            cmdtext = $"CREATE SERVICE [{name}] ON QUEUE [{queueName}]([{contractName}]);";
-            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext))
-            {
-                cmd.ExecuteNonQuery();
-            }
+            if (!string.IsNullOrEmpty(existing))
+                return;
+            
+            _sqlCommandExecutor.ExecuteCommand(cn, tx, $"CREATE SERVICE [{name}] ON QUEUE [{queueName}]([{contractName}]);");
         }
 
         private void CreateQueue(SqlConnection cn, SqlTransaction tx, string queueName)
         {
             var cmdtext = @"select name from sys.service_queues where name=@name";
-            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext))
-            {
-                cmd.Parameters.AddWithValue("@name", queueName);
+            var existing = _sqlCommandExecutor.ExecuteScalar<string>(cn, tx, cmdtext, new SqlParameter("@name", queueName));
 
-                var n = (string)cmd.ExecuteScalar();
-
-                if (!String.IsNullOrEmpty(n)) return;
-            }
-
-            cmdtext = $"CREATE QUEUE [{queueName}];";
-            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext))
-            {
-                cmd.ExecuteNonQuery();
-            }
+            if (!string.IsNullOrEmpty(existing))
+                return;
+                        
+            _sqlCommandExecutor.ExecuteCommand(cn, tx, $"CREATE QUEUE [{queueName}];");
         }
 
         private void CreateContract(SqlConnection cn, SqlTransaction tx, string contractName, string messageName)
         {
             var cmdtext = @"select name from sys.service_contracts where name=@name";
-            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext))
-            {
-                cmd.Parameters.AddWithValue("@name", contractName);
+            var existing = _sqlCommandExecutor.ExecuteScalar<string>(cn, tx, cmdtext, new SqlParameter("@name", contractName));
 
-                var n = (string)cmd.ExecuteScalar();
-
-                if (!String.IsNullOrEmpty(n)) return;
-            }
-
-            cmdtext = $"CREATE CONTRACT [{contractName}] ( [{messageName}] SENT BY INITIATOR);";
-            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext))
-            {
-                cmd.ExecuteNonQuery();
-            }
+            if (!string.IsNullOrEmpty(existing))
+                return;
+                        
+            _sqlCommandExecutor.ExecuteCommand(cn, tx, $"CREATE CONTRACT [{contractName}] ( [{messageName}] SENT BY INITIATOR);");
         }
 
         private void CreateMessageType(SqlConnection cn, SqlTransaction tx, string message)
         {
             var cmdtext = @"select name from sys.service_message_types where name=@name";
-            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext))
-            {
-                cmd.Parameters.AddWithValue("@name", message);
+            var existing = _sqlCommandExecutor.ExecuteScalar<string>(cn, tx, cmdtext, new SqlParameter("@name", message));
 
-                var n = (string)cmd.ExecuteScalar();
-
-                if (!String.IsNullOrEmpty(n)) return;
-            }
-
-            cmdtext = $"CREATE MESSAGE TYPE [{message}] VALIDATION = NONE;";
-            using (var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext))
-            {
-                cmd.ExecuteNonQuery();
-            }
+            if (!string.IsNullOrEmpty(existing))
+                return;
+            
+            _sqlCommandExecutor.ExecuteCommand(cn, tx, $"CREATE MESSAGE TYPE [{message}] VALIDATION = NONE;");
         }
 
         #endregion
 
         public void CreateDb()
         {
-            var pattern = "Database=(.[^;]+);";
+            var builder = new SqlConnectionStringBuilder(_connectionString);
+            var masterBuilder = new SqlConnectionStringBuilder(_connectionString);
+            masterBuilder.InitialCatalog = "master";
 
-            var regex = new Regex(pattern);
-            var db = regex.Match(_connectionString).Groups[1].Value;
-
-            var masterCn = _connectionString.Replace(regex.Match(_connectionString).Groups[0].Value, "Database=master;");
+            var masterCnStr = masterBuilder.ToString();
 
             bool dbPresente;
-            var cn = new SqlConnection(masterCn);
+            var cn = new SqlConnection(masterCnStr);
+            cn.Open();
             try
             {
-                cn.Open();
-
                 var cmd = cn.CreateCommand();
                 cmd.CommandText = "select name from sys.databases where name = @dbname";
-                cmd.Parameters.AddWithValue("@dbname", db);
+                cmd.Parameters.AddWithValue("@dbname", builder.InitialCatalog);
                 var found = cmd.ExecuteScalar();
                 dbPresente = (found != null);
-            } finally
-            {
-                cn.Close();
-            }
 
-            if (!dbPresente)
-            {
-                cn = new SqlConnection(masterCn);
-                try
-                {
-                    cn.Open();
-
-                    var cmd = cn.CreateCommand();
-                    cmd.CommandText = "create database [" + db + "]";
-                    cmd.ExecuteNonQuery();
-                } finally
-                {
-                    cn.Close();
+                if (!dbPresente)
+                {   
+                    var createCmd = cn.CreateCommand();
+                    createCmd.CommandText = "create database [" + builder.InitialCatalog + "]";
+                    createCmd.ExecuteNonQuery();
                 }
             }
+            finally
+            {
+                cn.Close();
+            }            
 
-            EnableBroker(masterCn, db);
+            EnableBroker(masterCnStr, builder.InitialCatalog);
         }
 
         private void EnableBroker(string masterCn, string db)
         {
             var cn = new SqlConnection(masterCn);
+            cn.Open();
+
+            var isBrokerEnabled = _sqlCommandExecutor.ExecuteScalar<bool>(cn, null, @"select is_broker_enabled from sys.databases where name = @name", new SqlParameter("@name", db));
+
+            if (isBrokerEnabled)
+                return;
+
+            var tx = cn.BeginTransaction();
             try
             {
-                cn.Open();
-                var tx = cn.BeginTransaction();
-
-                var cmdtext = @"select is_broker_enabled from sys.databases where name = @name";
-                
-                var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext);
-                cmd.Parameters.AddWithValue("@name", db);
-
-                bool isBrokerEnabled = (bool)cmd.ExecuteScalar();
-                if (isBrokerEnabled) return;
-
+                _sqlCommandExecutor.ExecuteCommand(cn, tx, $"ALTER DATABASE [{db}] SET ENABLE_BROKER;");
                 tx.Commit();
-            } finally
+            }
+            catch
+            {
+                tx.Rollback();
+                throw;
+            }
+            finally
             {
                 cn.Close();
-            }
-
-            cn = new SqlConnection(masterCn);
-            try
-            {
-                cn.Open();
-                var tx = cn.BeginTransaction();
-
-                var cmdtext = $"ALTER DATABASE [{db}] SET ENABLE_BROKER;";
-                var cmd = _sqlCommandExecutor.CreateCommand(cn, tx, cmdtext);
-
-                cmd.ExecuteScalar();
-                tx.Commit();
-            } finally
-            {
-                cn.Close();
-            }
+            }            
         }
     }
 }
