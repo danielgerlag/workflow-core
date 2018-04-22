@@ -162,9 +162,12 @@ There are several persistence providers available as separate Nuget packages.
 * [Testing](src/samples/WorkflowCore.TestSample01)
 
 
-## Authors
+## Contributors
 
 * **Daniel Gerlag** - *Initial work*
+* **Jackie Ja**
+* **Aaron Scribnor**
+* **Roberto Paterlini**
 
 ## Ports
 
