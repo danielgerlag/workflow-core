@@ -24,7 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             options.Services.AddTransient<IQueueConfigProvider, QueueConfigProvider>();
             options.Services.AddTransient<ISqlCommandExecutor, SqlCommandExecutor>();
-            options.Services.AddTransient<ISqlServerQueueProviderMigrator, SqlServerQueueProviderMigrator>();
+            options.Services.AddTransient<ISqlServerQueueProviderMigrator>(sp => new SqlServerQueueProviderMigrator(connectionString, sp.GetService<IQueueConfigProvider>(), sp.GetService<ISqlCommandExecutor>()));
 
             var sqlOptions = new SqlServerQueueProviderOptions()
             {

@@ -6,13 +6,13 @@ namespace WorkflowCore.QueueProviders.SqlServer.Models
 {
     public class QueueConfig
     {
-        public QueueConfig(string msgType, string initiatorService, string targetService, string contractName, string queueName)
+        public QueueConfig(string name)
         {
-            MsgType = msgType;
-            InitiatorService = initiatorService;
-            TargetService = targetService;
-            ContractName = contractName;
-            QueueName = queueName;
+            MsgType = $"//workflow-core/{name}";
+            InitiatorService = $"//workflow-core/initiator{name}Service";
+            TargetService = $"//workflow-core/target{name}Service";
+            ContractName = $"//workflow-core/{name}Contract";
+            QueueName = $"//workflow-core/{name}Queue";
         }
 
         public string MsgType { get; }
