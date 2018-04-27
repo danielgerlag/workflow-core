@@ -220,7 +220,7 @@ namespace WorkflowCore.Services
             {
                 foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count > 0))
                 {
-                    if (workflow.ExecutionPointers.Where(x => pointer.Children.Contains(x.Id)).All(x => IsBranchComplete(workflow.ExecutionPointers, x.Id)))
+                    if (workflow.ExecutionPointers.Where(x => pointer.Children.Contains(x.Id)).All(x => x.EndTime.HasValue))
                     {
                         if (!pointer.SleepUntil.HasValue)
                         {
@@ -240,27 +240,6 @@ namespace WorkflowCore.Services
                 workflow.CompleteTime = _datetimeProvider.Now.ToUniversalTime();
             }
         }
-
-        private bool IsBranchComplete(IEnumerable<ExecutionPointer> pointers, string rootId)
-        {
-            //TODO: move to own class
-            var root = pointers.First(x => x.Id == rootId);
-
-            if (root.EndTime == null)
-            {
-                return false;
-            }
-
-            var list = pointers.Where(x => x.PredecessorId == rootId).ToList();
-
-            bool result = true;
-
-            foreach (var item in list)
-            {
-                result = result && IsBranchComplete(pointers, item.Id);
-            }
-
-            return result;
-        }
+        
     }
 }
