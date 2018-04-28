@@ -22,19 +22,14 @@ namespace WorkflowCore.Primitives
             }
 
             if ((context.PersistenceData is ControlPersistenceData) && ((context.PersistenceData as ControlPersistenceData).ChildrenActive))
-            { 
-                bool complete = true;
-                foreach (var childId in context.ExecutionPointer.Children)
+            {
+                for (int i = context.ExecutionPointer.Children.Count - 1; i > -1; i--)
                 {
-                    complete = complete && IsBranchComplete(context.Workflow.ExecutionPointers, childId);
+                    if (!IsBranchComplete(context.Workflow.ExecutionPointers, context.ExecutionPointer.Children[i]))                 
+                        return ExecutionResult.Persist(context.PersistenceData);                 
                 }
-
-                if (complete)
-                {
-                    return ExecutionResult.Persist(null);
-                }
-                 
-                return ExecutionResult.Persist(context.PersistenceData);
+                
+                return ExecutionResult.Persist(null);  //re-evaluate condition on next pass
             }
 
             throw new CorruptPersistenceDataException();

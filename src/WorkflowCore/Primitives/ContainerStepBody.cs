@@ -5,27 +5,32 @@ using WorkflowCore.Models;
 namespace WorkflowCore.Primitives
 {
     public abstract class ContainerStepBody : StepBody
-    {       
-        protected bool IsBranchComplete(IEnumerable<ExecutionPointer> pointers, string rootId)
+    {
+        protected bool IsBranchComplete(ICollection<ExecutionPointer> pointers, string rootId)
         {
-            //TODO: move to own class
             var root = pointers.First(x => x.Id == rootId);
 
             if (root.EndTime == null)
             {
-                return false;   
+                return false;
             }
 
-            var list = pointers.Where(x => x.PredecessorId == rootId).ToList();
+            var queue = new Queue<ExecutionPointer>(pointers.Where(x => x.PredecessorId == rootId));
 
-            bool result = true;
-
-            foreach (var item in list)
+            while (queue.Count > 0)
             {
-                result = result && IsBranchComplete(pointers, item.Id);
+                var item = queue.Dequeue();
+                if (item.EndTime == null)
+                {
+                    return false;
+                }
+
+                var children = pointers.Where(x => x.PredecessorId == item.Id).ToList();
+                foreach (var child in children)
+                    queue.Enqueue(child);
             }
 
-            return result;
+            return true;
         }
     }
 }
