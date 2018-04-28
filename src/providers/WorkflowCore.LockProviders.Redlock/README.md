@@ -17,8 +17,5 @@ PM> Install-Package WorkflowCore.LockProviders.Redlock
 Use the .UseRedlock extension method when building your service provider.
 
 ```C#
-redis = ConnectionMultiplexer.Connect("127.0.0.1");
-services.AddWorkflow(x => x.UseRedlock(redis));
+services.AddWorkflow(x => x.UseRedlock(new DnsEndPoint("host1", 6379), new DnsEndPoint("host2", 6379)));
 ```
-
-*Adapted from https://github.com/KidFashion/redlock-cs*

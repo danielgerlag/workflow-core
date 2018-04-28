@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Roberto Paterlini</Authors>
+    <Description>Queue provider for Workflow-core using SQL Server Service Broker</Description>
+    <Company />
+    <Version>1.0.0-alpha</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Services\DequeueWork.sql" />
+    <None Remove="Services\QueueWork.sql" />
+    <None Remove="Services\SqlServerQueueProviderOption.cs~RF7cacba9.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="SqlCommands\DequeueWork.sql" />
+    <EmbeddedResource Include="SqlCommands\QueueWork.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="1.1.1" />
+    <PackageReference Include="System.Data.Common" Version="4.3.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\WorkflowCore\WorkflowCore.csproj" />
+  </ItemGroup>
+
+</Project>

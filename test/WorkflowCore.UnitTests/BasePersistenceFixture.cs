@@ -15,7 +15,7 @@ namespace WorkflowCore.UnitTests
         protected abstract IPersistenceProvider Subject { get; }
 
         [Fact]
-        public void CreateNewWorkflow()
+        public void CreateNewWorkflow_should_generate_id()
         {
             var workflow = new WorkflowInstance()
             {
@@ -40,7 +40,7 @@ namespace WorkflowCore.UnitTests
         }
 
         [Fact]
-        public void GetWorkflowInstance()
+        public void GetWorkflowInstance_should_retrieve_workflow()
         {
             var workflow = new WorkflowInstance()
             {

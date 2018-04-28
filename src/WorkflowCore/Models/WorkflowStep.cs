@@ -9,25 +9,25 @@ namespace WorkflowCore.Models
     {
         public abstract Type BodyType { get; }
 
-        public int Id { get; set; }
+        public virtual int Id { get; set; }
 
-        public string Name { get; set; }
+        public virtual string Name { get; set; }
 
-        public string Tag { get; set; }
+        public virtual string Tag { get; set; }
 
-        public List<int> Children { get; set; } = new List<int>();
+        public virtual List<int> Children { get; set; } = new List<int>();
 
-        public List<StepOutcome> Outcomes { get; set; } = new List<StepOutcome>();
+        public virtual List<StepOutcome> Outcomes { get; set; } = new List<StepOutcome>();
 
-        public List<DataMapping> Inputs { get; set; } = new List<DataMapping>();
+        public virtual List<DataMapping> Inputs { get; set; } = new List<DataMapping>();
 
-        public List<DataMapping> Outputs { get; set; } = new List<DataMapping>();
+        public virtual List<DataMapping> Outputs { get; set; } = new List<DataMapping>();
 
-        public WorkflowErrorHandling? ErrorBehavior { get; set; }
+        public virtual WorkflowErrorHandling? ErrorBehavior { get; set; }
 
-        public TimeSpan? RetryInterval { get; set; }
+        public virtual TimeSpan? RetryInterval { get; set; }
 
-        public int? CompensationStepId { get; set; }
+        public virtual int? CompensationStepId { get; set; }
 
         public virtual bool ResumeChildrenAfterCompensation => true;
 

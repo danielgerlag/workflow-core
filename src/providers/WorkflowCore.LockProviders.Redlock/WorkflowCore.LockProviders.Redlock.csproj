@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <AssemblyTitle>Workflow Core Redlock distributed lock manager</AssemblyTitle>
-    <VersionPrefix>1.1.0</VersionPrefix>
+    <VersionPrefix>1.6.0</VersionPrefix>
     <Authors>Daniel Gerlag</Authors>
     <TargetFramework>netstandard1.3</TargetFramework>
     <AssemblyName>WorkflowCore.LockProviders.Redlock</AssemblyName>
@@ -17,11 +17,11 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>1.3.0</Version>
+    <Version>1.6.0</Version>
     <PackageReleaseNotes></PackageReleaseNotes>
     <Description>Distributed lock provider for Workflow-core using Redis</Description>
-    <AssemblyVersion>1.3.0.0</AssemblyVersion>
-    <FileVersion>1.3.0.0</FileVersion>
+    <AssemblyVersion>1.6.0.0</AssemblyVersion>
+    <FileVersion>1.6.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <PackageReference Include="StackExchange.Redis" Version="1.1.608" />
+    <PackageReference Include="RedLock.net" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">

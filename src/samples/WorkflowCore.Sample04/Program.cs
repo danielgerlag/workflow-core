@@ -58,7 +58,8 @@ namespace WorkflowCore.Sample04
             //    x.UseSqlServerLocking(@"Server=.\SQLEXPRESS;Database=WorkflowCore;Trusted_Connection=True;");
             //});
 
-            //redis = ConnectionMultiplexer.Connect("127.0.0.1");
+            //services.AddWorkflow(x => x.UseRedlock(new System.Net.DnsEndPoint("127.0.0.1", 32768)));
+
             //services.AddWorkflow(x =>
             //{
             // x.UseMongoDB(@"mongodb://192.168.0.12:27017", "workflow");
