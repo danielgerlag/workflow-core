@@ -7,15 +7,16 @@ using WorkflowCore.Models;
 using WorkflowCore.Primitives;
 using WorkflowCore.Services;
 using WorkflowCore.Users.Interface;
+using WorkflowCore.Users.Models;
 using WorkflowCore.Users.Primitives;
 
 namespace WorkflowCore.Users.Services
 {
-    public class UserTaskBuilder<TData> : StepBuilder<TData, UserTask>, IUserTaskBuilder<TData>
+    public class UserTaskBuilder<TData> : StepBuilder<TData, UserTask<TData>>, IUserTaskBuilder<TData>
     {
-        private readonly WorkflowStep<UserTask> _step;
+        private readonly WorkflowStep<UserTask<TData>> _step;
 
-        public UserTaskBuilder(IWorkflowBuilder<TData> workflowBuilder, WorkflowStep<UserTask> step) 
+        public UserTaskBuilder(IWorkflowBuilder<TData> workflowBuilder, WorkflowStep<UserTask<TData>> step) 
             : base (workflowBuilder, step)
         {
             _step = step;
@@ -37,10 +38,10 @@ namespace WorkflowCore.Users.Services
             var stepBuilder = new UserTaskReturnBuilder<TData>(WorkflowBuilder, newStep, this);
 
             Step.Children.Add(newStep.Id);
-            _step.PreExectionActions.Add(new Action<UserTask, IStepExecutionContext, ExecutionPointer>((userTask, context, pointer) =>
+            _step.PreExectionActions.Add((userTask, context, pointer) =>
             {
                 userTask.Options[label] = value;
-            }));
+            });
 
             return stepBuilder;
         }
@@ -53,12 +54,14 @@ namespace WorkflowCore.Users.Services
             stepBuilder.Input(step => step.TimeOut, after);
             stepBuilder.Input(step => step.NewUser, newUser);
 
-            _step.PreExectionActions.Add(new Action<UserTask, IStepExecutionContext, ExecutionPointer>((userTask, context, pointer) =>
+            _step.PreExectionActions.Add((userTask, context, pointer) =>
             {
-                userTask.Options[label] = value;
-            }));
-
-            _wrapper.Escalations.Add(newStep);
+                userTask.Escalations.Add(new Escalation<TData>()
+                {
+                    TimeOut = after,
+                    NewUser = newUser
+                });
+            });
 
             if (action != null)
             {

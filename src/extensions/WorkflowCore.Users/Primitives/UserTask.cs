@@ -7,7 +7,7 @@ using WorkflowCore.Users.Models;
 
 namespace WorkflowCore.Users.Primitives
 {
-    public class UserTask : ContainerStepBody
+    public class UserTask<TData> : ContainerStepBody
     {
         public string AssignedPrincipal { get; set; }
 
@@ -15,7 +15,7 @@ namespace WorkflowCore.Users.Primitives
 
         public Dictionary<string, string> Options { get; set; } = new Dictionary<string, string>();
 
-        public List<Escalation> Escalations { get; set; } = new List<Escalation>();
+        public List<Escalation<TData>> Escalations { get; set; } = new List<Escalation<TData>>();
 
         public const string EventName = "UserAction";
         public const string ExtAssignPrincipal = "AssignedPrincipal";
@@ -77,7 +77,7 @@ namespace WorkflowCore.Users.Primitives
 
         private void SetupEscalations(IStepExecutionContext context)
         {
-            foreach (var esc in _escalations)
+            foreach (var esc in Escalations)
             {
                 context.Workflow.ExecutionPointers.Add(new ExecutionPointer()
                 {

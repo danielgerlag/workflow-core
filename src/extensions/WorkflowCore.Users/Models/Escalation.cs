@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace WorkflowCore.Users.Models
 {
-    public class Escalation
+    public class Escalation<TData>
     {
-        public TimeSpan TimeOut { get; set; }
+        public Expression<Func<TData, TimeSpan>> TimeOut { get; set; }
 
-        public string NewUser { get; set; }
+        public Expression<Func<TData, string>> NewUser { get; set; }
     }
 }

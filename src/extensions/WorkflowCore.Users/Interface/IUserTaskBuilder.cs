@@ -9,7 +9,7 @@ using WorkflowCore.Users.Services;
 
 namespace WorkflowCore.Users.Interface
 {
-    public interface IUserTaskBuilder<TData> : IStepBuilder<TData, UserTask>
+    public interface IUserTaskBuilder<TData> : IStepBuilder<TData, UserTask<TData>>
     {
         /// <summary>
         /// Add a selectable option to the user task
