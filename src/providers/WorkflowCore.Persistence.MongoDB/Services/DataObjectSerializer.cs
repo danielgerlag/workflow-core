@@ -16,7 +16,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
     {
         private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings()
         {
-            TypeNameHandling = TypeNameHandling.All
+            TypeNameHandling = TypeNameHandling.Objects,
         };
         
         public override object Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
@@ -32,15 +32,45 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, object value)
         {
-            string str = JsonConvert.SerializeObject(value, SerializerSettings);
+            var str = JsonConvert.SerializeObject(value, SerializerSettings);
             var doc = BsonDocument.Parse(str);
-            var typeElem = doc.GetElement("$type");
-            doc.RemoveElement(typeElem);
-
-            if (doc.Elements.All(x => x.Name != "_t"))
-                doc.InsertAt(0, new BsonElement("_t", typeElem.Value));
+            ConvertMetaFormat(doc);
             
             BsonSerializer.Serialize(context.Writer, doc);
+        }
+
+        private static void ConvertMetaFormat(BsonDocument root)
+        {
+            var stack = new Stack<BsonDocument>();
+            stack.Push(root);
+
+            while (stack.Count > 0)
+            {
+                var doc = stack.Pop();
+
+                if (doc.TryGetElement("$type", out var typeElem))
+                {
+                    doc.RemoveElement(typeElem);
+
+                    if (doc.Elements.All(x => x.Name != "_t"))
+                        doc.InsertAt(0, new BsonElement("_t", typeElem.Value));
+                }
+
+                foreach (var subDoc in doc.Elements)
+                {
+                    if (subDoc.Value.IsBsonDocument)
+                        stack.Push(subDoc.Value.ToBsonDocument());
+
+                    if (subDoc.Value.IsBsonArray)
+                    {
+                        foreach (var element in subDoc.Value.AsBsonArray)
+                        {
+                            if (element.IsBsonDocument)
+                                stack.Push(element.ToBsonDocument());
+                        }
+                    }
+                }
+            }
         }
     }
 }
