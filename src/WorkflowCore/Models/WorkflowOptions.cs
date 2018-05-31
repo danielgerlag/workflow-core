@@ -7,12 +7,12 @@ namespace WorkflowCore.Models
 {
     public class WorkflowOptions
     {
-        internal Func<IServiceProvider, IPersistenceProvider> PersistanceFactory;
-        internal Func<IServiceProvider, IQueueProvider> QueueFactory;
-        internal Func<IServiceProvider, IDistributedLockProvider> LockFactory;
-        internal TimeSpan PollInterval;
-        internal TimeSpan IdleTime;
-        internal TimeSpan ErrorRetryInterval;
+        public Func<IServiceProvider, IPersistenceProvider> PersistanceFactory;
+        public Func<IServiceProvider, IQueueProvider> QueueFactory;
+        public Func<IServiceProvider, IDistributedLockProvider> LockFactory;
+        public TimeSpan PollInterval;
+        public TimeSpan IdleTime;
+        public TimeSpan ErrorRetryInterval;
 
         public IServiceCollection Services { get; private set; }
 

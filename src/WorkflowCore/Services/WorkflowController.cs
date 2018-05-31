@@ -183,5 +183,15 @@ namespace WorkflowCore.Services
             TWorkflow wf = new TWorkflow();
             _registry.RegisterWorkflow<TData>(wf);
         }
+
+        public void RegisterWorkflow(IWorkflow workflow)
+        {
+            _registry.RegisterWorkflow(workflow);
+        }
+
+        public void RegisterWorkflow<TData>(IWorkflow<TData> workflow) where TData : new()
+        {
+            _registry.RegisterWorkflow(workflow);
+        }
     }
 }

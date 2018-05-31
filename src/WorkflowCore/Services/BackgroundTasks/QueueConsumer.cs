@@ -8,7 +8,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services.BackgroundTasks
 {
-    internal abstract class QueueConsumer : IBackgroundTask
+    public abstract class QueueConsumer : IBackgroundTask
     {
         protected abstract QueueType Queue { get; }
         protected virtual int MaxConcurrentItems => Math.Max(Environment.ProcessorCount, 2);

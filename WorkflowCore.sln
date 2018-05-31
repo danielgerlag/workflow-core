@@ -111,6 +111,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample17", "sr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.QueueProviders.SqlServer", "src\providers\WorkflowCore.QueueProviders.SqlServer\WorkflowCore.QueueProviders.SqlServer.csproj", "{7EDD9353-F5C2-414C-AE51-4B0F1C5E105A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.IOC.Castle", "src\WorkflowCore.IOC.Castle\WorkflowCore.IOC.Castle.csproj", "{3139D97C-E972-4C02-8873-5440F300347F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -281,6 +283,10 @@ Global
 		{7EDD9353-F5C2-414C-AE51-4B0F1C5E105A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7EDD9353-F5C2-414C-AE51-4B0F1C5E105A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7EDD9353-F5C2-414C-AE51-4B0F1C5E105A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3139D97C-E972-4C02-8873-5440F300347F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3139D97C-E972-4C02-8873-5440F300347F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3139D97C-E972-4C02-8873-5440F300347F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3139D97C-E972-4C02-8873-5440F300347F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -330,6 +336,7 @@ Global
 		{6396453F-4D0E-4CD4-BC89-87E8970F2A80} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
 		{42F475BC-95F4-42E1-8CCD-7B9C27487E33} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
 		{7EDD9353-F5C2-414C-AE51-4B0F1C5E105A} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
+		{3139D97C-E972-4C02-8873-5440F300347F} = {EF47161E-E399-451C-BDE8-E92AAD3BD761}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DC0FA8D3-6449-4FDA-BB46-ECF58FAD23B4}

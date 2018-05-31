@@ -13,6 +13,8 @@ namespace WorkflowCore.Interface
         Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null) where TData : class;
 
         Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null);
+        void RegisterWorkflow(IWorkflow workflow);
+        void RegisterWorkflow<TData>(IWorkflow<TData> workflow) where TData : new();
         void RegisterWorkflow<TWorkflow>() where TWorkflow : IWorkflow, new();
         void RegisterWorkflow<TWorkflow, TData>() where TWorkflow : IWorkflow<TData>, new() where TData : new();
 

@@ -8,6 +8,7 @@ using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using System.Reflection;
 using WorkflowCore.Exceptions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WorkflowCore.Services
 {
@@ -97,11 +98,22 @@ namespace WorkflowCore.Services
             QueueProvider.Stop();
             LockProvider.Stop();
         }
-        
+
+        public void RegisterWorkflow(IWorkflow workflow)
+        {
+            Registry.RegisterWorkflow(workflow);
+        }
+
+        public void RegisterWorkflow<TData>(IWorkflow<TData> workflow) where TData : new()
+        {
+            Registry.RegisterWorkflow(workflow);
+        }
+
         public void RegisterWorkflow<TWorkflow>() 
             where TWorkflow : IWorkflow, new()
         {
-            TWorkflow wf = new TWorkflow();
+            var wfs = _serviceProvider.GetServices<IWorkflow>();
+            var wf = wfs.FirstOrDefault(w => typeof(TWorkflow).FullName == w.GetType().FullName) ?? new TWorkflow();
             Registry.RegisterWorkflow(wf);
         }
 
@@ -109,8 +121,9 @@ namespace WorkflowCore.Services
             where TWorkflow : IWorkflow<TData>, new()
             where TData : new()
         {
-            TWorkflow wf = new TWorkflow();
-            Registry.RegisterWorkflow<TData>(wf);
+            var wfs = _serviceProvider.GetServices<IWorkflow<TData>>();
+            var wf = wfs.FirstOrDefault(w => typeof(TWorkflow).FullName == w.GetType().FullName) ?? new TWorkflow();
+            Registry.RegisterWorkflow(wf);
         }
 
         public Task<bool> SuspendWorkflow(string workflowId)

@@ -8,7 +8,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services.BackgroundTasks
 {
-    internal class WorkflowConsumer : QueueConsumer, IBackgroundTask
+    public class WorkflowConsumer : QueueConsumer, IBackgroundTask
     {
         private readonly IDistributedLockProvider _lockProvider;
         private readonly IDateTimeProvider _datetimeProvider;

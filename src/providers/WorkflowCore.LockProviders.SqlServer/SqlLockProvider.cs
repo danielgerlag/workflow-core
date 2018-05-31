@@ -3,10 +3,10 @@ using System.Data.SqlClient;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
-using System.Data;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Data;
 
 namespace WorkflowCore.LockProviders.SqlServer
 {

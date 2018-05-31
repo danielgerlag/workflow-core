@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace WorkflowCore.Services
 {
-    internal class InjectedObjectPoolPolicy<T> : IPooledObjectPolicy<T>
+    public class InjectedObjectPoolPolicy<T> : IPooledObjectPolicy<T>
     {
         private readonly IServiceProvider _provider;
 
