@@ -20,6 +20,7 @@
     <FileVersion>1.0.0.0</FileVersion>
     <PackageReleaseNotes></PackageReleaseNotes>
     <PackageIconUrl>https://github.com/st2forget/workflow-core/raw/master/src/logo.png</PackageIconUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

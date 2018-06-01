@@ -104,7 +104,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                         new SqlParameter("@msgType", par.MsgType),
                         new SqlParameter("@RequestMessage", id)
                         );
-                });
+                }).ConfigureAwait(false);
             }
             finally
             {
@@ -131,7 +131,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                     var sql = _dequeueWorkCommand.Replace("{queueName}", par.QueueName);
                     var msg = _sqlCommandExecutor.ExecuteScalar<object>(cn, null, sql);
                     return msg is DBNull ? null : (string)msg;
-                });
+                }).ConfigureAwait(false);
             }
             finally
             {
