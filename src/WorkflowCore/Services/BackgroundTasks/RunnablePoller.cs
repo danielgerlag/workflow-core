@@ -7,7 +7,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services.BackgroundTasks
 {
-    public class RunnablePoller : IBackgroundTask
+    public class RunnablePoller : IBackgroundTask, IDisposable
     {
         private readonly IPersistenceProvider _persistenceStore;
         private readonly IDistributedLockProvider _lockProvider;
@@ -23,6 +23,11 @@ namespace WorkflowCore.Services.BackgroundTasks
             _logger = loggerFactory.CreateLogger<RunnablePoller>();
             _lockProvider = lockProvider;
             _options = options;
+        }
+
+        public void Dispose()
+        {
+            _pollTimer?.Dispose();
         }
 
         public void Start()

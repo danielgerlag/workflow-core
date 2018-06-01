@@ -8,7 +8,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services.BackgroundTasks
 {
-    public abstract class QueueConsumer : IBackgroundTask
+    public abstract class QueueConsumer : IBackgroundTask, IDisposable
     {
         protected abstract QueueType Queue { get; }
         protected virtual int MaxConcurrentItems => Math.Max(Environment.ProcessorCount, 2);
@@ -109,6 +109,11 @@ namespace WorkflowCore.Services.BackgroundTasks
             {
                 Logger.LogError($"Error executing item {itemId} - {ex.Message}");
             }
+        }
+
+        public void Dispose()
+        {
+            _cancellationTokenSource?.Dispose();
         }
     }
 }
