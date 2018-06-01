@@ -52,7 +52,6 @@ namespace WorkflowCore.Ioc.CastleWindsor
             container.Register(Component.For<IPooledObjectPolicy<IPersistenceProvider>>().ImplementedBy<InjectedObjectPoolPolicy<IPersistenceProvider>>().LifestyleTransient());
             container.Register(Component.For<IPooledObjectPolicy<IWorkflowExecutor>>().ImplementedBy<InjectedObjectPoolPolicy<IWorkflowExecutor>>().LifestyleTransient());
             container.Register(Component.For<IDefinitionLoader>().ImplementedBy<DefinitionLoader>().LifestyleTransient());
-            //container.Register(Component.For<Foreach>().ImplementedBy<Foreach>().LifestyleTransient());
         }
 
         /// <summary>
