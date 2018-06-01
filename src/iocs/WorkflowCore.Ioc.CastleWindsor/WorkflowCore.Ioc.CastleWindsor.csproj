@@ -1,12 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <AssemblyTitle>Workflow Core IOC for Castle Windsor</AssemblyTitle>
+    <Authors>Gia, Le Huu Hoang</Authors>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyTitle>Workflow Core</AssemblyTitle>
-    <Authors>Daniel Gerlag</Authors>
-    <AssemblyName>WorkflowCore.IOC.Castle</AssemblyName>
-    <PackageId>WorkflowCore.IOC.Castle</PackageId>
+    <AssemblyName>WorkflowCore.Ioc.CastleWindsor</AssemblyName>
+    <PackageId>WorkflowCore.Ioc.CastleWindsor</PackageId>
     <PackageTags>workflow;.NET;Core;state machine</PackageTags>
     <PackageProjectUrl>https://github.com/st2forget/workflow-core</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/st2forget/workflow-core/blob/master/LICENSE.md</PackageLicenseUrl>
@@ -15,7 +14,7 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Description>Workflow Core is a light weight workflow engine targeting .NET Standard.</Description>
+    <Description>Workflow Core IOC for Castle.Windsor is an IOC provider of Castle.Windsor for workflow engine targeting .NET Standard.</Description>
     <Version>1.0.0</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
@@ -24,18 +23,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Castle.Core" Version="4.2.1" />
     <PackageReference Include="Castle.Windsor" Version="4.1.0" />
     <PackageReference Include="Castle.Windsor.MsDependencyInjection" Version="3.3.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="2.1.0" />
     <PackageReference Include="Serilog" Version="2.7.1" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="2.0.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\providers\WorkflowCore.QueueProviders.SqlServer\WorkflowCore.QueueProviders.SqlServer.csproj" />
-    <ProjectReference Include="..\WorkflowCore\WorkflowCore.csproj" />
+    <ProjectReference Include="..\..\providers\WorkflowCore.QueueProviders.SqlServer\WorkflowCore.QueueProviders.SqlServer.csproj" />
+    <ProjectReference Include="..\..\WorkflowCore\WorkflowCore.csproj" />
   </ItemGroup>
 
 </Project>

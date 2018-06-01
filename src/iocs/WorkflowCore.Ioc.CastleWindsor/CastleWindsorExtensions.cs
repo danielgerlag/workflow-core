@@ -15,7 +15,7 @@ using WorkflowCore.Services;
 using WorkflowCore.Services.BackgroundTasks;
 using WorkflowCore.Services.DefinitionStorage;
 
-namespace WorkflowCore.IOC.Castle
+namespace WorkflowCore.Ioc.CastleWindsor
 {
     public static class CastleWindsorExtensions
     {

@@ -93,15 +93,18 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             try
             {
                 cn.Open();
-                var par = _config.GetByQueue(queue);
+                await Task.Run(() =>
+                {
+                    var par = _config.GetByQueue(queue);
 
-                _sqlCommandExecutor.ExecuteCommand(cn, null, _queueWorkCommand,
-                    new SqlParameter("@initiatorService", par.InitiatorService),
-                    new SqlParameter("@targetService", par.TargetService),
-                    new SqlParameter("@contractName", par.ContractName),
-                    new SqlParameter("@msgType", par.MsgType),
-                    new SqlParameter("@RequestMessage", id)
-                    );
+                    _sqlCommandExecutor.ExecuteCommand(cn, null, _queueWorkCommand,
+                        new SqlParameter("@initiatorService", par.InitiatorService),
+                        new SqlParameter("@targetService", par.TargetService),
+                        new SqlParameter("@contractName", par.ContractName),
+                        new SqlParameter("@msgType", par.MsgType),
+                        new SqlParameter("@RequestMessage", id)
+                        );
+                });
             }
             finally
             {
@@ -122,11 +125,13 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             try
             {
                 cn.Open();
-                var par = _config.GetByQueue(queue);                
-                var sql = _dequeueWorkCommand.Replace("{queueName}", par.QueueName);
-                var msg = _sqlCommandExecutor.ExecuteScalar<object>(cn, null, sql);
-                return msg is DBNull ? null : (string)msg;
-                
+                return await Task.Run(() =>
+                {
+                    var par = _config.GetByQueue(queue);
+                    var sql = _dequeueWorkCommand.Replace("{queueName}", par.QueueName);
+                    var msg = _sqlCommandExecutor.ExecuteScalar<object>(cn, null, sql);
+                    return msg is DBNull ? null : (string)msg;
+                });
             }
             finally
             {
