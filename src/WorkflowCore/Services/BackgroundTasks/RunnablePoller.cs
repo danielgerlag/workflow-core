@@ -7,7 +7,9 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services.BackgroundTasks
 {
+#pragma warning disable S3881 // "IDisposable" should be implemented correctly
     public class RunnablePoller : IBackgroundTask, IDisposable
+#pragma warning restore S3881 // "IDisposable" should be implemented correctly
     {
         private readonly IPersistenceProvider _persistenceStore;
         private readonly IDistributedLockProvider _lockProvider;
@@ -34,13 +36,15 @@ namespace WorkflowCore.Services.BackgroundTasks
         {
             _pollTimer = new Timer(new TimerCallback(PollRunnables), null, TimeSpan.FromSeconds(0), _options.PollInterval);
         }
-
+        
         public void Stop()
         {
             if (_pollTimer != null)
             {
                 //NOSONAR
+#pragma warning disable S2952 // "IDisposable" should be implemented correctly
                 _pollTimer.Dispose();
+#pragma warning restore S2952 // "IDisposable" should be implemented correctly
                 _pollTimer = null;
             }
         }
