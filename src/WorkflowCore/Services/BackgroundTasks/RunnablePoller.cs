@@ -39,6 +39,7 @@ namespace WorkflowCore.Services.BackgroundTasks
         {
             if (_pollTimer != null)
             {
+                //NOSONAR
                 _pollTimer.Dispose();
                 _pollTimer = null;
             }
