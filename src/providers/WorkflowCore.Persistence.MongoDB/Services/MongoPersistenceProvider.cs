@@ -64,15 +64,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                 x.MapProperty(y => y.IsProcessed);
             });
 
-            //BsonClassMap.RegisterClassMap<ExecutionError>(x =>
-            //{
-            //    x.MapIdProperty(y => y.Id)
-            //        .SetIdGenerator(new StringObjectIdGenerator());
-            //    x.MapProperty(y => y.ErrorTime);
-            //    x.MapProperty(y => y.ExecutionPointerId);
-            //    x.MapProperty(y => y.Message);
-            //    x.MapProperty(y => y.WorkflowId);
-            //});
+            BsonClassMap.RegisterClassMap<ControlPersistenceData>(x => x.AutoMap());
         }
 
         static bool indexesCreated = false;
