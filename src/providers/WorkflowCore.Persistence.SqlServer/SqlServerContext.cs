@@ -1,58 +1,67 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WorkflowCore.Persistence.EntityFramework.Models;
 using WorkflowCore.Persistence.EntityFramework.Services;
 
-namespace WorkflowCore.Persistence.Sqlite
+namespace WorkflowCore.Persistence.SqlServer
 {
-    public class SqlitePersistenceProvider : EntityFrameworkPersistenceProvider
+    public class SqlServerContext : WorkflowDbContext
     {
         private readonly string _connectionString;
 
-        public SqlitePersistenceProvider(string connectionString, bool canCreateDB)
-            : base(canCreateDB, false)
+        public SqlServerContext(string connectionString)
+            : base()
         {
+            if (!connectionString.Contains("MultipleActiveResultSets"))
+                connectionString += ";MultipleActiveResultSets=True";
+
             _connectionString = connectionString;
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-            optionsBuilder.UseSqlite(_connectionString);
+            optionsBuilder.UseSqlServer(_connectionString);
         }
 
         protected override void ConfigureSubscriptionStorage(EntityTypeBuilder<PersistedSubscription> builder)
         {
-            builder.ToTable("Subscription");            
+            builder.ToTable("Subscription", "wfc");
+            builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
         }
 
         protected override void ConfigureWorkflowStorage(EntityTypeBuilder<PersistedWorkflow> builder)
         {
-            builder.ToTable("Workflow");
+            builder.ToTable("Workflow", "wfc");
+            builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
         }
         
         protected override void ConfigureExecutionPointerStorage(EntityTypeBuilder<PersistedExecutionPointer> builder)
         {
-            builder.ToTable("ExecutionPointer");
+            builder.ToTable("ExecutionPointer", "wfc");
+            builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
         }
 
         protected override void ConfigureExecutionErrorStorage(EntityTypeBuilder<PersistedExecutionError> builder)
         {
-            builder.ToTable("ExecutionError");
+            builder.ToTable("ExecutionError", "wfc");
+            builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
         }
 
         protected override void ConfigureExetensionAttributeStorage(EntityTypeBuilder<PersistedExtensionAttribute> builder)
         {
-            builder.ToTable("ExtensionAttribute");
+            builder.ToTable("ExtensionAttribute", "wfc");
+            builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
         }
 
         protected override void ConfigureEventStorage(EntityTypeBuilder<PersistedEvent> builder)
         {
-            builder.ToTable("Event");
+            builder.ToTable("Event", "wfc");
+            builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
         }
     }
 }

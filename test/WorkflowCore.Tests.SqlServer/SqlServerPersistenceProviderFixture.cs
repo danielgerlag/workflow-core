@@ -1,4 +1,5 @@
 using WorkflowCore.Interface;
+using WorkflowCore.Persistence.EntityFramework.Services;
 using WorkflowCore.Persistence.SqlServer;
 using WorkflowCore.UnitTests;
 using Xunit;
@@ -19,7 +20,7 @@ namespace WorkflowCore.Tests.SqlServer
         {
             get
             {
-                var db = new SqlServerPersistenceProvider(_connectionString, true, true);
+                var db = new EntityFrameworkPersistenceProvider<SqlServerContext>(new SqlContextFactory(_connectionString), true, true);
                 db.EnsureStoreExists();
                 return db;
             }

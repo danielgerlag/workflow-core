@@ -8,7 +8,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Persistence.SqlServer.Migrations
 {
-    [DbContext(typeof(SqlServerPersistenceProvider))]
+    [DbContext(typeof(SqlServerContext))]
     [Migration("20170722195832_WfReference")]
     partial class WfReference
     {

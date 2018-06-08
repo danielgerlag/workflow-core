@@ -8,7 +8,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 {
-    [DbContext(typeof(PostgresPersistenceProvider))]
+    [DbContext(typeof(PostgresContext))]
     [Migration("20170507214430_ControlStructures")]
     partial class ControlStructures
     {

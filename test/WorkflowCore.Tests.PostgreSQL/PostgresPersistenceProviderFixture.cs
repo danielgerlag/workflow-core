@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using WorkflowCore.Interface;
+using WorkflowCore.Persistence.EntityFramework.Services;
 using WorkflowCore.Persistence.PostgreSQL;
 using WorkflowCore.UnitTests;
 using Xunit;
@@ -18,7 +19,7 @@ namespace WorkflowCore.Tests.PostgreSQL
         public PostgresPersistenceProviderFixture(PostgresDockerSetup dockerSetup, ITestOutputHelper output)
         {
             output.WriteLine($"Connecting on {PostgresDockerSetup.ConnectionString}");
-            _subject = new PostgresPersistenceProvider(PostgresDockerSetup.ConnectionString, true, true);
+            _subject = new EntityFrameworkPersistenceProvider<PostgresContext>(new PostgresContextFactory(PostgresDockerSetup.ConnectionString), true, true);
             _subject.EnsureStoreExists();
         }
     }

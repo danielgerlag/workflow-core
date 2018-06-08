@@ -11,7 +11,7 @@ using WorkflowCore.Persistence.SqlServer;
 
 namespace WorkflowCore.Persistence.SqlServer.Migrations
 {
-    [DbContext(typeof(SqlServerPersistenceProvider))]
+    [DbContext(typeof(SqlServerContext))]
     [Migration("20171223020645_StepScope")]
     partial class StepScope
     {

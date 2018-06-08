@@ -11,7 +11,7 @@ using WorkflowCore.Persistence.SqlServer;
 
 namespace WorkflowCore.Persistence.SqlServer.Migrations
 {
-    [DbContext(typeof(SqlServerPersistenceProvider))]
+    [DbContext(typeof(SqlServerContext))]
     partial class SqlServerPersistenceProviderModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

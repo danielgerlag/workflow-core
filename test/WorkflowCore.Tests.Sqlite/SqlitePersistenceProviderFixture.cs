@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using WorkflowCore.Interface;
+using WorkflowCore.Persistence.EntityFramework.Services;
 using WorkflowCore.Persistence.Sqlite;
 using WorkflowCore.UnitTests;
 using Xunit;
@@ -22,7 +23,7 @@ namespace WorkflowCore.Tests.Sqlite
         {
             get
             {                
-                var db = new SqlitePersistenceProvider(_connectionString, true);
+                var db = new EntityFrameworkPersistenceProvider<SqliteContext>(new SqliteContextFactory(_connectionString), true, false);
                 db.EnsureStoreExists();
                 return db;
             }

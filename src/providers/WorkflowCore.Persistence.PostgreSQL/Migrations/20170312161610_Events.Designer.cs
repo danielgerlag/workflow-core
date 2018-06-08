@@ -8,7 +8,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 {
-    [DbContext(typeof(PostgresPersistenceProvider))]
+    [DbContext(typeof(PostgresContext))]
     [Migration("20170312161610_Events")]
     partial class Events
     {

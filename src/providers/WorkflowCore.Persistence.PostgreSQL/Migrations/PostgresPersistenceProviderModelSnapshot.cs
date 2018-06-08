@@ -11,7 +11,7 @@ using WorkflowCore.Persistence.PostgreSQL;
 
 namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 {
-    [DbContext(typeof(PostgresPersistenceProvider))]
+    [DbContext(typeof(PostgresContext))]
     partial class PostgresPersistenceProviderModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

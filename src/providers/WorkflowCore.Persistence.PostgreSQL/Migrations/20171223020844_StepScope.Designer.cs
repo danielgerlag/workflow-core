@@ -11,7 +11,7 @@ using WorkflowCore.Persistence.PostgreSQL;
 
 namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 {
-    [DbContext(typeof(PostgresPersistenceProvider))]
+    [DbContext(typeof(PostgresContext))]
     [Migration("20171223020844_StepScope")]
     partial class StepScope
     {

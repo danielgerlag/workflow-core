@@ -1,65 +1,58 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WorkflowCore.Persistence.EntityFramework.Models;
 using WorkflowCore.Persistence.EntityFramework.Services;
 
-namespace WorkflowCore.Persistence.PostgreSQL
+namespace WorkflowCore.Persistence.Sqlite
 {
-    public class PostgresPersistenceProvider : EntityFrameworkPersistenceProvider
+    public class SqliteContext : WorkflowDbContext
     {
         private readonly string _connectionString;
 
-        public PostgresPersistenceProvider(string connectionString, bool canCreateDB, bool canMigrateDB)
-            :base(canCreateDB, canMigrateDB)
-        {   
+        public SqliteContext(string connectionString)
+            : base()
+        {
             _connectionString = connectionString;
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-            optionsBuilder.UseNpgsql(_connectionString);
+            optionsBuilder.UseSqlite(_connectionString);
         }
 
         protected override void ConfigureSubscriptionStorage(EntityTypeBuilder<PersistedSubscription> builder)
         {
-            builder.ToTable("Subscription", "wfc");
-            builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
+            builder.ToTable("Subscription");            
         }
 
         protected override void ConfigureWorkflowStorage(EntityTypeBuilder<PersistedWorkflow> builder)
         {
-            builder.ToTable("Workflow", "wfc");
-            builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
+            builder.ToTable("Workflow");
         }
-                
+        
         protected override void ConfigureExecutionPointerStorage(EntityTypeBuilder<PersistedExecutionPointer> builder)
         {
-            builder.ToTable("ExecutionPointer", "wfc");
-            builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
+            builder.ToTable("ExecutionPointer");
         }
 
         protected override void ConfigureExecutionErrorStorage(EntityTypeBuilder<PersistedExecutionError> builder)
         {
-            builder.ToTable("ExecutionError", "wfc");
-            builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
+            builder.ToTable("ExecutionError");
         }
 
         protected override void ConfigureExetensionAttributeStorage(EntityTypeBuilder<PersistedExtensionAttribute> builder)
         {
-            builder.ToTable("ExtensionAttribute", "wfc");
-            builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
+            builder.ToTable("ExtensionAttribute");
         }
 
         protected override void ConfigureEventStorage(EntityTypeBuilder<PersistedEvent> builder)
         {
-            builder.ToTable("Event", "wfc");
-            builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
+            builder.ToTable("Event");
         }
     }
 }
-
