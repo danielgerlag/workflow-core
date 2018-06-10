@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static WorkflowOptions UseSqlite(this WorkflowOptions options, string connectionString, bool canCreateDB)
         {
-            options.UsePersistence(sp => new EntityFrameworkPersistenceProvider<SqliteContext>(new SqliteContextFactory(connectionString), canCreateDB, false));
+            options.UsePersistence(sp => new EntityFrameworkPersistenceProvider(new SqliteContextFactory(connectionString), canCreateDB, false));
             return options;
         }
     }

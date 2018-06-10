@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static WorkflowOptions UsePostgreSQL(this WorkflowOptions options, string connectionString, bool canCreateDB, bool canMigrateDB)
         {
-            options.UsePersistence(sp => new EntityFrameworkPersistenceProvider<PostgresContext>(new PostgresContextFactory(connectionString), canCreateDB, canMigrateDB));
+            options.UsePersistence(sp => new EntityFrameworkPersistenceProvider(new PostgresContextFactory(connectionString), canCreateDB, canMigrateDB));
             return options;
         }
     }

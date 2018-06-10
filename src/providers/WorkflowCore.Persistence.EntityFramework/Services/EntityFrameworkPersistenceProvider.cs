@@ -14,8 +14,7 @@ using WorkflowCore.Persistence.EntityFramework.Interfaces;
 
 namespace WorkflowCore.Persistence.EntityFramework.Services
 {
-    public class EntityFrameworkPersistenceProvider<TContext> : IPersistenceProvider
-        where TContext : WorkflowDbContext
+    public class EntityFrameworkPersistenceProvider : IPersistenceProvider
     {
         private readonly bool _canCreateDB;
         private readonly bool _canMigrateDB;

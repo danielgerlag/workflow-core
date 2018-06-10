@@ -20,7 +20,7 @@ namespace WorkflowCore.Tests.SqlServer
         {
             get
             {
-                var db = new EntityFrameworkPersistenceProvider<SqlServerContext>(new SqlContextFactory(_connectionString), true, true);
+                var db = new EntityFrameworkPersistenceProvider(new SqlContextFactory(_connectionString), true, true);
                 db.EnsureStoreExists();
                 return db;
             }
