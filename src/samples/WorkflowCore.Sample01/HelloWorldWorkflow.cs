@@ -20,6 +20,8 @@ namespace WorkflowCore.Sample01
         public string Id => "HelloWorld";
             
         public int Version => 1;
+
+	//test
                  
     }
 }
