@@ -22,7 +22,7 @@ namespace WorkflowCore.Sample05
             host.RegisterWorkflow<DeferSampleWorkflow>();
             host.Start();
 
-            host.StartWorkflow("DeferSampleWorkflow", 1, null);
+            host.StartWorkflow("DeferSampleWorkflow", 1, null, null);
                         
             Console.ReadLine();
             host.Stop();

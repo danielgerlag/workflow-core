@@ -29,23 +29,23 @@ namespace WorkflowCore.Services
             _logger = loggerFactory.CreateLogger<WorkflowController>();
         }
 
-        public Task<string> StartWorkflow(string workflowId, object data = null)
+        public Task<string> StartWorkflow(string workflowId, object data = null, string reference=null)
         {
-            return StartWorkflow(workflowId, null, data);
+            return StartWorkflow(workflowId, null, data, reference);
         }
 
-        public Task<string> StartWorkflow(string workflowId, int? version, object data = null)
+        public Task<string> StartWorkflow(string workflowId, int? version, object data = null, string reference=null)
         {
-            return StartWorkflow<object>(workflowId, version, data);
+            return StartWorkflow<object>(workflowId, version, data, reference);
         }
 
-        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null) 
+        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null, string reference=null) 
             where TData : class
         {
-            return StartWorkflow<TData>(workflowId, null, data);
+            return StartWorkflow<TData>(workflowId, null, data, reference);
         }
 
-        public async Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null)
+        public async Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference=null)
             where TData : class
         {
             
@@ -63,7 +63,8 @@ namespace WorkflowCore.Services
                 Description = def.Description,
                 NextExecution = 0,
                 CreateTime = DateTime.Now.ToUniversalTime(),
-                Status = WorkflowStatus.Runnable
+                Status = WorkflowStatus.Runnable,
+                Reference = reference
             };
 
             if ((def.DataType != null) && (data == null))
