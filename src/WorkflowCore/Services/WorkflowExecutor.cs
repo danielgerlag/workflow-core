@@ -182,7 +182,9 @@ namespace WorkflowCore.Services
                 var member = (output.Target.Body as MemberExpression);
                 var resolvedValue = output.Source.Compile().DynamicInvoke(body);
                 var data = workflow.Data;
-                data.GetType().GetProperty(member.Member.Name).SetValue(data, resolvedValue);
+                var property = data.GetType().GetProperty(member.Member.Name);
+                var convertedValue = Convert.ChangeType(resolvedValue, property.PropertyType);
+                property.SetValue(data, convertedValue);
             }
         }
 
