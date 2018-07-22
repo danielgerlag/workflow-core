@@ -9,8 +9,8 @@ namespace WorkflowCore.Interface
     {
         Task<string> StartWorkflow(string workflowId, object data = null);
         Task<string> StartWorkflow(string workflowId, int? version, object data = null);
-        Task<string> StartWorkflow<TData>(string workflowId, TData data = null) where TData : class;
-        Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null) where TData : class;
+        Task<string> StartWorkflow<TData>(string workflowId, TData data = null) where TData : class, new();
+        Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null) where TData : class, new();
 
         Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null);
         void RegisterWorkflow<TWorkflow>() where TWorkflow : IWorkflow, new();
