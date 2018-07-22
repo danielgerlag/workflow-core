@@ -45,7 +45,7 @@ namespace WorkflowCore.WebAPI.Controllers
 
         [HttpPost("{id}")]
         [HttpPost("{id}/{version}")]        
-        public async Task<IActionResult> Post(string id, int? version, [FromBody]JObject data)
+        public async Task<IActionResult> Post(string id, int? version, string reference, [FromBody]JObject data)
         {
             string workflowId = null;            
             var def = _registry.GetDefinition(id, version);
@@ -55,11 +55,11 @@ namespace WorkflowCore.WebAPI.Controllers
             {
                 var dataStr = JsonConvert.SerializeObject(data);
                 var dataObj = JsonConvert.DeserializeObject(dataStr, def.DataType);
-                workflowId = await _workflowHost.StartWorkflow(id, version, dataObj);
+                workflowId = await _workflowHost.StartWorkflow(id, version, dataObj, reference);
             }
             else
             {
-                workflowId = await _workflowHost.StartWorkflow(id, version, null);
+                workflowId = await _workflowHost.StartWorkflow(id, version, null, reference);
             }
             
             return Ok(workflowId);

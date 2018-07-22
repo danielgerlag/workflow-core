@@ -22,7 +22,7 @@ namespace WorkflowCore.Sample06
             host.RegisterWorkflow<MultipleOutcomeWorkflow>();
             host.Start();
 
-            host.StartWorkflow("MultipleOutcomeWorkflow", 1, null);
+            host.StartWorkflow("MultipleOutcomeWorkflow", 1, null, null);
 
             Console.ReadLine();
             host.Stop();

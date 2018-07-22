@@ -16,7 +16,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        public static void AddWorkflow(this IServiceCollection services, Action<WorkflowOptions> setupAction = null)
+        public static IServiceCollection AddWorkflow(this IServiceCollection services, Action<WorkflowOptions> setupAction = null)
         {
             if (services.Any(x => x.ServiceType == typeof(WorkflowOptions)))
                 throw new InvalidOperationException("Workflow services already registered");
@@ -47,6 +47,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<IDefinitionLoader, DefinitionLoader>();
 
             services.AddTransient<Foreach>();
+
+            return services;
         }
     }
 }
