@@ -49,7 +49,8 @@ namespace WorkflowCore.UnitTests
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Version = 1,
-                WorkflowDefinitionId = "My Workflow"
+                WorkflowDefinitionId = "My Workflow",
+                Reference =  "My Reference"
             };
             workflow.ExecutionPointers.Add(new ExecutionPointer()
             {
@@ -76,7 +77,8 @@ namespace WorkflowCore.UnitTests
                 NextExecution = 0,
                 Version = 1,
                 WorkflowDefinitionId = "My Workflow",
-                CreateTime = new DateTime(2000, 1, 1).ToUniversalTime()
+                CreateTime = new DateTime(2000, 1, 1).ToUniversalTime(),
+                Reference = "My Reference"
             };
             oldWorkflow.ExecutionPointers.Add(new ExecutionPointer()
             {
@@ -87,6 +89,7 @@ namespace WorkflowCore.UnitTests
             var workflowId = Subject.CreateNewWorkflow(oldWorkflow).Result;
             var newWorkflow = Utils.DeepCopy(oldWorkflow);
             newWorkflow.Data = oldWorkflow.Data;
+            newWorkflow.Reference = oldWorkflow.Reference;
             newWorkflow.NextExecution = 7;
             newWorkflow.ExecutionPointers.Add(new ExecutionPointer() { Id = Guid.NewGuid().ToString(), Active = true, StepId = 1 });
 

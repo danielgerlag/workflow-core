@@ -22,7 +22,7 @@ namespace WorkflowCore.Sample01
             host.RegisterWorkflow<HelloWorldWorkflow>();        
             host.Start();            
 
-            host.StartWorkflow("HelloWorld", 1, null);
+            host.StartWorkflow("HelloWorld");
             
             Console.ReadLine();
             host.Stop();

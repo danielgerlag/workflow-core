@@ -18,7 +18,7 @@ namespace WorkflowCore.Sample15
             host.RegisterWorkflow<HelloWorldWorkflow>();
             host.Start();
 
-            host.StartWorkflow("HelloWorld", 1, null);
+            host.StartWorkflow("HelloWorld", 1, null, null);
 
             Console.ReadLine();
             host.Stop();

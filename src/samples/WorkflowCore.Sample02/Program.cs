@@ -21,7 +21,7 @@ namespace WorkflowCore.Sample02
             host.RegisterWorkflow<SimpleDecisionWorkflow>();
             host.Start();
 
-            host.StartWorkflow("Simple Decision Workflow", 1, null);
+            host.StartWorkflow("Simple Decision Workflow");
 
             Console.ReadLine();
             host.Stop();
