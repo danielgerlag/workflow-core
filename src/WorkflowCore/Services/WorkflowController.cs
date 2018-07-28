@@ -18,7 +18,7 @@ namespace WorkflowCore.Services
         private readonly IQueueProvider _queueProvider;
         private readonly IExecutionPointerFactory _pointerFactory;
         private readonly ILogger _logger;
-        
+
         public WorkflowController(IPersistenceProvider persistenceStore, IDistributedLockProvider lockProvider, IWorkflowRegistry registry, IQueueProvider queueProvider, IExecutionPointerFactory pointerFactory, ILoggerFactory loggerFactory)
         {
             _persistenceStore = persistenceStore;
@@ -40,15 +40,15 @@ namespace WorkflowCore.Services
         }
 
         public Task<string> StartWorkflow<TData>(string workflowId, TData data = null, string reference=null) 
-            where TData : class
+            where TData : class, new()
         {
             return StartWorkflow<TData>(workflowId, null, data, reference);
         }
 
         public async Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference=null)
-            where TData : class
+            where TData : class, new()
         {
-            
+
             var def = _registry.GetDefinition(workflowId, version);
             if (def == null)
             {
@@ -69,7 +69,7 @@ namespace WorkflowCore.Services
 
             if ((def.DataType != null) && (data == null))
             {
-                wf.Data = TypeExtensions.GetConstructor(def.DataType, new Type[] { }).Invoke(null);
+                wf.Data = new TData();
             }
 
             wf.ExecutionPointers.Add(_pointerFactory.BuildGenesisPointer(def));
@@ -102,7 +102,7 @@ namespace WorkflowCore.Services
         {
             if (!await _lockProvider.AcquireLock(workflowId, new CancellationToken()))
                 return false;
-            
+
             try
             {
                 var wf = await _persistenceStore.GetWorkflowInstance(workflowId);
@@ -169,7 +169,7 @@ namespace WorkflowCore.Services
                 await _lockProvider.ReleaseLock(workflowId);
             }
         }
-        
+
         public void RegisterWorkflow<TWorkflow>()
             where TWorkflow : IWorkflow, new()
         {
