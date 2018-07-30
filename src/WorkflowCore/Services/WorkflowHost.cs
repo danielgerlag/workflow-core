@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+using WorkflowCore.EventBus.Abstractions;
+using WorkflowCore.EventHandlers;
+using WorkflowCore.Events;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
-using System.Reflection;
-using WorkflowCore.Exceptions;
 
 namespace WorkflowCore.Services
 {
@@ -18,6 +17,7 @@ namespace WorkflowCore.Services
 
         private readonly IEnumerable<IBackgroundTask> _backgroundTasks;
         private readonly IWorkflowController _workflowController;
+        private readonly IEventBus _eventBus;
 
         public event StepErrorEventHandler OnStepError;
 
@@ -29,7 +29,7 @@ namespace WorkflowCore.Services
         public IQueueProvider QueueProvider { get; private set; }
         public ILogger Logger { get; private set; }
 
-        public WorkflowHost(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, WorkflowOptions options, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IEnumerable<IBackgroundTask> backgroundTasks, IWorkflowController workflowController)
+        public WorkflowHost(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, WorkflowOptions options, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IEnumerable<IBackgroundTask> backgroundTasks, IWorkflowController workflowController, IEventBus eventBus)
         {
             PersistenceStore = persistenceStore;
             QueueProvider = queueProvider;
@@ -41,6 +41,7 @@ namespace WorkflowCore.Services
             _backgroundTasks = backgroundTasks;
             _workflowController = workflowController;
             persistenceStore.EnsureStoreExists();
+            _eventBus = eventBus;
         }
 
         public Task<string> StartWorkflow(string workflowId, object data = null, string reference=null)
@@ -77,6 +78,9 @@ namespace WorkflowCore.Services
             PersistenceStore.EnsureStoreExists();
             QueueProvider.Start().Wait();
             LockProvider.Start().Wait();
+
+            _eventBus.Subscribe<WorkflowStartedEvent, WorkflowStartedEventHandler>();
+            _eventBus.Subscribe<WorkflowCompleteEvent, WorkflowCompleteEventHandler>();
 
             Logger.LogInformation("Starting backgroud tasks");
 
@@ -137,6 +141,11 @@ namespace WorkflowCore.Services
         {
             if (!_shutdown)
                 Stop();
+        }
+
+        public Task WaitForWorkflow(string workflowId)
+        {
+            return _workflowController.WaitForWorkflow(workflowId);
         }
     }
 }

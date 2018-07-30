@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using WorkflowCore.EventBus.Abstractions;
 using WorkflowCore.Exceptions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -18,15 +19,19 @@ namespace WorkflowCore.Services
         private readonly IQueueProvider _queueProvider;
         private readonly IExecutionPointerFactory _pointerFactory;
         private readonly ILogger _logger;
+        private readonly IWorkflowWaitTaskStore _workflowWaitTaskStore;
+        private readonly IEventBus _eventBus;
 
-        public WorkflowController(IPersistenceProvider persistenceStore, IDistributedLockProvider lockProvider, IWorkflowRegistry registry, IQueueProvider queueProvider, IExecutionPointerFactory pointerFactory, ILoggerFactory loggerFactory)
+        public WorkflowController(IPersistenceProvider persistenceStore, IDistributedLockProvider lockProvider, IWorkflowRegistry registry, IQueueProvider queueProvider, IExecutionPointerFactory pointerFactory, ILoggerFactory loggerFactory, IWorkflowWaitTaskStore workflowWaitTaskStore, IEventBus eventBus)
         {
+            _eventBus = eventBus;
             _persistenceStore = persistenceStore;
             _lockProvider = lockProvider;
             _registry = registry;
             _queueProvider = queueProvider;
             _pointerFactory = pointerFactory;
             _logger = loggerFactory.CreateLogger<WorkflowController>();
+            _workflowWaitTaskStore = workflowWaitTaskStore;
         }
 
         public Task<string> StartWorkflow(string workflowId, object data = null, string reference=null)
@@ -39,7 +44,7 @@ namespace WorkflowCore.Services
             return StartWorkflow<object>(workflowId, version, data, reference);
         }
 
-        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null, string reference=null) 
+        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null, string reference=null)
             where TData : class, new()
         {
             return StartWorkflow<TData>(workflowId, null, data, reference);
@@ -75,6 +80,9 @@ namespace WorkflowCore.Services
             wf.ExecutionPointers.Add(_pointerFactory.BuildGenesisPointer(def));
 
             string id = await _persistenceStore.CreateNewWorkflow(wf);
+
+            _eventBus.WorkflowStarted(id);
+
             await _queueProvider.QueueWork(id, QueueType.Workflow);
             return id;
         }
@@ -183,6 +191,11 @@ namespace WorkflowCore.Services
         {
             TWorkflow wf = new TWorkflow();
             _registry.RegisterWorkflow<TData>(wf);
+        }
+
+        public Task WaitForWorkflow(string workflowId)
+        {
+            return _workflowWaitTaskStore.Wait(workflowId);
         }
     }
 }

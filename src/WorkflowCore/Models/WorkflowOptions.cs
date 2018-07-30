@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using WorkflowCore.EventBus.Abstractions;
 using WorkflowCore.Interface;
 using WorkflowCore.Services;
 
@@ -21,7 +22,7 @@ namespace WorkflowCore.Models
             Services = services;
             PollInterval = TimeSpan.FromSeconds(10);
             IdleTime = TimeSpan.FromMilliseconds(100);
-            ErrorRetryInterval = TimeSpan.FromSeconds(60);            
+            ErrorRetryInterval = TimeSpan.FromSeconds(60);
 
             QueueFactory = new Func<IServiceProvider, IQueueProvider>(sp => new SingleNodeQueueProvider());
             LockFactory = new Func<IServiceProvider, IDistributedLockProvider>(sp => new SingleNodeLockProvider());
@@ -53,5 +54,5 @@ namespace WorkflowCore.Models
             ErrorRetryInterval = interval;
         }
     }
-        
+
 }

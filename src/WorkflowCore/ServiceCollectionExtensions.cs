@@ -11,6 +11,9 @@ using Microsoft.Extensions.ObjectPool;
 using WorkflowCore.Primitives;
 using WorkflowCore.Services.BackgroundTasks;
 using WorkflowCore.Services.DefinitionStorage;
+using WorkflowCore.EventBus.Abstractions;
+using WorkflowCore.EventBus;
+using WorkflowCore.EventHandlers;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -28,6 +31,15 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IDistributedLockProvider>(options.LockFactory);
             services.AddSingleton<IWorkflowRegistry, WorkflowRegistry>();
             services.AddSingleton<WorkflowOptions>(options);
+
+            services.AddSingleton<IWorkflowWaitTaskStore, WorkflowWaitTaskStore>();
+            services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
+
+            services.AddTransient<WorkflowStartedEventHandler>();
+            services.AddTransient<WorkflowCompleteEventHandler>();
+
+
+            services.AddSingleton<IEventBus, SingleNodeEventBus>();
 
             services.AddTransient<IBackgroundTask, WorkflowConsumer>();
             services.AddTransient<IBackgroundTask, EventConsumer>();
