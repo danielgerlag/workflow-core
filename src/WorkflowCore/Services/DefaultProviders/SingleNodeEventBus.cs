@@ -30,16 +30,10 @@ namespace WorkflowCore.Services
             string eventName = _subsManager.GetEventKey(@event.GetType());
             IEnumerable<SubscriptionInfo> subscriptions = _subsManager.GetHandlersForEvent(eventName);
             foreach (var subscription in subscriptions)
-            {   
-                Type eventType = _subsManager.GetEventTypeByName(eventName);
-
+            {
                 IIntegrationEventHandler<TIntegrationEvent> handler = (IIntegrationEventHandler<TIntegrationEvent>)_serviceProvider.GetService(subscription.HandlerType);
 
                 await handler.Handle(@event);
-
-                //Type concreteType = typeof(IIntegrationEventHandler<>).MakeGenericType(eventType);
-
-                //await (Task)handler.GetType().GetMethod("Handle").Invoke(handler, new object[] { @event });
             }
         }
 
@@ -47,7 +41,6 @@ namespace WorkflowCore.Services
             where T : IntegrationEvent
             where TH : IIntegrationEventHandler<T>
         {
-            var eventName = _subsManager.GetEventKey<T>();
             _subsManager.AddSubscription<T, TH>();
 
             return Task.CompletedTask;
