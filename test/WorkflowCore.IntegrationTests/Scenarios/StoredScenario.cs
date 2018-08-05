@@ -11,7 +11,7 @@ using WorkflowCore.TestAssets.DataTypes;
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
     public class StoredScenario : JsonWorkflowTest
-    {   
+    {
         public StoredScenario()
         {
             Setup();
@@ -26,7 +26,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             var data = GetData<CounterBoard>(workflowId);
             GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
             UnhandledStepErrors.Count.Should().Be(0);
-            data.Counter1.Should().Be(1);
+            data.Counter1.Counter.Should().Be(1);
             data.Counter2.Should().Be(1);
             data.Counter3.Should().Be(1);
             data.Counter4.Should().Be(1);

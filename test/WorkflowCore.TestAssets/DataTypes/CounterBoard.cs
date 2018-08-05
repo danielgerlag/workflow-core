@@ -6,7 +6,7 @@ namespace WorkflowCore.TestAssets.DataTypes
 {
     public class CounterBoard
     {
-        public int Counter1 { get; set; }
+        public NestedCounterBoard Counter1 { get; set; } = new NestedCounterBoard();
         public int Counter2 { get; set; }
         public int Counter3 { get; set; }
         public int Counter4 { get; set; }
@@ -18,5 +18,10 @@ namespace WorkflowCore.TestAssets.DataTypes
         public bool Flag1 { get; set; }
         public bool Flag2 { get; set; }
         public bool Flag3 { get; set; }
+    }
+
+    public class NestedCounterBoard
+    {
+        public int Counter { get; set; }
     }
 }

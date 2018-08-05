@@ -7,8 +7,8 @@
     {
       "Id": "Step1",
       "StepType": "WorkflowCore.TestAssets.Steps.Counter, WorkflowCore.TestAssets",
-      "Inputs": { "Value": "data.Counter1" },
-      "Outputs": { "Counter1": "step.Value" },
+      "Inputs": { "A.Value": "data.Counter1.Counter" },
+      "Outputs": { "Counter1.Counter": "step.A.Value" },
       "NextStepId": "Step2"
     },
     {

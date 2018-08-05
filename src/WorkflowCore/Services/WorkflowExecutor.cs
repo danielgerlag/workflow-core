@@ -171,8 +171,30 @@ namespace WorkflowCore.Services
                         throw new ArgumentException();
                 }
 
-                step.BodyType.GetProperty(member.Member.Name).SetValue(body, resolvedValue);
+                SetProperty(member, body, resolvedValue);
             }
+        }
+
+        private void SetProperty(MemberExpression me, object target, object value)
+        {
+            List<string> propertyNames = new List<string>();
+
+            while (me != null)
+            {
+                propertyNames.Add(me.Member.Name);
+                me = me.Expression as MemberExpression;
+            }
+
+            propertyNames.Reverse();
+
+            for (int i = 0; i < propertyNames.Count - 1; i++)
+            {
+                PropertyInfo propertyToGet = target.GetType().GetProperty(propertyNames[i]);
+                target = propertyToGet.GetValue(target, null);
+            }
+
+            PropertyInfo propertyToSet = target.GetType().GetProperty(propertyNames.Last());
+            propertyToSet.SetValue(target, value, null);
         }
 
         private void ProcessOutputs(WorkflowInstance workflow, WorkflowStep step, IStepBody body)
@@ -182,9 +204,8 @@ namespace WorkflowCore.Services
                 var member = (output.Target.Body as MemberExpression);
                 var resolvedValue = output.Source.Compile().DynamicInvoke(body);
                 var data = workflow.Data;
-                var property = data.GetType().GetProperty(member.Member.Name);
-                var convertedValue = Convert.ChangeType(resolvedValue, property.PropertyType);
-                property.SetValue(data, convertedValue);
+
+                SetProperty(member, data, resolvedValue);
             }
         }
 
@@ -223,9 +244,9 @@ namespace WorkflowCore.Services
             {
                 foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count > 0))
                 {
-                    if (!workflow.ExecutionPointers.Where(x => x.Scope.Contains(pointer.Id)).All(x => x.EndTime.HasValue)) 
+                    if (!workflow.ExecutionPointers.Where(x => x.Scope.Contains(pointer.Id)).All(x => x.EndTime.HasValue))
                         continue;
-                    
+
                     if (!pointer.SleepUntil.HasValue)
                     {
                         workflow.NextExecution = 0;
@@ -237,12 +258,12 @@ namespace WorkflowCore.Services
                 }
             }
 
-            if ((workflow.NextExecution != null) || (workflow.ExecutionPointers.Any(x => x.EndTime == null))) 
+            if ((workflow.NextExecution != null) || (workflow.ExecutionPointers.Any(x => x.EndTime == null)))
                 return;
-            
+
             workflow.Status = WorkflowStatus.Complete;
             workflow.CompleteTime = _datetimeProvider.Now.ToUniversalTime();
         }
-        
+
     }
 }

@@ -23,7 +23,7 @@ namespace WorkflowCore.Services.DefinitionStorage
         {
             _registry = registry;
         }
-                        
+
         public WorkflowDefinition LoadDefinition(string json)
         {
             var source = JsonConvert.DeserializeObject<DefinitionSourceV1>(json);
@@ -118,7 +118,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                     targetStep.Outcomes.Add(new StepOutcome() { Tag = $"{nextStep.NextStepId}" });
 
                 result.Add(targetStep);
-                
+
                 i++;
             }
 
@@ -172,8 +172,13 @@ namespace WorkflowCore.Services.DefinitionStorage
             {
                 var dataParameter = Expression.Parameter(dataType, "data");
                 var contextParameter = Expression.Parameter(typeof(IStepExecutionContext), "context");
-                var sourceExpr = DynamicExpressionParser.ParseLambda(new [] { dataParameter, contextParameter }, typeof(object), input.Value);
-                var targetExpr = Expression.Property(Expression.Parameter(stepType), input.Key);
+                var sourceExpr = DynamicExpressionParser.ParseLambda(new[] { dataParameter, contextParameter }, typeof(object), input.Value);
+
+                Expression targetExpr = Expression.Parameter(stepType);
+                foreach (var member in input.Key.Split('.'))
+                {
+                    targetExpr = Expression.PropertyOrField(targetExpr, member);
+                }
 
                 step.Inputs.Add(new DataMapping()
                 {
@@ -189,7 +194,13 @@ namespace WorkflowCore.Services.DefinitionStorage
             {
                 var stepParameter = Expression.Parameter(stepType, "step");
                 var sourceExpr = DynamicExpressionParser.ParseLambda(new[] { stepParameter }, typeof(object), output.Value);
-                var targetExpr = Expression.Property(Expression.Parameter(dataType), output.Key);
+
+                Expression targetExpr = Expression.Parameter(dataType);
+                foreach (var member in output.Key.Split('.'))
+                {
+                    targetExpr = Expression.PropertyOrField(targetExpr, member);
+                }
+
 
                 step.Outputs.Add(new DataMapping()
                 {
