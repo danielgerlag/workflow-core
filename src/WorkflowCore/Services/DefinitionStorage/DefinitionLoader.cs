@@ -173,12 +173,15 @@ namespace WorkflowCore.Services.DefinitionStorage
                 var dataParameter = Expression.Parameter(dataType, "data");
                 var contextParameter = Expression.Parameter(typeof(IStepExecutionContext), "context");
                 var sourceExpr = DynamicExpressionParser.ParseLambda(new [] { dataParameter, contextParameter }, typeof(object), input.Value);
-                var targetExpr = Expression.Property(Expression.Parameter(stepType), input.Key);
 
-                step.Inputs.Add(new DataMapping()
+                var stepParameter = Expression.Parameter(stepType, "step");
+                var targetProperty = Expression.Property(stepParameter, input.Key);
+                var targetExpr = Expression.Lambda(targetProperty, stepParameter);
+
+                step.Inputs.Add(new DataMapping
                 {
                     Source = sourceExpr,
-                    Target = Expression.Lambda(targetExpr)
+                    Target = targetExpr
                 });
             }
         }
@@ -189,12 +192,28 @@ namespace WorkflowCore.Services.DefinitionStorage
             {
                 var stepParameter = Expression.Parameter(stepType, "step");
                 var sourceExpr = DynamicExpressionParser.ParseLambda(new[] { stepParameter }, typeof(object), output.Value);
-                var targetExpr = Expression.Property(Expression.Parameter(dataType), output.Key);
 
-                step.Outputs.Add(new DataMapping()
+                var dataParameter = Expression.Parameter(dataType, "data");
+                Expression targetProperty;
+                
+                // Check if our datatype has a matching property
+                var propertyInfo = dataType.GetProperty(output.Key);
+                if (propertyInfo != null)
+                {
+                    targetProperty = Expression.Property(dataParameter, propertyInfo);
+                }
+                else
+                {
+                    // If we did not find a matching property try to find a Indexer with string parameter
+                    propertyInfo = dataType.GetProperty("Item");
+                    targetProperty = Expression.Property(dataParameter, propertyInfo, Expression.Constant(output.Key));
+                }
+                var targetExpr = Expression.Lambda(targetProperty, dataParameter);
+
+                step.Outputs.Add(new DataMapping
                 {
                     Source = sourceExpr,
-                    Target = Expression.Lambda(targetExpr)
+                    Target = targetExpr
                 });
             }
         }

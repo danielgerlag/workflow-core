@@ -29,6 +29,17 @@ namespace WorkflowCore.Sample03
 
             host.StartWorkflow("PassingDataWorkflow", 1, initialData);
 
+            host.RegisterWorkflow<PassingDataWorkflow2, Dictionary<string, int>>();
+            //host.Start();
+
+            var initialData2 = new Dictionary<string, int>
+            {
+                ["Value1"] = 2,
+                ["Value2"] = 3
+            };
+
+            host.StartWorkflow("PassingDataWorkflow2", 1, initialData2);
+
             Console.ReadLine();
             host.Stop();
         }
