@@ -31,7 +31,6 @@ namespace WorkflowCore.Services.FluentBuilders
 
         public static LambdaExpression CreateSetter(LambdaExpression getterExpression)
         {
-            var thisParameter = getterExpression.Parameters.Single();
             var valueParameter = Expression.Parameter(getterExpression.ReturnType, "value");
             Expression assignment;
             if (getterExpression.Body is MethodCallExpression callExpression && callExpression.Method.Name == "get_Item")
@@ -48,7 +47,9 @@ namespace WorkflowCore.Services.FluentBuilders
             {
                 assignment = Expression.Assign(getterExpression.Body, valueParameter);
             }
-            return Expression.Lambda(assignment, thisParameter, valueParameter);
+
+            var parameters = getterExpression.Parameters.Concat(new[] {valueParameter}).ToArray();
+            return Expression.Lambda(assignment, parameters);
         }
     }
 }
