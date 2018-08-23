@@ -28,12 +28,12 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             public int Value1 { get; set; }
             public int Value2 { get; set; }
 
-            public Dictionary<string, int> _storage = new Dictionary<string, int>();
+            public Dictionary<string, int> Storage = new Dictionary<string, int>();
 
             public int this[string propertyName]
             {
-                get => _storage[propertyName];
-                set => _storage[propertyName] = value;
+                get => Storage[propertyName];
+                set => Storage[propertyName] = value;
             }
         }
 
