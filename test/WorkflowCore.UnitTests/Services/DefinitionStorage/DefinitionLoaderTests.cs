@@ -27,7 +27,7 @@ namespace WorkflowCore.UnitTests.Services.DefinitionStorage
         }
 
         [Fact(DisplayName = "Should register workflow")]
-        public void RegisterDefintion()
+        public void RegisterDefinition()
         {
             _subject.LoadDefinition("{\"Id\": \"HelloWorld\", \"Version\": 1, \"Steps\": []}");
 
@@ -37,7 +37,7 @@ namespace WorkflowCore.UnitTests.Services.DefinitionStorage
         }
 
         [Fact(DisplayName = "Should parse definition")]
-        public void ParseDefintion()
+        public void ParseDefinition()
         {
             _subject.LoadDefinition(TestAssets.Utils.GetTestDefinitionJson());
 
