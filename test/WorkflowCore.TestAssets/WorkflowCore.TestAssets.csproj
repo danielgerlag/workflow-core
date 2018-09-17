@@ -13,9 +13,13 @@
 
   <ItemGroup>
     <None Remove="stored-definition.json" />
+    <None Remove="stored-dynamic-definition.json" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="stored-dynamic-definition.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="stored-definition.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
