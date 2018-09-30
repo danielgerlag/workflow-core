@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
+using WorkflowCore.Services.FluentBuilders;
 
 namespace WorkflowCore.Services
 {
@@ -110,7 +111,7 @@ namespace WorkflowCore.Services
 
                         if (result.Proceed)
                         {
-                            ProcessOutputs(workflow, step, body);
+                            ProcessOutputs(workflow, step, body, context);
                         }
 
                         _executionResultProcessor.ProcessExecutionResult(workflow, def, pointer, step, result, wfResult);
@@ -175,16 +176,23 @@ namespace WorkflowCore.Services
             }
         }
 
-        private void ProcessOutputs(WorkflowInstance workflow, WorkflowStep step, IStepBody body)
+        private void ProcessOutputs(WorkflowInstance workflow, WorkflowStep step, IStepBody body, IStepExecutionContext context)
         {
             foreach (var output in step.Outputs)
             {
-                var member = (output.Target.Body as MemberExpression);
                 var resolvedValue = output.Source.Compile().DynamicInvoke(body);
                 var data = workflow.Data;
-                var property = data.GetType().GetProperty(member.Member.Name);
-                var convertedValue = Convert.ChangeType(resolvedValue, property.PropertyType);
-                property.SetValue(data, convertedValue);
+                var setter = ExpressionHelpers.CreateSetter(output.Target);
+                var convertedValue = Convert.ChangeType(resolvedValue, setter.Parameters.Last().Type);
+
+                if (setter.Parameters.Count == 2)
+                {
+                    setter.Compile().DynamicInvoke(data, convertedValue);
+                }
+                else
+                {
+                    setter.Compile().DynamicInvoke(data, context, convertedValue);
+                }
             }
         }
 

@@ -1,0 +1,70 @@
+﻿{
+  "Id": "Test",
+  "Version": 1,
+  "Description": "",
+  "DataType": "WorkflowCore.TestAssets.DataTypes.DynamicData, WorkflowCore.TestAssets",
+  "Steps": [
+    {
+      "Id": "Step1",
+      "StepType": "WorkflowCore.TestAssets.Steps.Counter, WorkflowCore.TestAssets",
+      "Inputs": { "Value": "data[\"Counter1\"]" },
+      "Outputs": { "Counter1": "step.Value" },
+      "NextStepId": "Step2"
+    },
+    {
+      "Id": "Step2",
+      "StepType": "WorkflowCore.TestAssets.Steps.Counter, WorkflowCore.TestAssets",
+      "Inputs": { "Value": "data[\"Counter2\"]" },
+      "Outputs": { "Counter2": "step.Value" },
+      "NextStepId": "Step3"
+    },
+    {
+      "Id": "Step3",
+      "StepType": "WorkflowCore.Primitives.If, WorkflowCore",
+      "NextStepId": "Step4",
+      "Inputs": { "Condition": "object.Equals(data[\"Flag1\"], true)" },
+      "Do": [
+        [
+          {
+            "Id": "Step3.1.1",
+            "StepType": "WorkflowCore.TestAssets.Steps.Counter, WorkflowCore.TestAssets",
+            "Inputs": { "Value": "data[\"Counter3\"]" },
+            "Outputs": { "Counter3": "step.Value" },
+            "NextStepId": "Step3.1.2"
+          },
+          {
+            "Id": "Step3.1.2",
+            "StepType": "WorkflowCore.TestAssets.Steps.Counter, WorkflowCore.TestAssets",
+            "Inputs": { "Value": "data[\"Counter4\"]" },
+            "Outputs": { "Counter4": "step.Value" }
+          }
+        ],
+        [
+          {
+            "Id": "Step3.2.1",
+            "StepType": "WorkflowCore.Primitives.WaitFor, WorkflowCore",
+            "NextStepId": "Step3.2.2",
+            "CancelCondition": "object.Equals(data[\"Flag2\"], true)",
+            "Inputs": {
+              "EventName": "\"Event1\"",
+              "EventKey": "\"Key1\"",
+              "EffectiveDate": "DateTime.Now"
+            }
+          },
+          {
+            "Id": "Step3.2.2",
+            "StepType": "WorkflowCore.TestAssets.Steps.Counter, WorkflowCore.TestAssets",
+            "Inputs": { "Value": "data[\"Counter5\"]" },
+            "Outputs": { "Counter5": "step.Value" }
+          }
+        ]
+      ]
+    },
+    {
+      "Id": "Step4",
+      "StepType": "WorkflowCore.TestAssets.Steps.Counter, WorkflowCore.TestAssets",
+      "Inputs": { "Value": "data[\"Counter6\"]" },
+      "Outputs": { "Counter6": "step.Value" }
+    }
+  ]
+}
