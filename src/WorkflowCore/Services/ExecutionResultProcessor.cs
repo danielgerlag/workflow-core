@@ -152,7 +152,11 @@ namespace WorkflowCore.Services
 
                 if (revert)
                 {
-                    var prevSiblings = workflow.ExecutionPointers.Where(x => pointer.Scope.SequenceEqual(x.Scope) && x.Id != pointer.Id && x.Status == PointerStatus.Complete).ToList();
+                    var prevSiblings = workflow.ExecutionPointers
+                        .Where(x => pointer.Scope.SequenceEqual(x.Scope) && x.Id != pointer.Id && x.Status == PointerStatus.Complete)
+                        .OrderByDescending(x => x.EndTime)
+                        .ToList();
+
                     foreach (var siblingPointer in prevSiblings)
                     {
                         var siblingStep = def.Steps.First(x => x.Id == siblingPointer.StepId);
