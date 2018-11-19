@@ -1,6 +1,6 @@
 # SQL Server Persistence provider for Workflow Core
 
-Provides support to persist workflows running on [Workflow Core](../../README.md) to a SQL Server database.
+Provides support to persist workflows running on [Workflow Core](../../../README.md) to a SQL Server database.
 
 ## Installing
 
