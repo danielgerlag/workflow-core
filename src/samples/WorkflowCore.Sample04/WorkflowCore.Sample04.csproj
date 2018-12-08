@@ -15,6 +15,7 @@
     <ProjectReference Include="..\..\providers\WorkflowCore.Persistence.PostgreSQL\WorkflowCore.Persistence.PostgreSQL.csproj" />
     <ProjectReference Include="..\..\providers\WorkflowCore.Persistence.Sqlite\WorkflowCore.Persistence.Sqlite.csproj" />
     <ProjectReference Include="..\..\providers\WorkflowCore.Persistence.SqlServer\WorkflowCore.Persistence.SqlServer.csproj" />
+    <ProjectReference Include="..\..\providers\WorkflowCore.Providers.AWS\WorkflowCore.Providers.AWS.csproj" />
     <ProjectReference Include="..\..\providers\WorkflowCore.Providers.Azure\WorkflowCore.Providers.Azure.csproj" />
     <ProjectReference Include="..\..\WorkflowCore\WorkflowCore.csproj" />
     <ProjectReference Include="..\..\providers\WorkflowCore.LockProviders.Redlock\WorkflowCore.LockProviders.Redlock.csproj" />
@@ -22,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.SQS" Version="3.3.3.39" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
