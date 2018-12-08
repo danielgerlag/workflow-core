@@ -12,13 +12,13 @@ namespace WorkflowCore.Providers.AWS.Services
 {
     public class SQSQueueProvider : IQueueProvider
     {
-        private const int WaitTime = 0;
+        private const int WaitTime = 5;
         private readonly ILogger _logger;
         private readonly IAmazonSQS _client;
         private string _workflowQueue;
         private string _eventQueue;
 
-        public bool IsDequeueBlocking => false;
+        public bool IsDequeueBlocking => true;
 
         public SQSQueueProvider(AWSCredentials credentials, AmazonSQSConfig config, ILoggerFactory logFactory)
         {
