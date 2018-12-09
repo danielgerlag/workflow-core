@@ -74,9 +74,7 @@ namespace WorkflowCore.Providers.Azure.Services
             await _eventQueue.CreateIfNotExistsAsync();
         }
 
-        public async Task Stop()
-        {
-        }
+        public Task Stop() => Task.CompletedTask;
 
         public void Dispose()
         {

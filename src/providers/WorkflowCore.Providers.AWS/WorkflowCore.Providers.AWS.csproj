@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Daniel Gerlag</Authors>
+    <Description>AWS providers for Workflow Core
+
+- Provides Queueing support  on Workflow Core</Description>
+    <PackageLicenseUrl>https://github.com/danielgerlag/workflow-core/blob/master/LICENSE.md</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/danielgerlag/workflow-core</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/danielgerlag/workflow-core.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Version>1.6.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.SQS" Version="3.3.3.39" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\WorkflowCore\WorkflowCore.csproj" />
+  </ItemGroup>
+
+</Project>
