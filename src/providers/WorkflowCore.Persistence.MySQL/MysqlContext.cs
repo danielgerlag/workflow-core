@@ -13,7 +13,6 @@ namespace WorkflowCore.Persistence.MySQL
         private readonly Action<MySqlDbContextOptionsBuilder> _mysqlOptionsAction;
 
         public MysqlContext(string connectionString, Action<MySqlDbContextOptionsBuilder> mysqlOptionsAction = null)
-            : base()
         {
             _connectionString = connectionString;
             _mysqlOptionsAction = mysqlOptionsAction;
