@@ -17,16 +17,19 @@ namespace WorkflowCore.UnitTests.Services
 {
     public class ExecutionResultProcessorFixture
     {
-        
         protected IExecutionResultProcessor Subject;
         protected IExecutionPointerFactory PointerFactory;
         protected IDateTimeProvider DateTimeProvider;
+        protected ILifeCycleEventHub EventHub;
+        protected ICollection<IWorkflowErrorHandler> ErrorHandlers;
         protected WorkflowOptions Options;
 
         public ExecutionResultProcessorFixture()
         {
             PointerFactory = A.Fake<IExecutionPointerFactory>();
             DateTimeProvider = A.Fake<IDateTimeProvider>();
+            EventHub = A.Fake<ILifeCycleEventHub>();
+            ErrorHandlers = new HashSet<IWorkflowErrorHandler>();
 
             Options = new WorkflowOptions(A.Fake<IServiceCollection>());
 
@@ -36,7 +39,7 @@ namespace WorkflowCore.UnitTests.Services
             var loggerFactory = new LoggerFactory();
             loggerFactory.AddConsole(LogLevel.Debug);            
 
-            Subject = new ExecutionResultProcessor(PointerFactory, DateTimeProvider, Options, loggerFactory);
+            Subject = new ExecutionResultProcessor(PointerFactory, DateTimeProvider, EventHub, ErrorHandlers, Options, loggerFactory);
         }
 
         [Fact(DisplayName = "Should advance workflow")]

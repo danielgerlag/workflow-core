@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using WorkflowCore.Exceptions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
+using WorkflowCore.Models.LifeCycleEvents;
 
 namespace WorkflowCore.Services
 {
@@ -17,15 +18,17 @@ namespace WorkflowCore.Services
         private readonly IWorkflowRegistry _registry;
         private readonly IQueueProvider _queueProvider;
         private readonly IExecutionPointerFactory _pointerFactory;
+        private readonly ILifeCycleEventHub _eventHub;
         private readonly ILogger _logger;
 
-        public WorkflowController(IPersistenceProvider persistenceStore, IDistributedLockProvider lockProvider, IWorkflowRegistry registry, IQueueProvider queueProvider, IExecutionPointerFactory pointerFactory, ILoggerFactory loggerFactory)
+        public WorkflowController(IPersistenceProvider persistenceStore, IDistributedLockProvider lockProvider, IWorkflowRegistry registry, IQueueProvider queueProvider, IExecutionPointerFactory pointerFactory, ILifeCycleEventHub eventHub, ILoggerFactory loggerFactory)
         {
             _persistenceStore = persistenceStore;
             _lockProvider = lockProvider;
             _registry = registry;
             _queueProvider = queueProvider;
             _pointerFactory = pointerFactory;
+            _eventHub = eventHub;
             _logger = loggerFactory.CreateLogger<WorkflowController>();
         }
 
@@ -76,6 +79,14 @@ namespace WorkflowCore.Services
 
             string id = await _persistenceStore.CreateNewWorkflow(wf);
             await _queueProvider.QueueWork(id, QueueType.Workflow);
+            await _eventHub.PublishNotification(new WorkflowStarted()
+            {
+                EventTimeUtc = DateTime.UtcNow,
+                Reference = reference,
+                WorkflowInsanceId = id,
+                WorkflowDefinitionId = def.Id,
+                Version = def.Version
+            });
             return id;
         }
 
@@ -110,6 +121,14 @@ namespace WorkflowCore.Services
                 {
                     wf.Status = WorkflowStatus.Suspended;
                     await _persistenceStore.PersistWorkflow(wf);
+                    await _eventHub.PublishNotification(new WorkflowSuspended()
+                    {
+                        EventTimeUtc = DateTime.UtcNow,
+                        Reference = wf.Reference,
+                        WorkflowInsanceId = wf.Id,
+                        WorkflowDefinitionId = wf.WorkflowDefinitionId,
+                        Version = wf.Version
+                    });
                     return true;
                 }
 
@@ -137,6 +156,14 @@ namespace WorkflowCore.Services
                     wf.Status = WorkflowStatus.Runnable;
                     await _persistenceStore.PersistWorkflow(wf);
                     requeue = true;
+                    await _eventHub.PublishNotification(new WorkflowResumed()
+                    {
+                        EventTimeUtc = DateTime.UtcNow,
+                        Reference = wf.Reference,
+                        WorkflowInsanceId = wf.Id,
+                        WorkflowDefinitionId = wf.WorkflowDefinitionId,
+                        Version = wf.Version
+                    });
                     return true;
                 }
 
@@ -162,6 +189,14 @@ namespace WorkflowCore.Services
                 var wf = await _persistenceStore.GetWorkflowInstance(workflowId);
                 wf.Status = WorkflowStatus.Terminated;
                 await _persistenceStore.PersistWorkflow(wf);
+                await _eventHub.PublishNotification(new WorkflowTerminated()
+                {
+                    EventTimeUtc = DateTime.UtcNow,
+                    Reference = wf.Reference,
+                    WorkflowInsanceId = wf.Id,
+                    WorkflowDefinitionId = wf.WorkflowDefinitionId,
+                    Version = wf.Version
+                });
                 return true;
             }
             finally

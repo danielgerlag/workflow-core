@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
+using WorkflowCore.Models.LifeCycleEvents;
 using WorkflowCore.Services.FluentBuilders;
 
 namespace WorkflowCore.Services
@@ -19,15 +20,17 @@ namespace WorkflowCore.Services
         protected readonly IDateTimeProvider _datetimeProvider;
         protected readonly ILogger _logger;
         private readonly IExecutionResultProcessor _executionResultProcessor;
+        private readonly ILifeCycleEventHub _eventHub;
         private readonly WorkflowOptions _options;
 
         private IWorkflowHost Host => _serviceProvider.GetService<IWorkflowHost>();
 
-        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, WorkflowOptions options, ILoggerFactory loggerFactory)
+        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, ILifeCycleEventHub eventHub, WorkflowOptions options, ILoggerFactory loggerFactory)
         {
             _serviceProvider = serviceProvider;
             _registry = registry;
             _datetimeProvider = datetimeProvider;
+            _eventHub = eventHub;
             _options = options;
             _logger = loggerFactory.CreateLogger<WorkflowExecutor>();
             _executionResultProcessor = executionResultProcessor;
@@ -127,8 +130,8 @@ namespace WorkflowCore.Services
                             ErrorTime = _datetimeProvider.Now.ToUniversalTime(),
                             Message = ex.Message
                         });
-
-                        _executionResultProcessor.HandleStepException(workflow, def, pointer, step);
+                        
+                        _executionResultProcessor.HandleStepException(workflow, def, pointer, step, ex);
                         Host.ReportStepError(workflow, step, ex);
                     }
                 }
@@ -250,6 +253,14 @@ namespace WorkflowCore.Services
             
             workflow.Status = WorkflowStatus.Complete;
             workflow.CompleteTime = _datetimeProvider.Now.ToUniversalTime();
+            _eventHub.PublishNotification(new WorkflowCompleted()
+            {
+                EventTimeUtc = _datetimeProvider.Now,
+                Reference = workflow.Reference,
+                WorkflowInsanceId = workflow.Id,
+                WorkflowDefinitionId = workflow.WorkflowDefinitionId,
+                Version = workflow.Version
+            });
         }
         
     }
