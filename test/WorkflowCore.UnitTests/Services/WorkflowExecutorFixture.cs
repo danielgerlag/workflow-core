@@ -271,6 +271,58 @@ namespace WorkflowCore.UnitTests.Services
             data["Value1"].Should().Be(7);
         }
 
+        /// <summary>
+        /// This test verifies that storing an object that does not implement IConvertable, in a step variable of type object works.
+        /// The problem is that calling for example Convert.ChangeType(new DataClass(), typeof(object)) throws, even though the convertion should be trivial.
+        /// </summary>
+        [Fact(DisplayName = "Should map object outputs, without calling Convert.ChangeType")]
+        public void should_map_outputs_object()
+        {
+            //arrange
+            Expression<Func<IStepWithProperties, object>> p1 = x => x.Property4;
+            Expression<Func<DataClass, IStepExecutionContext, object>> v1 = (x, context) => x.Value4;
+
+            var step1Body = A.Fake<IStepWithProperties>();
+            A.CallTo(() => step1Body.Property4).Returns(new DataClass());
+            A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
+            WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>(), new List<DataMapping>()
+                {
+                    new DataMapping()
+                    {
+                        Source = p1,
+                        Target = v1
+                    }
+                }
+            );
+
+            Given1StepWorkflow(step1, "Workflow", 1);
+
+            var data = new DataClass()
+            {
+                Value4 = 4
+            };
+
+            var instance = new WorkflowInstance
+            {
+                WorkflowDefinitionId = "Workflow",
+                Version = 1,
+                Status = WorkflowStatus.Runnable,
+                NextExecution = 0,
+                Id = "001",
+                Data = data,
+                ExecutionPointers = new List<ExecutionPointer>()
+                {
+                    new ExecutionPointer() { Active = true, StepId = 0 }
+                }
+            };
+
+            //act
+            Subject.Execute(instance);
+
+            //assert
+            data.Value4.Should().BeOfType<DataClass>();
+        }
+
         [Fact(DisplayName = "Should handle step exception")]
         public void should_handle_step_exception()
         {
@@ -372,7 +424,8 @@ namespace WorkflowCore.UnitTests.Services
         {
             int Property1 { get; set; }
             int Property2 { get; set; }
-            int Property3 { get; set; }            
+            int Property3 { get; set; }
+            DataClass Property4 { get; set; }
         }
 
         public class DataClass
@@ -380,6 +433,7 @@ namespace WorkflowCore.UnitTests.Services
             public int Value1 { get; set; }
             public int Value2 { get; set; }
             public int Value3 { get; set; }
+            public object Value4 { get; set; }
         }
 
         public class DynamicDataClass
