@@ -113,7 +113,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample17", "sr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.QueueProviders.SqlServer", "src\providers\WorkflowCore.QueueProviders.SqlServer\WorkflowCore.QueueProviders.SqlServer.csproj", "{7EDD9353-F5C2-414C-AE51-4B0F1C5E105A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Providers.AWS", "src\providers\WorkflowCore.Providers.AWS\WorkflowCore.Providers.AWS.csproj", "{5E82A137-0954-46A1-8C46-13C00F0E4842}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Providers.AWS", "src\providers\WorkflowCore.Providers.AWS\WorkflowCore.Providers.AWS.csproj", "{5E82A137-0954-46A1-8C46-13C00F0E4842}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Persistence.MySQL", "src\providers\WorkflowCore.Persistence.MySQL\WorkflowCore.Persistence.MySQL.csproj", "{453E260D-DBDC-4DDC-BC9C-CA500CED7897}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Tests.MySQL", "test\WorkflowCore.Tests.MySQL\WorkflowCore.Tests.MySQL.csproj", "{DF7F7ECA-1771-40C9-9CD0-AFEFC44E60DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -289,6 +293,14 @@ Global
 		{5E82A137-0954-46A1-8C46-13C00F0E4842}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5E82A137-0954-46A1-8C46-13C00F0E4842}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5E82A137-0954-46A1-8C46-13C00F0E4842}.Release|Any CPU.Build.0 = Release|Any CPU
+		{453E260D-DBDC-4DDC-BC9C-CA500CED7897}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{453E260D-DBDC-4DDC-BC9C-CA500CED7897}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{453E260D-DBDC-4DDC-BC9C-CA500CED7897}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{453E260D-DBDC-4DDC-BC9C-CA500CED7897}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF7F7ECA-1771-40C9-9CD0-AFEFC44E60DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF7F7ECA-1771-40C9-9CD0-AFEFC44E60DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF7F7ECA-1771-40C9-9CD0-AFEFC44E60DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF7F7ECA-1771-40C9-9CD0-AFEFC44E60DE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -339,6 +351,8 @@ Global
 		{42F475BC-95F4-42E1-8CCD-7B9C27487E33} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
 		{7EDD9353-F5C2-414C-AE51-4B0F1C5E105A} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
 		{5E82A137-0954-46A1-8C46-13C00F0E4842} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
+		{453E260D-DBDC-4DDC-BC9C-CA500CED7897} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
+		{DF7F7ECA-1771-40C9-9CD0-AFEFC44E60DE} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DC0FA8D3-6449-4FDA-BB46-ECF58FAD23B4}
