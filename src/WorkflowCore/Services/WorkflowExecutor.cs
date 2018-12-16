@@ -183,7 +183,15 @@ namespace WorkflowCore.Services
                 var resolvedValue = output.Source.Compile().DynamicInvoke(body);
                 var data = workflow.Data;
                 var setter = ExpressionHelpers.CreateSetter(output.Target);
-                var convertedValue = Convert.ChangeType(resolvedValue, setter.Parameters.Last().Type);
+                var targetType = setter.Parameters.Last().Type;
+
+                var convertedValue = resolvedValue;
+                // We need to make sure the resolvedValue is of the correct type.
+                // However if the targetType is object we don't need to do anything and in some cases Convert.ChangeType will throw.
+                if (targetType != typeof(object))
+                {
+                    convertedValue = Convert.ChangeType(resolvedValue, targetType);
+                }
 
                 if (setter.Parameters.Count == 2)
                 {
