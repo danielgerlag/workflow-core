@@ -30,7 +30,7 @@ namespace WorkflowCore.Services
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(ex, $"Error on event subscriber: {ex.Message}");
+                        _logger.LogWarning(default(EventId), ex, $"Error on event subscriber: {ex.Message}");
                     }
                 }
             });
