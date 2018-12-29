@@ -20,7 +20,7 @@ namespace WorkflowCore.UnitTests.Services
         protected IExecutionResultProcessor Subject;
         protected IExecutionPointerFactory PointerFactory;
         protected IDateTimeProvider DateTimeProvider;
-        protected ILifeCycleEventHub EventHub;
+        protected ILifeCycleEventPublisher EventHub;
         protected ICollection<IWorkflowErrorHandler> ErrorHandlers;
         protected WorkflowOptions Options;
 
@@ -28,7 +28,7 @@ namespace WorkflowCore.UnitTests.Services
         {
             PointerFactory = A.Fake<IExecutionPointerFactory>();
             DateTimeProvider = A.Fake<IDateTimeProvider>();
-            EventHub = A.Fake<ILifeCycleEventHub>();
+            EventHub = A.Fake<ILifeCycleEventPublisher>();
             ErrorHandlers = new HashSet<IWorkflowErrorHandler>();
 
             Options = new WorkflowOptions(A.Fake<IServiceCollection>());

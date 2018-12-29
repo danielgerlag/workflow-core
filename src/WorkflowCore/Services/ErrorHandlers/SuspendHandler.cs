@@ -9,20 +9,20 @@ namespace WorkflowCore.Services.ErrorHandlers
 {
     public class SuspendHandler : IWorkflowErrorHandler
     {
-        private readonly ILifeCycleEventHub _eventHub;
+        private readonly ILifeCycleEventPublisher _eventPublisher;
         private readonly IDateTimeProvider _datetimeProvider;
         public WorkflowErrorHandling Type => WorkflowErrorHandling.Suspend;
 
-        public SuspendHandler(ILifeCycleEventHub eventHub, IDateTimeProvider datetimeProvider)
+        public SuspendHandler(ILifeCycleEventPublisher eventPublisher, IDateTimeProvider datetimeProvider)
         {
-            _eventHub = eventHub;
+            _eventPublisher = eventPublisher;
             _datetimeProvider = datetimeProvider;
         }
 
         public void Handle(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, Exception exception, Queue<ExecutionPointer> bubbleUpQueue)
         {
             workflow.Status = WorkflowStatus.Suspended;
-            _eventHub.PublishNotification(new WorkflowSuspended()
+            _eventPublisher.PublishNotification(new WorkflowSuspended()
             {
                 EventTimeUtc = _datetimeProvider.Now,
                 Reference = workflow.Reference,

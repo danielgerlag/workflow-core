@@ -13,15 +13,15 @@ namespace WorkflowCore.Services
         private readonly IExecutionPointerFactory _pointerFactory;
         private readonly IDateTimeProvider _datetimeProvider;
         private readonly ILogger _logger;
-        private readonly ILifeCycleEventHub _eventHub;
+        private readonly ILifeCycleEventPublisher _eventPublisher;
         private readonly IEnumerable<IWorkflowErrorHandler> _errorHandlers;
         private readonly WorkflowOptions _options;
 
-        public ExecutionResultProcessor(IExecutionPointerFactory pointerFactory, IDateTimeProvider datetimeProvider, ILifeCycleEventHub eventHub, IEnumerable<IWorkflowErrorHandler> errorHandlers, WorkflowOptions options, ILoggerFactory loggerFactory)
+        public ExecutionResultProcessor(IExecutionPointerFactory pointerFactory, IDateTimeProvider datetimeProvider, ILifeCycleEventPublisher eventPublisher, IEnumerable<IWorkflowErrorHandler> errorHandlers, WorkflowOptions options, ILoggerFactory loggerFactory)
         {
             _pointerFactory = pointerFactory;
             _datetimeProvider = datetimeProvider;
-            _eventHub = eventHub;
+            _eventPublisher = eventPublisher;
             _errorHandlers = errorHandlers;
             _options = options;
             _logger = loggerFactory.CreateLogger<ExecutionResultProcessor>();
@@ -79,7 +79,7 @@ namespace WorkflowCore.Services
 
         public void HandleStepException(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, Exception exception)
         {
-            _eventHub.PublishNotification(new WorkflowError()
+            _eventPublisher.PublishNotification(new WorkflowError()
             {
                 EventTimeUtc = _datetimeProvider.Now,
                 Reference = workflow.Reference,

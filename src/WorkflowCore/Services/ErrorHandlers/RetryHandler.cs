@@ -9,14 +9,12 @@ namespace WorkflowCore.Services.ErrorHandlers
 {
     public class RetryHandler : IWorkflowErrorHandler
     {
-        private readonly ILifeCycleEventHub _eventHub;
         private readonly IDateTimeProvider _datetimeProvider;
         private readonly WorkflowOptions _options;
         public WorkflowErrorHandling Type => WorkflowErrorHandling.Retry;
 
-        public RetryHandler(ILifeCycleEventHub eventHub, IDateTimeProvider datetimeProvider, WorkflowOptions options)
+        public RetryHandler(IDateTimeProvider datetimeProvider, WorkflowOptions options)
         {
-            _eventHub = eventHub;
             _datetimeProvider = datetimeProvider;
             _options = options;
         }

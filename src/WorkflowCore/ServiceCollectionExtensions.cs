@@ -30,10 +30,12 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<ILifeCycleEventHub>(options.EventHubFactory);
             services.AddSingleton<IWorkflowRegistry, WorkflowRegistry>();
             services.AddSingleton<WorkflowOptions>(options);
+            services.AddSingleton<ILifeCycleEventPublisher, LifeCycleEventPublisher>();
 
             services.AddTransient<IBackgroundTask, WorkflowConsumer>();
             services.AddTransient<IBackgroundTask, EventConsumer>();
             services.AddTransient<IBackgroundTask, RunnablePoller>();
+            services.AddTransient<IBackgroundTask>(sp => sp.GetService<ILifeCycleEventPublisher>());
 
             services.AddTransient<IWorkflowErrorHandler, CompensateHandler>();
             services.AddTransient<IWorkflowErrorHandler, RetryHandler>();

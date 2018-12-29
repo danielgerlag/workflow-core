@@ -20,17 +20,17 @@ namespace WorkflowCore.Services
         protected readonly IDateTimeProvider _datetimeProvider;
         protected readonly ILogger _logger;
         private readonly IExecutionResultProcessor _executionResultProcessor;
-        private readonly ILifeCycleEventHub _eventHub;
+        private readonly ILifeCycleEventPublisher _publisher;
         private readonly WorkflowOptions _options;
 
         private IWorkflowHost Host => _serviceProvider.GetService<IWorkflowHost>();
 
-        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, ILifeCycleEventHub eventHub, WorkflowOptions options, ILoggerFactory loggerFactory)
+        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, ILifeCycleEventPublisher publisher, WorkflowOptions options, ILoggerFactory loggerFactory)
         {
             _serviceProvider = serviceProvider;
             _registry = registry;
             _datetimeProvider = datetimeProvider;
-            _eventHub = eventHub;
+            _publisher = publisher;
             _options = options;
             _logger = loggerFactory.CreateLogger<WorkflowExecutor>();
             _executionResultProcessor = executionResultProcessor;
@@ -253,7 +253,7 @@ namespace WorkflowCore.Services
             
             workflow.Status = WorkflowStatus.Complete;
             workflow.CompleteTime = _datetimeProvider.Now.ToUniversalTime();
-            _eventHub.PublishNotification(new WorkflowCompleted()
+            _publisher.PublishNotification(new WorkflowCompleted()
             {
                 EventTimeUtc = _datetimeProvider.Now,
                 Reference = workflow.Reference,

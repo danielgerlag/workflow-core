@@ -22,7 +22,7 @@ namespace WorkflowCore.UnitTests.Services
         protected IPersistenceProvider PersistenceProvider;
         protected IWorkflowRegistry Registry;
         protected IExecutionResultProcessor ResultProcesser;
-        protected ILifeCycleEventHub EventHub;
+        protected ILifeCycleEventPublisher EventHub;
         protected IServiceProvider ServiceProvider;
         protected IDateTimeProvider DateTimeProvider;
         protected WorkflowOptions Options;
@@ -34,7 +34,7 @@ namespace WorkflowCore.UnitTests.Services
             ServiceProvider = A.Fake<IServiceProvider>();
             Registry = A.Fake<IWorkflowRegistry>();
             ResultProcesser = A.Fake<IExecutionResultProcessor>();
-            EventHub = A.Fake<ILifeCycleEventHub>();
+            EventHub = A.Fake<ILifeCycleEventPublisher>();
             DateTimeProvider = A.Fake<IDateTimeProvider>();
 
             Options = new WorkflowOptions(A.Fake<IServiceCollection>());
