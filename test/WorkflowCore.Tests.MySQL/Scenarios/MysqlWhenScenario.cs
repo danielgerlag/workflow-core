@@ -13,7 +13,7 @@ namespace WorkflowCore.Tests.MySQL.Scenarios
     {        
         protected override void ConfigureServices(IServiceCollection services)
         {
-            services.AddWorkflow(x => x.UseMySQL(MysqlDockerSetup.ScenarioConnectionString, true));
+            services.AddWorkflow(x => x.UseMySQL(MysqlDockerSetup.ScenarioConnectionString, true, true));
         }
     }
 }

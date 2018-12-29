@@ -15,5 +15,5 @@ PM> Install-Package WorkflowCore.Persistence.MySQL -Pre
 Use the .UseMySQL extension method when building your service provider.
 
 ```C#
-services.AddWorkflow(x => x.UseMySQL(@"Server=127.0.0.1;Database=workflow;User=root;Password=password;", true));
+services.AddWorkflow(x => x.UseMySQL(@"Server=127.0.0.1;Database=workflow;User=root;Password=password;", true, true));
 ```

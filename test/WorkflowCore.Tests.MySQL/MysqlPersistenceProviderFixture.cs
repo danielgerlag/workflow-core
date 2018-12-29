@@ -16,7 +16,7 @@ namespace WorkflowCore.Tests.MySQL
         public MysqlPersistenceProviderFixture(MysqlDockerSetup dockerSetup, ITestOutputHelper output)
         {
             output.WriteLine($"Connecting on {MysqlDockerSetup.ConnectionString}");
-            _subject = new EntityFrameworkPersistenceProvider(new MysqlContextFactory(MysqlDockerSetup.ConnectionString), true, false);
+            _subject = new EntityFrameworkPersistenceProvider(new MysqlContextFactory(MysqlDockerSetup.ConnectionString), true, true);
             _subject.EnsureStoreExists();
         }
     }
