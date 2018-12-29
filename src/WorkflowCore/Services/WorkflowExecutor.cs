@@ -54,8 +54,7 @@ namespace WorkflowCore.Services
                 if (step != null)
                 {
                     try
-                    {
-                        pointer.Status = PointerStatus.Running;
+                    {                        
                         switch (step.InitForExecution(wfResult, def, workflow, pointer))
                         {
                             case ExecutionPipelineDirective.Defer:
@@ -64,6 +63,21 @@ namespace WorkflowCore.Services
                                 workflow.Status = WorkflowStatus.Complete;
                                 workflow.CompleteTime = _datetimeProvider.Now.ToUniversalTime();
                                 continue;
+                        }
+
+                        if (pointer.Status != PointerStatus.Running)
+                        {
+                            pointer.Status = PointerStatus.Running;
+                            _publisher.PublishNotification(new StepStarted()
+                            {
+                                EventTimeUtc = _datetimeProvider.Now,
+                                Reference = workflow.Reference,
+                                ExecutionPointerId = pointer.Id,
+                                StepId = step.Id,
+                                WorkflowInsanceId = workflow.Id,
+                                WorkflowDefinitionId = workflow.WorkflowDefinitionId,
+                                Version = workflow.Version
+                            });
                         }
 
                         if (!pointer.StartTime.HasValue)

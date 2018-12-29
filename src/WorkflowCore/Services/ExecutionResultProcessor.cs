@@ -64,6 +64,17 @@ namespace WorkflowCore.Services
                 {                    
                     workflow.ExecutionPointers.Add(_pointerFactory.BuildNextPointer(def, pointer, outcomeTarget));
                 }
+
+                _eventPublisher.PublishNotification(new StepCompleted()
+                {
+                    EventTimeUtc = _datetimeProvider.Now,
+                    Reference = workflow.Reference,
+                    ExecutionPointerId = pointer.Id,
+                    StepId = step.Id,
+                    WorkflowInsanceId = workflow.Id,
+                    WorkflowDefinitionId = workflow.WorkflowDefinitionId,
+                    Version = workflow.Version
+                });
             }
             else
             {
