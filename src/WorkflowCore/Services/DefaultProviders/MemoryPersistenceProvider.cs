@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,11 +15,26 @@ namespace WorkflowCore.Services
     /// </summary>
     public class MemoryPersistenceProvider : IPersistenceProvider
     {
+        private static readonly ConcurrentDictionary<string, Tuple<List<WorkflowInstance>, List<EventSubscription>, List<Event>, List<ExecutionError>>> Environments = 
+                            new ConcurrentDictionary<string, Tuple<List<WorkflowInstance>, List<EventSubscription>, List<Event>, List<ExecutionError>>>();
+        private readonly List<WorkflowInstance> _instances;
+        private readonly List<EventSubscription> _subscriptions;
+        private readonly List<Event> _events;
+        private readonly List<ExecutionError> _errors;
 
-        private static List<WorkflowInstance> _instances = new List<WorkflowInstance>();
-        private static List<EventSubscription> _subscriptions = new List<EventSubscription>();
-        private static List<Event> _events = new List<Event>();
-        private static List<ExecutionError> _errors = new List<ExecutionError>();
+        public MemoryPersistenceProvider()
+            : this("")
+        {
+        }
+
+        public MemoryPersistenceProvider(string environmentKey)
+        {
+            var environment = Environments.GetOrAdd(environmentKey, _ => Tuple.Create(new List<WorkflowInstance>(), new List<EventSubscription>(), new List<Event>(), new List<ExecutionError>()));
+            _instances = environment.Item1;
+            _subscriptions = environment.Item2;
+            _events = environment.Item3;
+            _errors = environment.Item4;
+        }
 
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
         {
