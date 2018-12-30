@@ -93,6 +93,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReleaseNotes", "ReleaseNote
 		ReleaseNotes\1.6.0.md = ReleaseNotes\1.6.0.md
 		ReleaseNotes\1.6.6.md = ReleaseNotes\1.6.6.md
 		ReleaseNotes\1.6.8.md = ReleaseNotes\1.6.8.md
+		ReleaseNotes\1.6.9.md = ReleaseNotes\1.6.9.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample14", "src\samples\WorkflowCore.Sample14\WorkflowCore.Sample14.csproj", "{6BC66637-B42A-4334-ADFB-DBEC9F29D293}"
@@ -113,7 +114,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample17", "sr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.QueueProviders.SqlServer", "src\providers\WorkflowCore.QueueProviders.SqlServer\WorkflowCore.QueueProviders.SqlServer.csproj", "{7EDD9353-F5C2-414C-AE51-4B0F1C5E105A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Providers.AWS", "src\providers\WorkflowCore.Providers.AWS\WorkflowCore.Providers.AWS.csproj", "{5E82A137-0954-46A1-8C46-13C00F0E4842}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Providers.AWS", "src\providers\WorkflowCore.Providers.AWS\WorkflowCore.Providers.AWS.csproj", "{5E82A137-0954-46A1-8C46-13C00F0E4842}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
