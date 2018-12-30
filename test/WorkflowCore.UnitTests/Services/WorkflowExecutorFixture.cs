@@ -22,6 +22,7 @@ namespace WorkflowCore.UnitTests.Services
         protected IPersistenceProvider PersistenceProvider;
         protected IWorkflowRegistry Registry;
         protected IExecutionResultProcessor ResultProcesser;
+        protected ILifeCycleEventPublisher EventHub;
         protected IServiceProvider ServiceProvider;
         protected IDateTimeProvider DateTimeProvider;
         protected WorkflowOptions Options;
@@ -33,6 +34,7 @@ namespace WorkflowCore.UnitTests.Services
             ServiceProvider = A.Fake<IServiceProvider>();
             Registry = A.Fake<IWorkflowRegistry>();
             ResultProcesser = A.Fake<IExecutionResultProcessor>();
+            EventHub = A.Fake<ILifeCycleEventPublisher>();
             DateTimeProvider = A.Fake<IDateTimeProvider>();
 
             Options = new WorkflowOptions(A.Fake<IServiceCollection>());
@@ -43,7 +45,7 @@ namespace WorkflowCore.UnitTests.Services
             var loggerFactory = new LoggerFactory();
             loggerFactory.AddConsole(LogLevel.Debug);            
 
-            Subject = new WorkflowExecutor(Registry, ServiceProvider, DateTimeProvider, ResultProcesser, Options, loggerFactory);
+            Subject = new WorkflowExecutor(Registry, ServiceProvider, DateTimeProvider, ResultProcesser, EventHub, Options, loggerFactory);
         }
 
         [Fact(DisplayName = "Should execute active step")]
@@ -350,7 +352,7 @@ namespace WorkflowCore.UnitTests.Services
 
             //assert
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).MustHaveHappened();
-            A.CallTo(() => ResultProcesser.HandleStepException(instance, A<WorkflowDefinition>.Ignored, A<ExecutionPointer>.Ignored, step1)).MustHaveHappened();
+            A.CallTo(() => ResultProcesser.HandleStepException(instance, A<WorkflowDefinition>.Ignored, A<ExecutionPointer>.Ignored, step1, A<Exception>.Ignored)).MustHaveHappened();
             A.CallTo(() => ResultProcesser.ProcessExecutionResult(instance, A<WorkflowDefinition>.Ignored, A<ExecutionPointer>.Ignored, step1, A<ExecutionResult>.Ignored, A<WorkflowExecutorResult>.Ignored)).MustNotHaveHappened();            
         }
 
