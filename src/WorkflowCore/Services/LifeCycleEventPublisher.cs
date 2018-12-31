@@ -14,7 +14,7 @@ namespace WorkflowCore.Services
         private readonly ILifeCycleEventHub _eventHub;
         private readonly ILogger _logger;
         private readonly BlockingCollection<LifeCycleEvent> _outbox;
-        protected Task DispatchTask;
+        private Task _dispatchTask;
 
         public LifeCycleEventPublisher(ILifeCycleEventHub eventHub, ILoggerFactory loggerFactory)
         {
@@ -33,21 +33,20 @@ namespace WorkflowCore.Services
 
         public void Start()
         {
-            if (DispatchTask != null)
+            if (_dispatchTask != null)
             {
                 throw new InvalidOperationException();
             }
 
-            DispatchTask = new Task(Execute);
-            DispatchTask.Start();
+            _dispatchTask = new Task(Execute);
+            _dispatchTask.Start();
         }
 
         public void Stop()
         {
             _outbox.CompleteAdding();
-
-            DispatchTask.Wait();
-            DispatchTask = null;
+            _dispatchTask.Wait();
+            _dispatchTask = null;
         }
 
         public void Dispose()
@@ -57,16 +56,16 @@ namespace WorkflowCore.Services
 
         private async void Execute()
         {
-            try
+            foreach (var evt in _outbox.GetConsumingEnumerable())
             {
-                foreach (var evt in _outbox.GetConsumingEnumerable())
+                try
                 {
                     await _eventHub.PublishNotification(evt);
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(default(EventId), ex, ex.Message);
+                catch (Exception ex)
+                {
+                    _logger.LogError(default(EventId), ex, ex.Message);
+                }
             }
         }
     }
