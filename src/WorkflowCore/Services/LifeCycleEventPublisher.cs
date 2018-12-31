@@ -9,24 +9,26 @@ using WorkflowCore.Models.LifeCycleEvents;
 
 namespace WorkflowCore.Services
 {
-    public class LifeCycleEventPublisher : ILifeCycleEventPublisher
+    public class LifeCycleEventPublisher : ILifeCycleEventPublisher, IDisposable
     {
         private readonly ILifeCycleEventHub _eventHub;
         private readonly ILogger _logger;
-        private readonly ConcurrentQueue<LifeCycleEvent> _outbox;
+        private readonly BlockingCollection<LifeCycleEvent> _outbox;
         protected Task DispatchTask;
-        private CancellationTokenSource _cancellationTokenSource;
 
         public LifeCycleEventPublisher(ILifeCycleEventHub eventHub, ILoggerFactory loggerFactory)
         {
             _eventHub = eventHub;
-            _outbox = new ConcurrentQueue<LifeCycleEvent>();
+            _outbox = new BlockingCollection<LifeCycleEvent>();
             _logger = loggerFactory.CreateLogger(GetType());
         }
 
         public void PublishNotification(LifeCycleEvent evt)
         {
-            _outbox.Enqueue(evt);
+            if (_outbox.IsAddingCompleted)
+                return;
+
+            _outbox.Add(evt);
         }
 
         public void Start()
@@ -36,44 +38,35 @@ namespace WorkflowCore.Services
                 throw new InvalidOperationException();
             }
 
-            _cancellationTokenSource = new CancellationTokenSource();
-
             DispatchTask = new Task(Execute);
             DispatchTask.Start();
         }
 
         public void Stop()
         {
-            _cancellationTokenSource.Cancel();
+            _outbox.CompleteAdding();
+
             DispatchTask.Wait();
             DispatchTask = null;
         }
 
+        public void Dispose()
+        {
+            _outbox.Dispose();
+        }
+
         private async void Execute()
         {
-            var cancelToken = _cancellationTokenSource.Token;
-            
-            while (!cancelToken.IsCancellationRequested)
+            try
             {
-                try
+                foreach (var evt in _outbox.GetConsumingEnumerable())
                 {
-                    if (!SpinWait.SpinUntil(() => _outbox.Count > 0, 1000))
-                    {
-                        continue;
-                    }
-
-                    if (_outbox.TryDequeue(out LifeCycleEvent evt))
-                    {
-                        await _eventHub.PublishNotification(evt);
-                    }
+                    await _eventHub.PublishNotification(evt);
                 }
-                catch (OperationCanceledException)
-                {
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex.Message);
-                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(default(EventId), ex, ex.Message);
             }
         }
     }
