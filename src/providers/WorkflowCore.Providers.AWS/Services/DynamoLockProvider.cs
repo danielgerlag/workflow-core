@@ -196,7 +196,7 @@ namespace WorkflowCore.Providers.AWS.Services
                 try
                 {
                     await Task.Delay(1000);
-                    var poll = await _client.DescribeTableAsync(_tableName, _cancellationTokenSource.Token);
+                    var poll = await _client.DescribeTableAsync(_tableName);
                     created = (poll.Table.TableStatus == TableStatus.ACTIVE);
                     i++;
                 }
