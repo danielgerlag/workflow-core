@@ -44,10 +44,10 @@ namespace WorkflowCore.Users.Primitives
 
             if (!(context.ExecutionPointer.EventData is UserAction))
                 throw new ArgumentException();
-            
-            var action = ((UserAction) context.ExecutionPointer.EventData);
+
+            var action = ((UserAction)context.ExecutionPointer.EventData);
             context.ExecutionPointer.ExtensionAttributes["ActionUser"] = action.User;
-            
+
             if (context.PersistenceData == null)
             {
                 var result = ExecutionResult.Branch(new List<object>() { null }, new ControlPersistenceData() { ChildrenActive = true });

@@ -14,7 +14,7 @@ namespace WorkflowCore.Providers.Azure.Services
 {
     public class AzureLockManager: IDistributedLockProvider
     {
-        private readonly CloudBlobClient _client;        
+        private readonly CloudBlobClient _client;
         private readonly ILogger _logger;
         private readonly List<ControlledLock> _locks = new List<ControlledLock>();
         private readonly AutoResetEvent _mutex = new AutoResetEvent(true);
@@ -42,7 +42,7 @@ namespace WorkflowCore.Providers.Azure.Services
                 try
                 {
                     var leaseId = await blob.AcquireLeaseAsync(LockTimeout);
-                    _locks.Add(new ControlledLock(Id, leaseId, blob));                    
+                    _locks.Add(new ControlledLock(Id, leaseId, blob));
                     return true;
                 }
                 catch (StorageException ex)
@@ -64,7 +64,7 @@ namespace WorkflowCore.Providers.Azure.Services
             {
                 try
                 {
-                    var entry = _locks.FirstOrDefault(x => x.Id == Id);
+                    var entry = _locks.Find(x => x.Id == Id);
 
                     if (entry != null)
                     {
@@ -75,7 +75,7 @@ namespace WorkflowCore.Providers.Azure.Services
                         catch (Exception ex)
                         {
                             _logger.LogError($"Error releasing lock - {ex.Message}");
-                        }                        
+                        }
                         _locks.Remove(entry);
                     }
                 }
@@ -135,6 +135,6 @@ namespace WorkflowCore.Providers.Azure.Services
             }
         }
     }
-    
+
 }
 

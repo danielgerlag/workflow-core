@@ -157,7 +157,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                 var tag = item.CompensateWith.Select(x => x.Id).FirstOrDefault();
                 if (tag != null)
                 {
-                    var compStep = result.FirstOrDefault(x => x.Tag == tag);
+                    var compStep = result.Find(x => x.Tag == tag);
                     if (compStep != null)
                         target.CompensationStepId = compStep.Id;
                 }

@@ -33,10 +33,7 @@ namespace WorkflowCore.Services
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, TStep>(WorkflowBuilder, newStep);
 
-            if (stepSetup != null)
-            {
-                stepSetup.Invoke(stepBuilder);
-            }
+            stepSetup?.Invoke(stepBuilder);
 
             newStep.Name = newStep.Name ?? typeof(TStep).Name;
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
@@ -164,12 +161,12 @@ namespace WorkflowCore.Services
                 throw new InvalidOperationException($"Parent step of name {name} not found");
             }
 
-            if (!(ancestor is WorkflowStep<TStep>))
+            if (!(ancestor is WorkflowStep<TStep> workflowStep))
             {
                 throw new InvalidOperationException($"Parent step of name {name} is not of type {typeof(TStep)}");
             }
 
-            return new StepBuilder<TData, TStep>(WorkflowBuilder, (ancestor as WorkflowStep<TStep>));
+            return new StepBuilder<TData, TStep>(WorkflowBuilder, workflowStep);
         }
 
         public IStepBuilder<TData, TStepBody> OnError(WorkflowErrorHandling behavior, TimeSpan? retryInterval = null)
@@ -406,10 +403,7 @@ namespace WorkflowCore.Services
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, TStep>(WorkflowBuilder, newStep);
 
-            if (stepSetup != null)
-            {
-                stepSetup.Invoke(stepBuilder);
-            }
+            stepSetup?.Invoke(stepBuilder);
 
             newStep.Name = newStep.Name ?? typeof(TStep).Name;
             Step.CompensationStepId = newStep.Id;

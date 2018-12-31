@@ -8,7 +8,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services.BackgroundTasks
 {
-    internal class EventConsumer : QueueConsumer, IBackgroundTask
+    internal class EventConsumer : QueueConsumer , IBackgroundTask
     {
         private readonly IPersistenceProvider _persistenceStore;
         private readonly IDistributedLockProvider _lockProvider;
@@ -16,7 +16,7 @@ namespace WorkflowCore.Services.BackgroundTasks
 
         protected override QueueType Queue => QueueType.Event;
 
-        public EventConsumer(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, WorkflowOptions options, IDateTimeProvider datetimeProvider)
+        public EventConsumer(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IDistributedLockProvider lockProvider, WorkflowOptions options, IDateTimeProvider datetimeProvider)
             : base(queueProvider, loggerFactory, options)
         {
             _persistenceStore = persistenceStore;
@@ -58,7 +58,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                 Logger.LogInformation($"Event locked {itemId}");
             }
         }
-        
+
         private async Task<bool> SeedSubscription(Event evt, EventSubscription sub, CancellationToken cancellationToken)
         {
             if (await _lockProvider.AcquireLock(sub.WorkflowId, cancellationToken))

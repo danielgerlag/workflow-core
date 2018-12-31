@@ -21,14 +21,16 @@ namespace WorkflowCore.Services
         {
             if (version.HasValue)
             {
-                var entry = _registry.FirstOrDefault(x => x.Item1 == workflowId && x.Item2 == version.Value);
+                var entry = _registry.Find(x => x.Item1 == workflowId && x.Item2 == version.Value);
                 // TODO: What in the heck does Item3 mean?
                 return entry?.Item3;
             }
             else
             {
-                var entry = _registry.Where(x => x.Item1 == workflowId).OrderByDescending(x => x.Item2)
-                                     .FirstOrDefault();
+                var entry = _registry
+                    .Where(x => x.Item1 == workflowId)
+                    .OrderByDescending(x => x.Item2)
+                    .FirstOrDefault();
                 return entry?.Item3;
             }
         }
@@ -40,7 +42,7 @@ namespace WorkflowCore.Services
                 throw new InvalidOperationException($"Workflow {workflow.Id} version {workflow.Version} is already registered");
             }
 
-            var builder = _serviceProvider.GetService<IWorkflowBuilder>().UseData<object>();            
+            var builder = _serviceProvider.GetService<IWorkflowBuilder>().UseData<object>();
             workflow.Build(builder);
             var def = builder.Build(workflow.Id, workflow.Version);
             _registry.Add(Tuple.Create(workflow.Id, workflow.Version, def));

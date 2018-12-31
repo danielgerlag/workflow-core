@@ -36,7 +36,7 @@ namespace WorkflowCore.Services
 
         public void AddStep(WorkflowStep step)
         {
-            step.Id = Steps.Count();
+            step.Id = Steps.Count;
             Steps.Add(step);
         }               
 
@@ -63,10 +63,7 @@ namespace WorkflowCore.Services
             WorkflowStep<TStep> step = new WorkflowStep<TStep>();
             var stepBuilder = new StepBuilder<TData, TStep>(this, step);
 
-            if (stepSetup != null)
-            {
-                stepSetup.Invoke(stepBuilder);
-            }
+            stepSetup?.Invoke(stepBuilder);
 
             step.Name = step.Name ?? typeof(TStep).Name;
             AddStep(step);

@@ -25,7 +25,7 @@ namespace WorkflowCore.Providers.Azure.Services
             var client = account.CreateCloudQueueClient();
 
             _workflowQueue = client.GetQueueReference("workflowcore-workflows");
-            _eventQueue = client.GetQueueReference("workflowcore-events");                        
+            _eventQueue = client.GetQueueReference("workflowcore-events");
         }
 
         public async Task QueueWork(string id, QueueType queue)
@@ -58,7 +58,7 @@ namespace WorkflowCore.Providers.Azure.Services
 
             if (cloudQueue == null)
                 return null;
-            
+
             var msg = await cloudQueue.GetMessageAsync();
 
             if (msg == null)

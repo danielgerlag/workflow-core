@@ -9,7 +9,7 @@ using WorkflowCore.Models;
 namespace WorkflowCore.Users.Models
 {
     [Obsolete]
-    public class UserStepContainer : WorkflowStep<UserStep>        
+    public class UserStepContainer : WorkflowStep<UserStep>
     {
         public LambdaExpression Principal { get; set; }
 

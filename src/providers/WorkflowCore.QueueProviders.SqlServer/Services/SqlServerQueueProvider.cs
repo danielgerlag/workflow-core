@@ -122,11 +122,11 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             try
             {
                 cn.Open();
-                var par = _config.GetByQueue(queue);                
+                var par = _config.GetByQueue(queue);
                 var sql = _dequeueWorkCommand.Replace("{queueName}", par.QueueName);
                 var msg = _sqlCommandExecutor.ExecuteScalar<object>(cn, null, sql);
                 return msg is DBNull ? null : (string)msg;
-                
+
             }
             finally
             {

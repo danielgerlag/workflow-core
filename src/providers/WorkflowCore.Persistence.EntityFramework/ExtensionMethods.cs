@@ -30,7 +30,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             
             foreach (var ep in instance.ExecutionPointers)
             {
-                var persistedEP = persistable.ExecutionPointers.FirstOrDefault(x => x.Id == ep.Id);
+                var persistedEP = persistable.ExecutionPointers.Find(x => x.Id == ep.Id);
                 
                 if (persistedEP == null)
                 {
@@ -67,7 +67,7 @@ namespace WorkflowCore.Persistence.EntityFramework
 
                 foreach (var attr in ep.ExtensionAttributes)
                 {
-                    var persistedAttr = persistedEP.ExtensionAttributes.FirstOrDefault(x => x.AttributeKey == attr.Key);
+                    var persistedAttr = persistedEP.ExtensionAttributes.Find(x => x.AttributeKey == attr.Key);
                     if (persistedAttr == null)
                     {
                         persistedAttr = new PersistedExtensionAttribute();

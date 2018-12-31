@@ -25,7 +25,7 @@ namespace WorkflowCore.LockProviders.SqlServer
             var csb = new SqlConnectionStringBuilder(connectionString);
             csb.Pooling = true;
             csb.ApplicationName = "Workflow Core Lock Manager";
-            
+
             _connectionString = csb.ToString();
         }
 
@@ -78,10 +78,10 @@ namespace WorkflowCore.LockProviders.SqlServer
                             return false;
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         connection.Close();
-                        throw ex;
+                        throw;
                     }
                 }
                 finally
@@ -134,7 +134,7 @@ namespace WorkflowCore.LockProviders.SqlServer
         }
 
         public async Task Start()
-        {         
+        {
         }
 
         public async Task Stop()

@@ -16,7 +16,7 @@ namespace WorkflowCore.Services.BackgroundTasks
         private readonly WorkflowOptions _options;
         private Timer _pollTimer;
 
-        public RunnablePoller(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, WorkflowOptions options)
+        public RunnablePoller(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IDistributedLockProvider lockProvider, WorkflowOptions options)
         {
             _persistenceStore = persistenceStore;
             _queueProvider = queueProvider;            

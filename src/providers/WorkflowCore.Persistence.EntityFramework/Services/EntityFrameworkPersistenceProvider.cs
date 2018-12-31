@@ -272,7 +272,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             using (var db = ConstructDbContext())
             {
                 var executionErrors = errors as ExecutionError[] ?? errors.ToArray();
-                if (executionErrors.Any())
+                if (executionErrors.Length > 0)
                 {
                     foreach (var error in executionErrors)
                     {

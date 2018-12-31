@@ -150,7 +150,7 @@ namespace WorkflowCore.Services
         {
             lock (_events)
             {
-                var evt = _events.FirstOrDefault(x => x.Id == id);
+                var evt = _events.Find(x => x.Id == id);
                 if (evt != null)
                     evt.IsProcessed = true;
             }
@@ -161,8 +161,7 @@ namespace WorkflowCore.Services
             lock (_events)
             {
                 return _events
-                    .Where(x => !x.IsProcessed)
-                    .Where(x => x.EventTime <= asAt.ToUniversalTime())
+                    .Where(x => !x.IsProcessed && x.EventTime <= asAt.ToUniversalTime())
                     .Select(x => x.Id)
                     .ToList();
             }
@@ -172,7 +171,7 @@ namespace WorkflowCore.Services
         {
             lock (_events)
             {
-                return _events.FirstOrDefault(x => x.Id == id);
+                return _events.Find(x => x.Id == id);
             }
         }
 
@@ -181,8 +180,7 @@ namespace WorkflowCore.Services
             lock (_events)
             {
                 return _events
-                    .Where(x => x.EventName == eventName && x.EventKey == eventKey)
-                    .Where(x => x.EventTime >= asOf)
+                    .Where(x => x.EventName == eventName && x.EventKey == eventKey && x.EventTime >= asOf)
                     .Select(x => x.Id)
                     .ToList();
             }
@@ -192,7 +190,7 @@ namespace WorkflowCore.Services
         {
             lock (_events)
             {
-                var evt = _events.FirstOrDefault(x => x.Id == id);
+                var evt = _events.Find(x => x.Id == id);
                 if (evt != null)
                 {
                     evt.IsProcessed = false;

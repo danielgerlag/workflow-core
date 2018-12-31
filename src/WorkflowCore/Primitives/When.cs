@@ -28,8 +28,8 @@ namespace WorkflowCore.Primitives
                 return ExecutionResult.Branch(new List<object>() { null }, new ControlPersistenceData() { ChildrenActive = true });
             }
 
-            if ((context.PersistenceData is ControlPersistenceData) && ((context.PersistenceData as ControlPersistenceData).ChildrenActive))
-            { 
+            if (context.PersistenceData is ControlPersistenceData controlPersistenceData && controlPersistenceData.ChildrenActive)
+            {
                 bool complete = true;
                 foreach (var childId in context.ExecutionPointer.Children)
                 {
@@ -40,12 +40,12 @@ namespace WorkflowCore.Primitives
                 {
                     return ExecutionResult.Next();
                 }
-                    
+
                 return ExecutionResult.Persist(context.PersistenceData);
             }
 
             throw new CorruptPersistenceDataException();
-        }        
+        }
 
         private object GetSwitchOutcome(IStepExecutionContext context)
         {

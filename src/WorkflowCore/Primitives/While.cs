@@ -7,7 +7,7 @@ namespace WorkflowCore.Primitives
 {
     public class While : ContainerStepBody
     {
-        public bool Condition { get; set; }                
+        public bool Condition { get; set; }
 
         public override ExecutionResult Run(IStepExecutionContext context)
         {
@@ -21,18 +21,18 @@ namespace WorkflowCore.Primitives
                 return ExecutionResult.Next();
             }
 
-            if ((context.PersistenceData is ControlPersistenceData) && ((context.PersistenceData as ControlPersistenceData).ChildrenActive))
+            if (context.PersistenceData is ControlPersistenceData controlPersistenceData && controlPersistenceData.ChildrenActive)
             {
                 for (int i = context.ExecutionPointer.Children.Count - 1; i > -1; i--)
                 {
-                    if (!IsBranchComplete(context.Workflow.ExecutionPointers, context.ExecutionPointer.Children[i]))                 
-                        return ExecutionResult.Persist(context.PersistenceData);                 
+                    if (!IsBranchComplete(context.Workflow.ExecutionPointers, context.ExecutionPointer.Children[i]))
+                        return ExecutionResult.Persist(context.PersistenceData);
                 }
-                
+
                 return ExecutionResult.Persist(null);  //re-evaluate condition on next pass
             }
 
             throw new CorruptPersistenceDataException();
-        }        
+        }
     }
 }

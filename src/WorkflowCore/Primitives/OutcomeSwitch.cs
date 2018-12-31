@@ -17,8 +17,8 @@ namespace WorkflowCore.Primitives
                 return result;
             }
 
-            if ((context.PersistenceData is ControlPersistenceData) && ((context.PersistenceData as ControlPersistenceData).ChildrenActive))
-            { 
+            if (context.PersistenceData is ControlPersistenceData controlPersistenceData && controlPersistenceData.ChildrenActive)
+            {
                 bool complete = true;
                 foreach (var childId in context.ExecutionPointer.Children)
                 {

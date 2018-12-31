@@ -23,10 +23,7 @@ namespace WorkflowCore.Services
             WorkflowBuilder.AddStep(step);
             var stepBuilder = new StepBuilder<TData, TStep>(WorkflowBuilder, step);
 
-            if (stepSetup != null)
-            {
-                stepSetup.Invoke(stepBuilder);
-            }
+            stepSetup?.Invoke(stepBuilder);
 
             step.Name = step.Name ?? typeof(TStep).Name;
             Outcome.NextStep = step.Id;

@@ -8,7 +8,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services.BackgroundTasks
 {
-    internal class WorkflowConsumer : QueueConsumer, IBackgroundTask
+    internal class WorkflowConsumer : QueueConsumer , IBackgroundTask
     {
         private readonly IDistributedLockProvider _lockProvider;
         private readonly IDateTimeProvider _datetimeProvider;
@@ -17,7 +17,7 @@ namespace WorkflowCore.Services.BackgroundTasks
 
         protected override QueueType Queue => QueueType.Workflow;
 
-        public WorkflowConsumer(IPooledObjectPolicy<IPersistenceProvider> persistencePoolPolicy, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IPooledObjectPolicy<IWorkflowExecutor> executorPoolPolicy, IDateTimeProvider datetimeProvider, WorkflowOptions options)
+        public WorkflowConsumer(IPooledObjectPolicy<IPersistenceProvider> persistencePoolPolicy, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IDistributedLockProvider lockProvider, IPooledObjectPolicy<IWorkflowExecutor> executorPoolPolicy, IDateTimeProvider datetimeProvider, WorkflowOptions options)
             : base(queueProvider, loggerFactory, options)
         {
             _persistenceStorePool = new DefaultObjectPool<IPersistenceProvider>(persistencePoolPolicy);
@@ -84,12 +84,12 @@ namespace WorkflowCore.Services.BackgroundTasks
                 Logger.LogInformation("Workflow locked {0}", itemId);
             }
         }
-        
+
         private async Task SubscribeEvent(EventSubscription subscription, IPersistenceProvider persistenceStore)
         {
             //TODO: move to own class
             Logger.LogDebug("Subscribing to event {0} {1} for workflow {2} step {3}", subscription.EventName, subscription.EventKey, subscription.WorkflowId, subscription.StepId);
-            
+
             await persistenceStore.CreateEventSubscription(subscription);
             var events = await persistenceStore.GetEvents(subscription.EventName, subscription.EventKey, subscription.SubscribeAsOf);
             foreach (var evt in events)

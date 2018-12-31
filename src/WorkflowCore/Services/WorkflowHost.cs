@@ -12,13 +12,12 @@ using WorkflowCore.Models.LifeCycleEvents;
 
 namespace WorkflowCore.Services
 {
-    public class WorkflowHost : IWorkflowHost, IDisposable
+    public class WorkflowHost : WorkflowController, IWorkflowHost, IDisposable
     {
         protected bool _shutdown = true;
         protected readonly IServiceProvider _serviceProvider;
 
         private readonly IEnumerable<IBackgroundTask> _backgroundTasks;
-        private readonly IWorkflowController _workflowController;
 
         public event StepErrorEventHandler OnStepError;
         public event LifeCycleEventHandler OnLifeCycleEvent;
@@ -31,7 +30,8 @@ namespace WorkflowCore.Services
         public IQueueProvider QueueProvider { get; private set; }
         public ILogger Logger { get; private set; }
 
-        public WorkflowHost(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, WorkflowOptions options, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IEnumerable<IBackgroundTask> backgroundTasks, IWorkflowController workflowController, ILifeCycleEventHub lifeCycleEventHub)
+        public WorkflowHost(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, WorkflowOptions options, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IEnumerable<IBackgroundTask> backgroundTasks, IExecutionPointerFactory pointerFactory, ILifeCycleEventHub lifeCycleEventHub)
+            : base(persistenceStore, lockProvider, registry, queueProvider, pointerFactory, lifeCycleEventHub, loggerFactory)
         {
             PersistenceStore = persistenceStore;
             QueueProvider = queueProvider;
@@ -41,36 +41,8 @@ namespace WorkflowCore.Services
             Registry = registry;
             LockProvider = lockProvider;
             _backgroundTasks = backgroundTasks;
-            _workflowController = workflowController;
             persistenceStore.EnsureStoreExists();
             lifeCycleEventHub.Subscribe(HandleLifeCycleEvent);
-        }
-        
-        public Task<string> StartWorkflow(string workflowId, object data = null, string reference=null)
-        {
-            return _workflowController.StartWorkflow(workflowId, data, reference);
-        }
-
-        public Task<string> StartWorkflow(string workflowId, int? version, object data = null, string reference=null)
-        {
-            return _workflowController.StartWorkflow<object>(workflowId, version, data, reference);
-        }
-
-        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null, string reference=null)
-            where TData : class, new()
-        {
-            return _workflowController.StartWorkflow<TData>(workflowId, null, data, reference);
-        }
-        
-        public Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference=null)
-            where TData : class, new()
-        {
-            return _workflowController.StartWorkflow(workflowId, version, data, reference);
-        }
-
-        public Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null)
-        {
-            return _workflowController.PublishEvent(eventName, eventKey, eventData, effectiveDate);
         }
 
         public void Start()
@@ -113,21 +85,6 @@ namespace WorkflowCore.Services
         {
             TWorkflow wf = new TWorkflow();
             Registry.RegisterWorkflow<TData>(wf);
-        }
-
-        public Task<bool> SuspendWorkflow(string workflowId)
-        {
-            return _workflowController.SuspendWorkflow(workflowId);
-        }
-
-        public Task<bool> ResumeWorkflow(string workflowId)
-        {
-            return _workflowController.ResumeWorkflow(workflowId);
-        }
-
-        public Task<bool> TerminateWorkflow(string workflowId)
-        {
-            return _workflowController.TerminateWorkflow(workflowId);
         }
 
         public void HandleLifeCycleEvent(LifeCycleEvent evt)
