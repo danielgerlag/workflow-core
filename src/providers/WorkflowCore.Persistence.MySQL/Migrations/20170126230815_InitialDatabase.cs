@@ -1,24 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace WorkflowCore.Persistence.PostgreSQL.Migrations
+namespace WorkflowCore.Persistence.MySQL.Migrations
 {
     public partial class InitialDatabase : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.EnsureSchema(
-                name: "wfc");
-
             migrationBuilder.CreateTable(
                 name: "UnpublishedEvent",
-                schema: "wfc",
                 columns: table => new
                 {
                     PersistenceId = table.Column<long>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     EventData = table.Column<string>(nullable: true),
                     EventKey = table.Column<string>(maxLength: 200, nullable: true),
                     EventName = table.Column<string>(maxLength: 200, nullable: true),
@@ -33,11 +28,10 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Subscription",
-                schema: "wfc",
                 columns: table => new
                 {
                     PersistenceId = table.Column<long>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     EventKey = table.Column<string>(maxLength: 200, nullable: true),
                     EventName = table.Column<string>(maxLength: 200, nullable: true),
                     StepId = table.Column<int>(nullable: false),
@@ -51,11 +45,10 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Workflow",
-                schema: "wfc",
                 columns: table => new
                 {
                     PersistenceId = table.Column<long>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     CompleteTime = table.Column<DateTime>(nullable: true),
                     CreateTime = table.Column<DateTime>(nullable: false),
                     Data = table.Column<string>(nullable: true),
@@ -73,11 +66,10 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
             migrationBuilder.CreateTable(
                 name: "ExecutionPointer",
-                schema: "wfc",
                 columns: table => new
                 {
                     PersistenceId = table.Column<long>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Active = table.Column<bool>(nullable: false),
                     ConcurrentFork = table.Column<int>(nullable: false),
                     EndTime = table.Column<DateTime>(nullable: true),
@@ -100,7 +92,6 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                     table.ForeignKey(
                         name: "FK_ExecutionPointer_Workflow_WorkflowId",
                         column: x => x.WorkflowId,
-                        principalSchema: "wfc",
                         principalTable: "Workflow",
                         principalColumn: "PersistenceId",
                         onDelete: ReferentialAction.Cascade);
@@ -108,11 +99,10 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
             migrationBuilder.CreateTable(
                 name: "ExecutionError",
-                schema: "wfc",
                 columns: table => new
                 {
                     PersistenceId = table.Column<long>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     ErrorTime = table.Column<DateTime>(nullable: false),
                     ExecutionPointerId = table.Column<long>(nullable: false),
                     Id = table.Column<string>(maxLength: 50, nullable: true),
@@ -124,7 +114,6 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                     table.ForeignKey(
                         name: "FK_ExecutionError_ExecutionPointer_ExecutionPointerId",
                         column: x => x.ExecutionPointerId,
-                        principalSchema: "wfc",
                         principalTable: "ExecutionPointer",
                         principalColumn: "PersistenceId",
                         onDelete: ReferentialAction.Cascade);
@@ -132,11 +121,10 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
             migrationBuilder.CreateTable(
                 name: "ExtensionAttribute",
-                schema: "wfc",
                 columns: table => new
                 {
                     PersistenceId = table.Column<long>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     AttributeKey = table.Column<string>(maxLength: 100, nullable: true),
                     AttributeValue = table.Column<string>(nullable: true),
                     ExecutionPointerId = table.Column<long>(nullable: false)
@@ -147,7 +135,6 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                     table.ForeignKey(
                         name: "FK_ExtensionAttribute_ExecutionPointer_ExecutionPointerId",
                         column: x => x.ExecutionPointerId,
-                        principalSchema: "wfc",
                         principalTable: "ExecutionPointer",
                         principalColumn: "PersistenceId",
                         onDelete: ReferentialAction.Cascade);
@@ -155,58 +142,49 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_ExecutionError_ExecutionPointerId",
-                schema: "wfc",
                 table: "ExecutionError",
                 column: "ExecutionPointerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ExecutionPointer_WorkflowId",
-                schema: "wfc",
                 table: "ExecutionPointer",
                 column: "WorkflowId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ExtensionAttribute_ExecutionPointerId",
-                schema: "wfc",
                 table: "ExtensionAttribute",
                 column: "ExecutionPointerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UnpublishedEvent_PublicationId",
-                schema: "wfc",
                 table: "UnpublishedEvent",
                 column: "PublicationId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Subscription_EventKey",
-                schema: "wfc",
                 table: "Subscription",
                 column: "EventKey");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Subscription_EventName",
-                schema: "wfc",
                 table: "Subscription",
                 column: "EventName");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Subscription_SubscriptionId",
-                schema: "wfc",
                 table: "Subscription",
                 column: "SubscriptionId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Workflow_InstanceId",
-                schema: "wfc",
                 table: "Workflow",
                 column: "InstanceId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Workflow_NextExecution",
-                schema: "wfc",
                 table: "Workflow",
                 column: "NextExecution");
         }
@@ -214,28 +192,22 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ExecutionError",
-                schema: "wfc");
+                name: "ExecutionError");
 
             migrationBuilder.DropTable(
-                name: "ExtensionAttribute",
-                schema: "wfc");
+                name: "ExtensionAttribute");
 
             migrationBuilder.DropTable(
-                name: "UnpublishedEvent",
-                schema: "wfc");
+                name: "UnpublishedEvent");
 
             migrationBuilder.DropTable(
-                name: "Subscription",
-                schema: "wfc");
+                name: "Subscription");
 
             migrationBuilder.DropTable(
-                name: "ExecutionPointer",
-                schema: "wfc");
+                name: "ExecutionPointer");
 
             migrationBuilder.DropTable(
-                name: "Workflow",
-                schema: "wfc");
+                name: "Workflow");
         }
     }
 }
