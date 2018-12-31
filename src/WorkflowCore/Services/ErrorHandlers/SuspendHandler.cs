@@ -26,7 +26,7 @@ namespace WorkflowCore.Services.ErrorHandlers
             {
                 EventTimeUtc = _datetimeProvider.Now,
                 Reference = workflow.Reference,
-                WorkflowInsanceId = workflow.Id,
+                WorkflowInstanceId = workflow.Id,
                 WorkflowDefinitionId = workflow.WorkflowDefinitionId,
                 Version = workflow.Version
             });

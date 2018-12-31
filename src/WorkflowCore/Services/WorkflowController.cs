@@ -83,7 +83,7 @@ namespace WorkflowCore.Services
             {
                 EventTimeUtc = DateTime.UtcNow,
                 Reference = reference,
-                WorkflowInsanceId = id,
+                WorkflowInstanceId = id,
                 WorkflowDefinitionId = def.Id,
                 Version = def.Version
             });
@@ -125,7 +125,7 @@ namespace WorkflowCore.Services
                     {
                         EventTimeUtc = DateTime.UtcNow,
                         Reference = wf.Reference,
-                        WorkflowInsanceId = wf.Id,
+                        WorkflowInstanceId = wf.Id,
                         WorkflowDefinitionId = wf.WorkflowDefinitionId,
                         Version = wf.Version
                     });
@@ -160,7 +160,7 @@ namespace WorkflowCore.Services
                     {
                         EventTimeUtc = DateTime.UtcNow,
                         Reference = wf.Reference,
-                        WorkflowInsanceId = wf.Id,
+                        WorkflowInstanceId = wf.Id,
                         WorkflowDefinitionId = wf.WorkflowDefinitionId,
                         Version = wf.Version
                     });
@@ -193,7 +193,7 @@ namespace WorkflowCore.Services
                 {
                     EventTimeUtc = DateTime.UtcNow,
                     Reference = wf.Reference,
-                    WorkflowInsanceId = wf.Id,
+                    WorkflowInstanceId = wf.Id,
                     WorkflowDefinitionId = wf.WorkflowDefinitionId,
                     Version = wf.Version
                 });
