@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <AssemblyTitle>Workflow Core EntityFramework Core Persistence Provider</AssemblyTitle>
-    <VersionPrefix>1.1.0</VersionPrefix>
+    <VersionPrefix>1.8.0</VersionPrefix>
     <Authors>Daniel Gerlag</Authors>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>WorkflowCore.Persistence.EntityFramework</AssemblyName>
@@ -15,10 +15,10 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>1.7.0</Version>
+    <Version>1.8.0</Version>
     <Description>Base package for Workflow-core peristence providers using entity framework</Description>
-    <AssemblyVersion>1.7.0.0</AssemblyVersion>
-    <FileVersion>1.7.0.0</FileVersion>
+    <AssemblyVersion>1.8.0.0</AssemblyVersion>
+    <FileVersion>1.8.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
