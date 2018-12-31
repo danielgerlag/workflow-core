@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
+using WorkflowCore.Models.LifeCycleEvents;
 using WorkflowCore.Services.FluentBuilders;
 
 namespace WorkflowCore.Services
@@ -19,15 +20,17 @@ namespace WorkflowCore.Services
         protected readonly IDateTimeProvider _datetimeProvider;
         protected readonly ILogger _logger;
         private readonly IExecutionResultProcessor _executionResultProcessor;
+        private readonly ILifeCycleEventPublisher _publisher;
         private readonly WorkflowOptions _options;
 
         private IWorkflowHost Host => _serviceProvider.GetService<IWorkflowHost>();
 
-        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, WorkflowOptions options, ILoggerFactory loggerFactory)
+        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, ILifeCycleEventPublisher publisher, WorkflowOptions options, ILoggerFactory loggerFactory)
         {
             _serviceProvider = serviceProvider;
             _registry = registry;
             _datetimeProvider = datetimeProvider;
+            _publisher = publisher;
             _options = options;
             _logger = loggerFactory.CreateLogger<WorkflowExecutor>();
             _executionResultProcessor = executionResultProcessor;
@@ -51,8 +54,7 @@ namespace WorkflowCore.Services
                 if (step != null)
                 {
                     try
-                    {
-                        pointer.Status = PointerStatus.Running;
+                    {                        
                         switch (step.InitForExecution(wfResult, def, workflow, pointer))
                         {
                             case ExecutionPipelineDirective.Defer:
@@ -61,6 +63,21 @@ namespace WorkflowCore.Services
                                 workflow.Status = WorkflowStatus.Complete;
                                 workflow.CompleteTime = _datetimeProvider.Now.ToUniversalTime();
                                 continue;
+                        }
+
+                        if (pointer.Status != PointerStatus.Running)
+                        {
+                            pointer.Status = PointerStatus.Running;
+                            _publisher.PublishNotification(new StepStarted()
+                            {
+                                EventTimeUtc = _datetimeProvider.Now,
+                                Reference = workflow.Reference,
+                                ExecutionPointerId = pointer.Id,
+                                StepId = step.Id,
+                                WorkflowInstanceId = workflow.Id,
+                                WorkflowDefinitionId = workflow.WorkflowDefinitionId,
+                                Version = workflow.Version
+                            });
                         }
 
                         if (!pointer.StartTime.HasValue)
@@ -127,8 +144,8 @@ namespace WorkflowCore.Services
                             ErrorTime = _datetimeProvider.Now.ToUniversalTime(),
                             Message = ex.Message
                         });
-
-                        _executionResultProcessor.HandleStepException(workflow, def, pointer, step);
+                        
+                        _executionResultProcessor.HandleStepException(workflow, def, pointer, step, ex);
                         Host.ReportStepError(workflow, step, ex);
                     }
                 }
@@ -258,6 +275,14 @@ namespace WorkflowCore.Services
             
             workflow.Status = WorkflowStatus.Complete;
             workflow.CompleteTime = _datetimeProvider.Now.ToUniversalTime();
+            _publisher.PublishNotification(new WorkflowCompleted()
+            {
+                EventTimeUtc = _datetimeProvider.Now,
+                Reference = workflow.Reference,
+                WorkflowInstanceId = workflow.Id,
+                WorkflowDefinitionId = workflow.WorkflowDefinitionId,
+                Version = workflow.Version
+            });
         }
         
     }
