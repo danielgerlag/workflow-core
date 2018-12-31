@@ -8,7 +8,7 @@ namespace WorkflowCore.Models.LifeCycleEvents
     {
         public DateTime EventTimeUtc { get; set; }
 
-        public string WorkflowInsanceId { get; set; }
+        public string WorkflowInstanceId { get; set; }
 
         public string WorkflowDefinitionId { get; set; }
 
