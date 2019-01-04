@@ -10,7 +10,7 @@ using WorkflowCore.Interface;
 
 namespace WorkflowCore.Providers.AWS.Services
 {
-    public class DynamoDbProvisioner
+    public class DynamoDbProvisioner : IDynamoDbProvisioner
     {
         private readonly ILogger _logger;
         private readonly AmazonDynamoDBClient _client;
@@ -25,7 +25,9 @@ namespace WorkflowCore.Providers.AWS.Services
 
         public async Task ProvisionTables()
         {
-            await EnsureTable($"{_tablePrefix}-{DynamoPersistenceProvider.WORKFLOW_TABLE}", async () => await CreateWorkflowTable());
+            await EnsureTable($"{_tablePrefix}-{DynamoPersistenceProvider.WORKFLOW_TABLE}", CreateWorkflowTable);
+            await EnsureTable($"{_tablePrefix}-{DynamoPersistenceProvider.SUBCRIPTION_TABLE}", CreateSubscriptionTable);
+            await EnsureTable($"{_tablePrefix}-{DynamoPersistenceProvider.EVENT_TABLE}", CreateEventTable);
         }
 
         private async Task CreateWorkflowTable()
@@ -38,17 +40,26 @@ namespace WorkflowCore.Providers.AWS.Services
                     {
                         new KeySchemaElement
                         {
-                            AttributeName= "status",
+                            AttributeName= "workflow_status",
                             KeyType = "HASH" //Partition key
                         }
                     },
                     {
                         new KeySchemaElement
                         {
-                            AttributeName = "nextExecution",
+                            AttributeName = "next_execution",
                             KeyType = "RANGE" //Sort key
                         }
                     }
+                },
+                Projection = new Projection()
+                {
+                    ProjectionType = ProjectionType.KEYS_ONLY
+                },
+                ProvisionedThroughput = new ProvisionedThroughput()
+                {
+                    ReadCapacityUnits = 1,
+                    WriteCapacityUnits = 1
                 }
             };
 
@@ -60,28 +71,182 @@ namespace WorkflowCore.Providers.AWS.Services
                 AttributeDefinitions = new List<AttributeDefinition>()
                 {
                     new AttributeDefinition("id", ScalarAttributeType.S),
-                    new AttributeDefinition("status", ScalarAttributeType.S),
-                    new AttributeDefinition("nextExecution", ScalarAttributeType.N),
+                    new AttributeDefinition("workflow_status", ScalarAttributeType.N),
+                    new AttributeDefinition("next_execution", ScalarAttributeType.N),
                 },
                 GlobalSecondaryIndexes = new List<GlobalSecondaryIndex>()
                 {
                     runnableIndex
                 },
-                BillingMode = BillingMode.PAY_PER_REQUEST
+                ProvisionedThroughput = new ProvisionedThroughput()
+                {
+                    ReadCapacityUnits = 1,
+                    WriteCapacityUnits = 1
+                }
             };
 
             await CreateTable(createRequest);
         }
 
-        private async Task EnsureTable(string tableName, Action createTask)
+        private async Task CreateSubscriptionTable()
+        {
+            var slugIndex = new GlobalSecondaryIndex()
+            {
+                IndexName = "slug",
+                KeySchema = new List<KeySchemaElement>()
+                {
+                    {
+                        new KeySchemaElement
+                        {
+                            AttributeName = "event_slug",
+                            KeyType = "HASH" //Partition key
+                        }
+                    },
+                    {
+                        new KeySchemaElement
+                        {
+                            AttributeName = "subscribe_as_of",
+                            KeyType = "RANGE" //Sort key
+                        }
+                    }
+                },
+                Projection = new Projection()
+                {
+                    ProjectionType = ProjectionType.ALL
+                },
+                ProvisionedThroughput = new ProvisionedThroughput()
+                {
+                    ReadCapacityUnits = 1,
+                    WriteCapacityUnits = 1
+                }
+            };
+
+            var createRequest = new CreateTableRequest($"{_tablePrefix}-{DynamoPersistenceProvider.SUBCRIPTION_TABLE}", new List<KeySchemaElement>()
+            {
+                new KeySchemaElement("id", KeyType.HASH)
+            })
+            {
+                AttributeDefinitions = new List<AttributeDefinition>()
+                {
+                    new AttributeDefinition("id", ScalarAttributeType.S),
+                    new AttributeDefinition("event_slug", ScalarAttributeType.S),
+                    new AttributeDefinition("subscribe_as_of", ScalarAttributeType.N)
+                },
+                GlobalSecondaryIndexes = new List<GlobalSecondaryIndex>()
+                {
+                    slugIndex
+                },
+                ProvisionedThroughput = new ProvisionedThroughput()
+                {
+                    ReadCapacityUnits = 1,
+                    WriteCapacityUnits = 1
+                }
+            };
+
+            await CreateTable(createRequest);
+        }
+
+        private async Task CreateEventTable()
+        {
+            var slugIndex = new GlobalSecondaryIndex()
+            {
+                IndexName = "slug",
+                KeySchema = new List<KeySchemaElement>()
+                {
+                    {
+                        new KeySchemaElement
+                        {
+                            AttributeName= "event_slug",
+                            KeyType = "HASH" //Partition key
+                        }
+                    },
+                    {
+                        new KeySchemaElement
+                        {
+                            AttributeName = "event_time",
+                            KeyType = "RANGE" //Sort key
+                        }
+                    }
+                },
+                Projection = new Projection()
+                {
+                    ProjectionType = ProjectionType.KEYS_ONLY
+                },
+                ProvisionedThroughput = new ProvisionedThroughput()
+                {
+                    ReadCapacityUnits = 1,
+                    WriteCapacityUnits = 1
+                }
+            };
+
+            var processedIndex = new GlobalSecondaryIndex()
+            {
+                IndexName = "processed",
+                KeySchema = new List<KeySchemaElement>()
+                {
+                    {
+                        new KeySchemaElement
+                        {
+                            AttributeName= "is_processed",
+                            KeyType = "HASH" //Partition key
+                        }
+                    },
+                    {
+                        new KeySchemaElement
+                        {
+                            AttributeName = "event_time",
+                            KeyType = "RANGE" //Sort key
+                        }
+                    }
+                },
+                Projection = new Projection()
+                {
+                    ProjectionType = ProjectionType.KEYS_ONLY
+                },
+                ProvisionedThroughput = new ProvisionedThroughput()
+                {
+                    ReadCapacityUnits = 1,
+                    WriteCapacityUnits = 1
+                }
+            };
+
+            var createRequest = new CreateTableRequest($"{_tablePrefix}-{DynamoPersistenceProvider.EVENT_TABLE}", new List<KeySchemaElement>()
+            {
+                new KeySchemaElement("id", KeyType.HASH)
+            })
+            {
+                AttributeDefinitions = new List<AttributeDefinition>()
+                {
+                    new AttributeDefinition("id", ScalarAttributeType.S),
+                    new AttributeDefinition("is_processed", ScalarAttributeType.S),
+                    new AttributeDefinition("event_slug", ScalarAttributeType.S),
+                    new AttributeDefinition("event_time", ScalarAttributeType.N)
+                },
+                GlobalSecondaryIndexes = new List<GlobalSecondaryIndex>()
+                {
+                    slugIndex,
+                    processedIndex
+                },
+                ProvisionedThroughput = new ProvisionedThroughput()
+                {
+                    ReadCapacityUnits = 1,
+                    WriteCapacityUnits = 1
+                }
+            };
+
+            await CreateTable(createRequest);
+        }
+
+        private async Task EnsureTable(string tableName, Func<Task> createTask)
         {
             try
             {
-                var poll = await _client.DescribeTableAsync(tableName);
+                await _client.DescribeTableAsync(tableName);
             }
             catch (ResourceNotFoundException)
             {
-                createTask();
+                _logger.LogWarning($"Provisioning DynamoDb table - {tableName}");
+                await createTask();
             }
         }
 
@@ -91,11 +256,11 @@ namespace WorkflowCore.Providers.AWS.Services
 
             int i = 0;
             bool created = false;
-            while ((i < 10) && (!created))
+            while ((i < 30) && (!created))
             {
                 try
                 {
-                    await Task.Delay(1000);
+                    await Task.Delay(2000);
                     var poll = await _client.DescribeTableAsync(createRequest.TableName);
                     created = (poll.Table.TableStatus == TableStatus.ACTIVE);
                     i++;

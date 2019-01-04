@@ -191,7 +191,7 @@ namespace WorkflowCore.Providers.AWS.Services
 
             int i = 0;
             bool created = false;
-            while ((i < 10) && (!created))
+            while ((i < 20) && (!created))
             {
                 try
                 {

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Bson;
 using WorkflowCore.Models;
 
 namespace WorkflowCore.Providers.AWS
@@ -18,28 +19,29 @@ namespace WorkflowCore.Providers.AWS
             var result = new Dictionary<string, AttributeValue>();
 
             result["id"] = new AttributeValue(source.Id);
-            result["description"] = new AttributeValue(source.Description);
-            result["reference"] = new AttributeValue(source.Reference);
-            result["workflowDefinitionId"] = new AttributeValue(source.WorkflowDefinitionId);
+            result["workflow_definition_id"] = new AttributeValue(source.WorkflowDefinitionId);
             result["version"] = new AttributeValue(source.Version.ToString());
-            result["nextExecution"] = new AttributeValue() { N = (source.NextExecution ?? 0).ToString() };
-            result["createTime"] = new AttributeValue() { N = source.CreateTime.Ticks.ToString() };
+            result["next_execution"] = new AttributeValue() { N = (source.NextExecution ?? 0).ToString() };
+            result["create_time"] = new AttributeValue() { N = source.CreateTime.Ticks.ToString() };
             result["data"] = new AttributeValue(JsonConvert.SerializeObject(source.Data, SerializerSettings));
-            result["status"] = new AttributeValue() { N = Convert.ToInt32(source.Status).ToString() };
+            result["workflow_status"] = new AttributeValue() { N = Convert.ToInt32(source.Status).ToString() };
+
+            if (!string.IsNullOrEmpty(source.Description))
+                result["description"] = new AttributeValue(source.Description);
+
+            if (!string.IsNullOrEmpty(source.Reference))
+                result["reference"] = new AttributeValue(source.Reference);
 
             if (source.CompleteTime.HasValue)
-                result["completeTime"] = new AttributeValue() { N = source.CompleteTime.Value.Ticks.ToString() };
-
+                result["complete_time"] = new AttributeValue() { N = source.CompleteTime.Value.Ticks.ToString() };
+            
             var pointers = new List<AttributeValue>();
             foreach (var pointer in source.ExecutionPointers)
             {
-                pointers.Add(new AttributeValue()
-                {
-                    M = pointer.ToDynamoMap()
-                });
+                pointers.Add(new AttributeValue(JsonConvert.SerializeObject(pointer, SerializerSettings)));
             }
 
-            result["executionPointers"] = new AttributeValue() { L = pointers };
+            result["pointers"] = new AttributeValue() { L = pointers };
 
             return result;
         }
@@ -49,95 +51,84 @@ namespace WorkflowCore.Providers.AWS
             var result = new WorkflowInstance()
             {
                 Id = source["id"].S,
-                Description = source["description"].S,
-                Reference = source["reference"].S,
-                WorkflowDefinitionId = source["workflowDefinitionId"].S,
+                WorkflowDefinitionId = source["workflow_definition_id"].S,
                 Version = Convert.ToInt32(source["version"].S),
-                Status = (WorkflowStatus)Convert.ToInt32(source["status"].N),
-                NextExecution = Convert.ToInt64(source["nextExecution"].N),
-                CreateTime = new DateTime(Convert.ToInt64(source["createTime"].N)),
+                Status = (WorkflowStatus)Convert.ToInt32(source["workflow_status"].N),
+                NextExecution = Convert.ToInt64(source["next_execution"].N),
+                CreateTime = new DateTime(Convert.ToInt64(source["create_time"].N)),
                 Data = JsonConvert.DeserializeObject(source["data"].S, SerializerSettings)
             };
 
-            if (source["completeTime"] != null)
-                result.CompleteTime = new DateTime(Int64.Parse(source["completeTime"].N));
+            if (source.ContainsKey("description"))
+                result.Description = source["description"].S;
+
+            if (source.ContainsKey("reference"))
+                result.Description = source["reference"].S;
+
+            if (source.ContainsKey("complete_time"))
+                result.CompleteTime = new DateTime(Int64.Parse(source["complete_time"].N));
             
-            foreach (var pointer in source["executionPointers"].L)
+            foreach (var pointer in source["pointers"].L)
             {
-                result.ExecutionPointers.Add(pointer.M.ToExecutionPointer());
+                var ep = JsonConvert.DeserializeObject<ExecutionPointer>(pointer.S, SerializerSettings);
+                result.ExecutionPointers.Add(ep);
             }
 
             return result;
         }
 
-        private static Dictionary<string, AttributeValue> ToDynamoMap(this ExecutionPointer source)
+        public static Dictionary<string, AttributeValue> ToDynamoMap(this EventSubscription source)
         {
-            var result = new Dictionary<string, AttributeValue>();
-            result["id"] = new AttributeValue(source.Id);
-            result["active"] = new AttributeValue() { BOOL = source.Active };
-            result["eventPublished"] = new AttributeValue() { BOOL = source.EventPublished };
-            result["eventKey"] = new AttributeValue(source.EventKey);
-            result["eventName"] = new AttributeValue(source.EventName);
-            result["predecessorId"] = new AttributeValue(source.PredecessorId);
-            result["stepName"] = new AttributeValue(source.StepName);
-            result["children"] = new AttributeValue(source.Children);
-            result["scope"] = new AttributeValue(source.Scope.ToList());
-            result["contextItem"] = new AttributeValue(JsonConvert.SerializeObject(source.ContextItem, SerializerSettings));
-            result["eventData"] = new AttributeValue(JsonConvert.SerializeObject(source.EventData, SerializerSettings));
-            result["persistenceData"] = new AttributeValue(JsonConvert.SerializeObject(source.PersistenceData, SerializerSettings));
-            result["outcome"] = new AttributeValue(JsonConvert.SerializeObject(source.Outcome, SerializerSettings));
-            result["stepId"] = new AttributeValue() { N = source.StepId.ToString() };
-            result["retryCount"] = new AttributeValue() { N = source.RetryCount.ToString() };
-            result["status"] = new AttributeValue() { N = Convert.ToInt32(source.Status).ToString() };
-
-            if (source.SleepUntil.HasValue)
-                result["sleepUntil"] = new AttributeValue() { N = source.SleepUntil.Value.Ticks.ToString() };
-            
-            if (source.StartTime.HasValue)
-                result["startTime"] = new AttributeValue() { N = source.StartTime.Value.Ticks.ToString() };
-
-            if (source.EndTime.HasValue)
-                result["endTime"] = new AttributeValue() { N = source.EndTime.Value.Ticks.ToString() };
-
-            result["extensionAttributes"] = new AttributeValue(JsonConvert.SerializeObject(source.ExtensionAttributes, SerializerSettings));
-
-            return result;
+            return new Dictionary<string, AttributeValue>
+            {
+                ["id"] = new AttributeValue(source.Id),
+                ["event_name"] = new AttributeValue(source.EventName),
+                ["event_key"] = new AttributeValue(source.EventKey),
+                ["workflow_id"] = new AttributeValue(source.WorkflowId),
+                ["step_id"] = new AttributeValue(source.StepId.ToString()),
+                ["subscribe_as_of"] = new AttributeValue() { N = source.SubscribeAsOf.Ticks.ToString() },
+                ["event_slug"] = new AttributeValue($"{source.EventName}:{source.EventKey}")
+            };
         }
 
-        public static ExecutionPointer ToExecutionPointer(this Dictionary<string, AttributeValue> source)
+        public static EventSubscription ToEventSubscription(this Dictionary<string, AttributeValue> source)
         {
-            var result = new ExecutionPointer
+            return new EventSubscription()
             {
                 Id = source["id"].S,
-                Active = source["active"].BOOL,
-                ContextItem = JsonConvert.DeserializeObject(source["contextItem"].S, SerializerSettings),
-                Children = source["children"].SS,
-                StepId = Convert.ToInt32(source["stepId"].N),
-                RetryCount = Convert.ToInt32(source["retryCount"].N),
-                EventKey = source["eventKey"].S,
-                EventName = source["eventName"].S,
-                EventPublished = source["eventPublished"].BOOL,
-                PredecessorId = source["predecessorId"].S,
-                Scope = new Stack<string>(source["scope"].SS),
-                StepName = source["stepName"].S,
-                Status = (PointerStatus)(Convert.ToInt32(source["status"].N)),
-                PersistenceData = JsonConvert.DeserializeObject(source["persistenceData"].S, SerializerSettings),
-                EventData = JsonConvert.DeserializeObject(source["eventData"].S, SerializerSettings),
-                Outcome = JsonConvert.DeserializeObject(source["outcome"].S, SerializerSettings),
-
-                ExtensionAttributes = JsonConvert.DeserializeObject<Dictionary<string, object>>(source["extensionAttributes"].S, SerializerSettings)
+                EventName = source["event_name"].S,
+                EventKey = source["event_key"].S,
+                WorkflowId = source["workflow_id"].S,
+                StepId = Convert.ToInt32(source["step_id"].S),
+                SubscribeAsOf = new DateTime(Convert.ToInt64(source["subscribe_as_of"].N))
             };
-            
-            if (source["startTime"] != null)
-                result.StartTime = new DateTime(Int64.Parse(source["startTime"].N));
+        }
 
-            if (source["endTime"] != null)
-                result.EndTime = new DateTime(Int64.Parse(source["endTime"].N));
+        public static Dictionary<string, AttributeValue> ToDynamoMap(this Event source)
+        {
+            return new Dictionary<string, AttributeValue>
+            {
+                ["id"] = new AttributeValue(source.Id),
+                ["event_name"] = new AttributeValue(source.EventName),
+                ["event_key"] = new AttributeValue(source.EventKey),
+                ["event_data"] = new AttributeValue(JsonConvert.SerializeObject(source.EventData, SerializerSettings)),
+                ["is_processed"] = new AttributeValue(source.IsProcessed.ToString()),
+                ["event_time"] = new AttributeValue() { N = source.EventTime.Ticks.ToString() },
+                ["event_slug"] = new AttributeValue($"{source.EventName}:{source.EventKey}")
+            };
+        }
 
-            if (source["sleepUntil"] != null)
-                result.SleepUntil = new DateTime(Int64.Parse(source["sleepUntil"].N));
-
-            return result;
+        public static Event ToEvent(this Dictionary<string, AttributeValue> source)
+        {
+            return new Event()
+            {
+                Id = source["id"].S,
+                EventName = source["event_name"].S,
+                EventKey = source["event_key"].S,
+                EventData = JsonConvert.DeserializeObject(source["event_data"].S, SerializerSettings),
+                IsProcessed = Boolean.Parse(source["is_processed"].S),
+                EventTime = new DateTime(Convert.ToInt64(source["event_time"].N))
+            };
         }
     }
 }

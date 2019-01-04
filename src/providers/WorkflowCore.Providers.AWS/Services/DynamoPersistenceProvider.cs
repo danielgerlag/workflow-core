@@ -17,14 +17,18 @@ namespace WorkflowCore.Providers.AWS.Services
         private readonly ILogger _logger;
         private readonly AmazonDynamoDBClient _client;
         private readonly string _tablePrefix;
+        private readonly IDynamoDbProvisioner _provisioner;
 
         public const string WORKFLOW_TABLE = "workflows";
+        public const string SUBCRIPTION_TABLE = "subscriptions";
+        public const string EVENT_TABLE = "events";
 
-        public DynamoPersistenceProvider(AWSCredentials credentials, AmazonDynamoDBConfig config, string tablePrefix, ILoggerFactory logFactory)
+        public DynamoPersistenceProvider(AWSCredentials credentials, AmazonDynamoDBConfig config, IDynamoDbProvisioner provisioner, string tablePrefix, ILoggerFactory logFactory)
         {
             _logger = logFactory.CreateLogger<DynamoPersistenceProvider>();
             _client = new AmazonDynamoDBClient(credentials, config);
             _tablePrefix = tablePrefix;
+            _provisioner = provisioner;
         }
 
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
@@ -63,14 +67,14 @@ namespace WorkflowCore.Providers.AWS.Services
             {
                 TableName = $"{_tablePrefix}-{WORKFLOW_TABLE}",
                 IndexName = "runnable",
-                //ProjectionExpression = "id",
-                KeyConditionExpression = "status = :status and nextExecution <= :effectiveDate",
+                ProjectionExpression = "id",
+                KeyConditionExpression = "workflow_status = :wfstatus and next_execution <= :effectiveDate",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
                     {
-                        ":status", new AttributeValue()
+                        ":wfstatus", new AttributeValue()
                         {
-                            S = WorkflowStatus.Runnable.ToString()
+                            N = Convert.ToInt32(WorkflowStatus.Runnable).ToString()
                         }
                     },
                     {
@@ -80,7 +84,6 @@ namespace WorkflowCore.Providers.AWS.Services
                         }
                     }
                 },
-                Select = "ALL_PROJECTED_ATTRIBUTES",
                 ScanIndexForward = true
             };
             
@@ -114,61 +117,217 @@ namespace WorkflowCore.Providers.AWS.Services
             return response.Item.ToWorkflowInstance();
         }
 
-        public Task<string> CreateEventSubscription(EventSubscription subscription)
+        public async Task<string> CreateEventSubscription(EventSubscription subscription)
         {
-            throw new NotImplementedException();
+            subscription.Id = Guid.NewGuid().ToString();
+
+            var req = new PutItemRequest()
+            {
+                TableName = $"{_tablePrefix}-{SUBCRIPTION_TABLE}",
+                Item = subscription.ToDynamoMap(),
+                ConditionExpression = "attribute_not_exists(id)"
+            };
+
+            var response = await _client.PutItemAsync(req);
+
+            return subscription.Id;
         }
 
-        public Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf)
+        public async Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf)
         {
-            throw new NotImplementedException();
+            var result = new List<EventSubscription>();
+            var asOfTicks = asOf.ToUniversalTime().Ticks;
+
+            var request = new QueryRequest()
+            {
+                TableName = $"{_tablePrefix}-{SUBCRIPTION_TABLE}",
+                IndexName = "slug",
+                Select = "ALL_PROJECTED_ATTRIBUTES",
+                KeyConditionExpression = "event_slug = :slug and subscribe_as_of <= :as_of",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    {
+                        ":slug", new AttributeValue($"{eventName}:{eventKey}")
+                    },
+                    {
+                        ":as_of", new AttributeValue()
+                        {
+                            N = Convert.ToString(asOfTicks)
+                        }
+                    }
+                },
+                ScanIndexForward = true
+            };
+
+            var response = await _client.QueryAsync(request);
+
+            foreach (var item in response.Items)
+            {
+                result.Add(item.ToEventSubscription());
+            }
+
+            return result;
         }
 
-        public Task TerminateSubscription(string eventSubscriptionId)
+        public async Task TerminateSubscription(string eventSubscriptionId)
         {
-            throw new NotImplementedException();
+            var request = new DeleteItemRequest()
+            {
+                TableName = $"{_tablePrefix}-{SUBCRIPTION_TABLE}",
+                Key = new Dictionary<string, AttributeValue>
+                {
+                    { "id", new AttributeValue(eventSubscriptionId) }
+                }
+            };
+            await _client.DeleteItemAsync(request);
         }
 
-        public Task<string> CreateEvent(Event newEvent)
+        public async Task<string> CreateEvent(Event newEvent)
         {
-            throw new NotImplementedException();
+            newEvent.Id = Guid.NewGuid().ToString();
+
+            var req = new PutItemRequest()
+            {
+                TableName = $"{_tablePrefix}-{EVENT_TABLE}",
+                Item = newEvent.ToDynamoMap(),
+                ConditionExpression = "attribute_not_exists(id)"
+            };
+
+            var response = await _client.PutItemAsync(req);
+
+            return newEvent.Id;
         }
 
-        public Task<Event> GetEvent(string id)
+        public async Task<Event> GetEvent(string id)
         {
-            throw new NotImplementedException();
+            var req = new GetItemRequest()
+            {
+                TableName = $"{_tablePrefix}-{EVENT_TABLE}",
+                Key = new Dictionary<string, AttributeValue>
+                {
+                    { "id", new AttributeValue(id) }
+                }
+            };
+            var response = await _client.GetItemAsync(req);
+
+            return response.Item.ToEvent();
         }
 
         public async Task<IEnumerable<string>> GetRunnableEvents(DateTime asAt)
         {
             var result = new List<string>();
-            //TODO
+            var now = asAt.ToUniversalTime().Ticks;
+
+            var request = new QueryRequest()
+            {
+                TableName = $"{_tablePrefix}-{EVENT_TABLE}",
+                IndexName = "processed",
+                ProjectionExpression = "id",
+                KeyConditionExpression = "is_processed = :processed and event_time <= :effectiveDate",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    { ":processed" , new AttributeValue(false.ToString()) },
+                    {
+                        ":effectiveDate", new AttributeValue()
+                        {
+                            N = Convert.ToString(now)
+                        }
+                    }
+                },
+                ScanIndexForward = true
+            };
+
+            var response = await _client.QueryAsync(request);
+
+            foreach (var item in response.Items)
+            {
+                result.Add(item["id"].S);
+            }
+
             return result;
         }
 
-        public Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf)
+        public async Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf)
         {
-            throw new NotImplementedException();
+            var result = new List<string>();
+            var asOfTicks = asOf.ToUniversalTime().Ticks;
+
+            var request = new QueryRequest()
+            {
+                TableName = $"{_tablePrefix}-{EVENT_TABLE}",
+                IndexName = "slug",
+                ProjectionExpression = "id",
+                KeyConditionExpression = "event_slug = :slug and event_time >= :effective_date",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    {
+                        ":slug", new AttributeValue($"{eventName}:{eventKey}")
+                    },
+                    {
+                        ":effective_date", new AttributeValue()
+                        {
+                            N = Convert.ToString(asOfTicks)
+                        }
+                    }
+                },
+                ScanIndexForward = true
+            };
+
+            var response = await _client.QueryAsync(request);
+
+            foreach (var item in response.Items)
+            {
+                result.Add(item["id"].S);
+            }
+
+            return result;
         }
 
-        public Task MarkEventProcessed(string id)
+        public async Task MarkEventProcessed(string id)
         {
-            throw new NotImplementedException();
+            var request = new UpdateItemRequest()
+            {
+                TableName = $"{_tablePrefix}-{EVENT_TABLE}",
+                Key = new Dictionary<string, AttributeValue>
+                {
+                    { "id", new AttributeValue(id) }
+                },
+                UpdateExpression = "SET is_processed = :processed",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
+                {
+                    { ":processed" , new AttributeValue(true.ToString()) }
+                }
+            };
+            await _client.UpdateItemAsync(request);
         }
 
-        public Task MarkEventUnprocessed(string id)
+        public async Task MarkEventUnprocessed(string id)
         {
-            throw new NotImplementedException();
+            var request = new UpdateItemRequest()
+            {
+                TableName = $"{_tablePrefix}-{EVENT_TABLE}",
+                Key = new Dictionary<string, AttributeValue>
+                {
+                    { "id", new AttributeValue(id) }
+                },
+                UpdateExpression = "SET is_processed = :processed",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
+                {
+                    { ":processed" , new AttributeValue(false.ToString()) }
+                }
+            };
+            await _client.UpdateItemAsync(request);
         }
 
         public Task PersistErrors(IEnumerable<ExecutionError> errors)
         {
-            throw new NotImplementedException();
+            //TODO
+            return Task.CompletedTask;
         }
 
         public void EnsureStoreExists()
         {
-            throw new NotImplementedException();
+            _provisioner.ProvisionTables().Wait();
         }
     }
 }

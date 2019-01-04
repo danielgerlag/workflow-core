@@ -13,10 +13,12 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\providers\WorkflowCore.Persistence.PostgreSQL\WorkflowCore.Persistence.PostgreSQL.csproj" />
     <ProjectReference Include="..\..\src\providers\WorkflowCore.Persistence.SqlServer\WorkflowCore.Persistence.SqlServer.csproj" />
+    <ProjectReference Include="..\..\src\providers\WorkflowCore.Providers.AWS\WorkflowCore.Providers.AWS.csproj" />
     <ProjectReference Include="..\..\src\WorkflowCore\WorkflowCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.16" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.1.0" />
