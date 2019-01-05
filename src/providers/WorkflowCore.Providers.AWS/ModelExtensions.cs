@@ -43,6 +43,9 @@ namespace WorkflowCore.Providers.AWS
 
             result["pointers"] = new AttributeValue() { L = pointers };
 
+            if (source.Status == WorkflowStatus.Runnable)
+                result["runnable"] = new AttributeValue() { N = 1.ToString() };
+
             return result;
         }
 
@@ -63,7 +66,7 @@ namespace WorkflowCore.Providers.AWS
                 result.Description = source["description"].S;
 
             if (source.ContainsKey("reference"))
-                result.Description = source["reference"].S;
+                result.Reference = source["reference"].S;
 
             if (source.ContainsKey("complete_time"))
                 result.CompleteTime = new DateTime(Int64.Parse(source["complete_time"].N));
@@ -106,29 +109,35 @@ namespace WorkflowCore.Providers.AWS
 
         public static Dictionary<string, AttributeValue> ToDynamoMap(this Event source)
         {
-            return new Dictionary<string, AttributeValue>
+            var result = new Dictionary<string, AttributeValue>
             {
                 ["id"] = new AttributeValue(source.Id),
                 ["event_name"] = new AttributeValue(source.EventName),
                 ["event_key"] = new AttributeValue(source.EventKey),
                 ["event_data"] = new AttributeValue(JsonConvert.SerializeObject(source.EventData, SerializerSettings)),
-                ["is_processed"] = new AttributeValue(source.IsProcessed.ToString()),
                 ["event_time"] = new AttributeValue() { N = source.EventTime.Ticks.ToString() },
                 ["event_slug"] = new AttributeValue($"{source.EventName}:{source.EventKey}")
             };
+
+            if (!source.IsProcessed)
+                result["not_processed"] = new AttributeValue() { N = 1.ToString() };
+
+            return result;
         }
 
         public static Event ToEvent(this Dictionary<string, AttributeValue> source)
         {
-            return new Event()
+            var result = new Event()
             {
                 Id = source["id"].S,
                 EventName = source["event_name"].S,
                 EventKey = source["event_key"].S,
                 EventData = JsonConvert.DeserializeObject(source["event_data"].S, SerializerSettings),
-                IsProcessed = Boolean.Parse(source["is_processed"].S),
-                EventTime = new DateTime(Convert.ToInt64(source["event_time"].N))
+                EventTime = new DateTime(Convert.ToInt64(source["event_time"].N)),
+                IsProcessed = (!source.ContainsKey("not_processed"))
             };
+
+            return result;
         }
     }
 }

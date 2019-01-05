@@ -34,13 +34,13 @@ namespace WorkflowCore.Providers.AWS.Services
         {
             var runnableIndex = new GlobalSecondaryIndex()
             {
-                IndexName = "runnable",
+                IndexName = "ix_runnable",
                 KeySchema = new List<KeySchemaElement>()
                 {
                     {
                         new KeySchemaElement
                         {
-                            AttributeName= "workflow_status",
+                            AttributeName= "runnable",
                             KeyType = "HASH" //Partition key
                         }
                     },
@@ -71,7 +71,7 @@ namespace WorkflowCore.Providers.AWS.Services
                 AttributeDefinitions = new List<AttributeDefinition>()
                 {
                     new AttributeDefinition("id", ScalarAttributeType.S),
-                    new AttributeDefinition("workflow_status", ScalarAttributeType.N),
+                    new AttributeDefinition("runnable", ScalarAttributeType.N),
                     new AttributeDefinition("next_execution", ScalarAttributeType.N),
                 },
                 GlobalSecondaryIndexes = new List<GlobalSecondaryIndex>()
@@ -92,7 +92,7 @@ namespace WorkflowCore.Providers.AWS.Services
         {
             var slugIndex = new GlobalSecondaryIndex()
             {
-                IndexName = "slug",
+                IndexName = "ix_slug",
                 KeySchema = new List<KeySchemaElement>()
                 {
                     {
@@ -150,7 +150,7 @@ namespace WorkflowCore.Providers.AWS.Services
         {
             var slugIndex = new GlobalSecondaryIndex()
             {
-                IndexName = "slug",
+                IndexName = "ix_slug",
                 KeySchema = new List<KeySchemaElement>()
                 {
                     {
@@ -181,13 +181,13 @@ namespace WorkflowCore.Providers.AWS.Services
 
             var processedIndex = new GlobalSecondaryIndex()
             {
-                IndexName = "processed",
+                IndexName = "ix_not_processed",
                 KeySchema = new List<KeySchemaElement>()
                 {
                     {
                         new KeySchemaElement
                         {
-                            AttributeName= "is_processed",
+                            AttributeName = "not_processed",
                             KeyType = "HASH" //Partition key
                         }
                     },
@@ -218,7 +218,7 @@ namespace WorkflowCore.Providers.AWS.Services
                 AttributeDefinitions = new List<AttributeDefinition>()
                 {
                     new AttributeDefinition("id", ScalarAttributeType.S),
-                    new AttributeDefinition("is_processed", ScalarAttributeType.S),
+                    new AttributeDefinition("not_processed", ScalarAttributeType.N),
                     new AttributeDefinition("event_slug", ScalarAttributeType.S),
                     new AttributeDefinition("event_time", ScalarAttributeType.N)
                 },

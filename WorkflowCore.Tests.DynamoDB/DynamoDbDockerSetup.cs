@@ -8,12 +8,15 @@ using System.Text;
 using Docker.Testify;
 using Xunit;
 using Amazon.DynamoDBv2;
+using Amazon.Runtime;
 
 namespace WorkflowCore.Tests.DynamoDB
 {    
     public class DynamoDbDockerSetup : DockerSetup
     {
         public static string ConnectionString { get; set; }
+
+        public static AWSCredentials Credentials => new EnvironmentVariablesAWSCredentials();
 
         public override string ImageName => @"amazon/dynamodb-local";
         public override int InternalPort => 8000;

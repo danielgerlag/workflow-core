@@ -17,6 +17,7 @@
     <ProjectReference Include="..\src\providers\WorkflowCore.Providers.AWS\WorkflowCore.Providers.AWS.csproj" />
     <ProjectReference Include="..\test\Docker.Testify\Docker.Testify.csproj" />
     <ProjectReference Include="..\test\WorkflowCore.IntegrationTests\WorkflowCore.IntegrationTests.csproj" />
+    <ProjectReference Include="..\test\WorkflowCore.UnitTests\WorkflowCore.UnitTests.csproj" />
   </ItemGroup>
 
 </Project>

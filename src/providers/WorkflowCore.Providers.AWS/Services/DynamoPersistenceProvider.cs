@@ -66,19 +66,19 @@ namespace WorkflowCore.Providers.AWS.Services
             var request = new QueryRequest()
             {
                 TableName = $"{_tablePrefix}-{WORKFLOW_TABLE}",
-                IndexName = "runnable",
+                IndexName = "ix_runnable",
                 ProjectionExpression = "id",
-                KeyConditionExpression = "workflow_status = :wfstatus and next_execution <= :effectiveDate",
+                KeyConditionExpression = "runnable = :r and next_execution <= :effective_date",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
                     {
-                        ":wfstatus", new AttributeValue()
+                        ":r", new AttributeValue()
                         {
-                            N = Convert.ToInt32(WorkflowStatus.Runnable).ToString()
+                            N = 1.ToString()
                         }
                     },
                     {
-                        ":effectiveDate", new AttributeValue()
+                        ":effective_date", new AttributeValue()
                         {
                             N = Convert.ToString(now)
                         }
@@ -141,7 +141,7 @@ namespace WorkflowCore.Providers.AWS.Services
             var request = new QueryRequest()
             {
                 TableName = $"{_tablePrefix}-{SUBCRIPTION_TABLE}",
-                IndexName = "slug",
+                IndexName = "ix_slug",
                 Select = "ALL_PROJECTED_ATTRIBUTES",
                 KeyConditionExpression = "event_slug = :slug and subscribe_as_of <= :as_of",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
@@ -221,12 +221,12 @@ namespace WorkflowCore.Providers.AWS.Services
             var request = new QueryRequest()
             {
                 TableName = $"{_tablePrefix}-{EVENT_TABLE}",
-                IndexName = "processed",
+                IndexName = "ix_not_processed",
                 ProjectionExpression = "id",
-                KeyConditionExpression = "is_processed = :processed and event_time <= :effectiveDate",
+                KeyConditionExpression = "not_processed = :n and event_time <= :effectiveDate",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
-                    { ":processed" , new AttributeValue(false.ToString()) },
+                    { ":n" , new AttributeValue() { N = 1.ToString() } },
                     {
                         ":effectiveDate", new AttributeValue()
                         {
@@ -255,7 +255,7 @@ namespace WorkflowCore.Providers.AWS.Services
             var request = new QueryRequest()
             {
                 TableName = $"{_tablePrefix}-{EVENT_TABLE}",
-                IndexName = "slug",
+                IndexName = "ix_slug",
                 ProjectionExpression = "id",
                 KeyConditionExpression = "event_slug = :slug and event_time >= :effective_date",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
@@ -292,11 +292,11 @@ namespace WorkflowCore.Providers.AWS.Services
                 {
                     { "id", new AttributeValue(id) }
                 },
-                UpdateExpression = "SET is_processed = :processed",
-                ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
-                {
-                    { ":processed" , new AttributeValue(true.ToString()) }
-                }
+                UpdateExpression = "REMOVE not_processed",
+                //ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
+                //{
+                //    { ":processed" , new AttributeValue(true.ToString()) }
+                //}
             };
             await _client.UpdateItemAsync(request);
         }
@@ -310,10 +310,10 @@ namespace WorkflowCore.Providers.AWS.Services
                 {
                     { "id", new AttributeValue(id) }
                 },
-                UpdateExpression = "SET is_processed = :processed",
+                UpdateExpression = "ADD not_processed = :n",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
                 {
-                    { ":processed" , new AttributeValue(false.ToString()) }
+                    { ":n" , new AttributeValue() { N = 1.ToString() } }
                 }
             };
             await _client.UpdateItemAsync(request);

@@ -11,7 +11,7 @@ using Xunit;
 namespace WorkflowCore.Tests.MongoDB.Scenarios
 {
     [Collection("DynamoDb collection")]
-    public class DynamoBasicScenario : BasicScenario
+    public class DynamoEventScenario : EventScenario
     {        
         protected override void ConfigureServices(IServiceCollection services)
         {
