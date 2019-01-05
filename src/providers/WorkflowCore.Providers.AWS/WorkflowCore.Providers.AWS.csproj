@@ -11,8 +11,8 @@
     <PackageProjectUrl>https://github.com/danielgerlag/workflow-core</PackageProjectUrl>
     <RepositoryUrl>https://github.com/danielgerlag/workflow-core.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Version>1.6.9</Version>
-    <AssemblyVersion>1.6.9.0</AssemblyVersion>
+    <Version>1.6.11</Version>
+    <AssemblyVersion>1.6.11.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

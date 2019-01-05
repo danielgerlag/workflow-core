@@ -23,11 +23,12 @@ namespace WorkflowCore.Providers.AWS.Services
             _tablePrefix = tablePrefix;
         }
 
-        public async Task ProvisionTables()
+        public Task ProvisionTables()
         {
-            await EnsureTable($"{_tablePrefix}-{DynamoPersistenceProvider.WORKFLOW_TABLE}", CreateWorkflowTable);
-            await EnsureTable($"{_tablePrefix}-{DynamoPersistenceProvider.SUBCRIPTION_TABLE}", CreateSubscriptionTable);
-            await EnsureTable($"{_tablePrefix}-{DynamoPersistenceProvider.EVENT_TABLE}", CreateEventTable);
+            return Task.WhenAll(
+                EnsureTable($"{_tablePrefix}-{DynamoPersistenceProvider.WORKFLOW_TABLE}", CreateWorkflowTable),
+                EnsureTable($"{_tablePrefix}-{DynamoPersistenceProvider.SUBCRIPTION_TABLE}", CreateSubscriptionTable),
+                EnsureTable($"{_tablePrefix}-{DynamoPersistenceProvider.EVENT_TABLE}", CreateEventTable));
         }
 
         private async Task CreateWorkflowTable()

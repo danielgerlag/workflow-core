@@ -42,7 +42,7 @@ namespace WorkflowCore.Providers.AWS.Services
                     Item = new Dictionary<string, AttributeValue>
                     {
                         { "id", new AttributeValue(Id) },
-                        { "lockOwner", new AttributeValue(_nodeId) },
+                        { "lock_owner", new AttributeValue(_nodeId) },
                         { "expires", new AttributeValue()
                             {
                                 N = Convert.ToString(new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds() + _ttl)
@@ -86,7 +86,7 @@ namespace WorkflowCore.Providers.AWS.Services
                     {
                         { "id", new AttributeValue(Id) }
                     },
-                    ConditionExpression = "lockOwner = :nodeId",
+                    ConditionExpression = "lock_owner = :nodeId",
                     ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                     {
                         { ":nodeId", new AttributeValue(_nodeId) }
@@ -137,14 +137,14 @@ namespace WorkflowCore.Providers.AWS.Services
                             Item = new Dictionary<string, AttributeValue>
                         {
                             { "id", new AttributeValue(item) },
-                            { "lockOwner", new AttributeValue(_nodeId) },
+                            { "lock_owner", new AttributeValue(_nodeId) },
                             { "expires", new AttributeValue()
                                 {
                                     N = Convert.ToString(new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds() + _ttl)
                                 }
                             }
                         },
-                            ConditionExpression = "lockOwner = :nodeId",
+                            ConditionExpression = "lock_owner = :nodeId",
                             ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                         {
                             { ":nodeId", new AttributeValue(_nodeId) }
