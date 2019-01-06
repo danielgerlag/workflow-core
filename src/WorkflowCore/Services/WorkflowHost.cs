@@ -42,7 +42,6 @@ namespace WorkflowCore.Services
             LockProvider = lockProvider;
             _backgroundTasks = backgroundTasks;
             _workflowController = workflowController;
-            persistenceStore.EnsureStoreExists();
             lifeCycleEventHub.Subscribe(HandleLifeCycleEvent);
         }
         

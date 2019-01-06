@@ -8,6 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using System.Text;
+using Amazon;
+using Amazon.DynamoDBv2;
+using Amazon.Runtime;
 
 namespace ScratchPad
 {
@@ -22,19 +25,29 @@ namespace ScratchPad
 
             //start the workflow host
             var host = serviceProvider.GetService<IWorkflowHost>();
-            var loader = serviceProvider.GetService<IDefinitionLoader>();
-            var str = ScratchPad.Properties.Resources.HelloWorld; //Encoding.UTF8.GetString(ScratchPad.Properties.Resources.HelloWorld);
+            var persistence = serviceProvider.GetService<IPersistenceProvider>();
 
-            loader.LoadDefinition(str);
+            var wf = new WorkflowInstance()
+            {
+                Description = "test",
+                CreateTime = DateTime.UtcNow,
+                Status = WorkflowStatus.Terminated,
+                Version = 1,
+                WorkflowDefinitionId = "def"
+            };
+            var id = persistence.CreateNewWorkflow(wf).Result;
 
+            //var loader = serviceProvider.GetService<IDefinitionLoader>();
+            //var str = ScratchPad.Properties.Resources.HelloWorld; //Encoding.UTF8.GetString(ScratchPad.Properties.Resources.HelloWorld);
+            //loader.LoadDefinition(str);
             //host.RegisterWorkflow<HelloWorldWorkflow>();
-            host.Start();
+            //host.Start();
 
-            host.StartWorkflow("HelloWorld", 1, new MyDataClass() { Value3 = "hi there" });
-                        
+            //host.StartWorkflow("HelloWorld", 1, new MyDataClass() { Value3 = "hi there" });
+
 
             Console.ReadLine();
-            host.Stop();
+            //host.Stop();
         }
 
         private static IServiceProvider ConfigureServices()
@@ -42,8 +55,17 @@ namespace ScratchPad
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
-            services.AddWorkflow();
+            //services.AddWorkflow();
             //services.AddWorkflow(x => x.UseMongoDB(@"mongodb://localhost:27017", "workflow"));
+            services.AddWorkflow(cfg =>
+            {
+                var ddbConfig = new AmazonDynamoDBConfig() { RegionEndpoint = RegionEndpoint.USWest2 };
+                cfg.UseAwsDynamoPersistence(new EnvironmentVariablesAWSCredentials(), ddbConfig, "sample31");
+                //cfg.UseAwsSimpleQueueService(new EnvironmentVariablesAWSCredentials(), new AmazonSQSConfig() { RegionEndpoint = RegionEndpoint.USWest2 });
+                //cfg.UseAwsDynamoLocking(new EnvironmentVariablesAWSCredentials(), new AmazonDynamoDBConfig() { RegionEndpoint = RegionEndpoint.USWest2 }, "workflow-core-locks");
+            });
+
+
             services.AddTransient<GoodbyeWorld>();
 
             var serviceProvider = services.BuildServiceProvider();

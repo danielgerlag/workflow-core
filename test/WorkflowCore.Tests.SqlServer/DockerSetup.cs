@@ -18,7 +18,7 @@ namespace WorkflowCore.Tests.SqlServer
 
         public override string ImageName => "microsoft/mssql-server-linux";
         public override int InternalPort => 1433;
-        public override TimeSpan TimeOut => TimeSpan.FromSeconds(60);
+        public override TimeSpan TimeOut => TimeSpan.FromSeconds(120);
 
         public const string SqlPassword = "I@mJustT3st1ing";
 

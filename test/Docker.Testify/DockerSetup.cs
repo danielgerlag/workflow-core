@@ -110,16 +110,11 @@ namespace Docker.Testify
             if (exists)
                 return;
 
-            var stream = await docker.Images.PullImageAsync(new ImagesPullParameters() { Parent = name, Tag = tag }, null);
-            
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                while (!reader.EndOfStream)
-                    Debug.WriteLine(reader.ReadLine());
-            }
+            Debug.WriteLine($"Pulling docker image {name}:{tag}");
+            await docker.Images.CreateImageAsync(new ImagesCreateParameters() { FromImage = name, Tag = tag }, null, new Progress<JSONMessage>());
         }
 
-    	public void Dispose()
+        public void Dispose()
     	{
     	    docker.Containers.KillContainerAsync(containerId, new ContainerKillParameters()).Wait();
     	    docker.Containers.RemoveContainerAsync(containerId, new ContainerRemoveParameters() { Force = true }).Wait();

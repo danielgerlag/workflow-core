@@ -114,6 +114,7 @@ There are several persistence providers available as separate Nuget packages.
 
 * MemoryPersistenceProvider *(Default provider, for demo and testing purposes)*
 * [MongoDB](src/providers/WorkflowCore.Persistence.MongoDB)
+* [Amazon DynamoDB](src/providers/WorkflowCore.Providers.AWS)
 * [SQL Server](src/providers/WorkflowCore.Persistence.SqlServer)
 * [PostgreSQL](src/providers/WorkflowCore.Persistence.PostgreSQL)
 * [Sqlite](src/providers/WorkflowCore.Persistence.Sqlite)

@@ -63,8 +63,11 @@ namespace WorkflowCore.Sample04
 
             //services.AddWorkflow(cfg =>
             //{
-            //    cfg.UseAwsSimpleQueueService(new EnvironmentVariablesAWSCredentials(), new AmazonSQSConfig() { RegionEndpoint = RegionEndpoint.USWest2 });
-            //    cfg.UseAwsDynamoLocking(new EnvironmentVariablesAWSCredentials(), new AmazonDynamoDBConfig() { RegionEndpoint = RegionEndpoint.USWest2 }, "workflow-core-locks");
+            //    var ddbConfig = new AmazonDynamoDBConfig() { RegionEndpoint = RegionEndpoint.USWest2 };
+
+            //    cfg.UseAwsDynamoPersistence(new EnvironmentVariablesAWSCredentials(), ddbConfig, "sample4");
+            //    cfg.UseAwsDynamoLocking(new EnvironmentVariablesAWSCredentials(), ddbConfig, "workflow-core-locks");
+            //    cfg.UseAwsSimpleQueueService(new EnvironmentVariablesAWSCredentials(), new AmazonSQSConfig() { RegionEndpoint = RegionEndpoint.USWest2 });                
             //});
 
             //services.AddWorkflow(x => x.UseRedlock(new System.Net.DnsEndPoint("127.0.0.1", 32768)));
