@@ -17,6 +17,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
         private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings()
         {
             TypeNameHandling = TypeNameHandling.Objects,
+            PreserveReferencesHandling = PreserveReferencesHandling.Objects
         };
         
         public override object Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)

@@ -12,7 +12,11 @@ namespace WorkflowCore.Providers.AWS
 {
     internal static class ModelExtensions
     {
-        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
+        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings()
+        {
+            TypeNameHandling = TypeNameHandling.All,
+            PreserveReferencesHandling = PreserveReferencesHandling.Objects
+        };
 
         public static Dictionary<string, AttributeValue> ToDynamoMap(this WorkflowInstance source)
         {

@@ -17,7 +17,11 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
     {
         private readonly IConnectionFactory _connectionFactory;
         private IConnection _connection = null;
-        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
+        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings()
+        {
+            TypeNameHandling = TypeNameHandling.All,
+            PreserveReferencesHandling = PreserveReferencesHandling.Objects
+        };
 
         public bool IsDequeueBlocking => false;
 

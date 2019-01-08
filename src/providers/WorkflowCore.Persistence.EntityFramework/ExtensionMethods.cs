@@ -10,12 +10,16 @@ namespace WorkflowCore.Persistence.EntityFramework
 {
     internal static class ExtensionMethods
     {
-        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
+        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings()
+        {
+            TypeNameHandling = TypeNameHandling.All,
+            PreserveReferencesHandling = PreserveReferencesHandling.Objects
+        };
 
         internal static PersistedWorkflow ToPersistable(this WorkflowInstance instance, PersistedWorkflow persistable = null)
         {
             if (persistable == null)            
-                persistable = new PersistedWorkflow();                        
+                persistable = new PersistedWorkflow();                       
 
             persistable.Data = JsonConvert.SerializeObject(instance.Data, SerializerSettings);
             persistable.Description = instance.Description;
