@@ -203,7 +203,7 @@ namespace WorkflowCore.Services
                 var targetType = setter.Parameters.Last().Type;
                 var convertedValue = resolvedValue;
 
-                if (typeof(IConvertible).IsAssignableFrom(targetType))
+                if (typeof(IConvertible).IsAssignableFrom(resolvedValue.GetType()))
                 {
                     convertedValue = Convert.ChangeType(resolvedValue, targetType);
                 }
