@@ -222,56 +222,8 @@ namespace WorkflowCore.UnitTests.Services
             data.Value1.Should().Be(7);
         }
 
-        [Fact(DisplayName = "Should map interface outputs")]
-        public void should_map_interface_outputs()
-        {
-            //arrange
-            Expression<Func<IStepWithProperties, IInterface>> p2 = x => x.Property2;
-            Expression<Func<DataClass, IStepExecutionContext, IInterface>> v2 = (x, context) => x.Value2;
-
-            var step1Body = A.Fake<IStepWithProperties>();
-            A.CallTo(() => step1Body.Property2).Returns(new Class2());
-            A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
-            WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>(), new List<DataMapping>()
-                {
-                    new DataMapping
-                    {
-                        Source = p2,
-                        Target = v2
-                    }
-                }
-            );
-
-            Given1StepWorkflow(step1, "Workflow", 1);
-
-            var data = new DataClass
-            {
-                Value2 = new Class1(),
-            };
-
-            var instance = new WorkflowInstance
-            {
-                WorkflowDefinitionId = "Workflow",
-                Version = 1,
-                Status = WorkflowStatus.Runnable,
-                NextExecution = 0,
-                Id = "001",
-                Data = data,
-                ExecutionPointers = new List<ExecutionPointer>()
-                {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
-                }
-            };
-
-            //act
-            Subject.Execute(instance);
-
-            //assert
-            data.Value2.Should().BeOfType<Class2>();
-        }
-
         [Fact(DisplayName = "Should map dynamic outputs")]
-        public void should_map_outputs_dynamic()
+        public void should_map_dynamic_outputs()
         {
             //arrange
             Expression<Func<IStepWithProperties, int>> p1 = x => x.Property1;
@@ -323,7 +275,7 @@ namespace WorkflowCore.UnitTests.Services
         /// The problem is that calling for example Convert.ChangeType(new DataClass(), typeof(object)) throws, even though the convertion should be trivial.
         /// </summary>
         [Fact(DisplayName = "Should map class outputs, without calling Convert.ChangeType")]
-        public void should_map_outputs_class()
+        public void should_map_class_outputs()
         {
             //arrange
             Expression<Func<IStepWithProperties, Class1>> p3 = x => x.Property3;
@@ -391,7 +343,7 @@ namespace WorkflowCore.UnitTests.Services
         /// The problem is that calling for example Convert.ChangeType(new DataClass(), typeof(object)) throws, even though the convertion should be trivial.
         /// </summary>
         [Fact(DisplayName = "Should map interface outputs, without calling Convert.ChangeType")]
-        public void should_map_outputs_interface()
+        public void should_map_interface_outputs()
         {
             //arrange
             Expression<Func<IStepWithProperties, IInterface>> p2 = x => x.Property2;
