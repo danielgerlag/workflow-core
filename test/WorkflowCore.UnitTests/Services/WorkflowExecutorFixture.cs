@@ -139,8 +139,8 @@ namespace WorkflowCore.UnitTests.Services
         public void should_map_inputs()
         {
             //arrange
-            Expression<Func<IStepWithProperties, int>> p1 = x => x.I;
-            Expression<Func<DataClass, IStepExecutionContext, int>> v1 = (x, context) => x.I;
+            Expression<Func<IStepWithProperties, int>> p = x => x.I;
+            Expression<Func<DataClass, IStepExecutionContext, int>> v = (x, context) => x.I;
 
             var step1Body = A.Fake<IStepWithProperties>();
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
@@ -148,8 +148,8 @@ namespace WorkflowCore.UnitTests.Services
                 {
                     new DataMapping()
                     {
-                        Source = v1,
-                        Target = p1
+                        Source = v,
+                        Target = p
                     }
                 }
             , new List<DataMapping>());
@@ -181,8 +181,8 @@ namespace WorkflowCore.UnitTests.Services
         public void should_map_primitive_outputs()
         {
             //arrange
-            Expression<Func<IStepWithProperties, int>> p1 = x => x.I;
-            Expression<Func<DataClass, IStepExecutionContext, int>> v1 = (x, context) => x.I;
+            Expression<Func<IStepWithProperties, int>> p = x => x.I;
+            Expression<Func<DataClass, IStepExecutionContext, int>> v = (x, context) => x.I;
 
             var step1Body = A.Fake<IStepWithProperties>();
             A.CallTo(() => step1Body.I).Returns(7);
@@ -191,8 +191,8 @@ namespace WorkflowCore.UnitTests.Services
                 {
                     new DataMapping()
                     {
-                        Source = p1,
-                        Target = v1
+                        Source = p,
+                        Target = v
                     }
                 }
             );
@@ -226,8 +226,8 @@ namespace WorkflowCore.UnitTests.Services
         public void should_map_dynamic_outputs()
         {
             //arrange
-            Expression<Func<IStepWithProperties, int>> p1 = x => x.I;
-            Expression<Func<DynamicDataClass, IStepExecutionContext, int>> v1 = (x, context) => x["Value1"];
+            Expression<Func<IStepWithProperties, int>> p = x => x.I;
+            Expression<Func<DynamicDataClass, IStepExecutionContext, int>> v = (x, context) => x["Value1"];
 
             var step1Body = A.Fake<IStepWithProperties>();
             A.CallTo(() => step1Body.I).Returns(7);
@@ -236,8 +236,8 @@ namespace WorkflowCore.UnitTests.Services
                 {
                     new DataMapping()
                     {
-                        Source = p1,
-                        Target = v1
+                        Source = p,
+                        Target = v
                     }
                 }
             );
@@ -278,8 +278,8 @@ namespace WorkflowCore.UnitTests.Services
         public void should_map_class_outputs()
         {
             //arrange
-            Expression<Func<IStepWithProperties, Class1>> p3 = x => x.Class;
-            Expression<Func<DataClass, IStepExecutionContext, Class1>> v3 = (x, context) => x.Class;
+            Expression<Func<IStepWithProperties, Class1>> p = x => x.Class;
+            Expression<Func<DataClass, IStepExecutionContext, Class1>> v = (x, context) => x.Class;
 
             var step1Body = A.Fake<IStepWithProperties>();
             var i = 2;
@@ -296,8 +296,8 @@ namespace WorkflowCore.UnitTests.Services
                 {
                     new DataMapping()
                     {
-                        Source = p3,
-                        Target = v3
+                        Source = p,
+                        Target = v
                     }
                 }
             );
@@ -346,8 +346,8 @@ namespace WorkflowCore.UnitTests.Services
         public void should_map_interface_outputs()
         {
             //arrange
-            Expression<Func<IStepWithProperties, IInterface>> p2 = x => x.Interface;
-            Expression<Func<DataClass, IStepExecutionContext, IInterface>> v2 = (x, context) => x.Interface;
+            Expression<Func<IStepWithProperties, IInterface>> p = x => x.Interface;
+            Expression<Func<DataClass, IStepExecutionContext, IInterface>> v = (x, context) => x.Interface;
 
             var step1Body = A.Fake<IStepWithProperties>();
             var i = 2;
@@ -364,8 +364,8 @@ namespace WorkflowCore.UnitTests.Services
                 {
                     new DataMapping()
                     {
-                        Source = p2,
-                        Target = v2
+                        Source = p,
+                        Target = v
                     }
                 }
             );
