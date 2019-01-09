@@ -122,7 +122,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Tests.MySQL", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Tests.DynamoDB", "WorkflowCore.Tests.DynamoDB\WorkflowCore.Tests.DynamoDB.csproj", "{0FF3F27E-E909-4ABA-BF82-39D1BA133EA7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp2", "ConsoleApp2\ConsoleApp2.csproj", "{81E3F91E-1793-45DE-AD31-B3BFD76BC9B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp2", "ConsoleApp2\ConsoleApp2.csproj", "{A4F963EA-A8B8-4A3B-BA2B-475514AA4745}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -310,10 +310,10 @@ Global
 		{0FF3F27E-E909-4ABA-BF82-39D1BA133EA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0FF3F27E-E909-4ABA-BF82-39D1BA133EA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0FF3F27E-E909-4ABA-BF82-39D1BA133EA7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{81E3F91E-1793-45DE-AD31-B3BFD76BC9B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{81E3F91E-1793-45DE-AD31-B3BFD76BC9B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{81E3F91E-1793-45DE-AD31-B3BFD76BC9B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{81E3F91E-1793-45DE-AD31-B3BFD76BC9B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4F963EA-A8B8-4A3B-BA2B-475514AA4745}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4F963EA-A8B8-4A3B-BA2B-475514AA4745}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4F963EA-A8B8-4A3B-BA2B-475514AA4745}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4F963EA-A8B8-4A3B-BA2B-475514AA4745}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
