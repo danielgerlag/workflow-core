@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 using WorkflowCore.Interface;
 
@@ -33,6 +34,8 @@ namespace WorkflowCore.Models
 
         public virtual bool RevertChildrenAfterCompensation => false;
 
+        public virtual LambdaExpression CancelCondition { get; set; }
+
         public virtual ExecutionPipelineDirective InitForExecution(WorkflowExecutorResult executorResult, WorkflowDefinition defintion, WorkflowInstance workflow, ExecutionPointer executionPointer)
         {
             return ExecutionPipelineDirective.Next;
@@ -61,6 +64,15 @@ namespace WorkflowCore.Models
         /// <param name="executionPointer"></param>
         public virtual void AfterWorkflowIteration(WorkflowExecutorResult executorResult, WorkflowDefinition defintion, WorkflowInstance workflow, ExecutionPointer executionPointer)
         {
+            if (CancelCondition != null)
+            {
+                var func = CancelCondition.Compile();
+                if ((bool)(func.DynamicInvoke(workflow.Data)))
+                {
+                    executionPointer.EndTime = DateTime.Now.ToUniversalTime();
+                    executionPointer.Active = false;
+                }
+            }
         }
 
         public virtual IStepBody ConstructBody(IServiceProvider serviceProvider)

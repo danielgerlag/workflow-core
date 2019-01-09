@@ -213,6 +213,13 @@ namespace WorkflowCore.Interface
         /// <param name="builder"></param>
         /// <returns></returns>
         IStepBuilder<TData, TStepBody> CompensateWithSequence(Action<IWorkflowBuilder<TData>> builder);
+
+        /// <summary>
+        /// Prematurely cancel the execution of this step on a condition
+        /// </summary>
+        /// <param name="cancelCondition"></param>
+        /// <returns></returns>
+        IStepBuilder<TData, TStepBody> CancelCondition(Expression<Func<TData, bool>> cancelCondition);
         
     }
 }
