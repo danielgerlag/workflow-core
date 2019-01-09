@@ -3,15 +3,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Services;
 using FluentAssertions;
 using Xunit;
-using WorkflowCore.Primitives;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace WorkflowCore.UnitTests.Services
 {
@@ -43,7 +40,7 @@ namespace WorkflowCore.UnitTests.Services
 
             //config logging
             var loggerFactory = new LoggerFactory();
-            loggerFactory.AddConsole(LogLevel.Debug);            
+            loggerFactory.AddConsole(LogLevel.Debug);
 
             Subject = new WorkflowExecutor(Registry, ServiceProvider, DateTimeProvider, ResultProcesser, EventHub, Options, loggerFactory);
         }
@@ -68,7 +65,7 @@ namespace WorkflowCore.UnitTests.Services
                 {
                     new ExecutionPointer() { Active = true, StepId = 0 }
                 }
-            };            
+            };
 
             //act
             Subject.Execute(instance);
@@ -130,7 +127,7 @@ namespace WorkflowCore.UnitTests.Services
                     new ExecutionPointer() { Active = false, StepId = 0 }
                 }
             };
-            
+
             //act
             Subject.Execute(instance);
 
@@ -145,7 +142,7 @@ namespace WorkflowCore.UnitTests.Services
             Expression<Func<IStepWithProperties, int>> p1 = x => x.Property1;
             Expression<Func<DataClass, IStepExecutionContext, int>> v1 = (x, context) => x.Value1;
 
-            var step1Body = A.Fake<IStepWithProperties>();            
+            var step1Body = A.Fake<IStepWithProperties>();
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
             WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>()
                 {
@@ -180,8 +177,8 @@ namespace WorkflowCore.UnitTests.Services
             step1Body.Property1.Should().Be(5);
         }
 
-        [Fact(DisplayName = "Should map outputs")]
-        public void should_map_outputs()
+        [Fact(DisplayName = "Should map primitive outputs")]
+        public void should_map_primitive_outputs()
         {
             //arrange
             Expression<Func<IStepWithProperties, int>> p1 = x => x.Property1;
@@ -217,12 +214,60 @@ namespace WorkflowCore.UnitTests.Services
                     new ExecutionPointer() { Active = true, StepId = 0 }
                 }
             };
-            
+
             //act
             Subject.Execute(instance);
 
             //assert
             data.Value1.Should().Be(7);
+        }
+
+        [Fact(DisplayName = "Should map interface outputs")]
+        public void should_map_interface_outputs()
+        {
+            //arrange
+            Expression<Func<IStepWithProperties, IInterface>> p2 = x => x.Property2;
+            Expression<Func<DataClass, IStepExecutionContext, IInterface>> v2 = (x, context) => x.Value2;
+
+            var step1Body = A.Fake<IStepWithProperties>();
+            A.CallTo(() => step1Body.Property2).Returns(new Class2());
+            A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
+            WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>(), new List<DataMapping>()
+                {
+                    new DataMapping
+                    {
+                        Source = p2,
+                        Target = v2
+                    }
+                }
+            );
+
+            Given1StepWorkflow(step1, "Workflow", 1);
+
+            var data = new DataClass
+            {
+                Value2 = new Class1(),
+            };
+
+            var instance = new WorkflowInstance
+            {
+                WorkflowDefinitionId = "Workflow",
+                Version = 1,
+                Status = WorkflowStatus.Runnable,
+                NextExecution = 0,
+                Id = "001",
+                Data = data,
+                ExecutionPointers = new List<ExecutionPointer>()
+                {
+                    new ExecutionPointer() { Active = true, StepId = 0 }
+                }
+            };
+
+            //act
+            Subject.Execute(instance);
+
+            //assert
+            data.Value2.Should().BeOfType<Class2>();
         }
 
         [Fact(DisplayName = "Should map dynamic outputs")]
@@ -274,34 +319,47 @@ namespace WorkflowCore.UnitTests.Services
         }
 
         /// <summary>
-        /// This test verifies that storing an object that does not implement IConvertable, in a step variable of type object works.
+        /// This test verifies that storing a class that does not implement IConvertable, in a step variable of type object works.
         /// The problem is that calling for example Convert.ChangeType(new DataClass(), typeof(object)) throws, even though the convertion should be trivial.
         /// </summary>
-        [Fact(DisplayName = "Should map object outputs, without calling Convert.ChangeType")]
-        public void should_map_outputs_object()
+        [Fact(DisplayName = "Should map class outputs, without calling Convert.ChangeType")]
+        public void should_map_outputs_class()
         {
             //arrange
-            Expression<Func<IStepWithProperties, object>> p1 = x => x.Property4;
-            Expression<Func<DataClass, IStepExecutionContext, object>> v1 = (x, context) => x.Value4;
+            Expression<Func<IStepWithProperties, Class1>> p3 = x => x.Property3;
+            Expression<Func<DataClass, IStepExecutionContext, Class1>> v3 = (x, context) => x.Value3;
 
             var step1Body = A.Fake<IStepWithProperties>();
-            A.CallTo(() => step1Body.Property4).Returns(new DataClass());
+            var i = 2;
+            var s = "s";
+            var o = new Action(() => { });
+            A.CallTo(() => step1Body.Property3).Returns(new Class2
+            {
+                I = i,
+                S = s,
+                O = o
+            });
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
             WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>(), new List<DataMapping>()
                 {
                     new DataMapping()
                     {
-                        Source = p1,
-                        Target = v1
+                        Source = p3,
+                        Target = v3
                     }
                 }
             );
 
             Given1StepWorkflow(step1, "Workflow", 1);
 
-            var data = new DataClass()
+            var data = new DataClass
             {
-                Value4 = 4
+                Value3 = new Class1
+                {
+                    I = 1,
+                    S = "a",
+                    O = typeof(string)
+                }
             };
 
             var instance = new WorkflowInstance
@@ -322,7 +380,78 @@ namespace WorkflowCore.UnitTests.Services
             Subject.Execute(instance);
 
             //assert
-            data.Value4.Should().BeOfType<DataClass>();
+            data.Value3.Should().BeOfType<Class2>();
+            data.Value3.I.Should().Be(i);
+            data.Value3.S.Should().Be(s);
+            data.Value3.O.Should().Be(o);
+        }
+
+        /// <summary>
+        /// This test verifies that storing an interface that does not implement IConvertable, in a step variable of type object works.
+        /// The problem is that calling for example Convert.ChangeType(new DataClass(), typeof(object)) throws, even though the convertion should be trivial.
+        /// </summary>
+        [Fact(DisplayName = "Should map interface outputs, without calling Convert.ChangeType")]
+        public void should_map_outputs_interface()
+        {
+            //arrange
+            Expression<Func<IStepWithProperties, IInterface>> p2 = x => x.Property2;
+            Expression<Func<DataClass, IStepExecutionContext, IInterface>> v2 = (x, context) => x.Value2;
+
+            var step1Body = A.Fake<IStepWithProperties>();
+            var i = 2;
+            var s = "s";
+            var o = new Action(() => { });
+            A.CallTo(() => step1Body.Property2).Returns(new Class2
+            {
+                I = i,
+                S = s,
+                O = o
+            });
+            A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
+            WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>(), new List<DataMapping>()
+                {
+                    new DataMapping()
+                    {
+                        Source = p2,
+                        Target = v2
+                    }
+                }
+            );
+
+            Given1StepWorkflow(step1, "Workflow", 1);
+
+            var data = new DataClass
+            {
+                Value2 = new Class1
+                {
+                    I = 1,
+                    S = "a",
+                    O = typeof(string)
+                }
+            };
+
+            var instance = new WorkflowInstance
+            {
+                WorkflowDefinitionId = "Workflow",
+                Version = 1,
+                Status = WorkflowStatus.Runnable,
+                NextExecution = 0,
+                Id = "001",
+                Data = data,
+                ExecutionPointers = new List<ExecutionPointer>()
+                {
+                    new ExecutionPointer() { Active = true, StepId = 0 }
+                }
+            };
+
+            //act
+            Subject.Execute(instance);
+
+            //assert
+            data.Value2.Should().BeOfType<Class2>();
+            data.Value2.I.Should().Be(i);
+            data.Value2.S.Should().Be(s);
+            data.Value2.O.Should().Be(o);
         }
 
         [Fact(DisplayName = "Should handle step exception")]
@@ -353,7 +482,7 @@ namespace WorkflowCore.UnitTests.Services
             //assert
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).MustHaveHappened();
             A.CallTo(() => ResultProcesser.HandleStepException(instance, A<WorkflowDefinition>.Ignored, A<ExecutionPointer>.Ignored, step1, A<Exception>.Ignored)).MustHaveHappened();
-            A.CallTo(() => ResultProcesser.ProcessExecutionResult(instance, A<WorkflowDefinition>.Ignored, A<ExecutionPointer>.Ignored, step1, A<ExecutionResult>.Ignored, A<WorkflowExecutorResult>.Ignored)).MustNotHaveHappened();            
+            A.CallTo(() => ResultProcesser.ProcessExecutionResult(instance, A<WorkflowDefinition>.Ignored, A<ExecutionPointer>.Ignored, step1, A<ExecutionResult>.Ignored, A<WorkflowExecutorResult>.Ignored)).MustNotHaveHappened();
         }
 
         [Fact(DisplayName = "Should process after execution iteration")]
@@ -422,20 +551,34 @@ namespace WorkflowCore.UnitTests.Services
             return result;
         }
 
+        public interface IInterface
+        {
+            int I { get; set; }
+            string S { get; set; }
+            object O { get; set; }
+        }
+
+        public class Class1 : IInterface
+        {
+            public int I { get; set; }
+            public string S { get; set; }
+            public object O { get; set; }
+        }
+
+        public class Class2 : Class1 { }
+
         public interface IStepWithProperties : IStepBody
         {
             int Property1 { get; set; }
-            int Property2 { get; set; }
-            int Property3 { get; set; }
-            DataClass Property4 { get; set; }
+            IInterface Property2 { get; set; }
+            Class1 Property3 { get; set; }
         }
 
         public class DataClass
         {
             public int Value1 { get; set; }
-            public int Value2 { get; set; }
-            public int Value3 { get; set; }
-            public object Value4 { get; set; }
+            public IInterface Value2 { get; set; }
+            public Class1 Value3 { get; set; }
         }
 
         public class DynamicDataClass

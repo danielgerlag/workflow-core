@@ -54,7 +54,7 @@ namespace WorkflowCore.Services
                 if (step != null)
                 {
                     try
-                    {                        
+                    {
                         switch (step.InitForExecution(wfResult, def, workflow, pointer))
                         {
                             case ExecutionPipelineDirective.Defer:
@@ -144,7 +144,7 @@ namespace WorkflowCore.Services
                             ErrorTime = _datetimeProvider.Now.ToUniversalTime(),
                             Message = ex.Message
                         });
-                        
+
                         _executionResultProcessor.HandleStepException(workflow, def, pointer, step, ex);
                         Host.ReportStepError(workflow, step, ex);
                     }
@@ -201,15 +201,12 @@ namespace WorkflowCore.Services
                 var data = workflow.Data;
                 var setter = ExpressionHelpers.CreateSetter(output.Target);
                 var targetType = setter.Parameters.Last().Type;
-
                 var convertedValue = resolvedValue;
-                // We need to make sure the resolvedValue is of the correct type.
-                // However if the targetType is object we don't need to do anything and in some cases Convert.ChangeType will throw.
-                if (targetType != typeof(object))
+
+                if (typeof(IConvertible).IsAssignableFrom(targetType))
                 {
                     convertedValue = Convert.ChangeType(resolvedValue, targetType);
                 }
-
                 if (setter.Parameters.Count == 2)
                 {
                     setter.Compile().DynamicInvoke(data, convertedValue);
@@ -256,9 +253,9 @@ namespace WorkflowCore.Services
             {
                 foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count > 0))
                 {
-                    if (!workflow.ExecutionPointers.Where(x => x.Scope.Contains(pointer.Id)).All(x => x.EndTime.HasValue)) 
+                    if (!workflow.ExecutionPointers.Where(x => x.Scope.Contains(pointer.Id)).All(x => x.EndTime.HasValue))
                         continue;
-                    
+
                     if (!pointer.SleepUntil.HasValue)
                     {
                         workflow.NextExecution = 0;
@@ -270,9 +267,9 @@ namespace WorkflowCore.Services
                 }
             }
 
-            if ((workflow.NextExecution != null) || (workflow.ExecutionPointers.Any(x => x.EndTime == null))) 
+            if ((workflow.NextExecution != null) || (workflow.ExecutionPointers.Any(x => x.EndTime == null)))
                 return;
-            
+
             workflow.Status = WorkflowStatus.Complete;
             workflow.CompleteTime = _datetimeProvider.Now.ToUniversalTime();
             _publisher.PublishNotification(new WorkflowCompleted()
@@ -284,6 +281,6 @@ namespace WorkflowCore.Services
                 Version = workflow.Version
             });
         }
-        
+
     }
 }
