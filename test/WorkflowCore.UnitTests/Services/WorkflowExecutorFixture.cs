@@ -139,8 +139,8 @@ namespace WorkflowCore.UnitTests.Services
         public void should_map_inputs()
         {
             //arrange
-            Expression<Func<IStepWithProperties, int>> p1 = x => x.Property1;
-            Expression<Func<DataClass, IStepExecutionContext, int>> v1 = (x, context) => x.Value1;
+            Expression<Func<IStepWithProperties, int>> p1 = x => x.I;
+            Expression<Func<DataClass, IStepExecutionContext, int>> v1 = (x, context) => x.I;
 
             var step1Body = A.Fake<IStepWithProperties>();
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
@@ -163,7 +163,7 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                Data = new DataClass() { Value1 = 5 },
+                Data = new DataClass() { I = 5 },
                 ExecutionPointers = new List<ExecutionPointer>()
                 {
                     new ExecutionPointer() { Active = true, StepId = 0 }
@@ -174,18 +174,18 @@ namespace WorkflowCore.UnitTests.Services
             Subject.Execute(instance);
 
             //assert
-            step1Body.Property1.Should().Be(5);
+            step1Body.I.Should().Be(5);
         }
 
         [Fact(DisplayName = "Should map primitive outputs")]
         public void should_map_primitive_outputs()
         {
             //arrange
-            Expression<Func<IStepWithProperties, int>> p1 = x => x.Property1;
-            Expression<Func<DataClass, IStepExecutionContext, int>> v1 = (x, context) => x.Value1;
+            Expression<Func<IStepWithProperties, int>> p1 = x => x.I;
+            Expression<Func<DataClass, IStepExecutionContext, int>> v1 = (x, context) => x.I;
 
             var step1Body = A.Fake<IStepWithProperties>();
-            A.CallTo(() => step1Body.Property1).Returns(7);
+            A.CallTo(() => step1Body.I).Returns(7);
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
             WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>(), new List<DataMapping>()
                 {
@@ -199,7 +199,7 @@ namespace WorkflowCore.UnitTests.Services
 
             Given1StepWorkflow(step1, "Workflow", 1);
 
-            var data = new DataClass() { Value1 = 5 };
+            var data = new DataClass() { I = 5 };
 
             var instance = new WorkflowInstance
             {
@@ -219,18 +219,18 @@ namespace WorkflowCore.UnitTests.Services
             Subject.Execute(instance);
 
             //assert
-            data.Value1.Should().Be(7);
+            data.I.Should().Be(7);
         }
 
         [Fact(DisplayName = "Should map dynamic outputs")]
         public void should_map_dynamic_outputs()
         {
             //arrange
-            Expression<Func<IStepWithProperties, int>> p1 = x => x.Property1;
+            Expression<Func<IStepWithProperties, int>> p1 = x => x.I;
             Expression<Func<DynamicDataClass, IStepExecutionContext, int>> v1 = (x, context) => x["Value1"];
 
             var step1Body = A.Fake<IStepWithProperties>();
-            A.CallTo(() => step1Body.Property1).Returns(7);
+            A.CallTo(() => step1Body.I).Returns(7);
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
             WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>(), new List<DataMapping>()
                 {
@@ -278,14 +278,14 @@ namespace WorkflowCore.UnitTests.Services
         public void should_map_class_outputs()
         {
             //arrange
-            Expression<Func<IStepWithProperties, Class1>> p3 = x => x.Property3;
-            Expression<Func<DataClass, IStepExecutionContext, Class1>> v3 = (x, context) => x.Value3;
+            Expression<Func<IStepWithProperties, Class1>> p3 = x => x.Class;
+            Expression<Func<DataClass, IStepExecutionContext, Class1>> v3 = (x, context) => x.Class;
 
             var step1Body = A.Fake<IStepWithProperties>();
             var i = 2;
             var s = "s";
             var o = new Action(() => { });
-            A.CallTo(() => step1Body.Property3).Returns(new Class2
+            A.CallTo(() => step1Body.Class).Returns(new Class2
             {
                 I = i,
                 S = s,
@@ -306,7 +306,7 @@ namespace WorkflowCore.UnitTests.Services
 
             var data = new DataClass
             {
-                Value3 = new Class1
+                Class = new Class1
                 {
                     I = 1,
                     S = "a",
@@ -332,10 +332,10 @@ namespace WorkflowCore.UnitTests.Services
             Subject.Execute(instance);
 
             //assert
-            data.Value3.Should().BeOfType<Class2>();
-            data.Value3.I.Should().Be(i);
-            data.Value3.S.Should().Be(s);
-            data.Value3.O.Should().Be(o);
+            data.Class.Should().BeOfType<Class2>();
+            data.Class.I.Should().Be(i);
+            data.Class.S.Should().Be(s);
+            data.Class.O.Should().Be(o);
         }
 
         /// <summary>
@@ -346,14 +346,14 @@ namespace WorkflowCore.UnitTests.Services
         public void should_map_interface_outputs()
         {
             //arrange
-            Expression<Func<IStepWithProperties, IInterface>> p2 = x => x.Property2;
-            Expression<Func<DataClass, IStepExecutionContext, IInterface>> v2 = (x, context) => x.Value2;
+            Expression<Func<IStepWithProperties, IInterface>> p2 = x => x.Interface;
+            Expression<Func<DataClass, IStepExecutionContext, IInterface>> v2 = (x, context) => x.Interface;
 
             var step1Body = A.Fake<IStepWithProperties>();
             var i = 2;
             var s = "s";
             var o = new Action(() => { });
-            A.CallTo(() => step1Body.Property2).Returns(new Class2
+            A.CallTo(() => step1Body.Interface).Returns(new Class2
             {
                 I = i,
                 S = s,
@@ -374,7 +374,7 @@ namespace WorkflowCore.UnitTests.Services
 
             var data = new DataClass
             {
-                Value2 = new Class1
+                Interface = new Class1
                 {
                     I = 1,
                     S = "a",
@@ -400,10 +400,10 @@ namespace WorkflowCore.UnitTests.Services
             Subject.Execute(instance);
 
             //assert
-            data.Value2.Should().BeOfType<Class2>();
-            data.Value2.I.Should().Be(i);
-            data.Value2.S.Should().Be(s);
-            data.Value2.O.Should().Be(o);
+            data.Interface.Should().BeOfType<Class2>();
+            data.Interface.I.Should().Be(i);
+            data.Interface.S.Should().Be(s);
+            data.Interface.O.Should().Be(o);
         }
 
         [Fact(DisplayName = "Should handle step exception")]
@@ -521,16 +521,16 @@ namespace WorkflowCore.UnitTests.Services
 
         public interface IStepWithProperties : IStepBody
         {
-            int Property1 { get; set; }
-            IInterface Property2 { get; set; }
-            Class1 Property3 { get; set; }
+            int I { get; set; }
+            IInterface Interface { get; set; }
+            Class1 Class { get; set; }
         }
 
         public class DataClass
         {
-            public int Value1 { get; set; }
-            public IInterface Value2 { get; set; }
-            public Class1 Value3 { get; set; }
+            public int I { get; set; }
+            public IInterface Interface { get; set; }
+            public Class1 Class { get; set; }
         }
 
         public class DynamicDataClass
