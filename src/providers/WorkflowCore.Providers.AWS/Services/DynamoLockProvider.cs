@@ -22,6 +22,7 @@ namespace WorkflowCore.Providers.AWS.Services
         private readonly List<string> _localLocks;
         private Task _heartbeatTask;
         private CancellationTokenSource _cancellationTokenSource;
+        private readonly AutoResetEvent _mutex = new AutoResetEvent(true);
 
         public DynamoLockProvider(AWSCredentials credentials, AmazonDynamoDBConfig config, string tableName, ILoggerFactory logFactory)
         {
@@ -76,7 +77,18 @@ namespace WorkflowCore.Providers.AWS.Services
 
         public async Task ReleaseLock(string Id)
         {
-            _localLocks.Remove(Id);
+            if (_mutex.WaitOne())
+            {
+                try
+                {
+                    _localLocks.Remove(Id);
+                }
+                finally
+                {
+                    _mutex.Set();
+                }
+            }
+            
             try
             {
                 var req = new DeleteItemRequest()
@@ -129,29 +141,46 @@ namespace WorkflowCore.Providers.AWS.Services
                 try
                 {
                     await Task.Delay(_heartbeat, _cancellationTokenSource.Token);
-                    foreach (var item in _localLocks)
+                    if (_mutex.WaitOne())
                     {
-                        var req = new PutItemRequest
+                        try
                         {
-                            TableName = _tableName,
-                            Item = new Dictionary<string, AttributeValue>
-                        {
-                            { "id", new AttributeValue(item) },
-                            { "lock_owner", new AttributeValue(_nodeId) },
-                            { "expires", new AttributeValue()
+                            foreach (var item in _localLocks)
+                            {
+                                var req = new PutItemRequest
                                 {
-                                    N = Convert.ToString(new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds() + _ttl)
+                                    TableName = _tableName,
+                                    Item = new Dictionary<string, AttributeValue>
+                                    {
+                                        { "id", new AttributeValue(item) },
+                                        { "lock_owner", new AttributeValue(_nodeId) },
+                                        { "expires", new AttributeValue()
+                                            {
+                                                N = Convert.ToString(new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds() + _ttl)
+                                            }
+                                        }
+                                    },
+                                    ConditionExpression = "lock_owner = :nodeId",
+                                    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                                    {
+                                        { ":nodeId", new AttributeValue(_nodeId) }
+                                    }
+                                };
+
+                                try
+                                {
+                                    await _client.PutItemAsync(req, _cancellationTokenSource.Token);
+                                }
+                                catch (ConditionalCheckFailedException)
+                                {
+                                    _logger.LogWarning($"Lock not owned anymore when sending heartbeat for {item}");
                                 }
                             }
-                        },
-                            ConditionExpression = "lock_owner = :nodeId",
-                            ExpressionAttributeValues = new Dictionary<string, AttributeValue>
-                        {
-                            { ":nodeId", new AttributeValue(_nodeId) }
                         }
-                        };
-
-                        await _client.PutItemAsync(req, _cancellationTokenSource.Token);
+                        finally
+                        {
+                            _mutex.Set();
+                        }
                     }
                 }
                 catch (Exception ex)

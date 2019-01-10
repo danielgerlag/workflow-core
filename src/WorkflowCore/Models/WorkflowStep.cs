@@ -69,8 +69,23 @@ namespace WorkflowCore.Models
                 var func = CancelCondition.Compile();
                 if ((bool)(func.DynamicInvoke(workflow.Data)))
                 {
-                    executionPointer.EndTime = DateTime.Now.ToUniversalTime();
-                    executionPointer.Active = false;
+                    var toCancel = new Stack<ExecutionPointer>();
+                    toCancel.Push(executionPointer);
+
+                    while (toCancel.Count > 0)
+                    {
+                        var ptr = toCancel.Pop();
+
+                        ptr.EndTime = DateTime.Now.ToUniversalTime();
+                        ptr.Active = false;
+
+                        foreach (var childId in ptr.Children)
+                        {
+                            var child = workflow.ExecutionPointers.FindById(childId);
+                            if (child != null)
+                                toCancel.Push(child);
+                        }
+                    }
                 }
             }
         }

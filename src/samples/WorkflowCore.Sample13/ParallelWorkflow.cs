@@ -19,6 +19,8 @@ namespace WorkflowCore.Sample13
                     .Do(then => 
                         then.StartWith<PrintMessage>()
                                 .Input(step => step.Message, data => "Item 1.1")
+                            .Then(x => Console.Write("boo"))
+                                .Output(data => data.Counter, step => 5)
                             .Then<PrintMessage>()
                                 .Input(step => step.Message, data => "Item 1.2"))
                     .Do(then =>
@@ -32,6 +34,7 @@ namespace WorkflowCore.Sample13
                             .Then<PrintMessage>()
                                 .Input(step => step.Message, data => "Item 3.2"))
                 .Join()
+                .CancelCondition(data => data.Counter == 5)
                 .Then<SayGoodbye>();
         }        
     }

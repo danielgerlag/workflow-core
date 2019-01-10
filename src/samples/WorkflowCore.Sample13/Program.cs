@@ -23,7 +23,7 @@ namespace WorkflowCore.Sample13
             host.Start();
 
             Console.WriteLine("Starting workflow...");
-            controller.StartWorkflow("parallel-sample");
+            controller.StartWorkflow("parallel-sample", new MyData());
             
             Console.ReadLine();
             host.Stop();
