@@ -78,6 +78,7 @@ namespace WorkflowCore.Models
 
                         ptr.EndTime = DateTime.Now.ToUniversalTime();
                         ptr.Active = false;
+                        ptr.Status = PointerStatus.Cancelled;
 
                         foreach (var childId in ptr.Children)
                         {

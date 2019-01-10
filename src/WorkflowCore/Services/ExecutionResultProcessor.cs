@@ -128,7 +128,7 @@ namespace WorkflowCore.Services
             while (scope.Count > 0)
             {
                 var pointerId = scope.Pop();
-                var pointer = workflow.ExecutionPointers.First(x => x.Id == pointerId);
+                var pointer = workflow.ExecutionPointers.FindById(pointerId);
                 var step = def.Steps.First(x => x.Id == pointer.StepId);
                 if (step.CompensationStepId.HasValue)
                     return step.CompensationStepId.Value;

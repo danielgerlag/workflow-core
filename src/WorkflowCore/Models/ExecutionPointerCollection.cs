@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace WorkflowCore.Models
@@ -8,6 +9,18 @@ namespace WorkflowCore.Models
     public class ExecutionPointerCollection : ICollection<ExecutionPointer>
     {
         private readonly Dictionary<string, ExecutionPointer> _dictionary = new Dictionary<string, ExecutionPointer>();
+
+        public ExecutionPointerCollection()
+        {
+        }
+
+        public ExecutionPointerCollection(ICollection<ExecutionPointer> pointers)
+        {
+            foreach (var ptr in pointers)
+            {
+                Add(ptr);
+            }
+        }
 
         public IEnumerator<ExecutionPointer> GetEnumerator()
         {
@@ -50,6 +63,11 @@ namespace WorkflowCore.Models
         public bool Remove(ExecutionPointer item)
         {
             return _dictionary.Remove(item.Id);
+        }
+
+        public ExecutionPointer Find(Predicate<ExecutionPointer> match)
+        {
+            return _dictionary.Values.FirstOrDefault(x => match(x));
         }
 
         public int Count => _dictionary.Count;

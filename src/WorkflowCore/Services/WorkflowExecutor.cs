@@ -50,6 +50,9 @@ namespace WorkflowCore.Services
 
             foreach (var pointer in exePointers)
             {
+                if (pointer.Status == PointerStatus.Cancelled)
+                    continue;
+
                 var step = def.Steps.First(x => x.Id == pointer.StepId);
                 if (step != null)
                 {

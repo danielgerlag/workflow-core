@@ -57,6 +57,7 @@ namespace WorkflowCore.Models
         Sleeping = 4,
         WaitingForEvent = 5,
         Failed = 6,
-        Compensated = 7
+        Compensated = 7,
+        Cancelled = 8
     }
 }

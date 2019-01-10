@@ -195,10 +195,10 @@ namespace WorkflowCore.UnitTests.Services
             return new WorkflowInstance
             {
                 Status = WorkflowStatus.Runnable,
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
                     pointer
-                }
+                })
             };
         }
     }

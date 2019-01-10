@@ -64,10 +64,10 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
                     new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                })
             };            
 
             //act
@@ -94,10 +94,10 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
                     new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                })
             };
 
             //act
@@ -125,10 +125,10 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
                     new ExecutionPointer() { Active = false, StepId = 0 }
-                }
+                })
             };
             
             //act
@@ -167,10 +167,10 @@ namespace WorkflowCore.UnitTests.Services
                 NextExecution = 0,
                 Id = "001",
                 Data = new DataClass() { Value1 = 5 },
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
                     new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                })
             };
 
             //act
@@ -212,10 +212,10 @@ namespace WorkflowCore.UnitTests.Services
                 NextExecution = 0,
                 Id = "001",
                 Data = data,
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
                     new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                })
             };
             
             //act
@@ -260,10 +260,10 @@ namespace WorkflowCore.UnitTests.Services
                 NextExecution = 0,
                 Id = "001",
                 Data = data,
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
                     new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                })
             };
 
             //act
@@ -312,10 +312,10 @@ namespace WorkflowCore.UnitTests.Services
                 NextExecution = 0,
                 Id = "001",
                 Data = data,
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
                     new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                })
             };
 
             //act
@@ -341,10 +341,10 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
                     new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                })
             };
 
             //act
@@ -372,10 +372,10 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
                     new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                })
             };
 
             //act
