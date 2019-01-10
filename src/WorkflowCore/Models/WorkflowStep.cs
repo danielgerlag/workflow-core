@@ -36,6 +36,8 @@ namespace WorkflowCore.Models
 
         public virtual LambdaExpression CancelCondition { get; set; }
 
+        public bool ProceedOnCancel { get; set; } = false;
+
         public virtual ExecutionPipelineDirective InitForExecution(WorkflowExecutorResult executorResult, WorkflowDefinition defintion, WorkflowInstance workflow, ExecutionPointer executionPointer)
         {
             return ExecutionPipelineDirective.Next;
@@ -64,31 +66,7 @@ namespace WorkflowCore.Models
         /// <param name="executionPointer"></param>
         public virtual void AfterWorkflowIteration(WorkflowExecutorResult executorResult, WorkflowDefinition defintion, WorkflowInstance workflow, ExecutionPointer executionPointer)
         {
-            if (CancelCondition != null)
-            {
-                var func = CancelCondition.Compile();
-                if ((bool)(func.DynamicInvoke(workflow.Data)))
-                {
-                    var toCancel = new Stack<ExecutionPointer>();
-                    toCancel.Push(executionPointer);
-
-                    while (toCancel.Count > 0)
-                    {
-                        var ptr = toCancel.Pop();
-
-                        ptr.EndTime = DateTime.Now.ToUniversalTime();
-                        ptr.Active = false;
-                        ptr.Status = PointerStatus.Cancelled;
-
-                        foreach (var childId in ptr.Children)
-                        {
-                            var child = workflow.ExecutionPointers.FindById(childId);
-                            if (child != null)
-                                toCancel.Push(child);
-                        }
-                    }
-                }
-            }
+            
         }
 
         public virtual IStepBody ConstructBody(IServiceProvider serviceProvider)

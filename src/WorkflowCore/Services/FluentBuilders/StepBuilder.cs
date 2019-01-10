@@ -443,9 +443,10 @@ namespace WorkflowCore.Services
             return this;
         }
 
-        public IStepBuilder<TData, TStepBody> CancelCondition(Expression<Func<TData, bool>> cancelCondition)
+        public IStepBuilder<TData, TStepBody> CancelCondition(Expression<Func<TData, bool>> cancelCondition, bool proceedAfterCancel = false)
         {
             Step.CancelCondition = cancelCondition;
+            Step.ProceedOnCancel = proceedAfterCancel;
             return this;
         }
     }

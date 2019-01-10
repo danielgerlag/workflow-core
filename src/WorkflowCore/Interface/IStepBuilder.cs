@@ -219,7 +219,7 @@ namespace WorkflowCore.Interface
         /// </summary>
         /// <param name="cancelCondition"></param>
         /// <returns></returns>
-        IStepBuilder<TData, TStepBody> CancelCondition(Expression<Func<TData, bool>> cancelCondition);
+        IStepBuilder<TData, TStepBody> CancelCondition(Expression<Func<TData, bool>> cancelCondition, bool proceedAfterCancel = false);
         
     }
 }

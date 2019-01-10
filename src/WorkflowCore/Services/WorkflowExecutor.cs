@@ -20,17 +20,19 @@ namespace WorkflowCore.Services
         protected readonly IDateTimeProvider _datetimeProvider;
         protected readonly ILogger _logger;
         private readonly IExecutionResultProcessor _executionResultProcessor;
+        private readonly ICancellationProcessor _cancellationProcessor;
         private readonly ILifeCycleEventPublisher _publisher;
         private readonly WorkflowOptions _options;
 
         private IWorkflowHost Host => _serviceProvider.GetService<IWorkflowHost>();
 
-        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, ILifeCycleEventPublisher publisher, WorkflowOptions options, ILoggerFactory loggerFactory)
+        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, ILifeCycleEventPublisher publisher, ICancellationProcessor cancellationProcessor, WorkflowOptions options, ILoggerFactory loggerFactory)
         {
             _serviceProvider = serviceProvider;
             _registry = registry;
             _datetimeProvider = datetimeProvider;
             _publisher = publisher;
+            _cancellationProcessor = cancellationProcessor;
             _options = options;
             _logger = loggerFactory.CreateLogger<WorkflowExecutor>();
             _executionResultProcessor = executionResultProcessor;
@@ -151,6 +153,7 @@ namespace WorkflowCore.Services
                         _executionResultProcessor.HandleStepException(workflow, def, pointer, step, ex);
                         Host.ReportStepError(workflow, step, ex);
                     }
+                    _cancellationProcessor.ProcessCancellations(workflow, def, wfResult);
                 }
                 else
                 {

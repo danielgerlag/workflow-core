@@ -188,7 +188,6 @@ namespace WorkflowCore.UnitTests.Services
             A.CallTo(() => PointerFactory.BuildChildPointer(definition, pointer, child, branch)).MustHaveHappened();
             instance.ExecutionPointers.Should().Contain(childPointer);
         }
-
         
         private static WorkflowInstance GivenWorkflow(ExecutionPointer pointer)
         {
