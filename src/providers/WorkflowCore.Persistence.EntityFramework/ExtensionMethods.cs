@@ -135,7 +135,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             if (instance.CompleteTime.HasValue)
                 result.CompleteTime = DateTime.SpecifyKind(instance.CompleteTime.Value, DateTimeKind.Utc);
 
-            result.ExecutionPointers = new ExecutionPointerCollection(instance.ExecutionPointers.Count);
+            result.ExecutionPointers = new ExecutionPointerCollection(instance.ExecutionPointers.Count + 8);
 
             foreach (var ep in instance.ExecutionPointers)
             {
