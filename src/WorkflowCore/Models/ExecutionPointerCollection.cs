@@ -15,6 +15,11 @@ namespace WorkflowCore.Models
         {
         }
 
+        public ExecutionPointerCollection(int capacity)
+        {
+            _dictionary = new Dictionary<string, ExecutionPointer>(capacity);
+        }
+
         public ExecutionPointerCollection(ICollection<ExecutionPointer> pointers)
         {
             foreach (var ptr in pointers)
