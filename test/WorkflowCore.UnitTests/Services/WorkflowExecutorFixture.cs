@@ -139,8 +139,8 @@ namespace WorkflowCore.UnitTests.Services
         public void should_map_inputs()
         {
             //arrange
-            Expression<Func<IStepWithProperties, int>> p = x => x.I;
-            Expression<Func<DataClass, IStepExecutionContext, int>> v = (x, context) => x.I;
+            Expression<Func<IStepWithProperties, int>> p = x => x.Int;
+            Expression<Func<DataClass, IStepExecutionContext, int>> v = (x, context) => x.Int;
 
             var step1Body = A.Fake<IStepWithProperties>();
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
@@ -163,7 +163,7 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                Data = new DataClass() { I = 5 },
+                Data = new DataClass() { Int = 5 },
                 ExecutionPointers = new List<ExecutionPointer>()
                 {
                     new ExecutionPointer() { Active = true, StepId = 0 }
@@ -174,18 +174,19 @@ namespace WorkflowCore.UnitTests.Services
             Subject.Execute(instance);
 
             //assert
-            step1Body.I.Should().Be(5);
+            step1Body.Int.Should().Be(5);
         }
 
-        [Fact(DisplayName = "Should map primitive outputs")]
-        public void should_map_primitive_outputs()
+        [Fact(DisplayName = "Should map value outputs")]
+        public void should_map_value_type_outputs()
         {
             //arrange
-            Expression<Func<IStepWithProperties, int>> p = x => x.I;
-            Expression<Func<DataClass, IStepExecutionContext, int>> v = (x, context) => x.I;
+            Expression<Func<IStepWithProperties, int>> p = x => x.Int;
+            Expression<Func<DataClass, IStepExecutionContext, int>> v = (x, context) => x.Int;
 
             var step1Body = A.Fake<IStepWithProperties>();
-            A.CallTo(() => step1Body.I).Returns(7);
+            const int @int = 7;
+            A.CallTo(() => step1Body.Int).Returns(@int);
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
             WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>(), new List<DataMapping>()
                 {
@@ -199,7 +200,7 @@ namespace WorkflowCore.UnitTests.Services
 
             Given1StepWorkflow(step1, "Workflow", 1);
 
-            var data = new DataClass() { I = 5 };
+            var data = new DataClass() { Int = 5 };
 
             var instance = new WorkflowInstance
             {
@@ -219,18 +220,163 @@ namespace WorkflowCore.UnitTests.Services
             Subject.Execute(instance);
 
             //assert
-            data.I.Should().Be(7);
+            data.Int.Should().Be(@int);
+        }
+
+        [Theory(DisplayName = "Should map nullable value outputs")]
+        [InlineData(7)]
+        [InlineData(null)]
+        public void should_map_nullable_value_type_outputs(int? nullableInt)
+        {
+            //arrange
+            Expression<Func<IStepWithProperties, int?>> p = x => x.NullableInt;
+            Expression<Func<DataClass, IStepExecutionContext, int?>> v = (x, context) => x.NullableInt;
+
+            var step1Body = A.Fake<IStepWithProperties>();
+            A.CallTo(() => step1Body.NullableInt).Returns(nullableInt);
+            A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
+            WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>(), new List<DataMapping>()
+                {
+                    new DataMapping()
+                    {
+                        Source = p,
+                        Target = v
+                    }
+                }
+            );
+
+            Given1StepWorkflow(step1, "Workflow", 1);
+
+            var data = new DataClass() { NullableInt = 5 };
+
+            var instance = new WorkflowInstance
+            {
+                WorkflowDefinitionId = "Workflow",
+                Version = 1,
+                Status = WorkflowStatus.Runnable,
+                NextExecution = 0,
+                Id = "001",
+                Data = data,
+                ExecutionPointers = new List<ExecutionPointer>()
+                {
+                    new ExecutionPointer() { Active = true, StepId = 0 }
+                }
+            };
+
+            //act
+            Subject.Execute(instance);
+
+            //assert
+            data.NullableInt.Should().Be(nullableInt);
+        }
+
+        [Fact(DisplayName = "Should map enum value outputs")]
+        public void should_map_enum_outputs()
+        {
+            //arrange
+            Expression<Func<IStepWithProperties, int>> p = x => x.EnumInt;
+            Expression<Func<DataClass, IStepExecutionContext, Enum>> v = (x, context) => x.Enum;
+
+            var step1Body = A.Fake<IStepWithProperties>();
+            const int enumInt = 2;
+            A.CallTo(() => step1Body.EnumInt).Returns(enumInt);
+            A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
+            WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>(), new List<DataMapping>()
+                {
+                    new DataMapping
+                    {
+                        Source = p,
+                        Target = v
+                    },
+                }
+            );
+
+            Given1StepWorkflow(step1, "Workflow", 1);
+
+            var data = new DataClass
+            {
+                Enum = Enum.One,
+            };
+
+            var instance = new WorkflowInstance
+            {
+                WorkflowDefinitionId = "Workflow",
+                Version = 1,
+                Status = WorkflowStatus.Runnable,
+                NextExecution = 0,
+                Id = "001",
+                Data = data,
+                ExecutionPointers = new List<ExecutionPointer>()
+                {
+                    new ExecutionPointer() { Active = true, StepId = 0 }
+                }
+            };
+
+            //act
+            Subject.Execute(instance);
+
+            //assert
+            data.Enum.Should().Be(Enum.Two);
+        }
+
+        [Fact(DisplayName = "Should map nullable enum value outputs")]
+        public void should_map_nullable_enum_outputs()
+        {
+            //arrange
+            Expression<Func<IStepWithProperties, int>> p = x => x.EnumInt;
+            Expression<Func<DataClass, IStepExecutionContext, Enum?>> v = (x, context) => x.NullableEnum;
+
+            var step1Body = A.Fake<IStepWithProperties>();
+            const int enumInt = 2;
+            A.CallTo(() => step1Body.EnumInt).Returns(enumInt);
+            A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
+            WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>(), new List<DataMapping>()
+                {
+                    new DataMapping
+                    {
+                        Source = p,
+                        Target = v
+                    },
+                }
+            );
+
+            Given1StepWorkflow(step1, "Workflow", 1);
+
+            var data = new DataClass
+            {
+                NullableEnum = Enum.One,
+            };
+
+            var instance = new WorkflowInstance
+            {
+                WorkflowDefinitionId = "Workflow",
+                Version = 1,
+                Status = WorkflowStatus.Runnable,
+                NextExecution = 0,
+                Id = "001",
+                Data = data,
+                ExecutionPointers = new List<ExecutionPointer>()
+                {
+                    new ExecutionPointer() { Active = true, StepId = 0 }
+                }
+            };
+
+            //act
+            Subject.Execute(instance);
+
+            //assert
+            data.NullableEnum.Should().Be(Enum.Two);
         }
 
         [Fact(DisplayName = "Should map dynamic outputs")]
         public void should_map_dynamic_outputs()
         {
             //arrange
-            Expression<Func<IStepWithProperties, int>> p = x => x.I;
+            Expression<Func<IStepWithProperties, int>> p = x => x.Int;
             Expression<Func<DynamicDataClass, IStepExecutionContext, int>> v = (x, context) => x["Value1"];
 
             var step1Body = A.Fake<IStepWithProperties>();
-            A.CallTo(() => step1Body.I).Returns(7);
+            A.CallTo(() => step1Body.Int).Returns(7);
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
             WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>(), new List<DataMapping>()
                 {
@@ -270,26 +416,18 @@ namespace WorkflowCore.UnitTests.Services
             data["Value1"].Should().Be(7);
         }
 
-        /// <summary>
-        /// This test verifies that storing a class that does not implement IConvertable, in a step variable of type object works.
-        /// The problem is that calling for example Convert.ChangeType(new DataClass(), typeof(object)) throws, even though the convertion should be trivial.
-        /// </summary>
-        [Fact(DisplayName = "Should map class outputs, without calling Convert.ChangeType")]
-        public void should_map_class_outputs()
+        [Fact(DisplayName = "Should map class reference outputs")]
+        public void should_map_class_reference_outputs()
         {
             //arrange
             Expression<Func<IStepWithProperties, Class1>> p = x => x.Class;
             Expression<Func<DataClass, IStepExecutionContext, Class1>> v = (x, context) => x.Class;
 
             var step1Body = A.Fake<IStepWithProperties>();
-            var i = 2;
-            var s = "s";
-            var o = new Action(() => { });
+            const int @int = 2;
             A.CallTo(() => step1Body.Class).Returns(new Class2
             {
-                I = i,
-                S = s,
-                O = o
+                Int = @int,
             });
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
             WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>(), new List<DataMapping>()
@@ -308,9 +446,7 @@ namespace WorkflowCore.UnitTests.Services
             {
                 Class = new Class1
                 {
-                    I = 1,
-                    S = "a",
-                    O = typeof(string)
+                    Int = 1,
                 }
             };
 
@@ -333,31 +469,21 @@ namespace WorkflowCore.UnitTests.Services
 
             //assert
             data.Class.Should().BeOfType<Class2>();
-            data.Class.I.Should().Be(i);
-            data.Class.S.Should().Be(s);
-            data.Class.O.Should().Be(o);
+            data.Class.Int.Should().Be(@int);
         }
 
-        /// <summary>
-        /// This test verifies that storing an interface that does not implement IConvertable, in a step variable of type object works.
-        /// The problem is that calling for example Convert.ChangeType(new DataClass(), typeof(object)) throws, even though the convertion should be trivial.
-        /// </summary>
-        [Fact(DisplayName = "Should map interface outputs, without calling Convert.ChangeType")]
-        public void should_map_interface_outputs()
+        [Fact(DisplayName = "Should map interface reference outputs")]
+        public void should_map_interface_reference_outputs()
         {
             //arrange
             Expression<Func<IStepWithProperties, IInterface>> p = x => x.Interface;
             Expression<Func<DataClass, IStepExecutionContext, IInterface>> v = (x, context) => x.Interface;
 
             var step1Body = A.Fake<IStepWithProperties>();
-            var i = 2;
-            var s = "s";
-            var o = new Action(() => { });
+            var @int = 2;
             A.CallTo(() => step1Body.Interface).Returns(new Class2
             {
-                I = i,
-                S = s,
-                O = o
+                Int = @int,
             });
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
             WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>(), new List<DataMapping>()
@@ -376,9 +502,7 @@ namespace WorkflowCore.UnitTests.Services
             {
                 Interface = new Class1
                 {
-                    I = 1,
-                    S = "a",
-                    O = typeof(string)
+                    Int = 1,
                 }
             };
 
@@ -401,9 +525,7 @@ namespace WorkflowCore.UnitTests.Services
 
             //assert
             data.Interface.Should().BeOfType<Class2>();
-            data.Interface.I.Should().Be(i);
-            data.Interface.S.Should().Be(s);
-            data.Interface.O.Should().Be(o);
+            data.Interface.Int.Should().Be(@int);
         }
 
         [Fact(DisplayName = "Should handle step exception")]
@@ -505,30 +627,38 @@ namespace WorkflowCore.UnitTests.Services
 
         public interface IInterface
         {
-            int I { get; set; }
-            string S { get; set; }
-            object O { get; set; }
+            int Int { get; set; }
         }
 
         public class Class1 : IInterface
         {
-            public int I { get; set; }
-            public string S { get; set; }
-            public object O { get; set; }
+            public int Int { get; set; }
         }
 
         public class Class2 : Class1 { }
 
+        public enum Enum
+        {
+            One = 1,
+            Two = 2,
+        }
+
         public interface IStepWithProperties : IStepBody
         {
-            int I { get; set; }
+            int Int { get; set; }
+            int? NullableInt { get; set; }
+            Enum Enum { get; set; }
+            int EnumInt { get; set; }
             IInterface Interface { get; set; }
             Class1 Class { get; set; }
         }
 
         public class DataClass
         {
-            public int I { get; set; }
+            public int Int { get; set; }
+            public int? NullableInt { get; set; }
+            public Enum Enum { get; set; }
+            public Enum? NullableEnum { get; set; }
             public IInterface Interface { get; set; }
             public Class1 Class { get; set; }
         }

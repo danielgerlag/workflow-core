@@ -197,24 +197,22 @@ namespace WorkflowCore.Services
         {
             foreach (var output in step.Outputs)
             {
-                var resolvedValue = output.Source.Compile().DynamicInvoke(body);
                 var data = workflow.Data;
                 var setter = ExpressionHelpers.CreateSetter(output.Target);
                 var targetType = setter.Parameters.Last().Type;
-                var convertedValue = resolvedValue;
+                var value = new Lazy<object>(() =>
+                {
+                    var val = output.Source.Compile().DynamicInvoke(body);
+                    return Expression
+                        .Lambda(Expression.Convert(Expression.Constant(val), targetType))
+                        .Compile()
+                        .DynamicInvoke();
+                }).Value;
 
-                if (typeof(IConvertible).IsAssignableFrom(resolvedValue.GetType()))
-                {
-                    convertedValue = Convert.ChangeType(resolvedValue, targetType);
-                }
                 if (setter.Parameters.Count == 2)
-                {
-                    setter.Compile().DynamicInvoke(data, convertedValue);
-                }
+                    setter.Compile().DynamicInvoke(data, value);
                 else
-                {
-                    setter.Compile().DynamicInvoke(data, context, convertedValue);
-                }
+                    setter.Compile().DynamicInvoke(data, context, value);
             }
         }
 
