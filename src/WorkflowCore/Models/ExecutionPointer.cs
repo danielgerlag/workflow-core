@@ -44,7 +44,7 @@ namespace WorkflowCore.Models
 
         public PointerStatus Status { get; set; } = PointerStatus.Legacy;
         
-        public Stack<string> Scope { get; set; } = new Stack<string>();
+        public IReadOnlyCollection<string> Scope { get; set; } = new Stack<string>();
                         
     }
 

@@ -30,7 +30,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             
             foreach (var ep in instance.ExecutionPointers)
             {
-                var persistedEP = persistable.ExecutionPointers.FirstOrDefault(x => x.Id == ep.Id);
+                var persistedEP = persistable.ExecutionPointers.FindById(ep.Id);
                 
                 if (persistedEP == null)
                 {

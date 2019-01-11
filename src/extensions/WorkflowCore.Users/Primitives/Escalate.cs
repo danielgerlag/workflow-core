@@ -16,7 +16,7 @@ namespace WorkflowCore.Users.Primitives
         {
             if (context.PersistenceData != null)
             {
-                var taskStep = context.Workflow.ExecutionPointers.Find(x => x.Id == context.ExecutionPointer.PredecessorId);
+                var taskStep = context.Workflow.ExecutionPointers.FindById(context.ExecutionPointer.PredecessorId);
 
                 if (!taskStep.EventPublished)
                 {

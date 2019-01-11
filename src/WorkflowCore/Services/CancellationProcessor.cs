@@ -35,26 +35,24 @@ namespace WorkflowCore.Services
                 }
                 if (cancel)
                 {
-                    var toCancel = new Stack<ExecutionPointer>(workflow.ExecutionPointers.Where(x => x.StepId == step.Id && x.Status != PointerStatus.Complete && x.Status != PointerStatus.Cancelled));
+                    var toCancel = workflow.ExecutionPointers.Where(x => x.StepId == step.Id && x.Status != PointerStatus.Complete && x.Status != PointerStatus.Cancelled).ToList();
 
-                    while (toCancel.Count > 0)
+                    foreach (var ptr in toCancel)
                     {
-                        var ptr = toCancel.Pop();
-
                         ptr.EndTime = DateTime.Now.ToUniversalTime();
                         ptr.Active = false;
                         ptr.Status = PointerStatus.Cancelled;
 
-                        if ((ptr.StepId == step.Id) && (step.ProceedOnCancel))
+                        if (step.ProceedOnCancel)
                         {
                             _executionResultProcessor.ProcessExecutionResult(workflow, workflowDef, ptr, step, ExecutionResult.Next(), executionResult);
                         }
-
-                        foreach (var childId in ptr.Children)
+                        
+                        foreach (var descendent in workflow.ExecutionPointers.FindByScope(ptr.Id).Where(x => x.Status != PointerStatus.Complete && x.Status != PointerStatus.Cancelled))
                         {
-                            var child = workflow.ExecutionPointers.FindById(childId);
-                            if (child != null)
-                                toCancel.Push(child);
+                            descendent.EndTime = DateTime.Now.ToUniversalTime();
+                            descendent.Active = false;
+                            descendent.Status = PointerStatus.Cancelled;
                         }
                     }
                 }

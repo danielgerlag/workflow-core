@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace WorkflowCore.Models
 {
@@ -25,8 +26,14 @@ namespace WorkflowCore.Models
 
         public DateTime CreateTime { get; set; }
 
-        public DateTime? CompleteTime { get; set; }        
+        public DateTime? CompleteTime { get; set; }
 
+        public bool IsBranchComplete(string parentId)
+        {
+            return ExecutionPointers
+                .FindByScope(parentId)
+                .All(x => x.EndTime != null);
+        }
     }
 
     public enum WorkflowStatus 

@@ -9,6 +9,7 @@ namespace WorkflowCore.Models
     public class ExecutionPointerCollection : ICollection<ExecutionPointer>
     {
         private readonly Dictionary<string, ExecutionPointer> _dictionary = new Dictionary<string, ExecutionPointer>();
+        private readonly Dictionary<string, ICollection<ExecutionPointer>> _scopeMap = new Dictionary<string, ICollection<ExecutionPointer>>();
 
         public ExecutionPointerCollection()
         {
@@ -40,14 +41,30 @@ namespace WorkflowCore.Models
             return _dictionary[id];
         }
 
+        public ICollection<ExecutionPointer> FindByScope(string stackFrame)
+        {
+            if (!_scopeMap.ContainsKey(stackFrame))
+                return new List<ExecutionPointer>();
+
+            return _scopeMap[stackFrame];
+        }
+
         public void Add(ExecutionPointer item)
         {
             _dictionary.Add(item.Id, item);
+
+            foreach (var stackFrame in item.Scope)
+            {
+                if (!_scopeMap.ContainsKey(stackFrame))
+                    _scopeMap.Add(stackFrame, new List<ExecutionPointer>());
+                _scopeMap[stackFrame].Add(item);
+            }
         }
 
         public void Clear()
         {
             _dictionary.Clear();
+            _scopeMap.Clear();
         }
 
         public bool Contains(ExecutionPointer item)
@@ -62,6 +79,11 @@ namespace WorkflowCore.Models
 
         public bool Remove(ExecutionPointer item)
         {
+            foreach (var stackFrame in item.Scope)
+            {
+                _scopeMap[stackFrame].Remove(item);
+            }
+
             return _dictionary.Remove(item.Id);
         }
 
