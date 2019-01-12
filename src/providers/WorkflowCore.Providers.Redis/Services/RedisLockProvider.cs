@@ -4,6 +4,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using RedLockNet;
+using RedLockNet.SERedis;
+using RedLockNet.SERedis.Configuration;
 using StackExchange.Redis;
 using WorkflowCore.Interface;
 
@@ -11,111 +14,71 @@ namespace WorkflowCore.Providers.Redis.Services
 {
     public class RedisLockProvider : IDistributedLockProvider
     {
-        private readonly ILogger _logger;
-        private readonly string _keyName;
-        private readonly string _connectionString;
-        private readonly TimeSpan _leaseTime = TimeSpan.FromSeconds(30);
-        private readonly TimeSpan _heartbeat = TimeSpan.FromSeconds(15);
-        private readonly List<string> _locks = new List<string>();
-        private readonly AutoResetEvent _mutex = new AutoResetEvent(true);
-        private Task _heartbeatTask;
-        private CancellationTokenSource _cancellationTokenSource;
+        private readonly ILogger _logger;        
+        private readonly string _connectionString;        
         private IConnectionMultiplexer _multiplexer;
-        private IDatabase _redis;
+        private RedLockFactory _redlockFactory;
+        private readonly TimeSpan _lockTimeout = TimeSpan.FromMinutes(1);
+        private readonly List<IRedLock> ManagedLocks = new List<IRedLock>();
 
-        public RedisLockProvider(string connectionString, string keyName, ILoggerFactory logFactory)
+        public RedisLockProvider(string connectionString, ILoggerFactory logFactory)
         {
             _connectionString = connectionString;
-            _keyName = keyName;
             _logger = logFactory.CreateLogger(GetType());
         }
 
         public async Task<bool> AcquireLock(string Id, CancellationToken cancellationToken)
         {
-            if (_redis == null)
+            if (_redlockFactory == null)
                 throw new InvalidOperationException();
 
-            if (await _redis.LockTakeAsync(_keyName, Id, _leaseTime))
+            var redLock = await _redlockFactory.CreateLockAsync(Id, _lockTimeout);
+
+            if (redLock.IsAcquired)
             {
-                _locks.Add(Id);
+                lock (ManagedLocks)
+                {
+                    ManagedLocks.Add(redLock);
+                }
                 return true;
             }
 
             return false;
         }
 
-        public async Task ReleaseLock(string Id)
+        public Task ReleaseLock(string Id)
         {
-            if (_redis == null)
+            if (_redlockFactory == null)
                 throw new InvalidOperationException();
 
-            if (_mutex.WaitOne())
+            lock (ManagedLocks)
             {
-                try
+                foreach (var redLock in ManagedLocks)
                 {
-                    _locks.Remove(Id);
-                }
-                finally
-                {
-                    _mutex.Set();
+                    if (redLock.Resource == Id)
+                    {
+                        redLock.Dispose();
+                        ManagedLocks.Remove(redLock);
+                        break;
+                    }
                 }
             }
 
-            await _redis.LockReleaseAsync(_keyName, Id);
+            return Task.CompletedTask;
         }
 
         public async Task Start()
         {
-            if (_heartbeatTask != null)
-                throw new InvalidOperationException();
-
-            _multiplexer = await ConnectionMultiplexer.ConnectAsync(_connectionString);
-            _redis = _multiplexer.GetDatabase();
-
-            _cancellationTokenSource = new CancellationTokenSource();
-
-            _heartbeatTask = new Task(SendHeartbeat);
-            _heartbeatTask.Start();
+            _multiplexer = await ConnectionMultiplexer.ConnectAsync(_connectionString);           
+            _redlockFactory = RedLockFactory.Create(new List<RedLockMultiplexer>() { new RedLockMultiplexer(_multiplexer) });
         }
 
         public async Task Stop()
         {
-            _cancellationTokenSource.Cancel();
-            _heartbeatTask.Wait();
-            _heartbeatTask = null;
-
+            _redlockFactory?.Dispose();
             await _multiplexer.CloseAsync();
-            _redis = null;
             _multiplexer = null;
-        }
-
-        private async void SendHeartbeat()
-        {
-            while (!_cancellationTokenSource.IsCancellationRequested)
-            {
-                try
-                {
-                    await Task.Delay(_heartbeat, _cancellationTokenSource.Token);
-                    if (_mutex.WaitOne())
-                    {
-                        try
-                        {
-                            foreach (var item in _locks)
-                            {
-                                _redis.LockExtend(_keyName, item, _leaseTime);
-                            }
-                        }
-                        finally
-                        {
-                            _mutex.Set();
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(default(EventId), ex, ex.Message);
-                }
-            }
+            
         }
     }
 }

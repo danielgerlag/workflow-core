@@ -14,9 +14,9 @@ namespace Microsoft.Extensions.DependencyInjection
             return options;
         }
 
-        public static WorkflowOptions UseRedisLocking(this WorkflowOptions options, string connectionString, string keyName)
+        public static WorkflowOptions UseRedisLocking(this WorkflowOptions options, string connectionString)
         {
-            options.UseDistributedLockManager(sp => new RedisLockProvider(connectionString, keyName, sp.GetService<ILoggerFactory>()));
+            options.UseDistributedLockManager(sp => new RedisLockProvider(connectionString, sp.GetService<ILoggerFactory>()));
             return options;
         }
 
