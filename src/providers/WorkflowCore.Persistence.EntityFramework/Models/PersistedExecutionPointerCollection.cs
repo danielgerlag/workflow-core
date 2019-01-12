@@ -7,8 +7,18 @@ namespace WorkflowCore.Persistence.EntityFramework.Models
 {
     public class PersistedExecutionPointerCollection : ICollection<PersistedExecutionPointer>
     {
-        private readonly Dictionary<string, PersistedExecutionPointer> _dictionary = new Dictionary<string, PersistedExecutionPointer>();
+        private readonly Dictionary<string, PersistedExecutionPointer> _dictionary;
         
+        public PersistedExecutionPointerCollection()
+        {
+            _dictionary = new Dictionary<string, PersistedExecutionPointer>();
+        }
+
+        public PersistedExecutionPointerCollection(int capacity)
+        {
+            _dictionary = new Dictionary<string, PersistedExecutionPointer>(capacity);
+        }
+
         public IEnumerator<PersistedExecutionPointer> GetEnumerator()
         {
             return _dictionary.Values.GetEnumerator();
