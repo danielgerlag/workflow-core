@@ -174,22 +174,22 @@ namespace WorkflowCore.Services
             //TODO: Move to own class
             foreach (var input in step.Inputs)
             {
-                var member = (input.Target.Body as MemberExpression);
-                object resolvedValue = null;
+                var member = input.Target.Body as MemberExpression;
+                object value = null;
 
                 switch (input.Source.Parameters.Count)
                 {
                     case 1:
-                        resolvedValue = input.Source.Compile().DynamicInvoke(workflow.Data);
+                        value = input.Source.Compile().DynamicInvoke(workflow.Data);
                         break;
                     case 2:
-                        resolvedValue = input.Source.Compile().DynamicInvoke(workflow.Data, context);
+                        value = input.Source.Compile().DynamicInvoke(workflow.Data, context);
                         break;
                     default:
                         throw new ArgumentException();
                 }
 
-                step.BodyType.GetProperty(member.Member.Name).SetValue(body, resolvedValue);
+                step.BodyType.GetProperty(member.Member.Name).SetValue(body, value);
             }
         }
 
@@ -199,20 +199,15 @@ namespace WorkflowCore.Services
             {
                 var data = workflow.Data;
                 var setter = ExpressionHelpers.CreateSetter(output.Target);
-                var targetType = setter.Parameters.Last().Type;
+                var type = setter.Parameters.Last().Type;
                 var value = new Lazy<object>(() =>
                 {
                     var val = output.Source.Compile().DynamicInvoke(body);
-                    return Expression
-                        .Lambda(Expression.Convert(Expression.Constant(val), targetType))
-                        .Compile()
-                        .DynamicInvoke();
+                    return Expression.Lambda(Expression.Convert(Expression.Constant(val), type)).Compile().DynamicInvoke();
                 }).Value;
 
-                if (setter.Parameters.Count == 2)
-                    setter.Compile().DynamicInvoke(data, value);
-                else
-                    setter.Compile().DynamicInvoke(data, context, value);
+                if (setter.Parameters.Count == 2) setter.Compile().DynamicInvoke(data, value);
+                else setter.Compile().DynamicInvoke(data, context, value);
             }
         }
 
