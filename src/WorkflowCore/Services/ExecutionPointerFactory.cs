@@ -34,7 +34,7 @@ namespace WorkflowCore.Services
                 ContextItem = pointer.ContextItem,
                 Status = PointerStatus.Pending,
                 StepName = def.Steps.First(x => x.Id == outcomeTarget.NextStep).Name,
-                Scope = new Stack<string>(pointer.Scope)
+                Scope = new List<string>(pointer.Scope)
             };            
         }
 
@@ -54,7 +54,7 @@ namespace WorkflowCore.Services
                 ContextItem = branch,
                 Status = PointerStatus.Pending,
                 StepName = def.Steps.First(x => x.Id == childDefinitionId).Name,
-                Scope = childScope
+                Scope = new List<string>(childScope)
             };            
         }
 
@@ -70,7 +70,7 @@ namespace WorkflowCore.Services
                 ContextItem = pointer.ContextItem,
                 Status = PointerStatus.Pending,
                 StepName = def.Steps.First(x => x.Id == compensationStepId).Name,
-                Scope = new Stack<string>(pointer.Scope)
+                Scope = new List<string>(pointer.Scope)
             };
         }
 

@@ -58,7 +58,7 @@ namespace WorkflowCore.UnitTests
                 Active = true,
                 StepId = 0,
                 SleepUntil = new DateTime(2000, 1, 1).ToUniversalTime(),
-                Scope = new Stack<string>(new List<string>() { "4", "3", "2", "1" })
+                Scope = new List<string>() { "4", "3", "2", "1" }
             });
             var workflowId = Subject.CreateNewWorkflow(workflow).Result;
 
@@ -88,7 +88,7 @@ namespace WorkflowCore.UnitTests
                 Id = Guid.NewGuid().ToString(),
                 Active = true,
                 StepId = 0,
-                Scope = new Stack<string>(new List<string>() { "1", "2", "3", "4" })
+                Scope = new List<string>() { "1", "2", "3", "4" }
             });
             var workflowId = Subject.CreateNewWorkflow(oldWorkflow).Result;
             var newWorkflow = Utils.DeepCopy(oldWorkflow);
