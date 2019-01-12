@@ -199,12 +199,12 @@ namespace WorkflowCore.Services
             {
                 var data = workflow.Data;
                 var setter = ExpressionHelpers.CreateSetter(output.Target);
-                var type = setter.Parameters.Last().Type;
-                var value = new Lazy<object>(() =>
-                {
-                    var val = output.Source.Compile().DynamicInvoke(body);
-                    return Expression.Lambda(Expression.Convert(Expression.Constant(val), type)).Compile().DynamicInvoke();
-                }).Value;
+                var value = Expression
+                    .Lambda(Expression.Convert(
+                        Expression.Constant(output.Source.Compile().DynamicInvoke(body)),
+                        setter.Parameters.Last().Type))
+                    .Compile()
+                    .DynamicInvoke();
 
                 if (setter.Parameters.Count == 2) setter.Compile().DynamicInvoke(data, value);
                 else setter.Compile().DynamicInvoke(data, context, value);
