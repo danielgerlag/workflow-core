@@ -68,7 +68,7 @@ namespace WorkflowCore.UnitTests.Services
                 Id = "001",
                 ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
                 })
             };            
 
@@ -98,7 +98,7 @@ namespace WorkflowCore.UnitTests.Services
                 Id = "001",
                 ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
                 })
             };
 
@@ -129,7 +129,7 @@ namespace WorkflowCore.UnitTests.Services
                 Id = "001",
                 ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = false, StepId = 0 }
+                    new ExecutionPointer() { Id = "1", Active = false, StepId = 0 }
                 })
             };
             
@@ -171,7 +171,7 @@ namespace WorkflowCore.UnitTests.Services
                 Data = new DataClass() { Value1 = 5 },
                 ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
                 })
             };
 
@@ -216,7 +216,7 @@ namespace WorkflowCore.UnitTests.Services
                 Data = data,
                 ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
                 })
             };
             
@@ -264,7 +264,7 @@ namespace WorkflowCore.UnitTests.Services
                 Data = data,
                 ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
                 })
             };
 
@@ -316,7 +316,7 @@ namespace WorkflowCore.UnitTests.Services
                 Data = data,
                 ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
                 })
             };
 
@@ -345,7 +345,7 @@ namespace WorkflowCore.UnitTests.Services
                 Id = "001",
                 ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
                 })
             };
 
@@ -376,7 +376,7 @@ namespace WorkflowCore.UnitTests.Services
                 Id = "001",
                 ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
                 })
             };
 
@@ -405,7 +405,7 @@ namespace WorkflowCore.UnitTests.Services
                 Id = "001",
                 ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
                 })
             };
 

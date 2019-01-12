@@ -17,8 +17,8 @@
     <ProjectReference Include="..\..\providers\WorkflowCore.Persistence.SqlServer\WorkflowCore.Persistence.SqlServer.csproj" />
     <ProjectReference Include="..\..\providers\WorkflowCore.Providers.AWS\WorkflowCore.Providers.AWS.csproj" />
     <ProjectReference Include="..\..\providers\WorkflowCore.Providers.Azure\WorkflowCore.Providers.Azure.csproj" />
+    <ProjectReference Include="..\..\providers\WorkflowCore.Providers.Redis\WorkflowCore.Providers.Redis.csproj" />
     <ProjectReference Include="..\..\WorkflowCore\WorkflowCore.csproj" />
-    <ProjectReference Include="..\..\providers\WorkflowCore.LockProviders.Redlock\WorkflowCore.LockProviders.Redlock.csproj" />
     <ProjectReference Include="..\..\providers\WorkflowCore.Persistence.MongoDB\WorkflowCore.Persistence.MongoDB.csproj" />
   </ItemGroup>
 

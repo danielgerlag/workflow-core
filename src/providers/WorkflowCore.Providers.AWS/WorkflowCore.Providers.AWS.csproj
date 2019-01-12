@@ -16,10 +16,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.16" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.16.5" />
     <PackageReference Include="AWSSDK.SQS" Version="3.3.3.44" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.1.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -41,5 +41,16 @@ namespace WorkflowCore.Services
         {
             _subscribers.Add(action);
         }
+
+        public Task Start()
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task Stop()
+        {
+            _subscribers.Clear();
+            return Task.CompletedTask;
+        }
     }
 }
