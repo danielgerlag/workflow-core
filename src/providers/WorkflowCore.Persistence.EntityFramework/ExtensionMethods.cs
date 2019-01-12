@@ -173,7 +173,7 @@ namespace WorkflowCore.Persistence.EntityFramework
                 pointer.Status = ep.Status;
 
                 if (!string.IsNullOrEmpty(ep.Scope))
-                    pointer.Scope = new Stack<string>(ep.Scope.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
+                    pointer.Scope = new List<string>(ep.Scope.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
 
                 foreach (var attr in ep.ExtensionAttributes)
                 {
