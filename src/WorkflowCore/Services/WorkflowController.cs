@@ -72,7 +72,10 @@ namespace WorkflowCore.Services
 
             if ((def.DataType != null) && (data == null))
             {
-                wf.Data = new TData();
+                if (typeof(TData) == def.DataType)
+                    wf.Data = new TData();
+                else
+                    wf.Data = def.DataType.GetConstructor(new Type[0]).Invoke(new object[0]);
             }
 
             wf.ExecutionPointers.Add(_pointerFactory.BuildGenesisPointer(def));

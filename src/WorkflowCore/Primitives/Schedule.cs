@@ -22,15 +22,8 @@ namespace WorkflowCore.Primitives
                 {
                     return ExecutionResult.Branch(new List<object>() { null }, new SchedulePersistenceData() { Elapsed = true });
                 }
-
-                var complete = true;
-
-                foreach (var childId in context.ExecutionPointer.Children)
-                {
-                    complete = complete && IsBranchComplete(context.Workflow.ExecutionPointers, childId);
-                }
-
-                if (complete)
+                
+                if (context.Workflow.IsBranchComplete(context.ExecutionPointer.Id))
                 {
                     return ExecutionResult.Next();
                 }

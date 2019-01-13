@@ -25,7 +25,9 @@ namespace WorkflowCore.Sample13
                         then.StartWith<PrintMessage>()
                                 .Input(step => step.Message, data => "Item 2.1")
                             .Then<PrintMessage>()
-                                .Input(step => step.Message, data => "Item 2.2"))
+                                .Input(step => step.Message, data => "Item 2.2")
+                            .Then<PrintMessage>()
+                                .Input(step => step.Message, data => "Item 2.3"))
                     .Do(then =>
                         then.StartWith<PrintMessage>()
                                 .Input(step => step.Message, data => "Item 3.1")

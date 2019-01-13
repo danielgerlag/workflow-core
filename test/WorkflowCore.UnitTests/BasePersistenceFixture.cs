@@ -54,16 +54,19 @@ namespace WorkflowCore.UnitTests
             };
             workflow.ExecutionPointers.Add(new ExecutionPointer()
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = "1",
                 Active = true,
                 StepId = 0,
-                SleepUntil = new DateTime(2000, 1, 1).ToUniversalTime()                
+                SleepUntil = new DateTime(2000, 1, 1).ToUniversalTime(),
+                Scope = new List<string>() { "4", "3", "2", "1" }
             });
             var workflowId = Subject.CreateNewWorkflow(workflow).Result;
 
             var retrievedWorkflow = Subject.GetWorkflowInstance(workflowId).Result;
 
             retrievedWorkflow.ShouldBeEquivalentTo(workflow);
+            retrievedWorkflow.ExecutionPointers.FindById("1")
+                .Scope.Should().ContainInOrder(workflow.ExecutionPointers.FindById("1").Scope);
         }
 
         [Fact]
@@ -84,7 +87,8 @@ namespace WorkflowCore.UnitTests
             {
                 Id = Guid.NewGuid().ToString(),
                 Active = true,
-                StepId = 0
+                StepId = 0,
+                Scope = new List<string>() { "1", "2", "3", "4" }
             });
             var workflowId = Subject.CreateNewWorkflow(oldWorkflow).Result;
             var newWorkflow = Utils.DeepCopy(oldWorkflow);

@@ -27,18 +27,19 @@ namespace WorkflowCore.Persistence.EntityFramework
             persistable.Status = instance.Status;
             persistable.CreateTime = instance.CreateTime;
             persistable.CompleteTime = instance.CompleteTime;
+            persistable.ExecutionPointers = new PersistedExecutionPointerCollection(instance.ExecutionPointers.Count);
             
             foreach (var ep in instance.ExecutionPointers)
             {
-                var persistedEP = persistable.ExecutionPointers.FirstOrDefault(x => x.Id == ep.Id);
+                var persistedEP = persistable.ExecutionPointers.FindById(ep.Id);
                 
                 if (persistedEP == null)
                 {
                     persistedEP = new PersistedExecutionPointer();
+                    persistedEP.Id = ep.Id ?? Guid.NewGuid().ToString();
                     persistable.ExecutionPointers.Add(persistedEP);
-                }
-                 
-                persistedEP.Id = ep.Id ?? Guid.NewGuid().ToString(); 
+                }                 
+                
                 persistedEP.StepId = ep.StepId;
                 persistedEP.Active = ep.Active;
                 persistedEP.SleepUntil = ep.SleepUntil;
@@ -134,10 +135,11 @@ namespace WorkflowCore.Persistence.EntityFramework
             if (instance.CompleteTime.HasValue)
                 result.CompleteTime = DateTime.SpecifyKind(instance.CompleteTime.Value, DateTimeKind.Utc);
 
+            result.ExecutionPointers = new ExecutionPointerCollection(instance.ExecutionPointers.Count + 8);
+
             foreach (var ep in instance.ExecutionPointers)
             {
-                var pointer = new ExecutionPointer();
-                result.ExecutionPointers.Add(pointer);
+                var pointer = new ExecutionPointer();                
 
                 pointer.Id = ep.Id;
                 pointer.StepId = ep.StepId;
@@ -171,12 +173,14 @@ namespace WorkflowCore.Persistence.EntityFramework
                 pointer.Status = ep.Status;
 
                 if (!string.IsNullOrEmpty(ep.Scope))
-                    pointer.Scope = new Stack<string>(ep.Scope.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
+                    pointer.Scope = new List<string>(ep.Scope.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
 
                 foreach (var attr in ep.ExtensionAttributes)
                 {
                     pointer.ExtensionAttributes[attr.AttributeKey] = JsonConvert.DeserializeObject(attr.AttributeValue, SerializerSettings);
                 }
+
+                result.ExecutionPointers.Add(pointer);
             }
 
             return result;

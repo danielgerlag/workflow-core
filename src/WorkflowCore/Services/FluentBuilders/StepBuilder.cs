@@ -111,12 +111,8 @@ namespace WorkflowCore.Services
 
         public IStepBuilder<TData, WaitFor> WaitFor(string eventName, Expression<Func<TData, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null, Expression<Func<TData, bool>> cancelCondition = null)
         {
-            WorkflowStep<WaitFor> newStep;
-
-            if (cancelCondition != null)
-                newStep = new CancellableStep<WaitFor, TData>(cancelCondition);
-            else
-                newStep = new WorkflowStep<WaitFor>();
+            var newStep = new WorkflowStep<WaitFor>();
+            newStep.CancelCondition = cancelCondition;
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, WaitFor>(WorkflowBuilder, newStep);
@@ -134,12 +130,8 @@ namespace WorkflowCore.Services
 
         public IStepBuilder<TData, WaitFor> WaitFor(string eventName, Expression<Func<TData, IStepExecutionContext, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null, Expression<Func<TData, bool>> cancelCondition = null)
         {
-            WorkflowStep<WaitFor> newStep;
-
-            if (cancelCondition != null)
-                newStep = new CancellableStep<WaitFor, TData>(cancelCondition);
-            else
-                newStep = new WorkflowStep<WaitFor>();
+            var newStep = new WorkflowStep<WaitFor>();
+            newStep.CancelCondition = cancelCondition;
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, WaitFor>(WorkflowBuilder, newStep);
@@ -379,7 +371,9 @@ namespace WorkflowCore.Services
 
         public IContainerStepBuilder<TData, Recur, TStepBody> Recur(Expression<Func<TData, TimeSpan>> interval, Expression<Func<TData, bool>> until)
         {
-            var newStep = new CancellableStep<Recur, TData>(until);
+            var newStep = new WorkflowStep<Recur>();
+            newStep.CancelCondition = until;
+
             Expression<Func<Recur, TimeSpan>> intervalExpr = (x => x.Interval);
             Expression<Func<Recur, bool>> untilExpr = (x => x.StopCondition);
             newStep.Inputs.Add(new DataMapping() { Source = interval, Target = intervalExpr });
@@ -446,6 +440,13 @@ namespace WorkflowCore.Services
             builder.Invoke(WorkflowBuilder);
             stepBuilder.Step.Children.Add(stepBuilder.Step.Id + 1); //TODO: make more elegant
 
+            return this;
+        }
+
+        public IStepBuilder<TData, TStepBody> CancelCondition(Expression<Func<TData, bool>> cancelCondition, bool proceedAfterCancel = false)
+        {
+            Step.CancelCondition = cancelCondition;
+            Step.ProceedOnCancel = proceedAfterCancel;
             return this;
         }
     }

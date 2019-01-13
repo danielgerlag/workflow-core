@@ -27,9 +27,8 @@ namespace WorkflowCore.Persistence.EntityFramework.Models
         [MaxLength(200)]
         public string Reference { get; set; }
 
-        public virtual List<PersistedExecutionPointer> ExecutionPointers { get; set; } = new List<PersistedExecutionPointer>();
+        public virtual PersistedExecutionPointerCollection ExecutionPointers { get; set; } = new PersistedExecutionPointerCollection();
 
-        //[Index]
         public long? NextExecution { get; set; }
 
         public string Data { get; set; }

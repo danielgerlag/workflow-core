@@ -20,17 +20,19 @@ namespace WorkflowCore.Services
         protected readonly IDateTimeProvider _datetimeProvider;
         protected readonly ILogger _logger;
         private readonly IExecutionResultProcessor _executionResultProcessor;
+        private readonly ICancellationProcessor _cancellationProcessor;
         private readonly ILifeCycleEventPublisher _publisher;
         private readonly WorkflowOptions _options;
 
         private IWorkflowHost Host => _serviceProvider.GetService<IWorkflowHost>();
 
-        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, ILifeCycleEventPublisher publisher, WorkflowOptions options, ILoggerFactory loggerFactory)
+        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, ILifeCycleEventPublisher publisher, ICancellationProcessor cancellationProcessor, WorkflowOptions options, ILoggerFactory loggerFactory)
         {
             _serviceProvider = serviceProvider;
             _registry = registry;
             _datetimeProvider = datetimeProvider;
             _publisher = publisher;
+            _cancellationProcessor = cancellationProcessor;
             _options = options;
             _logger = loggerFactory.CreateLogger<WorkflowExecutor>();
             _executionResultProcessor = executionResultProcessor;
@@ -50,6 +52,9 @@ namespace WorkflowCore.Services
 
             foreach (var pointer in exePointers)
             {
+                if (pointer.Status == PointerStatus.Cancelled)
+                    continue;
+
                 var step = def.Steps.First(x => x.Id == pointer.StepId);
                 if (step != null)
                 {
@@ -148,6 +153,7 @@ namespace WorkflowCore.Services
                         _executionResultProcessor.HandleStepException(workflow, def, pointer, step, ex);
                         Host.ReportStepError(workflow, step, ex);
                     }
+                    _cancellationProcessor.ProcessCancellations(workflow, def, wfResult);
                 }
                 else
                 {
@@ -256,7 +262,7 @@ namespace WorkflowCore.Services
             {
                 foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count > 0))
                 {
-                    if (!workflow.ExecutionPointers.Where(x => x.Scope.Contains(pointer.Id)).All(x => x.EndTime.HasValue)) 
+                    if (!workflow.ExecutionPointers.FindByScope(pointer.Id).All(x => x.EndTime.HasValue)) 
                         continue;
                     
                     if (!pointer.SleepUntil.HasValue)

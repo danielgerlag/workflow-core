@@ -13,7 +13,7 @@ namespace WorkflowCore.Users.Primitives
         public override void AfterWorkflowIteration(WorkflowExecutorResult executorResult, WorkflowDefinition defintion, WorkflowInstance workflow, ExecutionPointer executionPointer)
         {
             base.AfterWorkflowIteration(executorResult, defintion, workflow, executionPointer);
-            var taskStep = workflow.ExecutionPointers.Find(x => x.Id == executionPointer.PredecessorId);
+            var taskStep = workflow.ExecutionPointers.FindById(executionPointer.PredecessorId);
 
             if (taskStep.EventPublished)
             {

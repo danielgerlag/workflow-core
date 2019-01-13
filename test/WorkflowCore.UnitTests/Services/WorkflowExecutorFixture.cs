@@ -23,6 +23,7 @@ namespace WorkflowCore.UnitTests.Services
         protected IWorkflowRegistry Registry;
         protected IExecutionResultProcessor ResultProcesser;
         protected ILifeCycleEventPublisher EventHub;
+        protected ICancellationProcessor CancellationProcessor;
         protected IServiceProvider ServiceProvider;
         protected IDateTimeProvider DateTimeProvider;
         protected WorkflowOptions Options;
@@ -35,6 +36,7 @@ namespace WorkflowCore.UnitTests.Services
             Registry = A.Fake<IWorkflowRegistry>();
             ResultProcesser = A.Fake<IExecutionResultProcessor>();
             EventHub = A.Fake<ILifeCycleEventPublisher>();
+            CancellationProcessor = A.Fake<ICancellationProcessor>();
             DateTimeProvider = A.Fake<IDateTimeProvider>();
 
             Options = new WorkflowOptions(A.Fake<IServiceCollection>());
@@ -45,7 +47,7 @@ namespace WorkflowCore.UnitTests.Services
             var loggerFactory = new LoggerFactory();
             loggerFactory.AddConsole(LogLevel.Debug);            
 
-            Subject = new WorkflowExecutor(Registry, ServiceProvider, DateTimeProvider, ResultProcesser, EventHub, Options, loggerFactory);
+            Subject = new WorkflowExecutor(Registry, ServiceProvider, DateTimeProvider, ResultProcesser, EventHub, CancellationProcessor, Options, loggerFactory);
         }
 
         [Fact(DisplayName = "Should execute active step")]
@@ -64,10 +66,10 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                })
             };            
 
             //act
@@ -94,10 +96,10 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                })
             };
 
             //act
@@ -125,10 +127,10 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = false, StepId = 0 }
-                }
+                    new ExecutionPointer() { Id = "1", Active = false, StepId = 0 }
+                })
             };
             
             //act
@@ -167,10 +169,10 @@ namespace WorkflowCore.UnitTests.Services
                 NextExecution = 0,
                 Id = "001",
                 Data = new DataClass() { Value1 = 5 },
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                })
             };
 
             //act
@@ -212,10 +214,10 @@ namespace WorkflowCore.UnitTests.Services
                 NextExecution = 0,
                 Id = "001",
                 Data = data,
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                })
             };
             
             //act
@@ -260,10 +262,10 @@ namespace WorkflowCore.UnitTests.Services
                 NextExecution = 0,
                 Id = "001",
                 Data = data,
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                })
             };
 
             //act
@@ -312,10 +314,10 @@ namespace WorkflowCore.UnitTests.Services
                 NextExecution = 0,
                 Id = "001",
                 Data = data,
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                })
             };
 
             //act
@@ -341,10 +343,10 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                })
             };
 
             //act
@@ -372,10 +374,10 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                })
             };
 
             //act
@@ -383,6 +385,35 @@ namespace WorkflowCore.UnitTests.Services
 
             //assert
             A.CallTo(() => step1.AfterWorkflowIteration(A<WorkflowExecutorResult>.Ignored, A<WorkflowDefinition>.Ignored, instance, A<ExecutionPointer>.Ignored)).MustHaveHappened();
+        }
+
+        [Fact(DisplayName = "Should process cancellations")]
+        public void should_process_cancellations()
+        {
+            //arrange            
+            var step1Body = A.Fake<IStepBody>();
+            A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Persist(null));
+            WorkflowStep step1 = BuildFakeStep(step1Body);
+            Given1StepWorkflow(step1, "Workflow", 1);
+
+            var instance = new WorkflowInstance
+            {
+                WorkflowDefinitionId = "Workflow",
+                Version = 1,
+                Status = WorkflowStatus.Runnable,
+                NextExecution = 0,
+                Id = "001",
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
+                {
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                })
+            };
+
+            //act
+            Subject.Execute(instance);
+
+            //assert
+            A.CallTo(() => CancellationProcessor.ProcessCancellations(instance, A<WorkflowDefinition>.Ignored, A<WorkflowExecutorResult>.Ignored)).MustHaveHappened();
         }
 
 
