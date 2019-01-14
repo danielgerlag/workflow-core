@@ -32,8 +32,9 @@ namespace WorkflowCore.Services
         public ILogger Logger { get; private set; }
 
         private readonly ILifeCycleEventHub _lifeCycleEventHub;
+        private readonly ISearchIndex _searchIndex;
 
-        public WorkflowHost(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, WorkflowOptions options, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IEnumerable<IBackgroundTask> backgroundTasks, IWorkflowController workflowController, ILifeCycleEventHub lifeCycleEventHub)
+        public WorkflowHost(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, WorkflowOptions options, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IEnumerable<IBackgroundTask> backgroundTasks, IWorkflowController workflowController, ILifeCycleEventHub lifeCycleEventHub, ISearchIndex searchIndex)
         {
             PersistenceStore = persistenceStore;
             QueueProvider = queueProvider;
@@ -44,6 +45,7 @@ namespace WorkflowCore.Services
             LockProvider = lockProvider;
             _backgroundTasks = backgroundTasks;
             _workflowController = workflowController;
+            _searchIndex = searchIndex;
             _lifeCycleEventHub = lifeCycleEventHub;
             _lifeCycleEventHub.Subscribe(HandleLifeCycleEvent);
         }
@@ -82,6 +84,7 @@ namespace WorkflowCore.Services
             QueueProvider.Start().Wait();
             LockProvider.Start().Wait();
             _lifeCycleEventHub.Start().Wait();
+            _searchIndex.Start().Wait();
             
             Logger.LogInformation("Starting backgroud tasks");
 
@@ -101,6 +104,7 @@ namespace WorkflowCore.Services
 
             QueueProvider.Stop().Wait();
             LockProvider.Stop().Wait();
+            _searchIndex.Stop().Wait();
             _lifeCycleEventHub.Stop().Wait();
         }
 
