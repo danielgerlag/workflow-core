@@ -36,10 +36,31 @@ namespace WorkflowCore.Providers.Elasticsearch.Services
             if (_client == null)
                 throw new InvalidOperationException();
 
+            var filters = new List<Func<QueryContainerDescriptor<WorkflowSearchResult>, QueryContainer>>();
+
+            filters.Add(filter => filter.Match(t => t.Field(f => f.Status).Query("Runnable")));
+
+            var dt = new DateTime(2029, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            filters.Add(filter => filter.DateRange(t => t.Field(f => f.CreateTime).GreaterThanOrEquals(dt)));
+
             var result = await _client.SearchAsync<WorkflowSearchResult>(s => s
                 .Index(_indexName)
                 .Skip(skip)
-                .Take(take));
+                .Take(take)          
+                .MinScore(0.1)
+                .Query(query => query
+                    .Bool(b => b
+                        .Filter(filters)
+                        .Should(
+                            should => should.Match(t => t.Field(f => f.Reference).Query(terms).Boost(1.2)),
+                            should => should.Match(t => t.Field(f => f.DataTokens).Query(terms).Boost(1.1)),
+                            should => should.Match(t => t.Field(f => f.WorkflowDefinitionId).Query(terms).Boost(0.9)),
+                            should => should.Match(t => t.Field(f => f.Status).Query(terms).Boost(0.9)),
+                            should => should.Match(t => t.Field(f => f.Description).Query(terms))
+                        )
+                    )
+                )
+            );
 
             return new Page<WorkflowSearchResult>
             {

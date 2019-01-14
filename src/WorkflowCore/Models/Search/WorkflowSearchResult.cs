@@ -22,6 +22,8 @@ namespace WorkflowCore.Models.Search
 
         public object Data { get; set; }
 
+        public string DataTokens { get; set; }
+
         public DateTime CreateTime { get; set; }
 
         public DateTime? CompleteTime { get; set; }

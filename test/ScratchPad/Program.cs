@@ -30,7 +30,11 @@ namespace ScratchPad
             host.Start();
             //host.StartWorkflow<object>("HelloWorld", null, "ref1").Wait();
 
-            var searchResult = searchIndex.Search("ref2", 0, 10).Result;
+            var searchResult1 = searchIndex.Search("ref1", 0, 10).Result;
+            var searchResult2 = searchIndex.Search("ref2", 0, 10).Result;
+            var searchResult3 = searchIndex.Search("HelloWorld", 0, 10).Result;
+            var searchResult4 = searchIndex.Search("fox", 0, 10).Result;
+            var searchResult5 = searchIndex.Search("dog", 0, 10).Result;
 
             Console.ReadLine();
             host.Stop();
