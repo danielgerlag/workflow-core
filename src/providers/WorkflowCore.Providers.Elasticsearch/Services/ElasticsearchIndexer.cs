@@ -31,17 +31,10 @@ namespace WorkflowCore.Providers.Elasticsearch.Services
             await _client.IndexAsync(denormModel, x => x.Index(_indexName));
         }
 
-        public async Task<Page<WorkflowSearchResult>> Search(string terms, int skip, int take)
+        public async Task<Page<WorkflowSearchResult>> Search(string terms, int skip, int take, params SearchFilter[] filters)
         {
             if (_client == null)
                 throw new InvalidOperationException();
-
-            var filters = new List<Func<QueryContainerDescriptor<WorkflowSearchResult>, QueryContainer>>();
-
-            filters.Add(filter => filter.Match(t => t.Field(f => f.Status).Query("Runnable")));
-
-            var dt = new DateTime(2029, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            filters.Add(filter => filter.DateRange(t => t.Field(f => f.CreateTime).GreaterThanOrEquals(dt)));
 
             var result = await _client.SearchAsync<WorkflowSearchResult>(s => s
                 .Index(_indexName)
@@ -50,7 +43,7 @@ namespace WorkflowCore.Providers.Elasticsearch.Services
                 .MinScore(0.1)
                 .Query(query => query
                     .Bool(b => b
-                        .Filter(filters)
+                        .Filter(BuildFilterQuery(filters))
                         .Should(
                             should => should.Match(t => t.Field(f => f.Reference).Query(terms).Boost(1.2)),
                             should => should.Match(t => t.Field(f => f.DataTokens).Query(terms).Boost(1.1)),
@@ -79,6 +72,41 @@ namespace WorkflowCore.Providers.Elasticsearch.Services
         {
             _client = null;
             return Task.CompletedTask;
+        }
+
+        private List<Func<QueryContainerDescriptor<WorkflowSearchResult>, QueryContainer>> BuildFilterQuery(SearchFilter[] filters)
+        {
+            var result = new List<Func<QueryContainerDescriptor<WorkflowSearchResult>, QueryContainer>>();
+
+            foreach (var filter in filters)
+            {
+                switch (filter)
+                {
+                    case ReferenceFilter f:
+                        result.Add(x => x.Match(t => t.Field(field => field.Reference).Query(f.Value)));
+                        break;
+                    case WorkflowDefinitionFilter f:
+                        result.Add(x => x.Match(t => t.Field(field => field.WorkflowDefinitionId).Query(f.Value)));
+                        break;
+                    case StatusFilter f:
+                        result.Add(x => x.Match(t => t.Field(field => field.Reference).Query(f.Value.ToString())));
+                        break;
+                    case CreateDateFilter f:
+                        if (f.BeforeValue.HasValue)
+                            result.Add(x => x.DateRange(t => t.Field(field => field.CreateTime).LessThan(f.BeforeValue)));
+                        if (f.AfterValue.HasValue)
+                            result.Add(x => x.DateRange(t => t.Field(field => field.CreateTime).GreaterThan(f.AfterValue)));
+                        break;
+                    case CompleteDateFilter f:
+                        if (f.BeforeValue.HasValue)
+                            result.Add(x => x.DateRange(t => t.Field(field => field.CompleteTime).LessThan(f.BeforeValue)));
+                        if (f.AfterValue.HasValue)
+                            result.Add(x => x.DateRange(t => t.Field(field => field.CompleteTime).GreaterThan(f.AfterValue)));
+                        break;
+                }
+            }
+
+            return result;
         }
     }
 }

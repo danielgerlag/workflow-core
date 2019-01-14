@@ -15,7 +15,7 @@ namespace WorkflowCore.Services
             return Task.CompletedTask;
         }
 
-        public Task<Page<WorkflowSearchResult>> Search(string terms, int skip, int take)
+        public Task<Page<WorkflowSearchResult>> Search(string terms, int skip, int take, params SearchFilter[] filters)
         {
             throw new NotImplementedException();
         }

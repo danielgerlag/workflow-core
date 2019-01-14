@@ -12,6 +12,7 @@ using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.Runtime;
 using Nest;
+using WorkflowCore.Models.Search;
 
 namespace ScratchPad
 {
@@ -30,7 +31,7 @@ namespace ScratchPad
             host.Start();
             //host.StartWorkflow<object>("HelloWorld", null, "ref1").Wait();
 
-            var searchResult1 = searchIndex.Search("ref1", 0, 10).Result;
+            var searchResult1 = searchIndex.Search("ref1", 0, 10, CreateDateFilter.Between(new DateTime(2020, 1, 1), new DateTime(2021, 1, 1))).Result;
             var searchResult2 = searchIndex.Search("ref2", 0, 10).Result;
             var searchResult3 = searchIndex.Search("HelloWorld", 0, 10).Result;
             var searchResult4 = searchIndex.Search("fox", 0, 10).Result;
@@ -56,6 +57,7 @@ namespace ScratchPad
                 //cfg.UseAwsDynamoLocking(new EnvironmentVariablesAWSCredentials(), new AmazonDynamoDBConfig() { RegionEndpoint = RegionEndpoint.USWest2 }, "workflow-core-locks");
             });
 
+            services.AddTransient<WorkflowCore.Sample01.Steps.GoodbyeWorld>();
 
             var serviceProvider = services.BuildServiceProvider();
 
