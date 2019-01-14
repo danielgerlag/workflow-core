@@ -37,7 +37,7 @@ namespace WorkflowCore.Services.ErrorHandlers
             while (scope.Any())
             {
                 var pointerId = scope.Pop();
-                var scopePointer = workflow.ExecutionPointers.First(x => x.Id == pointerId);
+                var scopePointer = workflow.ExecutionPointers.FindById(pointerId);
                 var scopeStep = def.Steps.First(x => x.Id == scopePointer.StepId);
 
                 var resume = true;
@@ -46,7 +46,7 @@ namespace WorkflowCore.Services.ErrorHandlers
                 if (scope.Any())
                 {
                     var parentId = scope.Peek();
-                    var parentPointer = workflow.ExecutionPointers.First(x => x.Id == parentId);
+                    var parentPointer = workflow.ExecutionPointers.FindById(parentId);
                     var parentStep = def.Steps.First(x => x.Id == parentPointer.StepId);
                     resume = parentStep.ResumeChildrenAfterCompensation;
                     revert = parentStep.RevertChildrenAfterCompensation;

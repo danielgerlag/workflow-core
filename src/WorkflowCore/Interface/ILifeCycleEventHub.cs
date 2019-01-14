@@ -10,5 +10,7 @@ namespace WorkflowCore.Interface
     {
         Task PublishNotification(LifeCycleEvent evt);
         void Subscribe(Action<LifeCycleEvent> action);
+        Task Start();
+        Task Stop();
     }
 }

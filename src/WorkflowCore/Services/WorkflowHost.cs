@@ -31,6 +31,8 @@ namespace WorkflowCore.Services
         public IQueueProvider QueueProvider { get; private set; }
         public ILogger Logger { get; private set; }
 
+        private readonly ILifeCycleEventHub _lifeCycleEventHub;
+
         public WorkflowHost(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, WorkflowOptions options, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IEnumerable<IBackgroundTask> backgroundTasks, IWorkflowController workflowController, ILifeCycleEventHub lifeCycleEventHub)
         {
             PersistenceStore = persistenceStore;
@@ -42,7 +44,8 @@ namespace WorkflowCore.Services
             LockProvider = lockProvider;
             _backgroundTasks = backgroundTasks;
             _workflowController = workflowController;
-            lifeCycleEventHub.Subscribe(HandleLifeCycleEvent);
+            _lifeCycleEventHub = lifeCycleEventHub;
+            _lifeCycleEventHub.Subscribe(HandleLifeCycleEvent);
         }
         
         public Task<string> StartWorkflow(string workflowId, object data = null, string reference=null)
@@ -78,7 +81,8 @@ namespace WorkflowCore.Services
             PersistenceStore.EnsureStoreExists();
             QueueProvider.Start().Wait();
             LockProvider.Start().Wait();
-
+            _lifeCycleEventHub.Start().Wait();
+            
             Logger.LogInformation("Starting backgroud tasks");
 
             foreach (var task in _backgroundTasks)
@@ -95,8 +99,9 @@ namespace WorkflowCore.Services
 
             Logger.LogInformation("Worker tasks stopped");
 
-            QueueProvider.Stop();
-            LockProvider.Stop();
+            QueueProvider.Stop().Wait();
+            LockProvider.Stop().Wait();
+            _lifeCycleEventHub.Stop().Wait();
         }
 
         public void RegisterWorkflow<TWorkflow>()

@@ -292,11 +292,7 @@ namespace WorkflowCore.Providers.AWS.Services
                 {
                     { "id", new AttributeValue(id) }
                 },
-                UpdateExpression = "REMOVE not_processed",
-                //ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
-                //{
-                //    { ":processed" , new AttributeValue(true.ToString()) }
-                //}
+                UpdateExpression = "REMOVE not_processed"
             };
             await _client.UpdateItemAsync(request);
         }

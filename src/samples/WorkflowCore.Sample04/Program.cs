@@ -70,7 +70,12 @@ namespace WorkflowCore.Sample04
             //    cfg.UseAwsSimpleQueueService(new EnvironmentVariablesAWSCredentials(), new AmazonSQSConfig() { RegionEndpoint = RegionEndpoint.USWest2 });                
             //});
 
-            //services.AddWorkflow(x => x.UseRedlock(new System.Net.DnsEndPoint("127.0.0.1", 32768)));
+            //services.AddWorkflow(cfg =>
+            //{
+            //    cfg.UseRedisLocking("localhost:6379");
+            //    cfg.UseRedisQueues("localhost:6379", "sample4");
+            //    cfg.UseRedisEventHub("localhost:6379", "channel1");
+            //});
 
             //services.AddWorkflow(x =>
             //{

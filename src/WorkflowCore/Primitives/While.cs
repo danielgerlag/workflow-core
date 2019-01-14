@@ -23,11 +23,8 @@ namespace WorkflowCore.Primitives
 
             if ((context.PersistenceData is ControlPersistenceData) && ((context.PersistenceData as ControlPersistenceData).ChildrenActive))
             {
-                for (int i = context.ExecutionPointer.Children.Count - 1; i > -1; i--)
-                {
-                    if (!IsBranchComplete(context.Workflow.ExecutionPointers, context.ExecutionPointer.Children[i]))                 
-                        return ExecutionResult.Persist(context.PersistenceData);                 
-                }
+                if (!context.Workflow.IsBranchComplete(context.ExecutionPointer.Id))
+                    return ExecutionResult.Persist(context.PersistenceData);
                 
                 return ExecutionResult.Persist(null);  //re-evaluate condition on next pass
             }

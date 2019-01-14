@@ -69,19 +69,18 @@ namespace WorkflowCore.Services.DefinitionStorage
                 var containerType = typeof(WorkflowStep<>).MakeGenericType(stepType);
                 var targetStep = (containerType.GetConstructor(new Type[] { }).Invoke(null) as WorkflowStep);
 
-                if (!string.IsNullOrEmpty(nextStep.CancelCondition))
-                {
-                    containerType = typeof(CancellableStep<,>).MakeGenericType(stepType, dataType);
-                    var cancelExprType = typeof(Expression<>).MakeGenericType(typeof(Func<,>).MakeGenericType(dataType, typeof(bool)));
-                    var dataParameter = Expression.Parameter(dataType, "data");
-                    var cancelExpr = DynamicExpressionParser.ParseLambda(new[] { dataParameter }, typeof(bool), nextStep.CancelCondition);
-                    targetStep = (containerType.GetConstructor(new Type[] { cancelExprType }).Invoke(new[] { cancelExpr }) as WorkflowStep);
-                }
-
-                if (nextStep.Saga)  //TODO: cancellable saga???
+                if (nextStep.Saga)
                 {
                     containerType = typeof(SagaContainer<>).MakeGenericType(stepType);
                     targetStep = (containerType.GetConstructor(new Type[] { }).Invoke(null) as WorkflowStep);
+                }
+
+                if (!string.IsNullOrEmpty(nextStep.CancelCondition))
+                {
+                    var cancelExprType = typeof(Expression<>).MakeGenericType(typeof(Func<,>).MakeGenericType(dataType, typeof(bool)));
+                    var dataParameter = Expression.Parameter(dataType, "data");
+                    var cancelExpr = DynamicExpressionParser.ParseLambda(new[] { dataParameter }, typeof(bool), nextStep.CancelCondition);
+                    targetStep.CancelCondition = cancelExpr;
                 }
 
                 targetStep.Id = i;

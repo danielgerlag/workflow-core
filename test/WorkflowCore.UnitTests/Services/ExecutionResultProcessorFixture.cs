@@ -47,8 +47,8 @@ namespace WorkflowCore.UnitTests.Services
         {
             //arrange            
             var definition = new WorkflowDefinition();
-            var pointer1 = new ExecutionPointer() { Active = true, StepId = 0, Status = PointerStatus.Running };
-            var pointer2 = new ExecutionPointer();
+            var pointer1 = new ExecutionPointer() { Id = "1", Active = true, StepId = 0, Status = PointerStatus.Running };
+            var pointer2 = new ExecutionPointer() { Id = "2" };
             var outcome = new StepOutcome() { NextStep = 1 };
             var step = A.Fake<WorkflowStep>();            
             var workflowResult = new WorkflowExecutorResult();
@@ -76,7 +76,7 @@ namespace WorkflowCore.UnitTests.Services
             //arrange
             var persistenceData = new object();
             var definition = new WorkflowDefinition();
-            var pointer = new ExecutionPointer() { Active = true, StepId = 0, Status = PointerStatus.Running };
+            var pointer = new ExecutionPointer() { Id = "1", Active = true, StepId = 0, Status = PointerStatus.Running };
             var step = A.Fake<WorkflowStep>();
             var workflowResult = new WorkflowExecutorResult();
             var instance = GivenWorkflow(pointer);
@@ -94,7 +94,7 @@ namespace WorkflowCore.UnitTests.Services
         {
             //arrange
             var definition = new WorkflowDefinition();
-            var pointer = new ExecutionPointer() { Active = true, StepId = 0, Status = PointerStatus.Running };
+            var pointer = new ExecutionPointer() { Id = "1", Active = true, StepId = 0, Status = PointerStatus.Running };
             var step = A.Fake<WorkflowStep>();
             var workflowResult = new WorkflowExecutorResult();
             var instance = GivenWorkflow(pointer);
@@ -116,9 +116,9 @@ namespace WorkflowCore.UnitTests.Services
         {
             //arrange            
             var definition = new WorkflowDefinition();
-            var pointer1 = new ExecutionPointer() { Active = true, StepId = 0, Status = PointerStatus.Running };
-            var pointer2 = new ExecutionPointer();
-            var pointer3 = new ExecutionPointer();
+            var pointer1 = new ExecutionPointer() { Id = "1", Active = true, StepId = 0, Status = PointerStatus.Running };
+            var pointer2 = new ExecutionPointer() { Id = "2" };
+            var pointer3 = new ExecutionPointer() { Id = "3" };
             var outcome1 = new StepOutcome() { NextStep = 1, Value = data => 10 };
             var outcome2 = new StepOutcome() { NextStep = 2, Value = data => 20 };
             var step = A.Fake<WorkflowStep>();
@@ -150,7 +150,7 @@ namespace WorkflowCore.UnitTests.Services
             //arrange
             var persistenceData = new object();
             var definition = new WorkflowDefinition();
-            var pointer = new ExecutionPointer() { Active = true, StepId = 0, Status = PointerStatus.Running };
+            var pointer = new ExecutionPointer() { Id = "1", Active = true, StepId = 0, Status = PointerStatus.Running };
             var step = A.Fake<WorkflowStep>();            
             var workflowResult = new WorkflowExecutorResult();
             var instance = GivenWorkflow(pointer);
@@ -171,8 +171,8 @@ namespace WorkflowCore.UnitTests.Services
             var branch = 10;
             var child = 2;
             var definition = new WorkflowDefinition();
-            var pointer = new ExecutionPointer() { Active = true, StepId = 0, Status = PointerStatus.Running };
-            var childPointer = new ExecutionPointer();
+            var pointer = new ExecutionPointer() { Id = "1", Active = true, StepId = 0, Status = PointerStatus.Running };
+            var childPointer = new ExecutionPointer() { Id = "2" };
             var step = A.Fake<WorkflowStep>();
             var workflowResult = new WorkflowExecutorResult();
             var instance = GivenWorkflow(pointer);
@@ -188,17 +188,16 @@ namespace WorkflowCore.UnitTests.Services
             A.CallTo(() => PointerFactory.BuildChildPointer(definition, pointer, child, branch)).MustHaveHappened();
             instance.ExecutionPointers.Should().Contain(childPointer);
         }
-
         
         private static WorkflowInstance GivenWorkflow(ExecutionPointer pointer)
         {
             return new WorkflowInstance
             {
                 Status = WorkflowStatus.Runnable,
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
                     pointer
-                }
+                })
             };
         }
     }

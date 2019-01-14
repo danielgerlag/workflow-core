@@ -6,6 +6,8 @@ namespace WorkflowCore.Models
 {
     public class ExecutionPointer
     {
+        private IReadOnlyCollection<string> _scope = new List<string>();
+
         public string Id { get; set; }
 
         public int StepId { get; set; }
@@ -26,8 +28,8 @@ namespace WorkflowCore.Models
 
         public bool EventPublished { get; set; }
 
-        public object EventData { get; set; }                
-        
+        public object EventData { get; set; }
+
         public Dictionary<string, object> ExtensionAttributes { get; set; } = new Dictionary<string, object>();
 
         public string StepName { get; set; }
@@ -43,9 +45,12 @@ namespace WorkflowCore.Models
         public object Outcome { get; set; }
 
         public PointerStatus Status { get; set; } = PointerStatus.Legacy;
-        
-        public Stack<string> Scope { get; set; } = new Stack<string>();
-                        
+
+        public IReadOnlyCollection<string> Scope
+        {
+            get => _scope;
+            set => _scope = new List<string>(value);
+        }
     }
 
     public enum PointerStatus
@@ -57,6 +62,7 @@ namespace WorkflowCore.Models
         Sleeping = 4,
         WaitingForEvent = 5,
         Failed = 6,
-        Compensated = 7
+        Compensated = 7,
+        Cancelled = 8
     }
 }
