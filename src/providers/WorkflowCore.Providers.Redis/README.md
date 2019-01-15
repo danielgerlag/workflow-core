@@ -11,13 +11,13 @@ This makes it possible to have a cluster of nodes processing your workflows.
 Install the NuGet package "WorkflowCore.Providers.Redis"
 
 Using Nuget package console
-    ```
-    PM> Install-Package WorkflowCore.Providers.Redis
-    ```
+```
+PM> Install-Package WorkflowCore.Providers.Redis
+```
 Using .NET CLI
-    ```
-    dotnet add package WorkflowCore.Providers.Redis
-    ```
+```
+dotnet add package WorkflowCore.Providers.Redis
+```
 
 
 ## Usage
