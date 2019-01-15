@@ -8,7 +8,7 @@ using WorkflowCore.Models.Search;
 
 namespace WorkflowCore.Services
 {
-    public class InMemorySearchIndex : ISearchIndex
+    public class NullSearchIndex : ISearchIndex
     {
         public Task IndexWorkflow(WorkflowInstance workflow)
         {

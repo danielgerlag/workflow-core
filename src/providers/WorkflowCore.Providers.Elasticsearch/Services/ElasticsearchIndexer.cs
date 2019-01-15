@@ -14,33 +14,42 @@ namespace WorkflowCore.Providers.Elasticsearch.Services
     {
         private readonly ConnectionSettings _settings;
         private readonly string _indexName;
+        private readonly ILogger _logger;
         private IElasticClient _client;
-
+        
         public ElasticsearchIndexer(ConnectionSettings settings, string indexName, ILoggerFactory loggerFactory)
         {
             _settings = settings;
             _indexName = indexName;
+            _logger = loggerFactory.CreateLogger(GetType());
         }
 
         public async Task IndexWorkflow(WorkflowInstance workflow)
         {
             if (_client == null)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("Not started");
 
-            var denormModel = WorkflowSearchResult.FromWorkflowInstance(workflow);
-            await _client.IndexAsync(denormModel, x => x.Index(_indexName));
+            try
+            {
+                var denormModel = WorkflowSearchResult.FromWorkflowInstance(workflow);
+                await _client.IndexAsync(denormModel, x => x.Index(_indexName));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(default(EventId), ex, $"Failed to index workflow {workflow.Id}");
+            }
         }
 
         public async Task<Page<WorkflowSearchResult>> Search(string terms, int skip, int take, params SearchFilter[] filters)
         {
             if (_client == null)
-                throw new InvalidOperationException();
-
+                throw new InvalidOperationException("Not started");
+            
             var result = await _client.SearchAsync<WorkflowSearchResult>(s => s
                 .Index(_indexName)
                 .Skip(skip)
-                .Take(take)          
-                .MinScore(0.1)
+                .Take(take)
+                .MinScore(!string.IsNullOrEmpty(terms) ? 0.1 : 0)
                 .Query(query => query
                     .Bool(b => b
                         .Filter(BuildFilterQuery(filters))
@@ -62,10 +71,10 @@ namespace WorkflowCore.Providers.Elasticsearch.Services
             };
         }
 
-        public Task Start()
+        public async Task Start()
         {
             _client = new ElasticClient(_settings);
-            return Task.CompletedTask;
+            var ping = await _client.PingAsync();
         }
 
         public Task Stop()
@@ -82,26 +91,20 @@ namespace WorkflowCore.Providers.Elasticsearch.Services
             {
                 switch (filter)
                 {
-                    case ReferenceFilter f:
-                        result.Add(x => x.Match(t => t.Field(field => field.Reference).Query(f.Value)));
+                    case ScalarFilter f:
+                        result.Add(x => x.Match(t => t.Field(f.Property).Query(Convert.ToString(f.Value))));
                         break;
-                    case WorkflowDefinitionFilter f:
-                        result.Add(x => x.Match(t => t.Field(field => field.WorkflowDefinitionId).Query(f.Value)));
-                        break;
-                    case StatusFilter f:
-                        result.Add(x => x.Match(t => t.Field(field => field.Reference).Query(f.Value.ToString())));
-                        break;
-                    case CreateDateFilter f:
+                    case DateRangeFilter f:
                         if (f.BeforeValue.HasValue)
-                            result.Add(x => x.DateRange(t => t.Field(field => field.CreateTime).LessThan(f.BeforeValue)));
+                            result.Add(x => x.DateRange(t => t.Field(f.Property).LessThan(f.BeforeValue)));
                         if (f.AfterValue.HasValue)
-                            result.Add(x => x.DateRange(t => t.Field(field => field.CreateTime).GreaterThan(f.AfterValue)));
+                            result.Add(x => x.DateRange(t => t.Field(f.Property).GreaterThan(f.AfterValue)));
                         break;
-                    case CompleteDateFilter f:
-                        if (f.BeforeValue.HasValue)
-                            result.Add(x => x.DateRange(t => t.Field(field => field.CompleteTime).LessThan(f.BeforeValue)));
-                        if (f.AfterValue.HasValue)
-                            result.Add(x => x.DateRange(t => t.Field(field => field.CompleteTime).GreaterThan(f.AfterValue)));
+                    case NumericRangeFilter f:
+                        if (f.LessValue.HasValue)
+                            result.Add(x => x.Range(t => t.Field(f.Property).LessThan(f.LessValue)));
+                        if (f.GreaterValue.HasValue)
+                            result.Add(x => x.Range(t => t.Field(f.Property).GreaterThan(f.GreaterValue)));
                         break;
                 }
             }

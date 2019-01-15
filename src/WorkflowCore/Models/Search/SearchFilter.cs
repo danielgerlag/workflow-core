@@ -1,84 +1,132 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace WorkflowCore.Models.Search
 {
     public abstract class SearchFilter
     {
+        public Expression Property { get; set; }
     }
 
-    public class ReferenceFilter : SearchFilter
+    public class ScalarFilter : SearchFilter
     {
-        public string Value { get; set; }
+        public object Value { get; set; }
 
-        public static ReferenceFilter Equals(string value) => new ReferenceFilter()
+        public static SearchFilter Equals(Expression<Func<WorkflowSearchResult, object>> property, object value) => new ScalarFilter()
         {
+            Property = property,
+            Value = value
+        };
+
+        public static SearchFilter Equals<T>(Expression<Func<WorkflowSearchResult<T>, object>> property, object value) => new ScalarFilter()
+        {
+            Property = property,
             Value = value
         };
     }
 
-    public class StatusFilter : SearchFilter
+    public class DateRangeFilter : SearchFilter
     {
-        public WorkflowStatus Value { get; set; }
+        public DateTime? BeforeValue { get; set; }
+        public DateTime? AfterValue { get; set; }
+
+        public static DateRangeFilter Before(Expression<Func<WorkflowSearchResult, object>> property, DateTime value) => new DateRangeFilter()
+        {
+            Property = property,
+            BeforeValue = value
+        };
+
+        public static DateRangeFilter After(Expression<Func<WorkflowSearchResult, object>> property, DateTime value) => new DateRangeFilter()
+        {
+            Property = property,
+            AfterValue = value
+        };
+
+        public static DateRangeFilter Between(Expression<Func<WorkflowSearchResult, object>> property, DateTime start, DateTime end) => new DateRangeFilter()
+        {
+            Property = property,
+            BeforeValue = end,
+            AfterValue = start
+        };
+
+        public static DateRangeFilter Before<T>(Expression<Func<WorkflowSearchResult<T>, object>> property, DateTime value) => new DateRangeFilter()
+        {
+            Property = property,
+            BeforeValue = value
+        };
+
+        public static DateRangeFilter After<T>(Expression<Func<WorkflowSearchResult<T>, object>> property, DateTime value) => new DateRangeFilter()
+        {
+            Property = property,
+            AfterValue = value
+        };
+
+        public static DateRangeFilter Between<T>(Expression<Func<WorkflowSearchResult<T>, object>> property, DateTime start, DateTime end) => new DateRangeFilter()
+        {
+            Property = property,
+            BeforeValue = end,
+            AfterValue = start
+        };
+    }
+
+    public class NumericRangeFilter : SearchFilter
+    {
+        public double? LessValue { get; set; }
+        public double? GreaterValue { get; set; }
+
+        public static NumericRangeFilter LessThan(Expression<Func<WorkflowSearchResult, object>> property, double value) => new NumericRangeFilter()
+        {
+            Property = property,
+            LessValue = value
+        };
+
+        public static NumericRangeFilter GreaterThan(Expression<Func<WorkflowSearchResult, object>> property, double value) => new NumericRangeFilter()
+        {
+            Property = property,
+            GreaterValue = value
+        };
+
+        public static NumericRangeFilter Between(Expression<Func<WorkflowSearchResult, object>> property, double start, double end) => new NumericRangeFilter()
+        {
+            Property = property,
+            LessValue = end,
+            GreaterValue = start
+        };
+
+        public static NumericRangeFilter LessThan<T>(Expression<Func<WorkflowSearchResult<T>, object>> property, double value) => new NumericRangeFilter()
+        {
+            Property = property,
+            LessValue = value
+        };
+
+        public static NumericRangeFilter GreaterThan<T>(Expression<Func<WorkflowSearchResult<T>, object>> property, double value) => new NumericRangeFilter()
+        {
+            Property = property,
+            GreaterValue = value
+        };
+
+        public static NumericRangeFilter Between<T>(Expression<Func<WorkflowSearchResult<T>, object>> property, double start, double end) => new NumericRangeFilter()
+        {
+            Property = property,
+            LessValue = end,
+            GreaterValue = start
+        };
+    }
+
+    public class StatusFilter : ScalarFilter
+    {
+        protected StatusFilter()
+        {
+            Expression<Func<WorkflowSearchResult, object>> lambda = (WorkflowSearchResult x) => x.Status;
+            Property = lambda;
+        }
 
         public static StatusFilter Equals(WorkflowStatus value) => new StatusFilter()
         {
-            Value = value
+            Value = value.ToString()
         };
     }
 
-    public class WorkflowDefinitionFilter : SearchFilter
-    {
-        public string Value { get; set; }
-
-        public static WorkflowDefinitionFilter Equals(string value) => new WorkflowDefinitionFilter()
-        {
-            Value = value
-        };
-    }
-
-    public class CreateDateFilter : SearchFilter
-    {
-        public DateTime? BeforeValue { get; set; }
-        public DateTime? AfterValue { get; set; }
-
-        public static CreateDateFilter Before(DateTime value) => new CreateDateFilter()
-        {
-            BeforeValue = value
-        };
-
-        public static CreateDateFilter After(DateTime value) => new CreateDateFilter()
-        {
-            AfterValue = value
-        };
-
-        public static CreateDateFilter Between(DateTime start, DateTime end) => new CreateDateFilter()
-        {
-            BeforeValue = end,
-            AfterValue = start
-        };
-    }
-
-    public class CompleteDateFilter : SearchFilter
-    {
-        public DateTime? BeforeValue { get; set; }
-        public DateTime? AfterValue { get; set; }
-
-        public static CompleteDateFilter Before(DateTime value) => new CompleteDateFilter()
-        {
-            BeforeValue = value
-        };
-
-        public static CompleteDateFilter After(DateTime value) => new CompleteDateFilter()
-        {
-            AfterValue = value
-        };
-
-        public static CompleteDateFilter Between(DateTime start, DateTime end) => new CompleteDateFilter()
-        {
-            BeforeValue = end,
-            AfterValue = start
-        };
-    }
 }
