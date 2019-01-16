@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Reflection;
 using WorkflowCore.Interface;
 
 namespace WorkflowCore.Models.Search
 {
-    public class WorkflowSearchResult<TData>
+    public class WorkflowSearchResult
     {
         public string Id { get; set; }
 
@@ -19,12 +19,10 @@ namespace WorkflowCore.Models.Search
 
         public DateTime? NextExecutionUtc { get; set; }
 
-        public string Status { get; set; }
+        public WorkflowStatus Status { get; set; }
 
-        public TData Data { get; set; }
-
-        public IEnumerable<string> DataTokens { get; set; }
-
+        public object Data { get; set; }
+        
         public DateTime CreateTime { get; set; }
 
         public DateTime? CompleteTime { get; set; }
@@ -35,63 +33,12 @@ namespace WorkflowCore.Models.Search
 
         public ICollection<StepInfo> FailedSteps { get; set; } = new HashSet<StepInfo>();
 
+
     }
 
-    public class WorkflowSearchResult : WorkflowSearchResult<object>
+    public class WorkflowSearchResult<TData> : WorkflowSearchResult
     {
-        public static WorkflowSearchResult FromWorkflowInstance(WorkflowInstance workflow)
-        {
-            var result = new WorkflowSearchResult
-            {
-                Id = workflow.Id,
-                WorkflowDefinitionId = workflow.WorkflowDefinitionId,
-                Description = workflow.Description,
-                Reference = workflow.Reference,
-                Data = workflow.Data,
-                CompleteTime = workflow.CompleteTime,
-                CreateTime = workflow.CreateTime,
-                Version = workflow.Version,
-                Status = workflow.Status.ToString()
-            };
-
-            if (workflow.NextExecution.HasValue)
-                result.NextExecutionUtc = new DateTime(workflow.NextExecution.Value);
-
-            if (workflow.Data is ISearchable)
-                result.DataTokens = (workflow.Data as ISearchable).GetSearchTokens();
-
-            foreach (var ep in workflow.ExecutionPointers)
-            {
-                if (ep.Status == PointerStatus.Sleeping)
-                {
-                    result.SleepingSteps.Add(new StepInfo()
-                    {
-                        StepId = ep.StepId,
-                        Name = ep.StepName
-                    });
-                }
-
-                if (ep.Status == PointerStatus.WaitingForEvent)
-                {
-                    result.WaitingSteps.Add(new StepInfo()
-                    {
-                        StepId = ep.StepId,
-                        Name = ep.StepName
-                    });
-                }
-
-                if (ep.Status == PointerStatus.Failed)
-                {
-                    result.FailedSteps.Add(new StepInfo()
-                    {
-                        StepId = ep.StepId,
-                        Name = ep.StepName
-                    });
-                }
-            }
-
-            return result;
-        }
+        public new TData Data { get; set; }
     }
     
 }

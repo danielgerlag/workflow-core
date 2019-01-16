@@ -7,6 +7,8 @@ namespace WorkflowCore.Models.Search
 {
     public abstract class SearchFilter
     {
+        public bool IsData { get; set; }
+        public Type DataType { get; set; }
         public Expression Property { get; set; }
     }
 
@@ -20,8 +22,10 @@ namespace WorkflowCore.Models.Search
             Value = value
         };
 
-        public static SearchFilter Equals<T>(Expression<Func<WorkflowSearchResult<T>, object>> property, object value) => new ScalarFilter()
+        public static SearchFilter Equals<T>(Expression<Func<T, object>> property, object value) => new ScalarFilter()
         {
+            IsData = true,
+            DataType = typeof(T),
             Property = property,
             Value = value
         };
@@ -51,20 +55,23 @@ namespace WorkflowCore.Models.Search
             AfterValue = start
         };
 
-        public static DateRangeFilter Before<T>(Expression<Func<WorkflowSearchResult<T>, object>> property, DateTime value) => new DateRangeFilter()
+        public static DateRangeFilter Before<T>(Expression<Func<T, object>> property, DateTime value) => new DateRangeFilter()
         {
+            IsData = true,
             Property = property,
             BeforeValue = value
         };
 
-        public static DateRangeFilter After<T>(Expression<Func<WorkflowSearchResult<T>, object>> property, DateTime value) => new DateRangeFilter()
+        public static DateRangeFilter After<T>(Expression<Func<T, object>> property, DateTime value) => new DateRangeFilter()
         {
+            IsData = true,
             Property = property,
             AfterValue = value
         };
 
-        public static DateRangeFilter Between<T>(Expression<Func<WorkflowSearchResult<T>, object>> property, DateTime start, DateTime end) => new DateRangeFilter()
+        public static DateRangeFilter Between<T>(Expression<Func<T, object>> property, DateTime start, DateTime end) => new DateRangeFilter()
         {
+            IsData = true,
             Property = property,
             BeforeValue = end,
             AfterValue = start
@@ -95,20 +102,23 @@ namespace WorkflowCore.Models.Search
             GreaterValue = start
         };
 
-        public static NumericRangeFilter LessThan<T>(Expression<Func<WorkflowSearchResult<T>, object>> property, double value) => new NumericRangeFilter()
+        public static NumericRangeFilter LessThan<T>(Expression<Func<T, object>> property, double value) => new NumericRangeFilter()
         {
+            IsData = true,
             Property = property,
             LessValue = value
         };
 
-        public static NumericRangeFilter GreaterThan<T>(Expression<Func<WorkflowSearchResult<T>, object>> property, double value) => new NumericRangeFilter()
+        public static NumericRangeFilter GreaterThan<T>(Expression<Func<T, object>> property, double value) => new NumericRangeFilter()
         {
+            IsData = true,
             Property = property,
             GreaterValue = value
         };
 
-        public static NumericRangeFilter Between<T>(Expression<Func<WorkflowSearchResult<T>, object>> property, double start, double end) => new NumericRangeFilter()
+        public static NumericRangeFilter Between<T>(Expression<Func<T, object>> property, double start, double end) => new NumericRangeFilter()
         {
+            IsData = true,
             Property = property,
             LessValue = end,
             GreaterValue = start

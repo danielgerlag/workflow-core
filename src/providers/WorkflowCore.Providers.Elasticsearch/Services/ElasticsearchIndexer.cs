@@ -3,10 +3,12 @@ using Nest;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Models.Search;
+using WorkflowCore.Providers.Elasticsearch.Models;
 
 namespace WorkflowCore.Providers.Elasticsearch.Services
 {
@@ -20,7 +22,7 @@ namespace WorkflowCore.Providers.Elasticsearch.Services
         public ElasticsearchIndexer(ConnectionSettings settings, string indexName, ILoggerFactory loggerFactory)
         {
             _settings = settings;
-            _indexName = indexName;
+            _indexName = indexName.ToLower();
             _logger = loggerFactory.CreateLogger(GetType());
         }
 
@@ -31,8 +33,13 @@ namespace WorkflowCore.Providers.Elasticsearch.Services
 
             try
             {
-                var denormModel = WorkflowSearchResult.FromWorkflowInstance(workflow);
-                await _client.IndexAsync(denormModel, x => x.Index(_indexName));
+                var denormModel = WorkflowSearchModel.FromWorkflowInstance(workflow);
+                
+                var result = await _client.IndexAsync(denormModel, idx => idx
+                    .Index(_indexName)
+                );
+
+                System.Threading.Thread.Sleep(0);
             }
             catch (Exception ex)
             {
@@ -45,7 +52,7 @@ namespace WorkflowCore.Providers.Elasticsearch.Services
             if (_client == null)
                 throw new InvalidOperationException("Not started");
             
-            var result = await _client.SearchAsync<WorkflowSearchResult>(s => s
+            var result = await _client.SearchAsync<WorkflowSearchModel>(s => s
                 .Index(_indexName)
                 .Skip(skip)
                 .Take(take)
@@ -67,14 +74,20 @@ namespace WorkflowCore.Providers.Elasticsearch.Services
             return new Page<WorkflowSearchResult>
             {
                 Total = result.Total,
-                Data = result.Hits.Select(x => x.Source).ToList()
+                Data = result.Hits.Select(x => x.Source).Select(x => x.ToSearchResult()).ToList()
             };
         }
 
         public async Task Start()
         {
             _client = new ElasticClient(_settings);
-            var ping = await _client.PingAsync();
+            await _client.PingAsync();
+
+            //var exists = await _client.IndexExistsAsync(_indexName);
+            //if (!exists.Exists)
+            //{
+            //    await _client.CreateIndexAsync(_indexName);
+            //}
         }
 
         public Task Stop()
@@ -83,28 +96,47 @@ namespace WorkflowCore.Providers.Elasticsearch.Services
             return Task.CompletedTask;
         }
 
-        private List<Func<QueryContainerDescriptor<WorkflowSearchResult>, QueryContainer>> BuildFilterQuery(SearchFilter[] filters)
+        private List<Func<QueryContainerDescriptor<WorkflowSearchModel>, QueryContainer>> BuildFilterQuery(SearchFilter[] filters)
         {
-            var result = new List<Func<QueryContainerDescriptor<WorkflowSearchResult>, QueryContainer>>();
+            var result = new List<Func<QueryContainerDescriptor<WorkflowSearchModel>, QueryContainer>>();
 
             foreach (var filter in filters)
             {
+                var field = new Field(filter.Property);
+                if (filter.IsData)
+                {
+                    Expression<Func<WorkflowSearchModel, object>> dataExpr = x => x.Data[filter.DataType.FullName];
+                    var p1 = Expression.Parameter(filter.DataType);
+                    //Expression.Convert()
+                    var subExpr = Expression.Lambda(filter.Property, p1);
+                    
+                    //field = Expression.Property(dataExpr, (filter.Property as MemberExpression).Member.Name);
+                    //subExpr.
+                    var modelType = typeof(TypedWorkflowSearchModel<>).MakeGenericType(filter.DataType);
+                    var funcType = typeof(Func<,>).MakeGenericType(modelType, typeof(object));
+                    var exprType = typeof(Expression<>).MakeGenericType(funcType);
+
+
+                    //field = new Field("data.WorkflowCore.Sample03.MyDataClass.value1");
+                    field = new Field(dataExpr.AppendSuffix("value1"));
+                }
+
                 switch (filter)
                 {
                     case ScalarFilter f:
-                        result.Add(x => x.Match(t => t.Field(f.Property).Query(Convert.ToString(f.Value))));
+                        result.Add(x => x.Match(t => t.Field(field).Query(Convert.ToString(f.Value))));
                         break;
                     case DateRangeFilter f:
                         if (f.BeforeValue.HasValue)
-                            result.Add(x => x.DateRange(t => t.Field(f.Property).LessThan(f.BeforeValue)));
+                            result.Add(x => x.DateRange(t => t.Field(field).LessThan(f.BeforeValue)));
                         if (f.AfterValue.HasValue)
-                            result.Add(x => x.DateRange(t => t.Field(f.Property).GreaterThan(f.AfterValue)));
+                            result.Add(x => x.DateRange(t => t.Field(field).GreaterThan(f.AfterValue)));
                         break;
                     case NumericRangeFilter f:
                         if (f.LessValue.HasValue)
-                            result.Add(x => x.Range(t => t.Field(f.Property).LessThan(f.LessValue)));
+                            result.Add(x => x.Range(t => t.Field(field).LessThan(f.LessValue)));
                         if (f.GreaterValue.HasValue)
-                            result.Add(x => x.Range(t => t.Field(f.Property).GreaterThan(f.GreaterValue)));
+                            result.Add(x => x.Range(t => t.Field(field).GreaterThan(f.GreaterValue)));
                         break;
                 }
             }
