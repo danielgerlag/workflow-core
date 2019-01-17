@@ -30,18 +30,18 @@ namespace ScratchPad
             host.RegisterWorkflow<WorkflowCore.Sample04.EventSampleWorkflow, WorkflowCore.Sample04.MyDataClass>();
 
             host.Start();
-            //var data1 = new WorkflowCore.Sample03.MyDataClass() { Value1 = 2, Value2 = 3 };
-            //host.StartWorkflow("PassingDataWorkflow", data1, "quick dog").Wait();
+            var data1 = new WorkflowCore.Sample03.MyDataClass() { Value1 = 2, Value2 = 3 };
+            host.StartWorkflow("PassingDataWorkflow", data1, "quick dog").Wait();
 
-            //var data2 = new WorkflowCore.Sample04.MyDataClass() { Value1 = "test" };
-            //host.StartWorkflow("EventSampleWorkflow", data2, "alt1 boom").Wait();
+            var data2 = new WorkflowCore.Sample04.MyDataClass() { Value1 = "test" };
+            host.StartWorkflow("EventSampleWorkflow", data2, "alt1 boom").Wait();
 
 
             var searchResult1 = searchIndex.Search("dog", 0, 10).Result;
             var searchResult2 = searchIndex.Search("quick dog", 0, 10).Result;
-            var searchResult3 = searchIndex.Search("quick", 0, 10).Result;
+            var searchResult3 = searchIndex.Search("fast", 0, 10).Result;
             var searchResult4 = searchIndex.Search("alt1", 0, 10).Result;
-            var searchResult5 = searchIndex.Search("slow", 0, 10).Result;
+            var searchResult5 = searchIndex.Search("dogs", 0, 10).Result;
             var searchResult6 = searchIndex.Search("test", 0, 10).Result;
             var searchResult7 = searchIndex.Search("", 0, 10).Result;
             var searchResult8 = searchIndex.Search("", 0, 10, ScalarFilter.Equals(x => x.Reference, "quick dog")).Result;

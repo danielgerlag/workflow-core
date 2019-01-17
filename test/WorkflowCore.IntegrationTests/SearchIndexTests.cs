@@ -4,7 +4,7 @@ using FluentAssertions;
 using FluentAssertions.Collections;
 using FluentAssertions.Equivalency;
 using FluentAssertions.Common;
-using NUnit.Framework;
+using Xunit;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Models.Search;
@@ -15,6 +15,15 @@ namespace WorkflowCore.IntegrationTests
     {
         protected abstract ISearchIndex CreateService();
         protected ISearchIndex Subject { get; set; }
+
+        protected SearchIndexTests()
+        {
+            Subject = CreateService();
+            Subject.Start().Wait();
+
+            foreach (var item in BuildTestData())
+                Subject.IndexWorkflow(item).Wait();
+        }
 
         protected IEnumerable<WorkflowInstance> BuildTestData()
         {
@@ -36,7 +45,7 @@ namespace WorkflowCore.IntegrationTests
                 Reference = "ref2",
                 Data = new DataObject()
                 {
-                    IntValue = 7
+                    Value3 = 7
                 }
             });
 
@@ -48,26 +57,30 @@ namespace WorkflowCore.IntegrationTests
                 Reference = "ref3",
                 Data = new DataObject()
                 {
-                    IntValue = 5,
-                    StrValue1 = "quick fox",
-                    StrValue2 = "lazy dog" 
+                    Value3 = 5,
+                    Value1 = "quick fox",
+                    Value2 = "lazy dog" 
+                }
+            });
+
+            result.Add(new WorkflowInstance()
+            {
+                Id = "4",
+                CreateTime = new DateTime(2010, 1, 1),
+                Status = WorkflowStatus.Complete,
+                Reference = "ref4",
+                Data = new AltDataObject()
+                {
+                    Value1 = 9,
+                    Value2 = new DateTime(2000, 1, 1)
                 }
             });
 
             return result;
         }
 
-        [OneTimeSetUp]
-        public async void Setup()
-        {
-            Subject = CreateService();
-            await Subject.Start();
 
-            foreach (var item in BuildTestData())
-                await Subject.IndexWorkflow(item);
-        }
-
-        [Test]
+        [Fact]
         public async void should_search_on_reference()
         {
             var result1 = await Subject.Search("ref1", 0, 10);
@@ -82,7 +95,7 @@ namespace WorkflowCore.IntegrationTests
             result2.Data.Should().NotContain(x => x.Id == "3");
         }
         
-        [Test]
+        [Fact]
         public async void should_search_on_custom_data()
         {
             var result = await Subject.Search("dog fox", 0, 10);
@@ -92,17 +105,27 @@ namespace WorkflowCore.IntegrationTests
             result.Data.Should().Contain(x => x.Id == "3");
         }
 
-        [Test]
+        [Fact]
         public async void should_filter_on_custom_data()
         {
-            var result = await Subject.Search(null, 0, 10, ScalarFilter.Equals<DataObject>(x => x.Data.IntValue, 7));
+            var result = await Subject.Search(null, 0, 10, ScalarFilter.Equals<DataObject>(x => x.Value3, 7));
 
             result.Data.Should().NotContain(x => x.Id == "1");
             result.Data.Should().Contain(x => x.Id == "2");
             result.Data.Should().NotContain(x => x.Id == "3");
         }
 
-        [Test]
+        [Fact]
+        public async void should_filter_on_alt_custom_data_with_conflicting_names()
+        {
+            var result1 = await Subject.Search(null, 0, 10, ScalarFilter.Equals<AltDataObject>(x => x.Value1, 9));
+            var result2 = await Subject.Search(null, 0, 10, DateRangeFilter.Between<AltDataObject>(x => x.Value2, new DateTime(1999, 12, 31), new DateTime(2000, 1, 2)));
+
+            result1.Data.Should().Contain(x => x.Id == "4");
+            result2.Data.Should().Contain(x => x.Id == "4");
+        }
+
+        [Fact]
         public async void should_filter_on_reference()
         {
             var result = await Subject.Search(null, 0, 10, ScalarFilter.Equals(x => x.Reference, "ref2"));
@@ -112,16 +135,16 @@ namespace WorkflowCore.IntegrationTests
             result.Data.Should().NotContain(x => x.Id == "3");
         }
 
-        [Test]
+        [Fact]
         public async void should_filter_on_status()
         {
             var result = await Subject.Search(null, 0, 10, StatusFilter.Equals(WorkflowStatus.Runnable));
 
-            result.Data.Should().NotContain(x => x.Status != WorkflowStatus.Runnable.ToString());
-            result.Data.Should().Contain(x => x.Status == WorkflowStatus.Runnable.ToString());
+            result.Data.Should().NotContain(x => x.Status != WorkflowStatus.Runnable);
+            result.Data.Should().Contain(x => x.Status == WorkflowStatus.Runnable);
         }
 
-        [Test]
+        [Fact]
         public async void should_filter_on_date_range()
         {
             var start = new DateTime(2000, 1, 1);
@@ -134,19 +157,25 @@ namespace WorkflowCore.IntegrationTests
 
         class DataObject : ISearchable
         {
-            public string StrValue1 { get; set; }
-            public string StrValue2 { get; set; }
+            public string Value1 { get; set; }
+            public string Value2 { get; set; }
 
-            public int IntValue { get; set; }
+            public int Value3 { get; set; }
 
             public IEnumerable<string> GetSearchTokens()
             {
                 return new List<string>()
                 {
-                    StrValue1,
-                    StrValue2
+                    Value1,
+                    Value2
                 };    
             }
+        }
+
+        class AltDataObject
+        {
+            public int Value1 { get; set; }
+            public DateTime Value2 { get; set; }
         }
     }
 }

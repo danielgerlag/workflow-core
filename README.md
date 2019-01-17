@@ -120,6 +120,12 @@ There are several persistence providers available as separate Nuget packages.
 * [Sqlite](src/providers/WorkflowCore.Persistence.Sqlite)
 * Redis *(coming soon...)*
 
+## Search
+
+A search index provider can be plugged in to Workflow Core, enabling you to index your workflows and search against the data and state of them.
+These are also available as separate Nuget packages.
+* [Elasticsearch](src/providers/WorkflowCore.Providers.Elasticsearch)
+
 ## Extensions
 
 * [User (human) workflows](src/extensions/WorkflowCore.Users)

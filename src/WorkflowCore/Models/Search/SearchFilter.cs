@@ -10,6 +10,11 @@ namespace WorkflowCore.Models.Search
         public bool IsData { get; set; }
         public Type DataType { get; set; }
         public Expression Property { get; set; }
+
+        static Func<T, V> Lambda<T, V>(Func<T, V> del)
+        {
+            return del;
+        }
     }
 
     public class ScalarFilter : SearchFilter
@@ -58,6 +63,7 @@ namespace WorkflowCore.Models.Search
         public static DateRangeFilter Before<T>(Expression<Func<T, object>> property, DateTime value) => new DateRangeFilter()
         {
             IsData = true,
+            DataType = typeof(T),
             Property = property,
             BeforeValue = value
         };
@@ -65,6 +71,7 @@ namespace WorkflowCore.Models.Search
         public static DateRangeFilter After<T>(Expression<Func<T, object>> property, DateTime value) => new DateRangeFilter()
         {
             IsData = true,
+            DataType = typeof(T),
             Property = property,
             AfterValue = value
         };
@@ -72,6 +79,7 @@ namespace WorkflowCore.Models.Search
         public static DateRangeFilter Between<T>(Expression<Func<T, object>> property, DateTime start, DateTime end) => new DateRangeFilter()
         {
             IsData = true,
+            DataType = typeof(T),
             Property = property,
             BeforeValue = end,
             AfterValue = start
@@ -105,6 +113,7 @@ namespace WorkflowCore.Models.Search
         public static NumericRangeFilter LessThan<T>(Expression<Func<T, object>> property, double value) => new NumericRangeFilter()
         {
             IsData = true,
+            DataType = typeof(T),
             Property = property,
             LessValue = value
         };
@@ -112,6 +121,7 @@ namespace WorkflowCore.Models.Search
         public static NumericRangeFilter GreaterThan<T>(Expression<Func<T, object>> property, double value) => new NumericRangeFilter()
         {
             IsData = true,
+            DataType = typeof(T),
             Property = property,
             GreaterValue = value
         };
@@ -119,6 +129,7 @@ namespace WorkflowCore.Models.Search
         public static NumericRangeFilter Between<T>(Expression<Func<T, object>> property, double start, double end) => new NumericRangeFilter()
         {
             IsData = true,
+            DataType = typeof(T),
             Property = property,
             LessValue = end,
             GreaterValue = start

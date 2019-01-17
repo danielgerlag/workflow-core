@@ -127,6 +127,6 @@ The following filter types are available
 	public int Value2 { get; set; }
  }
 
- searchIndex.Search("", 0, 10, ScalarFilter.Equals<MyData>(x => x.Data.Value1, "blue moon"));
- searchIndex.Search("", 0, 10, NumericRangeFilter.LessThan<MyData>(x => x.Data.Value2, 5))
+ searchIndex.Search("", 0, 10, ScalarFilter.Equals<MyData>(x => x.Value1, "blue moon"));
+ searchIndex.Search("", 0, 10, NumericRangeFilter.LessThan<MyData>(x => x.Value2, 5))
  ```

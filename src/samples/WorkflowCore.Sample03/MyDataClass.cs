@@ -7,7 +7,7 @@ using WorkflowCore.Interface;
 
 namespace WorkflowCore.Sample03
 {
-    public class MyDataClass : ISearchable
+    public class MyDataClass
     {
         public int Value1 { get; set; }
 
@@ -15,11 +15,5 @@ namespace WorkflowCore.Sample03
 
         public int Value3 { get; set; }
 
-        public string ValueStr { get; set; }
-
-        public IEnumerable<string> GetSearchTokens()
-        {
-            yield return ValueStr;
-        }
     }
 }

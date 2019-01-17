@@ -39,7 +39,10 @@ namespace WorkflowCore.Providers.Elasticsearch.Services
                     .Index(_indexName)
                 );
 
-                System.Threading.Thread.Sleep(0);
+                if (!result.ApiCall.Success)
+                {
+                    _logger.LogError(default(EventId), result.ApiCall.OriginalException, $"Failed to index workflow {workflow.Id}");
+                }
             }
             catch (Exception ex)
             {
@@ -81,13 +84,15 @@ namespace WorkflowCore.Providers.Elasticsearch.Services
         public async Task Start()
         {
             _client = new ElasticClient(_settings);
-            await _client.PingAsync();
+            var nodeInfo = await _client.NodesInfoAsync();
+            if (nodeInfo.Nodes.Values.Any(x => Convert.ToUInt32(x.Version.Split('.')[0]) < 6))
+                throw new NotSupportedException("Elasticsearch verison 6 or greater is required");
 
-            //var exists = await _client.IndexExistsAsync(_indexName);
-            //if (!exists.Exists)
-            //{
-            //    await _client.CreateIndexAsync(_indexName);
-            //}
+            var exists = await _client.IndexExistsAsync(_indexName);
+            if (!exists.Exists)
+            {
+                await _client.CreateIndexAsync(_indexName);
+            }
         }
 
         public Task Stop()
@@ -106,19 +111,8 @@ namespace WorkflowCore.Providers.Elasticsearch.Services
                 if (filter.IsData)
                 {
                     Expression<Func<WorkflowSearchModel, object>> dataExpr = x => x.Data[filter.DataType.FullName];
-                    var p1 = Expression.Parameter(filter.DataType);
-                    //Expression.Convert()
-                    var subExpr = Expression.Lambda(filter.Property, p1);
-                    
-                    //field = Expression.Property(dataExpr, (filter.Property as MemberExpression).Member.Name);
-                    //subExpr.
-                    var modelType = typeof(TypedWorkflowSearchModel<>).MakeGenericType(filter.DataType);
-                    var funcType = typeof(Func<,>).MakeGenericType(modelType, typeof(object));
-                    var exprType = typeof(Expression<>).MakeGenericType(funcType);
-
-
-                    //field = new Field("data.WorkflowCore.Sample03.MyDataClass.value1");
-                    field = new Field(dataExpr.AppendSuffix("value1"));
+                    var fieldExpr = Expression.Convert(filter.Property, typeof(Func<object, object>));
+                    field = new Field(Expression.Invoke(fieldExpr, dataExpr));
                 }
 
                 switch (filter)
