@@ -149,15 +149,11 @@ namespace WorkflowCore.UnitTests.Services
 
             var step1Body = A.Fake<IStepWithProperties>();            
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
-            WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>()
+            WorkflowStep step1 = BuildFakeStep(step1Body, new List<IStepParameter>()
                 {
-                    new DataMapping()
-                    {
-                        Source = v1,
-                        Target = p1
-                    }
+                    new MemberMapParameter(v1, p1)
                 }
-            , new List<DataMapping>());
+            , new List<IStepParameter>());
 
             Given1StepWorkflow(step1, "Workflow", 1);
 
@@ -192,13 +188,9 @@ namespace WorkflowCore.UnitTests.Services
             var step1Body = A.Fake<IStepWithProperties>();
             A.CallTo(() => step1Body.Property1).Returns(7);
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
-            WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>(), new List<DataMapping>()
+            WorkflowStep step1 = BuildFakeStep(step1Body, new List<IStepParameter>(), new List<IStepParameter>()
                 {
-                    new DataMapping()
-                    {
-                        Source = p1,
-                        Target = v1
-                    }
+                    new MemberMapParameter(p1, v1)
                 }
             );
 
@@ -237,13 +229,9 @@ namespace WorkflowCore.UnitTests.Services
             var step1Body = A.Fake<IStepWithProperties>();
             A.CallTo(() => step1Body.Property1).Returns(7);
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
-            WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>(), new List<DataMapping>()
+            WorkflowStep step1 = BuildFakeStep(step1Body, new List<IStepParameter>(), new List<IStepParameter>()
                 {
-                    new DataMapping()
-                    {
-                        Source = p1,
-                        Target = v1
-                    }
+                    new MemberMapParameter(p1, v1)
                 }
             );
 
@@ -289,13 +277,9 @@ namespace WorkflowCore.UnitTests.Services
             var step1Body = A.Fake<IStepWithProperties>();
             A.CallTo(() => step1Body.Property4).Returns(new DataClass());
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
-            WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>(), new List<DataMapping>()
+            WorkflowStep step1 = BuildFakeStep(step1Body, new List<IStepParameter>(), new List<IStepParameter>()
                 {
-                    new DataMapping()
-                    {
-                        Source = p1,
-                        Target = v1
-                    }
+                    new MemberMapParameter(p1, v1)
                 }
             );
 
@@ -434,10 +418,10 @@ namespace WorkflowCore.UnitTests.Services
 
         private WorkflowStep BuildFakeStep(IStepBody stepBody)
         {
-            return BuildFakeStep(stepBody, new List<DataMapping>(), new List<DataMapping>());
+            return BuildFakeStep(stepBody, new List<IStepParameter>(), new List<IStepParameter>());
         }
 
-        private WorkflowStep BuildFakeStep(IStepBody stepBody, List<DataMapping> inputs, List<DataMapping> outputs)
+        private WorkflowStep BuildFakeStep(IStepBody stepBody, List<IStepParameter> inputs, List<IStepParameter> outputs)
         {
             var result = A.Fake<WorkflowStep>();
             A.CallTo(() => result.Id).Returns(0);

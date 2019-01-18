@@ -19,7 +19,7 @@ namespace WorkflowCore.Sample03
                 .Then<AddNumbers>()
                     .Input(step => step.Input1, data => data["Value1"])
                     .Input(step => step.Input2, data => data["Value2"])
-                    .Output(data => data["Value3"], step => step.Output)
+                    .Output((step, data) => data["Value3"] = step.Output)
                 .Then<CustomMessage>()
                     .Name("Print custom message")
                     .Input(step => step.Message, data => "The answer is " + data["Value3"].ToString())
