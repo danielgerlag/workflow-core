@@ -28,9 +28,11 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IQueueProvider>(options.QueueFactory);
             services.AddSingleton<IDistributedLockProvider>(options.LockFactory);
             services.AddSingleton<ILifeCycleEventHub>(options.EventHubFactory);
+            services.AddSingleton<ISearchIndex>(options.SearchIndexFactory);
+
             services.AddSingleton<IWorkflowRegistry, WorkflowRegistry>();
             services.AddSingleton<WorkflowOptions>(options);
-            services.AddSingleton<ILifeCycleEventPublisher, LifeCycleEventPublisher>();
+            services.AddSingleton<ILifeCycleEventPublisher, LifeCycleEventPublisher>();            
 
             services.AddTransient<IBackgroundTask, WorkflowConsumer>();
             services.AddTransient<IBackgroundTask, EventConsumer>();

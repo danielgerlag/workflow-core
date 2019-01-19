@@ -2,14 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Models.LifeCycleEvents;
-using WorkflowCore.Services.FluentBuilders;
 
 namespace WorkflowCore.Services
 {
@@ -117,7 +114,9 @@ namespace WorkflowCore.Services
                             Item = pointer.ContextItem
                         };
 
-                        ProcessInputs(workflow, step, body, context);
+                        foreach (var input in step.Inputs)
+                            input.AssignInput(workflow.Data, body, context);
+
 
                         switch (step.BeforeExecute(wfResult, context, pointer, body))
                         {
@@ -133,7 +132,8 @@ namespace WorkflowCore.Services
 
                         if (result.Proceed)
                         {
-                            ProcessOutputs(workflow, step, body, context);
+                            foreach (var output in step.Outputs)
+                                output.AssignOutput(workflow.Data, body, context);
                         }
 
                         _executionResultProcessor.ProcessExecutionResult(workflow, def, pointer, step, result, wfResult);
@@ -174,59 +174,7 @@ namespace WorkflowCore.Services
 
             return wfResult;
         }
-
-        private void ProcessInputs(WorkflowInstance workflow, WorkflowStep step, IStepBody body, IStepExecutionContext context)
-        {
-            //TODO: Move to own class
-            foreach (var input in step.Inputs)
-            {
-                var member = (input.Target.Body as MemberExpression);
-                object resolvedValue = null;
-
-                switch (input.Source.Parameters.Count)
-                {
-                    case 1:
-                        resolvedValue = input.Source.Compile().DynamicInvoke(workflow.Data);
-                        break;
-                    case 2:
-                        resolvedValue = input.Source.Compile().DynamicInvoke(workflow.Data, context);
-                        break;
-                    default:
-                        throw new ArgumentException();
-                }
-
-                step.BodyType.GetProperty(member.Member.Name).SetValue(body, resolvedValue);
-            }
-        }
-
-        private void ProcessOutputs(WorkflowInstance workflow, WorkflowStep step, IStepBody body, IStepExecutionContext context)
-        {
-            foreach (var output in step.Outputs)
-            {
-                var resolvedValue = output.Source.Compile().DynamicInvoke(body);
-                var data = workflow.Data;
-                var setter = ExpressionHelpers.CreateSetter(output.Target);
-                var targetType = setter.Parameters.Last().Type;
-
-                var convertedValue = resolvedValue;
-                // We need to make sure the resolvedValue is of the correct type.
-                // However if the targetType is object we don't need to do anything and in some cases Convert.ChangeType will throw.
-                if (targetType != typeof(object))
-                {
-                    convertedValue = Convert.ChangeType(resolvedValue, targetType);
-                }
-
-                if (setter.Parameters.Count == 2)
-                {
-                    setter.Compile().DynamicInvoke(data, convertedValue);
-                }
-                else
-                {
-                    setter.Compile().DynamicInvoke(data, context, convertedValue);
-                }
-            }
-        }
-
+        
         private void ProcessAfterExecutionIteration(WorkflowInstance workflow, WorkflowDefinition workflowDef, WorkflowExecutorResult workflowResult)
         {
             var pointers = workflow.ExecutionPointers.Where(x => x.EndTime == null);

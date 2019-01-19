@@ -26,11 +26,7 @@ namespace WorkflowCore.Users.Services
             var newStep = new WorkflowStep<When>();
             Expression<Func<When, object>> inputExpr = (x => x.ExpectedOutcome);
             Expression<Func<TData, string>> valueExpr = (x => value);
-            var mapping = new DataMapping()
-            {
-                Source = valueExpr,
-                Target = inputExpr
-            };
+            var mapping = new MemberMapParameter(valueExpr, inputExpr);
             newStep.Inputs.Add(mapping);
 
             WorkflowBuilder.AddStep(newStep);
