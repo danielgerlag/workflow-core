@@ -21,6 +21,7 @@ namespace WorkflowCore.Providers.AWS.Services
         private readonly AmazonKinesisClient _client;
         private readonly CancellationTokenSource _cancelToken = new CancellationTokenSource();
         private readonly Task _processTask;
+        private readonly int _batchSize = 100;
         private ICollection<ShardSubscription> _subscribers = new HashSet<ShardSubscription>();
         
         public KinesisStreamConsumer(AWSCredentials credentials, RegionEndpoint region, IKinesisTracker tracker, IDistributedLockProvider lockManager, ILoggerFactory logFactory)
@@ -67,8 +68,8 @@ namespace WorkflowCore.Providers.AWS.Services
 
                         try
                         {
-                            var iterator =
-                                await _tracker.GetNextShardIterator(sub.AppName, sub.Stream, sub.Shard.ShardId);
+                            var iterator = await _tracker.GetNextShardIterator(sub.AppName, sub.Stream, sub.Shard.ShardId);
+
                             if (iterator == null)
                             {
                                 var iterResp = await _client.GetShardIteratorAsync(new GetShardIteratorRequest()
@@ -84,8 +85,11 @@ namespace WorkflowCore.Providers.AWS.Services
                             var records = await _client.GetRecordsAsync(new GetRecordsRequest()
                             {
                                 ShardIterator = iterator,
-                                Limit = 10
+                                Limit = _batchSize
                             });
+
+                            if (records.Records.Count == 0)
+                                sub.Snooze = DateTime.Now.AddSeconds(5);
 
                             foreach (var rec in records.Records)
                             {
@@ -98,6 +102,8 @@ namespace WorkflowCore.Providers.AWS.Services
                                     _logger.LogError(default(EventId), ex, ex.Message);
                                 }
                             }
+
+                            await _tracker.IncrementShardIterator(sub.AppName, sub.Stream, sub.Shard.ShardId, records.NextShardIterator);
                         }
                         finally
                         {
