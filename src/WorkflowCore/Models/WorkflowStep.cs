@@ -20,9 +20,9 @@ namespace WorkflowCore.Models
 
         public virtual List<StepOutcome> Outcomes { get; set; } = new List<StepOutcome>();
 
-        public virtual List<DataMapping> Inputs { get; set; } = new List<DataMapping>();
+        public virtual List<IStepParameter> Inputs { get; set; } = new List<IStepParameter>();
 
-        public virtual List<DataMapping> Outputs { get; set; } = new List<DataMapping>();
+        public virtual List<IStepParameter> Outputs { get; set; } = new List<IStepParameter>();
 
         public virtual WorkflowErrorHandling? ErrorBehavior { get; set; }
 
