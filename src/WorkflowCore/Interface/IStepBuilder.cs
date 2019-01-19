@@ -78,7 +78,7 @@ namespace WorkflowCore.Interface
         IStepBuilder<TData, TStepBody> Input<TInput>(Expression<Func<TStepBody, TInput>> stepProperty, Expression<Func<TData, IStepExecutionContext, TInput>> value);
 
         /// <summary>
-        /// Manipulate properties on the step before the it executes
+        /// Manipulate properties on the step before its executed.
         /// </summary>
         /// <param name="action"></param>
         /// <returns></returns>
