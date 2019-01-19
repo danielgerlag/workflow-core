@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace WorkflowCore.Providers.AWS.Services
+namespace WorkflowCore.Providers.AWS.Interface
 {
     public interface IDynamoDbProvisioner
     {

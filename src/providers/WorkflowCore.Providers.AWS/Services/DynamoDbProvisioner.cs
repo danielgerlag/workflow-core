@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using WorkflowCore.Interface;
+using WorkflowCore.Providers.AWS.Interface;
 
 namespace WorkflowCore.Providers.AWS.Services
 {
