@@ -18,28 +18,31 @@ namespace WorkflowCore.Providers.AWS.Services
     public class KinesisProvider : ILifeCycleEventHub
     {
         private readonly ILogger _logger;
-        private ICollection<Action<LifeCycleEvent>> _subscribers = new HashSet<Action<LifeCycleEvent>>();
+        private Queue<Action<LifeCycleEvent>> _deferredSubscribers = new Queue<Action<LifeCycleEvent>>();
         private readonly string _streamName;
         private readonly string _appName;
         private readonly JsonSerializer _serializer;
         private readonly IKinesisStreamConsumer _consumer;
-
-        private AmazonKinesisClient _client;
+        private readonly AmazonKinesisClient _client;
         private readonly int _defaultShardCount = 1;
+        private bool _started = false;
 
         public KinesisProvider(AWSCredentials credentials, RegionEndpoint region, string appName, string streamName, IKinesisStreamConsumer consumer, ILoggerFactory logFactory)
         {
             _logger = logFactory.CreateLogger(GetType());
+            _appName = appName;
             _streamName = streamName;
             _consumer = consumer;
-            _serializer = new JsonSerializer();
+            _serializer = new JsonSerializer();            
+            _serializer.TypeNameHandling = TypeNameHandling.All;
+            _client = new AmazonKinesisClient(credentials, region);
         }
 
         public async Task PublishNotification(LifeCycleEvent evt)
         {
             using (var stream = new MemoryStream())
             {
-                var writer = new StreamWriter(stream);
+                var writer = new StreamWriter(stream);                
                 _serializer.Serialize(writer, evt);
                 writer.Flush();
 
@@ -59,23 +62,30 @@ namespace WorkflowCore.Providers.AWS.Services
 
         public void Subscribe(Action<LifeCycleEvent> action)
         {
-            _consumer.Subscribe(_appName, _streamName, record =>
+            if (_started)
             {
-                using (var strm = new StreamReader(record.Data))
-                {
-                    var evt = _serializer.Deserialize<LifeCycleEvent>(new JsonTextReader(strm));
-                    action(evt);
-                }
-            });
+                _consumer.Subscribe(_appName, _streamName, record => Consume(record, action));
+            }
+            else
+            {
+                _deferredSubscribers.Enqueue(action);
+            }
         }
 
         public async Task Start()
         {
             await EnsureStream();
+            _started = true;
+            while (_deferredSubscribers.Count > 0)
+            {
+                var action = _deferredSubscribers.Dequeue();
+                await _consumer.Subscribe(_appName, _streamName, record => Consume(record, action));
+            }
         }
 
         public Task Stop()
         {
+            _started = false;
             return Task.CompletedTask;
         }
 
@@ -117,20 +127,14 @@ namespace WorkflowCore.Providers.AWS.Services
             }
 
             throw new TimeoutException();
-        }
+        }                
 
-        private void NotifySubscribers(LifeCycleEvent evt)
+        private void Consume(Record record, Action<LifeCycleEvent> action)
         {
-            foreach (var subscriber in _subscribers)
+            using (var strm = new StreamReader(record.Data))
             {
-                try
-                {
-                    subscriber(evt);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(default(EventId), ex, $"Error on event subscriber: {ex.Message}");
-                }
+                var evt = _serializer.Deserialize(new JsonTextReader(strm));
+                action(evt as LifeCycleEvent);
             }
         }
     }

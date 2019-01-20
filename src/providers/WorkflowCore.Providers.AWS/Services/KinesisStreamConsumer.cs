@@ -75,7 +75,7 @@ namespace WorkflowCore.Providers.AWS.Services
                                 var iterResp = await _client.GetShardIteratorAsync(new GetShardIteratorRequest()
                                 {
                                     ShardId = sub.Shard.ShardId,
-                                    StreamName = sub.AppName,
+                                    StreamName = sub.Stream,
                                     ShardIteratorType = ShardIteratorType.AFTER_SEQUENCE_NUMBER,
                                     StartingSequenceNumber = sub.Shard.SequenceNumberRange.StartingSequenceNumber
                                 });
