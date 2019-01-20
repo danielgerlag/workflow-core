@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using Amazon.Util;
+using WorkflowCore.Providers.AWS.Interface;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
