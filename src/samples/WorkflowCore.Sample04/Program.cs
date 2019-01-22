@@ -72,6 +72,7 @@ namespace WorkflowCore.Sample04
 
             //services.AddWorkflow(cfg =>
             //{
+            //    cfg.UseRedisPersistence("localhost:6379", "sample4");
             //    cfg.UseRedisLocking("localhost:6379");
             //    cfg.UseRedisQueues("localhost:6379", "sample4");
             //    cfg.UseRedisEventHub("localhost:6379", "channel1");

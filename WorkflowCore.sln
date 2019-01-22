@@ -130,6 +130,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Providers.Elas
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Tests.Elasticsearch", "test\WorkflowCore.Tests.Elasticsearch\WorkflowCore.Tests.Elasticsearch.csproj", "{44644716-0CE8-4837-B189-AB65AE2106AA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Tests.Redis", "test\WorkflowCore.Tests.Redis\WorkflowCore.Tests.Redis.csproj", "{78217204-B873-40B9-8875-E3925B2FBCEC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -328,6 +330,10 @@ Global
 		{44644716-0CE8-4837-B189-AB65AE2106AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44644716-0CE8-4837-B189-AB65AE2106AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{44644716-0CE8-4837-B189-AB65AE2106AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78217204-B873-40B9-8875-E3925B2FBCEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78217204-B873-40B9-8875-E3925B2FBCEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78217204-B873-40B9-8875-E3925B2FBCEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78217204-B873-40B9-8875-E3925B2FBCEC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -384,6 +390,7 @@ Global
 		{435C6263-C6F8-4E93-B417-D861E9C22E18} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
 		{F6348170-B695-4D97-BAE6-4F0F643F3BEF} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
 		{44644716-0CE8-4837-B189-AB65AE2106AA} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
+		{78217204-B873-40B9-8875-E3925B2FBCEC} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DC0FA8D3-6449-4FDA-BB46-ECF58FAD23B4}

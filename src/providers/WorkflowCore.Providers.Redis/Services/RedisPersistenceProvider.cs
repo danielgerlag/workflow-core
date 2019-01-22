@@ -16,9 +16,10 @@ namespace WorkflowCore.Providers.Redis.Services
         private readonly string _connectionString;
         private readonly string _prefix;
         private const string WORKFLOW_SET = "workflows";
-        private const string SUBSCRIPTION_SET = "events";
+        private const string SUBSCRIPTION_SET = "subscriptions";
         private const string EVENT_SET = "events";
         private const string RUNNABLE_INDEX = "runnable";
+        private const string EVENTSLUG_INDEX = "eventslug";
         private readonly IConnectionMultiplexer _multiplexer;
         private readonly IDatabase _redis;
 
@@ -35,23 +36,31 @@ namespace WorkflowCore.Providers.Redis.Services
 
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
         {
-            throw new NotImplementedException();
+            workflow.Id = Guid.NewGuid().ToString();
+            await PersistWorkflow(workflow);
+            return workflow.Id;
         }
 
         public async Task PersistWorkflow(WorkflowInstance workflow)
         {
-            var txn = _redis.CreateTransaction();
             var str = JsonConvert.SerializeObject(workflow, _serializerSettings);
-            await txn.HashSetAsync($"{_prefix}.{WORKFLOW_SET}", workflow.Id, str);
-            _redis.SortedSetScan
-            txn.scan
+            await _redis.HashSetAsync($"{_prefix}.{WORKFLOW_SET}", workflow.Id, str);
 
-            await txn.ExecuteAsync();
+            if ((workflow.Status == WorkflowStatus.Runnable) && (workflow.NextExecution.HasValue))
+                await _redis.SortedSetAddAsync($"{_prefix}.{WORKFLOW_SET}.{RUNNABLE_INDEX}", workflow.Id, workflow.NextExecution.Value);
+            else
+                await _redis.SortedSetRemoveAsync($"{_prefix}.{WORKFLOW_SET}.{RUNNABLE_INDEX}", workflow.Id);
         }
 
         public async Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt)
         {
-            throw new NotImplementedException();
+            var result = new List<string>();
+            var data = await _redis.SortedSetRangeByScoreAsync($"{_prefix}.{WORKFLOW_SET}.{RUNNABLE_INDEX}", -1, DateTime.UtcNow.Ticks);
+
+            foreach (var item in data)
+                result.Add(item);
+
+            return result;
         }
 
         public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip,
@@ -62,62 +71,111 @@ namespace WorkflowCore.Providers.Redis.Services
 
         public async Task<WorkflowInstance> GetWorkflowInstance(string Id)
         {
-            throw new NotImplementedException();
+            var raw = await _redis.HashGetAsync($"{_prefix}.{WORKFLOW_SET}", Id);
+            return JsonConvert.DeserializeObject<WorkflowInstance>(raw, _serializerSettings);
         }
 
         public async Task<string> CreateEventSubscription(EventSubscription subscription)
         {
-            throw new NotImplementedException();
+            subscription.Id = Guid.NewGuid().ToString();
+            var str = JsonConvert.SerializeObject(subscription, _serializerSettings);
+            await _redis.HashSetAsync($"{_prefix}.{SUBSCRIPTION_SET}", subscription.Id, str);
+            await _redis.SortedSetAddAsync($"{_prefix}.{SUBSCRIPTION_SET}.{EVENTSLUG_INDEX}.{subscription.EventName}-{subscription.EventKey}", subscription.Id, subscription.SubscribeAsOf.Ticks);
+
+            return subscription.Id;
         }
 
         public async Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf)
         {
-            throw new NotImplementedException();
+            var result = new List<EventSubscription>();
+            var data = await _redis.SortedSetRangeByScoreAsync($"{_prefix}.{SUBSCRIPTION_SET}.{EVENTSLUG_INDEX}.{eventName}-{eventKey}", -1, asOf.Ticks);
+
+            foreach (var id in data)
+            {
+                var raw = await _redis.HashGetAsync($"{_prefix}.{SUBSCRIPTION_SET}", id);
+                if (raw.HasValue)
+                    result.Add(JsonConvert.DeserializeObject<EventSubscription>(raw, _serializerSettings));
+            }
+
+            return result;
         }
 
         public async Task TerminateSubscription(string eventSubscriptionId)
         {
-            throw new NotImplementedException();
+            var existingRaw = await _redis.HashGetAsync($"{_prefix}.{SUBSCRIPTION_SET}", eventSubscriptionId);
+            var existing = JsonConvert.DeserializeObject<EventSubscription>(existingRaw, _serializerSettings);
+            await _redis.HashDeleteAsync($"{_prefix}.{SUBSCRIPTION_SET}", eventSubscriptionId);
+            await _redis.SortedSetRemoveAsync($"{_prefix}.{SUBSCRIPTION_SET}.{EVENTSLUG_INDEX}.{existing.EventName}-{existing.EventKey}", eventSubscriptionId);
         }
 
         public async Task<string> CreateEvent(Event newEvent)
         {
-            throw new NotImplementedException();
+            newEvent.Id = Guid.NewGuid().ToString();
+            var str = JsonConvert.SerializeObject(newEvent, _serializerSettings);
+            await _redis.HashSetAsync($"{_prefix}.{EVENT_SET}", newEvent.Id, str);
+            await _redis.SortedSetAddAsync($"{_prefix}.{EVENT_SET}.{EVENTSLUG_INDEX}.{newEvent.EventName}-{newEvent.EventKey}", newEvent.Id, newEvent.EventTime.Ticks);
+
+            if (newEvent.IsProcessed)
+                await _redis.SortedSetRemoveAsync($"{_prefix}.{EVENT_SET}.{RUNNABLE_INDEX}", newEvent.Id);
+            else
+                await _redis.SortedSetAddAsync($"{_prefix}.{EVENT_SET}.{RUNNABLE_INDEX}", newEvent.Id, newEvent.EventTime.Ticks);
+
+            return newEvent.Id;
         }
 
         public async Task<Event> GetEvent(string id)
         {
-            throw new NotImplementedException();
+            var raw = await _redis.HashGetAsync($"{_prefix}.{EVENT_SET}", id);
+            return JsonConvert.DeserializeObject<Event>(raw, _serializerSettings);
         }
 
         public async Task<IEnumerable<string>> GetRunnableEvents(DateTime asAt)
         {
-            throw new NotImplementedException();
+            var result = new List<string>();
+            var data = await _redis.SortedSetRangeByScoreAsync($"{_prefix}.{EVENT_SET}.{RUNNABLE_INDEX}", -1, asAt.Ticks);
+
+            foreach (var item in data)
+                result.Add(item);
+
+            return result;
         }
 
         public async Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf)
         {
-            throw new NotImplementedException();
+            var result = new List<string>();
+            var data = await _redis.SortedSetRangeByScoreAsync($"{_prefix}.{EVENT_SET}.{EVENTSLUG_INDEX}.{eventName}-{eventKey}", asOf.Ticks);
+
+            foreach (var id in data)
+                result.Add(id);
+
+            return result;
         }
 
         public async Task MarkEventProcessed(string id)
         {
-            throw new NotImplementedException();
+            var evt = await GetEvent(id);
+            evt.IsProcessed = true;
+            var str = JsonConvert.SerializeObject(evt, _serializerSettings);
+            await _redis.HashSetAsync($"{_prefix}.{EVENT_SET}", evt.Id, str);
+            await _redis.SortedSetRemoveAsync($"{_prefix}.{EVENT_SET}.{RUNNABLE_INDEX}", id);
         }
 
         public async Task MarkEventUnprocessed(string id)
         {
-            throw new NotImplementedException();
+            var evt = await GetEvent(id);
+            evt.IsProcessed = false;
+            var str = JsonConvert.SerializeObject(evt, _serializerSettings);
+            await _redis.HashSetAsync($"{_prefix}.{EVENT_SET}", evt.Id, str);
+            await _redis.SortedSetAddAsync($"{_prefix}.{EVENT_SET}.{RUNNABLE_INDEX}", evt.Id, evt.EventTime.Ticks);
         }
 
-        public async Task PersistErrors(IEnumerable<ExecutionError> errors)
+        public Task PersistErrors(IEnumerable<ExecutionError> errors)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         public void EnsureStoreExists()
         {
-            throw new NotImplementedException();
         }
     }
 }

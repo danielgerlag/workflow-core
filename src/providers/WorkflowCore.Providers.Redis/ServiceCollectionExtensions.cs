@@ -20,6 +20,12 @@ namespace Microsoft.Extensions.DependencyInjection
             return options;
         }
 
+        public static WorkflowOptions UseRedisPersistence(this WorkflowOptions options, string connectionString, string prefix)
+        {
+            options.UsePersistence(sp => new RedisPersistenceProvider(connectionString, prefix, sp.GetService<ILoggerFactory>()));
+            return options;
+        }
+
         public static WorkflowOptions UseRedisEventHub(this WorkflowOptions options, string connectionString, string channel)
         {
             options.UseEventHub(sp => new RedisLifeCycleEventHub(connectionString, channel, sp.GetService<ILoggerFactory>()));
