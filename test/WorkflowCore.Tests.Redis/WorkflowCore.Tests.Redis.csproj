@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.0.519" />
     <PackageReference Include="xunit" Version="2.4.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
   </ItemGroup>
@@ -16,6 +17,8 @@
     <ProjectReference Include="..\..\src\providers\WorkflowCore.Providers.Redis\WorkflowCore.Providers.Redis.csproj" />
     <ProjectReference Include="..\..\src\WorkflowCore\WorkflowCore.csproj" />
     <ProjectReference Include="..\Docker.Testify\Docker.Testify.csproj" />
+    <ProjectReference Include="..\WorkflowCore.IntegrationTests\WorkflowCore.IntegrationTests.csproj" />
+    <ProjectReference Include="..\WorkflowCore.UnitTests\WorkflowCore.UnitTests.csproj" />
   </ItemGroup>
 
 </Project>

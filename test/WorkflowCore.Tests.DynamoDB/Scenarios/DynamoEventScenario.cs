@@ -8,7 +8,7 @@ using WorkflowCore.IntegrationTests.Scenarios;
 using WorkflowCore.Tests.DynamoDB;
 using Xunit;
 
-namespace WorkflowCore.Tests.MongoDB.Scenarios
+namespace WorkflowCore.Tests.DynamoDB.Scenarios
 {
     [Collection("DynamoDb collection")]
     public class DynamoEventScenario : EventScenario
