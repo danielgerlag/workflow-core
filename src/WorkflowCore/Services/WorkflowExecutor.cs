@@ -14,6 +14,7 @@ namespace WorkflowCore.Services
     {
         protected readonly IWorkflowRegistry _registry;
         protected readonly IServiceProvider _serviceProvider;
+        protected readonly IScopeProvider _scopeProvider;
         protected readonly IDateTimeProvider _datetimeProvider;
         protected readonly ILogger _logger;
         private readonly IExecutionResultProcessor _executionResultProcessor;
@@ -23,9 +24,10 @@ namespace WorkflowCore.Services
 
         private IWorkflowHost Host => _serviceProvider.GetService<IWorkflowHost>();
 
-        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, ILifeCycleEventPublisher publisher, ICancellationProcessor cancellationProcessor, WorkflowOptions options, ILoggerFactory loggerFactory)
+        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IScopeProvider scopeProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, ILifeCycleEventPublisher publisher, ICancellationProcessor cancellationProcessor, WorkflowOptions options, ILoggerFactory loggerFactory)
         {
             _serviceProvider = serviceProvider;
+            _scopeProvider = scopeProvider;
             _registry = registry;
             _datetimeProvider = datetimeProvider;
             _publisher = publisher;
@@ -87,7 +89,7 @@ namespace WorkflowCore.Services
                             pointer.StartTime = _datetimeProvider.Now.ToUniversalTime();
                         }
 
-                        using (var scope = _serviceProvider.CreateScope())
+                        using (var scope = _scopeProvider.CreateScope())
                         {
                             _logger.LogDebug("Starting step {0} on workflow {1}", step.Name, workflow.Id);
 
