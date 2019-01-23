@@ -46,7 +46,47 @@ namespace WorkflowCore.Providers.AWS.Services
             return response.Item["next_iterator"].S;
         }
 
+        public async Task<string> GetNextLastSequenceNumber(string app, string stream, string shard)
+        {
+            if (!_tableConfirmed)
+                await EnsureTable();
+
+            var response = await _client.GetItemAsync(new GetItemRequest()
+            {
+                TableName = _tableName,
+                Key = new Dictionary<string, AttributeValue>
+                {
+                    { "id", new AttributeValue(FormatId(app, stream, shard)) }
+                }
+            });
+
+            if (!response.Item.ContainsKey("last_sequence"))
+                return null;
+
+            return response.Item["last_sequence"].S;
+        }
+
         public async Task IncrementShardIterator(string app, string stream, string shard, string iterator)
+        {
+            if (!_tableConfirmed)
+                await EnsureTable();
+
+            await _client.UpdateItemAsync(new UpdateItemRequest()
+            {
+                TableName = _tableName,
+                Key = new Dictionary<string, AttributeValue>
+                {
+                    {"id", new AttributeValue(FormatId(app, stream, shard))}
+                },
+                UpdateExpression = "SET next_iterator = :n",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
+                {
+                    { ":n" , new AttributeValue(iterator) }
+                }
+            });
+        }
+
+        public async Task IncrementShardIteratorAndSequence(string app, string stream, string shard, string iterator, string sequence)
         {
             if (!_tableConfirmed)
                 await EnsureTable();
@@ -56,12 +96,13 @@ namespace WorkflowCore.Providers.AWS.Services
                 TableName = _tableName,
                 Item = new Dictionary<string, AttributeValue>
                 {
-                    { "id", new AttributeValue(FormatId(app, stream, shard)) },
-                    { "next_iterator", new AttributeValue(iterator) }
+                    {"id", new AttributeValue(FormatId(app, stream, shard))},
+                    {"next_iterator", new AttributeValue(iterator)},
+                    {"last_sequence", new AttributeValue(sequence)}
                 }
             });
         }
-        
+
         private async Task EnsureTable()
         {
             try
