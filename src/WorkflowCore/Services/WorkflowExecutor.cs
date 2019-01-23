@@ -87,57 +87,60 @@ namespace WorkflowCore.Services
                             pointer.StartTime = _datetimeProvider.Now.ToUniversalTime();
                         }
 
-                        _logger.LogDebug("Starting step {0} on workflow {1}", step.Name, workflow.Id);
-
-                        IStepBody body = step.ConstructBody(_serviceProvider);
-
-                        if (body == null)
+                        using (var scope = _serviceProvider.CreateScope())
                         {
-                            _logger.LogError("Unable to construct step body {0}", step.BodyType.ToString());
-                            pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(_options.ErrorRetryInterval);
-                            wfResult.Errors.Add(new ExecutionError()
+                            _logger.LogDebug("Starting step {0} on workflow {1}", step.Name, workflow.Id);
+
+                            IStepBody body = step.ConstructBody(scope.ServiceProvider);
+
+                            if (body == null)
                             {
-                                WorkflowId = workflow.Id,
-                                ExecutionPointerId = pointer.Id,
-                                ErrorTime = _datetimeProvider.Now.ToUniversalTime(),
-                                Message = String.Format("Unable to construct step body {0}", step.BodyType.ToString())
-                            });
-                            continue;
-                        }
-
-                        IStepExecutionContext context = new StepExecutionContext()
-                        {
-                            Workflow = workflow,
-                            Step = step,
-                            PersistenceData = pointer.PersistenceData,
-                            ExecutionPointer = pointer,
-                            Item = pointer.ContextItem
-                        };
-
-                        foreach (var input in step.Inputs)
-                            input.AssignInput(workflow.Data, body, context);
-
-
-                        switch (step.BeforeExecute(wfResult, context, pointer, body))
-                        {
-                            case ExecutionPipelineDirective.Defer:
+                                _logger.LogError("Unable to construct step body {0}", step.BodyType.ToString());
+                                pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(_options.ErrorRetryInterval);
+                                wfResult.Errors.Add(new ExecutionError()
+                                {
+                                    WorkflowId = workflow.Id,
+                                    ExecutionPointerId = pointer.Id,
+                                    ErrorTime = _datetimeProvider.Now.ToUniversalTime(),
+                                    Message = String.Format("Unable to construct step body {0}", step.BodyType.ToString())
+                                });
                                 continue;
-                            case ExecutionPipelineDirective.EndWorkflow:
-                                workflow.Status = WorkflowStatus.Complete;
-                                workflow.CompleteTime = _datetimeProvider.Now.ToUniversalTime();
-                                continue;
+                            }
+
+                            IStepExecutionContext context = new StepExecutionContext()
+                            {
+                                Workflow = workflow,
+                                Step = step,
+                                PersistenceData = pointer.PersistenceData,
+                                ExecutionPointer = pointer,
+                                Item = pointer.ContextItem
+                            };
+
+                            foreach (var input in step.Inputs)
+                                input.AssignInput(workflow.Data, body, context);
+
+
+                            switch (step.BeforeExecute(wfResult, context, pointer, body))
+                            {
+                                case ExecutionPipelineDirective.Defer:
+                                    continue;
+                                case ExecutionPipelineDirective.EndWorkflow:
+                                    workflow.Status = WorkflowStatus.Complete;
+                                    workflow.CompleteTime = _datetimeProvider.Now.ToUniversalTime();
+                                    continue;
+                            }
+
+                            var result = await body.RunAsync(context);
+
+                            if (result.Proceed)
+                            {
+                                foreach (var output in step.Outputs)
+                                    output.AssignOutput(workflow.Data, body, context);
+                            }
+
+                            _executionResultProcessor.ProcessExecutionResult(workflow, def, pointer, step, result, wfResult);
+                            step.AfterExecute(wfResult, context, result, pointer);
                         }
-
-                        var result = await body.RunAsync(context);
-
-                        if (result.Proceed)
-                        {
-                            foreach (var output in step.Outputs)
-                                output.AssignOutput(workflow.Data, body, context);
-                        }
-
-                        _executionResultProcessor.ProcessExecutionResult(workflow, def, pointer, step, result, wfResult);
-                        step.AfterExecute(wfResult, context, result, pointer);
                     }
                     catch (Exception ex)
                     {
