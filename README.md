@@ -20,7 +20,7 @@ public class MyWorkflow : IWorkflow
         builder
            .StartWith<Task1>()
            .Then<Task2>()
-           .Then<Task3>;
+           .Then<Task3>();
     }
 }
 ```
@@ -66,7 +66,7 @@ public class MyWorkflow : IWorkflow
             .StartWith<CreateUser>()
                 .Input(step => step.Email, data => data.Email)
                 .Input(step => step.Password, data => data.Password)
-                .Output(data => data.UserId, step => step.UserId);
+                .Output(data => data.UserId, step => step.UserId)
            .Then<SendConfirmationEmail>()
                .WaitFor("confirmation", data => data.UserId)
            .Then<UpdateUser>()
@@ -118,6 +118,7 @@ There are several persistence providers available as separate Nuget packages.
 * [SQL Server](src/providers/WorkflowCore.Persistence.SqlServer)
 * [PostgreSQL](src/providers/WorkflowCore.Persistence.PostgreSQL)
 * [Sqlite](src/providers/WorkflowCore.Persistence.Sqlite)
+* [MySQL](src/providers/WorkflowCore.Persistence.MySQL)
 * Redis *(coming soon...)*
 
 ## Search
