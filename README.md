@@ -130,7 +130,6 @@ These are also available as separate Nuget packages.
 ## Extensions
 
 * [User (human) workflows](src/extensions/WorkflowCore.Users)
-* [HTTP wrapper for Workflow Host Service](src/extensions/WorkflowCore.WebAPI)
 
 
 ## Samples
@@ -163,7 +162,7 @@ These are also available as separate Nuget packages.
 
 * [Looping](src/samples/WorkflowCore.Sample02)
 
-* [Exposing a REST API](src/samples/WorkflowCore.Sample07)
+* [Exposing a REST API](src/samples/WebApiSample)
 
 * [Human(User) Workflow](src/samples/WorkflowCore.Sample08)
 
