@@ -32,7 +32,7 @@ Use the `IServiceCollection` extension methods when building your service provid
 ```C#
 services.AddWorkflow(cfg =>
 {
-	cfg.UseRedisPersistence("localhost:6379", "app-name");
+    cfg.UseRedisPersistence("localhost:6379", "app-name");
     cfg.UseRedisLocking("localhost:6379");
     cfg.UseRedisQueues("localhost:6379", "app-name");
     cfg.UseRedisEventHub("localhost:6379", "channel-name")
