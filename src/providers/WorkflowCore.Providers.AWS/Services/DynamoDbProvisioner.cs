@@ -13,7 +13,7 @@ namespace WorkflowCore.Providers.AWS.Services
     public class DynamoDbProvisioner : IDynamoDbProvisioner
     {
         private readonly ILogger _logger;
-        private readonly AmazonDynamoDBClient _client;
+        private readonly IAmazonDynamoDB _client;
         private readonly string _tablePrefix;
 
         public DynamoDbProvisioner(AWSCredentials credentials, AmazonDynamoDBConfig config, string tablePrefix, ILoggerFactory logFactory)

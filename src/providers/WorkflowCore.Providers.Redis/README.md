@@ -1,5 +1,6 @@
 # Redis providers for Workflow Core
 
+* Provides Persistence support on [Workflow Core](../../README.md) backed by Redis.
 * Provides Queueing support on [Workflow Core](../../README.md) backed by Redis.
 * Provides Distributed locking support on [Workflow Core](../../README.md) backed by Redis.
 * Provides event hub support on [Workflow Core](../../README.md) backed by Redis.
@@ -23,6 +24,7 @@ dotnet add package WorkflowCore.Providers.Redis
 ## Usage
 
 Use the `IServiceCollection` extension methods when building your service provider
+* .UseRedisPersistence
 * .UseRedisQueues
 * .UseRedisLocking
 * .UseRedisEventHub
@@ -30,8 +32,9 @@ Use the `IServiceCollection` extension methods when building your service provid
 ```C#
 services.AddWorkflow(cfg =>
 {
+	cfg.UseRedisPersistence("localhost:6379", "app-name");
     cfg.UseRedisLocking("localhost:6379");
-    cfg.UseRedisQueues("localhost:6379", "my-app");
-    cfg.UseRedisEventHub("localhost:6379", "my-channel")
+    cfg.UseRedisQueues("localhost:6379", "app-name");
+    cfg.UseRedisEventHub("localhost:6379", "channel-name")
 });
 ```

@@ -13,7 +13,7 @@ namespace WorkflowCore.Providers.AWS.Services
     public class DynamoLockProvider : IDistributedLockProvider
     {
         private readonly ILogger _logger;
-        private readonly AmazonDynamoDBClient _client;
+        private readonly IAmazonDynamoDB _client;
         private readonly string _tableName;
         private readonly string _nodeId;    
         private readonly long _ttl = 30000;

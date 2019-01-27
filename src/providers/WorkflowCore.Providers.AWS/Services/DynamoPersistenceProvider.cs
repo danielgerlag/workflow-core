@@ -15,7 +15,7 @@ namespace WorkflowCore.Providers.AWS.Services
     public class DynamoPersistenceProvider : IPersistenceProvider
     {
         private readonly ILogger _logger;
-        private readonly AmazonDynamoDBClient _client;
+        private readonly IAmazonDynamoDB _client;
         private readonly string _tablePrefix;
         private readonly IDynamoDbProvisioner _provisioner;
 
