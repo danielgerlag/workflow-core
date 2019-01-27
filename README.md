@@ -180,6 +180,7 @@ These are also available as separate Nuget packages.
 
 * [JWorkflow (Java)](https://github.com/danielgerlag/jworkflow)
 * [workflow-es (Node.js)](https://github.com/danielgerlag/workflow-es)
+* [liteflow (Python)](https://github.com/danielgerlag/liteflow)
 * [workflow_rb (Ruby)](https://github.com/danielgerlag/workflow_rb)
 
 ## License
