@@ -119,7 +119,7 @@ There are several persistence providers available as separate Nuget packages.
 * [PostgreSQL](src/providers/WorkflowCore.Persistence.PostgreSQL)
 * [Sqlite](src/providers/WorkflowCore.Persistence.Sqlite)
 * [MySQL](src/providers/WorkflowCore.Persistence.MySQL)
-* Redis *(coming soon...)*
+* [Redis](src/providers/WorkflowCore.Providers.Redis)
 
 ## Search
 
@@ -173,7 +173,7 @@ These are also available as separate Nuget packages.
 
 * **Daniel Gerlag** - *Initial work*
 * **Jackie Ja**
-* **Aaron Scribnor**
+* **Aaron Scribner**
 * **Roberto Paterlini**
 
 ## Ports
