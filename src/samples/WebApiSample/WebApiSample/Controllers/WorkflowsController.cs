@@ -28,8 +28,7 @@ namespace WebApiSample.Controllers
             _registry = registry;
             _searchService = searchService;
         }
-
-
+        
         [HttpGet]
         public async Task<IActionResult> Get(string terms, WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take = 10)
         {
