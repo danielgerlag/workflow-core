@@ -37,14 +37,14 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
     public class Dependency1
     {
-        public static int InstanceCounter = 0;
+        private static int InstanceCounter = 0;
 
         public int Instance { get; set; } = ++InstanceCounter;
     }
 
     public class Dependency2
     {
-        public readonly Dependency1 dependency1;
+        public Dependency1 dependency1 { get; private set; }
 
         public Dependency2(Dependency1 dependency1)
         {
@@ -54,8 +54,8 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
     public class DiStep1 : StepBody
     {
-        public readonly Dependency1 dependency1;
-        public readonly Dependency2 dependency2;
+        public Dependency1 dependency1 { get; private set; }
+        public Dependency2 dependency2 { get; private set; }
 
         public DiStep1(Dependency1 dependency1, Dependency2 dependency2)
         {
