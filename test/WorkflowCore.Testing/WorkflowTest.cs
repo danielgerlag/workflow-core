@@ -39,7 +39,7 @@ namespace WorkflowCore.Testing
             Host.Start();
         }
 
-        private void Host_OnStepError(WorkflowInstance workflow, WorkflowStep step, Exception exception)
+        protected void Host_OnStepError(WorkflowInstance workflow, WorkflowStep step, Exception exception)
         {
             UnhandledStepErrors.Add(new StepError()
             {
