@@ -46,6 +46,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddSingleton<IWorkflowController, WorkflowController>();
             services.AddSingleton<IWorkflowHost, WorkflowHost>();
+            services.AddTransient<IScopeProvider, ScopeProvider>();
             services.AddTransient<IWorkflowExecutor, WorkflowExecutor>();
             services.AddTransient<ICancellationProcessor, CancellationProcessor>();
             services.AddTransient<IWorkflowBuilder, WorkflowBuilder>();
