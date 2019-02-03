@@ -77,16 +77,14 @@ namespace WorkflowCore.Providers.AWS.Services
 
         public async Task ReleaseLock(string Id)
         {
-            if (_mutex.WaitOne())
+            _mutex.WaitOne();
+            try
             {
-                try
-                {
-                    _localLocks.Remove(Id);
-                }
-                finally
-                {
-                    _mutex.Set();
-                }
+                _localLocks.Remove(Id);
+            }
+            finally
+            {
+                _mutex.Set();
             }
             
             try
