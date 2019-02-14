@@ -45,11 +45,19 @@ namespace WorkflowCore.Services.ErrorHandlers
 
                 if (scope.Any())
                 {
-                    var parentId = scope.Peek();
-                    var parentPointer = workflow.ExecutionPointers.FindById(parentId);
-                    var parentStep = def.Steps.First(x => x.Id == parentPointer.StepId);
-                    resume = parentStep.ResumeChildrenAfterCompensation;
-                    revert = parentStep.RevertChildrenAfterCompensation;
+                    var txnStack = new Stack<string>(scope.Reverse());
+                    while (txnStack.Count > 0)
+                    {
+                        var parentId = txnStack.Pop();
+                        var parentPointer = workflow.ExecutionPointers.FindById(parentId);
+                        var parentStep = def.Steps.First(x => x.Id == parentPointer.StepId);
+                        if ((resume != parentStep.ResumeChildrenAfterCompensation) || (revert != parentStep.RevertChildrenAfterCompensation))
+                        {
+                            resume = parentStep.ResumeChildrenAfterCompensation;
+                            revert = parentStep.RevertChildrenAfterCompensation;
+                            break;
+                        }
+                    }
                 }
 
                 if ((scopeStep.ErrorBehavior ?? WorkflowErrorHandling.Compensate) != WorkflowErrorHandling.Compensate)
