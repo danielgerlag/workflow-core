@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using Xunit;
 using FluentAssertions;
 using System.Linq;
 using System.Threading.Tasks;
-
 using WorkflowCore.Testing;
 using WorkflowCore.Users.Models;
 
@@ -39,28 +37,23 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                     .CompensateWith(context => Compensation1Fired++)
                     .Saga(x => x
                         .StartWith(context => ExecutionResult.Next())
-                        .CompensateWith(context => Compensation2Fired++)
+                            .CompensateWith(context => Compensation2Fired++)
                         .UserTask("prompt", data => "assigner")
-                        .WithOption("a", "Option A")
-                        .Do(wb => wb
-                            .StartWith(context => ExecutionResult.Next())
-                            .Then(context =>
-                            {
-                                Event1Fired++;
-                                if (Event1Fired < 3)
-                                    throw new Exception();
-                                Event2Fired++;
-                            })
-                            .Name("Event1+2")
-                            .CompensateWith(context => Compensation3Fired++)
-                            .Then(context =>
-                            {
-                                Event3Fired++;
-                            }).Name("Event3")
-
-                            .CompensateWith(context => Compensation4Fired++)
-                        ).Name("Do")
-                    ).Name("saga")
+                            .WithOption("a", "Option A")
+                                .Do(wb => wb
+                                    .StartWith(context => ExecutionResult.Next())
+                                    .Then(context =>
+                                    {
+                                        Event1Fired++;
+                                        if (Event1Fired < 3)
+                                            throw new Exception();
+                                        Event2Fired++;
+                                    })
+                                        .CompensateWith(context => Compensation3Fired++)
+                                    .Then(context => Event3Fired++)
+                                        .CompensateWith(context => Compensation4Fired++)
+                                )
+                    )
                     .OnError(WorkflowErrorHandling.Retry, TimeSpan.FromSeconds(1))
                     .Then(context => TailEventFired++);
             }

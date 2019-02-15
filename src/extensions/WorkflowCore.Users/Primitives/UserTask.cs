@@ -80,7 +80,9 @@ namespace WorkflowCore.Users.Primitives
                     Id = Guid.NewGuid().ToString(),
                     PredecessorId = context.ExecutionPointer.Id,
                     StepId = esc.Id,
-                    StepName = esc.Name
+                    StepName = esc.Name,
+                    Status = PointerStatus.Pending,
+                    Scope = new List<string>(context.ExecutionPointer.Scope)
                 });
             }
         }

@@ -27,7 +27,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             public static int Compensation3Fired;
             public static int Compensation4Fired;
             
-            public string Id => "RetrySagaWorkflow";
+            public string Id => "NestedRetrySagaWorkflow";
             public int Version => 1;
             public void Build(IWorkflowBuilder<MyDataClass> builder)
             {

@@ -9,7 +9,6 @@ namespace WorkflowCore.Services
 {
     public class ExecutionPointerFactory : IExecutionPointerFactory
     {
-
         public ExecutionPointer BuildGenesisPointer(WorkflowDefinition def)
         {
             return new ExecutionPointer
@@ -41,8 +40,8 @@ namespace WorkflowCore.Services
         public ExecutionPointer BuildChildPointer(WorkflowDefinition def, ExecutionPointer pointer, int childDefinitionId, object branch)
         {
             var childPointerId = GenerateId();
-            var childScope = new Stack<string>(pointer.Scope);
-            childScope.Push(pointer.Id);
+            var childScope = new List<string>(pointer.Scope);
+            childScope.Insert(0, pointer.Id);
             pointer.Children.Add(childPointerId);
 
             return new ExecutionPointer()
