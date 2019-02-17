@@ -27,13 +27,9 @@ namespace WorkflowCore.Services.ErrorHandlers
 
         public void Handle(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer exceptionPointer, WorkflowStep exceptionStep, Exception exception, Queue<ExecutionPointer> bubbleUpQueue)
         {
-            var scope = new Stack<string>(exceptionPointer.Scope);
+            var scope = new Stack<string>(exceptionPointer.Scope.Reverse());
             scope.Push(exceptionPointer.Id);
-
-            exceptionPointer.Active = false;
-            exceptionPointer.EndTime = _datetimeProvider.Now.ToUniversalTime();
-            exceptionPointer.Status = PointerStatus.Failed;
-
+            
             while (scope.Any())
             {
                 var pointerId = scope.Pop();
@@ -42,14 +38,19 @@ namespace WorkflowCore.Services.ErrorHandlers
 
                 var resume = true;
                 var revert = false;
-
-                if (scope.Any())
+                
+                var txnStack = new Stack<string>(scope.Reverse());
+                while (txnStack.Count > 0)
                 {
-                    var parentId = scope.Peek();
+                    var parentId = txnStack.Pop();
                     var parentPointer = workflow.ExecutionPointers.FindById(parentId);
                     var parentStep = def.Steps.First(x => x.Id == parentPointer.StepId);
-                    resume = parentStep.ResumeChildrenAfterCompensation;
-                    revert = parentStep.RevertChildrenAfterCompensation;
+                    if ((!parentStep.ResumeChildrenAfterCompensation) || (parentStep.RevertChildrenAfterCompensation))
+                    {
+                        resume = parentStep.ResumeChildrenAfterCompensation;
+                        revert = parentStep.RevertChildrenAfterCompensation;
+                        break;
+                    }
                 }
 
                 if ((scopeStep.ErrorBehavior ?? WorkflowErrorHandling.Compensate) != WorkflowErrorHandling.Compensate)
@@ -58,10 +59,12 @@ namespace WorkflowCore.Services.ErrorHandlers
                     continue;
                 }
 
+                scopePointer.Active = false;
+                scopePointer.EndTime = _datetimeProvider.Now.ToUniversalTime();
+                scopePointer.Status = PointerStatus.Failed;
+
                 if (scopeStep.CompensationStepId.HasValue)
                 {
-                    scopePointer.Active = false;
-                    scopePointer.EndTime = _datetimeProvider.Now.ToUniversalTime();
                     scopePointer.Status = PointerStatus.Compensated;
 
                     var compensationPointer = _pointerFactory.BuildCompensationPointer(def, scopePointer, exceptionPointer, scopeStep.CompensationStepId.Value);
