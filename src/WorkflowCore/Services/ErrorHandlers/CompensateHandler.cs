@@ -34,7 +34,7 @@ namespace WorkflowCore.Services.ErrorHandlers
             {
                 var pointerId = scope.Pop();
                 var scopePointer = workflow.ExecutionPointers.FindById(pointerId);
-                var scopeStep = def.Steps.First(x => x.Id == scopePointer.StepId);
+                var scopeStep = def.Steps.FindById(scopePointer.StepId);
 
                 var resume = true;
                 var revert = false;
@@ -44,7 +44,7 @@ namespace WorkflowCore.Services.ErrorHandlers
                 {
                     var parentId = txnStack.Pop();
                     var parentPointer = workflow.ExecutionPointers.FindById(parentId);
-                    var parentStep = def.Steps.First(x => x.Id == parentPointer.StepId);
+                    var parentStep = def.Steps.FindById(parentPointer.StepId);
                     if ((!parentStep.ResumeChildrenAfterCompensation) || (parentStep.RevertChildrenAfterCompensation))
                     {
                         resume = parentStep.ResumeChildrenAfterCompensation;
@@ -86,7 +86,7 @@ namespace WorkflowCore.Services.ErrorHandlers
 
                     foreach (var siblingPointer in prevSiblings)
                     {
-                        var siblingStep = def.Steps.First(x => x.Id == siblingPointer.StepId);
+                        var siblingStep = def.Steps.FindById(siblingPointer.StepId);
                         if (siblingStep.CompensationStepId.HasValue)
                         {
                             var compensationPointer = _pointerFactory.BuildCompensationPointer(def, siblingPointer, exceptionPointer, siblingStep.CompensationStepId.Value);

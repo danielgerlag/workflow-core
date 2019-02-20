@@ -12,7 +12,7 @@ namespace WorkflowCore.Models
 
         public string Description { get; set; }
 
-        public List<WorkflowStep> Steps { get; set; }
+        public WorkflowStepCollection Steps { get; set; } = new WorkflowStepCollection();
 
         public Type DataType { get; set; }
 

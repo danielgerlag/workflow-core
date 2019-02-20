@@ -53,9 +53,9 @@ namespace WorkflowCore.Services.DefinitionStorage
         }
 
 
-        private List<WorkflowStep> ConvertSteps(ICollection<StepSourceV1> source, Type dataType)
+        private WorkflowStepCollection ConvertSteps(ICollection<StepSourceV1> source, Type dataType)
         {
-            var result = new List<WorkflowStep>();
+            var result = new WorkflowStepCollection();
             int i = 0;
             var stack = new Stack<StepSourceV1>(source.Reverse<StepSourceV1>());
             var parents = new List<StepSourceV1>();

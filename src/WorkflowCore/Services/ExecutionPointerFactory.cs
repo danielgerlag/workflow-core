@@ -17,7 +17,7 @@ namespace WorkflowCore.Services
                 StepId = 0,
                 Active = true,
                 Status = PointerStatus.Pending,
-                StepName = Enumerable.First<WorkflowStep>(def.Steps, x => x.Id == 0).Name
+                StepName = def.Steps.FindById(0).Name
             };
         }
 
@@ -32,7 +32,7 @@ namespace WorkflowCore.Services
                 Active = true,
                 ContextItem = pointer.ContextItem,
                 Status = PointerStatus.Pending,
-                StepName = def.Steps.First(x => x.Id == outcomeTarget.NextStep).Name,
+                StepName = def.Steps.FindById(outcomeTarget.NextStep).Name,
                 Scope = new List<string>(pointer.Scope)
             };            
         }
@@ -52,7 +52,7 @@ namespace WorkflowCore.Services
                 Active = true,
                 ContextItem = branch,
                 Status = PointerStatus.Pending,
-                StepName = def.Steps.First(x => x.Id == childDefinitionId).Name,
+                StepName = def.Steps.FindById(childDefinitionId).Name,
                 Scope = new List<string>(childScope)
             };            
         }
@@ -68,7 +68,7 @@ namespace WorkflowCore.Services
                 Active = true,
                 ContextItem = pointer.ContextItem,
                 Status = PointerStatus.Pending,
-                StepName = def.Steps.First(x => x.Id == compensationStepId).Name,
+                StepName = def.Steps.FindById(compensationStepId).Name,
                 Scope = new List<string>(pointer.Scope)
             };
         }

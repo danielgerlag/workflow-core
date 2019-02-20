@@ -28,7 +28,7 @@ namespace WorkflowCore.Services
             WorkflowDefinition result = new WorkflowDefinition();
             result.Id = id;
             result.Version = version;
-            result.Steps = this.Steps;
+            result.Steps = new WorkflowStepCollection(Steps);
             result.DefaultErrorBehavior = DefaultErrorBehavior;
             result.DefaultErrorRetryInterval = DefaultErrorRetryInterval;
             return result;
