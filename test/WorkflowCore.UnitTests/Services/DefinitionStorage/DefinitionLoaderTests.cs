@@ -63,8 +63,8 @@ namespace WorkflowCore.UnitTests.Services.DefinitionStorage
         private bool MatchTestDefinition(WorkflowDefinition def)
         {
             //TODO: make this better
-            var step1 = def.Steps.Single(s => s.Tag == "Step1");
-            var step2 = def.Steps.Single(s => s.Tag == "Step2");
+            var step1 = def.Steps.Single(s => s.ExternalId == "Step1");
+            var step2 = def.Steps.Single(s => s.ExternalId == "Step2");
             
             step1.Outcomes.Count.Should().Be(1);
             step1.Inputs.Count.Should().Be(1);

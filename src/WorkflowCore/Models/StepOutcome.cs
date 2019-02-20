@@ -16,7 +16,7 @@ namespace WorkflowCore.Models
 
         public string Label { get; set; }
 
-        public string Tag { get; set; }
+        public string ExternalNextStepId { get; set; }
 
         public object GetValue(object data)
         {

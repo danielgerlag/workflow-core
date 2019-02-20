@@ -26,6 +26,12 @@ namespace WorkflowCore.Services
             return this;
         }
 
+        public IStepBuilder<TData, TStepBody> Id(string id)
+        {
+            Step.ExternalId = id;
+            return this;
+        }
+
         public IStepBuilder<TData, TStep> Then<TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null)
             where TStep : IStepBody
         {
@@ -72,11 +78,23 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
+        public IStepBuilder<TData, TStepBody> Attach(string id)
+        {
+            Step.Outcomes.Add(new StepOutcome()
+            {
+                ExternalNextStepId = id
+            });
+
+            return this;
+        }
+
         public IStepOutcomeBuilder<TData> When(object outcomeValue, string label = null)
         {
-            StepOutcome result = new StepOutcome();
-            result.Value = x => outcomeValue;
-            result.Label = label;
+            StepOutcome result = new StepOutcome
+            {
+                Value = x => outcomeValue,
+                Label = label
+            };
             Step.Outcomes.Add(result);
             var outcomeBuilder = new StepOutcomeBuilder<TData>(WorkflowBuilder, result);
             return outcomeBuilder;

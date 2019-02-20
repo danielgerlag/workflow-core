@@ -14,7 +14,7 @@ namespace WorkflowCore.Models
 
         public virtual string Name { get; set; }
 
-        public virtual string Tag { get; set; }
+        public virtual string ExternalId { get; set; }
 
         public virtual List<int> Children { get; set; } = new List<int>();
 

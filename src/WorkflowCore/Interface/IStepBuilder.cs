@@ -22,6 +22,13 @@ namespace WorkflowCore.Interface
         IStepBuilder<TData, TStepBody> Name(string name);
 
         /// <summary>
+        /// Specifies a custom Id to reference this step
+        /// </summary>
+        /// <param name="id">A custom Id to reference this step</param>
+        /// <returns></returns>
+        IStepBuilder<TData, TStepBody> Id(string id);
+
+        /// <summary>
         /// Specify the next step in the workflow
         /// </summary>
         /// <typeparam name="TStep">The type of the step to execute</typeparam>
@@ -50,6 +57,13 @@ namespace WorkflowCore.Interface
         /// <param name="body"></param>
         /// <returns></returns>
         IStepBuilder<TData, ActionStepBody> Then(Action<IStepExecutionContext> body);
+
+        /// <summary>
+        /// Specify the next step in the workflow by Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        IStepBuilder<TData, TStepBody> Attach(string id);
 
         /// <summary>
         /// Configure an outcome for this step, then wire it to another step
