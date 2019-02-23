@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,8 +16,7 @@ namespace WorkflowCore.Providers.AWS.Services
         private const int WaitTime = 5;
         private readonly ILogger _logger;
         private readonly IAmazonSQS _client;
-        private string _workflowQueue;
-        private string _eventQueue;
+        private readonly Dictionary<QueueType, string> _queues = new Dictionary<QueueType, string>();
 
         public bool IsDequeueBlocking => true;
 
@@ -28,32 +28,14 @@ namespace WorkflowCore.Providers.AWS.Services
 
         public async Task QueueWork(string id, QueueType queue)
         {
-            var queueUrl = string.Empty;
-            switch (queue)
-            {
-                case QueueType.Workflow:
-                    queueUrl = _workflowQueue;
-                    break;
-                case QueueType.Event:
-                    queueUrl = _eventQueue;
-                    break;
-            }
+            var queueUrl = _queues[queue];
 
             await _client.SendMessageAsync(new SendMessageRequest(queueUrl, id));
         }
 
         public async Task<string> DequeueWork(QueueType queue, CancellationToken cancellationToken)
         {
-            var queueUrl = string.Empty;
-            switch (queue)
-            {
-                case QueueType.Workflow:
-                    queueUrl = _workflowQueue;
-                    break;
-                case QueueType.Event:
-                    queueUrl = _eventQueue;
-                    break;
-            }
+            var queueUrl = _queues[queue];
 
             var result = await _client.ReceiveMessageAsync(new ReceiveMessageRequest(queueUrl)
             {
@@ -74,9 +56,11 @@ namespace WorkflowCore.Providers.AWS.Services
         {
             var workflowQueue = await _client.CreateQueueAsync(new CreateQueueRequest("workflowcore-workflows"));
             var eventQueue = await _client.CreateQueueAsync(new CreateQueueRequest("workflowcore-events"));
+            var indexQueue = await _client.CreateQueueAsync(new CreateQueueRequest("workflowcore-index"));
 
-            _workflowQueue = workflowQueue.QueueUrl;
-            _eventQueue = eventQueue.QueueUrl;
+            _queues[QueueType.Workflow] = workflowQueue.QueueUrl;
+            _queues[QueueType.Event] = eventQueue.QueueUrl;
+            _queues[QueueType.Index] = indexQueue.QueueUrl;
         }
 
         public Task Stop() => Task.CompletedTask;

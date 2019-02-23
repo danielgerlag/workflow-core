@@ -32,7 +32,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                         return ExecutionResult.Next();
                     })
                         .Id("step1")
-                    .If(data => Step1Ticker < 3).Do(then => then
+                    .If(data => Step1Ticker < 4).Do(then => then
                         .StartWith(context =>
                         {
                             Step2Ticker++;
@@ -54,7 +54,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             var workflowId = StartWorkflow(new MyDataClass());
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
-            Step1Ticker.Should().Be(3);
+            Step1Ticker.Should().Be(4);
             Step2Ticker.Should().Be(3);
 
             GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);

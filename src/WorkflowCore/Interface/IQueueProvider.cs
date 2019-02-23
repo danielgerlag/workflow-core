@@ -32,5 +32,5 @@ namespace WorkflowCore.Interface
         Task Stop();
     }
 
-    public enum QueueType { Workflow = 0, Event = 1 }
+    public enum QueueType { Workflow = 0, Event = 1, Index = 2 }
 }

@@ -14,10 +14,16 @@ namespace WorkflowCore.Providers.Redis.Services
         private readonly ILogger _logger;
         private readonly string _connectionString;
         private readonly string _prefix;
-        private const string WORKFLOW_QUEUE = "workflows";
-        private const string EVENT_QUEUE = "events";
+
         private IConnectionMultiplexer _multiplexer;
         private IDatabase _redis;
+
+        private readonly Dictionary<QueueType, string> _queues = new Dictionary<QueueType, string>()
+        {
+            [QueueType.Workflow] = "workflows",
+            [QueueType.Event] = "events",
+            [QueueType.Index] = "index"
+        };
 
         public RedisQueueProvider(string connectionString, string prefix, ILoggerFactory logFactory)
         {
@@ -66,20 +72,6 @@ namespace WorkflowCore.Providers.Redis.Services
         {
         }
 
-        private string GetQueueName(QueueType queue)
-        {
-            var queueName = string.Empty;
-            switch (queue)
-            {
-                case QueueType.Workflow:
-                    queueName = $"{_prefix}-{WORKFLOW_QUEUE}";
-                    break;
-                case QueueType.Event:
-                    queueName = $"{_prefix}-{EVENT_QUEUE}";
-                    break;
-            }
-
-            return queueName;
-        }
+        private string GetQueueName(QueueType queue) => $"{_prefix}-{_queues[queue]}";
     }
 }
