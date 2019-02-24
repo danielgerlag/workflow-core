@@ -25,20 +25,36 @@ namespace WorkflowCore.Services
 
         public virtual WorkflowDefinition Build(string id, int version)
         {
-            WorkflowDefinition result = new WorkflowDefinition();
-            result.Id = id;
-            result.Version = version;
-            result.Steps = this.Steps;
-            result.DefaultErrorBehavior = DefaultErrorBehavior;
-            result.DefaultErrorRetryInterval = DefaultErrorRetryInterval;
-            return result;
+            AttachExternalIds();
+            return new WorkflowDefinition
+            {
+                Id = id,
+                Version = version,
+                Steps = new WorkflowStepCollection(Steps),
+                DefaultErrorBehavior = DefaultErrorBehavior,
+                DefaultErrorRetryInterval = DefaultErrorRetryInterval
+            };
         }
 
         public void AddStep(WorkflowStep step)
         {
             step.Id = Steps.Count();
             Steps.Add(step);
-        }               
+        }
+
+        private void AttachExternalIds()
+        {
+            foreach (var step in Steps)
+            {
+                foreach (var outcome in step.Outcomes.Where(x => !string.IsNullOrEmpty(x.ExternalNextStepId)))
+                {
+                    if (Steps.All(x => x.ExternalId != outcome.ExternalNextStepId))
+                        throw new KeyNotFoundException($"Cannot find step id {outcome.ExternalNextStepId}");
+
+                    outcome.NextStep = Steps.Single(x => x.ExternalId == outcome.ExternalNextStepId).Id;
+                }
+            }
+        }
 
     }
 

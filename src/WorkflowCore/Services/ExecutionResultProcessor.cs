@@ -109,7 +109,7 @@ namespace WorkflowCore.Services
             while (queue.Count > 0)
             {
                 var exceptionPointer = queue.Dequeue();
-                var exceptionStep = def.Steps.Find(x => x.Id == exceptionPointer.StepId);
+                var exceptionStep = def.Steps.FindById(exceptionPointer.StepId);
                 var compensatingStepId = FindScopeCompensationStepId(workflow, def, exceptionPointer);
                 var errorOption = (exceptionStep.ErrorBehavior ?? (compensatingStepId.HasValue ? WorkflowErrorHandling.Compensate : def.DefaultErrorBehavior));
 
@@ -129,7 +129,7 @@ namespace WorkflowCore.Services
             {
                 var pointerId = scope.Pop();
                 var pointer = workflow.ExecutionPointers.FindById(pointerId);
-                var step = def.Steps.First(x => x.Id == pointer.StepId);
+                var step = def.Steps.FindById(pointer.StepId);
                 if (step.CompensationStepId.HasValue)
                     return step.CompensationStepId.Value;
             }

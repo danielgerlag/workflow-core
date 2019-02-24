@@ -53,9 +53,9 @@ namespace WorkflowCore.Services.DefinitionStorage
         }
 
 
-        private List<WorkflowStep> ConvertSteps(ICollection<StepSourceV1> source, Type dataType)
+        private WorkflowStepCollection ConvertSteps(ICollection<StepSourceV1> source, Type dataType)
         {
-            var result = new List<WorkflowStep>();
+            var result = new WorkflowStepCollection();
             int i = 0;
             var stack = new Stack<StepSourceV1>(source.Reverse<StepSourceV1>());
             var parents = new List<StepSourceV1>();
@@ -87,7 +87,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                 targetStep.Name = nextStep.Name;
                 targetStep.ErrorBehavior = nextStep.ErrorBehavior;
                 targetStep.RetryInterval = nextStep.RetryInterval;
-                targetStep.Tag = $"{nextStep.Id}";
+                targetStep.ExternalId = $"{nextStep.Id}";
 
                 AttachInputs(nextStep, dataType, stepType, targetStep);
                 AttachOutputs(nextStep, dataType, stepType, targetStep);
@@ -114,7 +114,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                 }
 
                 if (!string.IsNullOrEmpty(nextStep.NextStepId))
-                    targetStep.Outcomes.Add(new StepOutcome() { Tag = $"{nextStep.NextStepId}" });
+                    targetStep.Outcomes.Add(new StepOutcome() { ExternalNextStepId = $"{nextStep.NextStepId}" });
 
                 result.Add(targetStep);
                 
@@ -123,26 +123,26 @@ namespace WorkflowCore.Services.DefinitionStorage
 
             foreach (var step in result)
             {
-                if (result.Any(x => x.Tag == step.Tag && x.Id != step.Id))
-                    throw new WorkflowDefinitionLoadException($"Duplicate step Id {step.Tag}");
+                if (result.Any(x => x.ExternalId == step.ExternalId && x.Id != step.Id))
+                    throw new WorkflowDefinitionLoadException($"Duplicate step Id {step.ExternalId}");
 
                 foreach (var outcome in step.Outcomes)
                 {
-                    if (result.All(x => x.Tag != outcome.Tag))
-                        throw new WorkflowDefinitionLoadException($"Cannot find step id {outcome.Tag}");
+                    if (result.All(x => x.ExternalId != outcome.ExternalNextStepId))
+                        throw new WorkflowDefinitionLoadException($"Cannot find step id {outcome.ExternalNextStepId}");
 
-                    outcome.NextStep = result.Single(x => x.Tag == outcome.Tag).Id;
+                    outcome.NextStep = result.Single(x => x.ExternalId == outcome.ExternalNextStepId).Id;
                 }
             }
 
             foreach (var parent in parents)
             {
-                var target = result.Single(x => x.Tag == parent.Id);
+                var target = result.Single(x => x.ExternalId == parent.Id);
                 foreach (var branch in parent.Do)
                 {
                     var childTags = branch.Select(x => x.Id).ToList();
                     target.Children.AddRange(result
-                        .Where(x => childTags.Contains(x.Tag))
+                        .Where(x => childTags.Contains(x.ExternalId))
                         .OrderBy(x => x.Id)
                         .Select(x => x.Id)
                         .Take(1)
@@ -152,11 +152,11 @@ namespace WorkflowCore.Services.DefinitionStorage
 
             foreach (var item in compensatables)
             {
-                var target = result.Single(x => x.Tag == item.Id);
+                var target = result.Single(x => x.ExternalId == item.Id);
                 var tag = item.CompensateWith.Select(x => x.Id).FirstOrDefault();
                 if (tag != null)
                 {
-                    var compStep = result.FirstOrDefault(x => x.Tag == tag);
+                    var compStep = result.FirstOrDefault(x => x.ExternalId == tag);
                     if (compStep != null)
                         target.CompensationStepId = compStep.Id;
                 }

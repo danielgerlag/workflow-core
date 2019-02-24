@@ -13,8 +13,8 @@ namespace WorkflowCore.Providers.Azure.Services
     public class AzureStorageQueueProvider : IQueueProvider
     {
         private readonly ILogger _logger;
-        private readonly CloudQueue _workflowQueue;
-        private readonly CloudQueue _eventQueue;
+        
+        private readonly Dictionary<QueueType, CloudQueue> _queues = new Dictionary<QueueType, CloudQueue>();
 
         public bool IsDequeueBlocking => false;
 
@@ -24,37 +24,20 @@ namespace WorkflowCore.Providers.Azure.Services
             var account = CloudStorageAccount.Parse(connectionString);
             var client = account.CreateCloudQueueClient();
 
-            _workflowQueue = client.GetQueueReference("workflowcore-workflows");
-            _eventQueue = client.GetQueueReference("workflowcore-events");                        
+            _queues[QueueType.Workflow] = client.GetQueueReference("workflowcore-workflows");
+            _queues[QueueType.Event] = client.GetQueueReference("workflowcore-events");
+            _queues[QueueType.Index] = client.GetQueueReference("workflowcore-index");
         }
 
         public async Task QueueWork(string id, QueueType queue)
         {
             var msg = new CloudQueueMessage(id);
-
-            switch (queue)
-            {
-                case QueueType.Workflow:
-                    await _workflowQueue.AddMessageAsync(msg);
-                    break;
-                case QueueType.Event:
-                    await _eventQueue.AddMessageAsync(msg);
-                    break;
-            }
+            await _queues[queue].AddMessageAsync(msg);
         }
 
         public async Task<string> DequeueWork(QueueType queue, CancellationToken cancellationToken)
         {
-            CloudQueue cloudQueue = null;
-            switch (queue)
-            {
-                case QueueType.Workflow:
-                    cloudQueue = _workflowQueue;
-                    break;
-                case QueueType.Event:
-                    cloudQueue = _eventQueue;
-                    break;
-            }
+            CloudQueue cloudQueue = _queues[queue];
 
             if (cloudQueue == null)
                 return null;
@@ -70,8 +53,10 @@ namespace WorkflowCore.Providers.Azure.Services
 
         public async Task Start()
         {
-            await _workflowQueue.CreateIfNotExistsAsync();
-            await _eventQueue.CreateIfNotExistsAsync();
+            foreach (var queue in _queues.Values)
+            {
+                await queue.CreateIfNotExistsAsync();
+            }
         }
 
         public Task Stop() => Task.CompletedTask;

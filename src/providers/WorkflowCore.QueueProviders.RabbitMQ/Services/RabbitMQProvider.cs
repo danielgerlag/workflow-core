@@ -96,6 +96,8 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
                     return "wfc.workflow_queue";
                 case QueueType.Event:
                     return "wfc.event_queue";
+                case QueueType.Index:
+                    return "wfc.index_queue";
             }
             return null;
         }

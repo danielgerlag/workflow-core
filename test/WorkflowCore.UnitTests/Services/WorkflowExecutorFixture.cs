@@ -324,7 +324,7 @@ namespace WorkflowCore.UnitTests.Services
                 Id = id,
                 Version = version,
                 DataType = typeof(object),
-                Steps = new List<WorkflowStep>()
+                Steps = new WorkflowStepCollection()
                 {
                     step1
                 }

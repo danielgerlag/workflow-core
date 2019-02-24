@@ -40,7 +40,8 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                 var queueConfigurations = new[]
                 {
                     _configProvider.GetByQueue(QueueType.Workflow),
-                    _configProvider.GetByQueue(QueueType.Event)
+                    _configProvider.GetByQueue(QueueType.Event),
+                    _configProvider.GetByQueue(QueueType.Index)
                 };
 
                 foreach (var item in queueConfigurations)

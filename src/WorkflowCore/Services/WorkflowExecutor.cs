@@ -54,7 +54,7 @@ namespace WorkflowCore.Services
                 if (pointer.Status == PointerStatus.Cancelled)
                     continue;
 
-                var step = def.Steps.First(x => x.Id == pointer.StepId);
+                var step = def.Steps.FindById(pointer.StepId);
                 if (step != null)
                 {
                     try
@@ -186,7 +186,7 @@ namespace WorkflowCore.Services
 
             foreach (var pointer in pointers)
             {
-                var step = workflowDef.Steps.First(x => x.Id == pointer.StepId);
+                var step = workflowDef.Steps.FindById(pointer.StepId);
                 step?.AfterWorkflowIteration(workflowResult, workflowDef, workflow, pointer);
             }
         }
