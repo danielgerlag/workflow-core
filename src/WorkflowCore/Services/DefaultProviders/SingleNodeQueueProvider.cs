@@ -21,7 +21,7 @@ namespace WorkflowCore.Services
             [QueueType.Index] = new BlockingCollection<string>()
         };
 
-        public bool IsDequeueBlocking => true;
+        public bool IsDequeueBlocking => false;
 
         public async Task QueueWork(string id, QueueType queue)
         {
@@ -30,7 +30,7 @@ namespace WorkflowCore.Services
 
         public async Task<string> DequeueWork(QueueType queue, CancellationToken cancellationToken)
         {
-            if (_queues[queue].TryTake(out string id, 100, cancellationToken))
+            if (_queues[queue].TryTake(out string id))
                 return id;
 
             return null;

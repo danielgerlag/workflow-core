@@ -30,24 +30,18 @@ namespace WorkflowCore.Providers.Elasticsearch.Services
         {
             if (_client == null)
                 throw new InvalidOperationException("Not started");
-
-            try
-            {
-                var denormModel = WorkflowSearchModel.FromWorkflowInstance(workflow);
+                        
+            var denormModel = WorkflowSearchModel.FromWorkflowInstance(workflow);
                 
-                var result = await _client.IndexAsync(denormModel, idx => idx
-                    .Index(_indexName)
-                );
+            var result = await _client.IndexAsync(denormModel, idx => idx
+                .Index(_indexName)
+            );
 
-                if (!result.ApiCall.Success)
-                {
-                    _logger.LogError(default(EventId), result.ApiCall.OriginalException, $"Failed to index workflow {workflow.Id}");
-                }
-            }
-            catch (Exception ex)
+            if (!result.ApiCall.Success)
             {
-                _logger.LogError(default(EventId), ex, $"Failed to index workflow {workflow.Id}");
-            }
+                _logger.LogError(default(EventId), result.ApiCall.OriginalException, $"Failed to index workflow {workflow.Id}");
+                throw new ApplicationException($"Failed to index workflow {workflow.Id}", result.ApiCall.OriginalException);
+            }            
         }
 
         public async Task<Page<WorkflowSearchResult>> Search(string terms, int skip, int take, params SearchFilter[] filters)

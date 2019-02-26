@@ -24,6 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             var options = new WorkflowOptions(services);
             setupAction?.Invoke(options);
+            services.AddSingleton<ISingletonMemoryProvider, MemoryPersistenceProvider>();
             services.AddTransient<IPersistenceProvider>(options.PersistanceFactory);
             services.AddSingleton<IQueueProvider>(options.QueueFactory);
             services.AddSingleton<IDistributedLockProvider>(options.LockFactory);
