@@ -36,6 +36,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddTransient<IBackgroundTask, WorkflowConsumer>();
             services.AddTransient<IBackgroundTask, EventConsumer>();
+            services.AddTransient<IBackgroundTask, IndexConsumer>();
             services.AddTransient<IBackgroundTask, RunnablePoller>();
             services.AddTransient<IBackgroundTask>(sp => sp.GetService<ILifeCycleEventPublisher>());
 
