@@ -17,7 +17,6 @@ namespace WorkflowCore.Services.BackgroundTasks
         private readonly Dictionary<string, int> _errorCounts = new Dictionary<string, int>();
 
         protected override QueueType Queue => QueueType.Index;
-        protected override int MaxConcurrentItems => 1;
 
         public IndexConsumer(IPooledObjectPolicy<IPersistenceProvider> persistencePoolPolicy, IQueueProvider queueProvider, ILoggerFactory loggerFactory, ISearchIndex searchIndex, WorkflowOptions options)
             : base(queueProvider, loggerFactory, options)

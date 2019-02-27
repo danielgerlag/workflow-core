@@ -19,6 +19,11 @@ namespace WorkflowCore.Testing
         protected IPersistenceProvider PersistenceProvider;
         protected List<StepError> UnhandledStepErrors = new List<StepError>();
 
+        static WorkflowTest()
+        {
+            ThreadPool.SetMinThreads(50, 30);
+        }
+
         protected virtual void Setup()
         {
             //setup dependency injection

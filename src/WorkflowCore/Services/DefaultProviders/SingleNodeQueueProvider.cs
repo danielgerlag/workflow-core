@@ -21,19 +21,20 @@ namespace WorkflowCore.Services
             [QueueType.Index] = new BlockingCollection<string>()
         };
 
-        public bool IsDequeueBlocking => false;
+        public bool IsDequeueBlocking => true;
 
-        public async Task QueueWork(string id, QueueType queue)
+        public Task QueueWork(string id, QueueType queue)
         {
             _queues[queue].Add(id);
+            return Task.CompletedTask;
         }
 
-        public async Task<string> DequeueWork(QueueType queue, CancellationToken cancellationToken)
-        {
-            if (_queues[queue].TryTake(out string id))
-                return id;
+        public Task<string> DequeueWork(QueueType queue, CancellationToken cancellationToken)
+        {            
+            if (_queues[queue].TryTake(out string id, 100, cancellationToken))
+                return Task.FromResult(id);
 
-            return null;
+            return Task.FromResult<string>(null);
         }
 
         public Task Start()
