@@ -37,7 +37,7 @@ namespace WorkflowCore.Services.BackgroundTasks
 
             _cancellationTokenSource = new CancellationTokenSource();
                         
-            DispatchTask = new Task(Execute);
+            DispatchTask = new Task(Execute, TaskCreationOptions.LongRunning);
             DispatchTask.Start();
         }
 
@@ -100,7 +100,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                         activeTasks.Add(item, task);
                     }
                     
-                    task.Start(TaskScheduler.Current);
+                    task.Start();
                 }
                 catch (OperationCanceledException)
                 {

@@ -21,7 +21,8 @@ namespace WorkflowCore.Testing
 
         static WorkflowTest()
         {
-            ThreadPool.SetMinThreads(50, 30);
+            //ThreadPool.SetMinThreads(50, 30);
+            //ThreadPool.SetMaxThreads(100, 100);
         }
 
         protected virtual void Setup()
