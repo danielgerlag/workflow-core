@@ -18,13 +18,7 @@ namespace WorkflowCore.Testing
         protected IWorkflowHost Host;
         protected IPersistenceProvider PersistenceProvider;
         protected List<StepError> UnhandledStepErrors = new List<StepError>();
-
-        static WorkflowTest()
-        {
-            //ThreadPool.SetMinThreads(50, 30);
-            //ThreadPool.SetMaxThreads(100, 100);
-        }
-
+        
         protected virtual void Setup()
         {
             //setup dependency injection

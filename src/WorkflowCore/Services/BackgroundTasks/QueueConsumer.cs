@@ -12,6 +12,7 @@ namespace WorkflowCore.Services.BackgroundTasks
     {
         protected abstract QueueType Queue { get; }
         protected virtual int MaxConcurrentItems => Math.Max(Environment.ProcessorCount, 2);
+        protected virtual bool EnableSecondPasses => false;
 
         protected readonly IQueueProvider QueueProvider;
         protected readonly ILogger Logger;
@@ -52,6 +53,7 @@ namespace WorkflowCore.Services.BackgroundTasks
         {
             var cancelToken = _cancellationTokenSource.Token;
             var activeTasks = new Dictionary<string, Task>();
+            var secondPasses = new HashSet<string>();
 
             while (!cancelToken.IsCancellationRequested)
             {
@@ -71,21 +73,25 @@ namespace WorkflowCore.Services.BackgroundTasks
                             await Task.Delay(Options.IdleTime, cancelToken);
                         continue;
                     }
-
-                    lock (activeTasks)
+                    
+                    if (activeTasks.ContainsKey(item))
                     {
-                        if (activeTasks.ContainsKey(item))
-                        {
-                            QueueProvider.QueueWork(item, Queue);
-                            continue;
-                        }
+                        secondPasses.Add(item);
+                        continue;
                     }
+
+                    secondPasses.Remove(item);
 
                     var task = new Task(async (object data) =>
                     {
                         try
                         {
                             await ExecuteItem((string)data);
+                            while (EnableSecondPasses && secondPasses.Contains(item))
+                            {
+                                secondPasses.Remove(item);
+                                await ExecuteItem((string)data);
+                            }
                         }
                         finally
                         {

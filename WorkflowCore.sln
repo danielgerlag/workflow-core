@@ -97,6 +97,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReleaseNotes", "ReleaseNote
 		ReleaseNotes\1.7.0.md = ReleaseNotes\1.7.0.md
 		ReleaseNotes\1.8.0.md = ReleaseNotes\1.8.0.md
 		ReleaseNotes\1.8.1.md = ReleaseNotes\1.8.1.md
+		ReleaseNotes\1.9.0.md = ReleaseNotes\1.9.0.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample14", "src\samples\WorkflowCore.Sample14\WorkflowCore.Sample14.csproj", "{6BC66637-B42A-4334-ADFB-DBEC9F29D293}"

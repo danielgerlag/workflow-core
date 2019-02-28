@@ -13,7 +13,7 @@ namespace WorkflowCore.Services.BackgroundTasks
         private readonly IPersistenceProvider _persistenceStore;
         private readonly IDistributedLockProvider _lockProvider;
         private readonly IDateTimeProvider _datetimeProvider;
-
+        protected override int MaxConcurrentItems => 2;
         protected override QueueType Queue => QueueType.Event;
 
         public EventConsumer(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, WorkflowOptions options, IDateTimeProvider datetimeProvider)
