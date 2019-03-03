@@ -139,7 +139,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             var openActions = instance.GetOpenUserActions()?.ToList();
             while ((openActions?.Count ?? 0) == 0)
             {
-                await Task.Delay(TimeSpan.FromMilliseconds(10));
+                await Task.Delay(TimeSpan.FromMilliseconds(100));
                 openActions = instance.GetOpenUserActions()?.ToList();
                 if (delayCount-- == 0)
                 {
