@@ -8,6 +8,8 @@ namespace WorkflowCore.UnitTests.Services
 {
     public class MemoryPersistenceProviderFixture : BasePersistenceFixture
     {
-        protected override IPersistenceProvider Subject => new MemoryPersistenceProvider();
+        private readonly IPersistenceProvider _subject = new MemoryPersistenceProvider();
+
+        protected override IPersistenceProvider Subject => _subject;
     }
 }

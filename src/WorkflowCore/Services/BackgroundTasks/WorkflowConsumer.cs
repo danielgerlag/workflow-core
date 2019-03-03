@@ -12,19 +12,17 @@ namespace WorkflowCore.Services.BackgroundTasks
     {
         private readonly IDistributedLockProvider _lockProvider;
         private readonly IDateTimeProvider _datetimeProvider;
-        private readonly ISearchIndex _searchIndex;
         private readonly ObjectPool<IPersistenceProvider> _persistenceStorePool;
         private readonly ObjectPool<IWorkflowExecutor> _executorPool;
 
         protected override QueueType Queue => QueueType.Workflow;
 
-        public WorkflowConsumer(IPooledObjectPolicy<IPersistenceProvider> persistencePoolPolicy, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IPooledObjectPolicy<IWorkflowExecutor> executorPoolPolicy, IDateTimeProvider datetimeProvider, ISearchIndex searchIndex, WorkflowOptions options)
+        public WorkflowConsumer(IPooledObjectPolicy<IPersistenceProvider> persistencePoolPolicy, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IPooledObjectPolicy<IWorkflowExecutor> executorPoolPolicy, IDateTimeProvider datetimeProvider, WorkflowOptions options)
             : base(queueProvider, loggerFactory, options)
         {
             _persistenceStorePool = new DefaultObjectPool<IPersistenceProvider>(persistencePoolPolicy);
             _executorPool = new DefaultObjectPool<IWorkflowExecutor>(executorPoolPolicy);
             _lockProvider = lockProvider;
-            _searchIndex = searchIndex;
             _datetimeProvider = datetimeProvider;
         }
 
@@ -52,7 +50,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                             {
                                 _executorPool.Return(executor);
                                 await persistenceStore.PersistWorkflow(workflow);
-                                await _searchIndex.IndexWorkflow(workflow);
+                                await QueueProvider.QueueWork(itemId, QueueType.Index);
                             }
                         }
                     }
