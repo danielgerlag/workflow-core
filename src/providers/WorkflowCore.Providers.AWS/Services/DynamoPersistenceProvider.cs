@@ -4,6 +4,7 @@ using Amazon.Runtime;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WorkflowCore.Providers.AWS.Interface;
@@ -86,7 +87,7 @@ namespace WorkflowCore.Providers.AWS.Services
                 },
                 ScanIndexForward = true
             };
-            
+
             var response = await _client.QueryAsync(request);
 
             foreach (var item in response.Items)
@@ -115,6 +116,55 @@ namespace WorkflowCore.Providers.AWS.Services
             var response = await _client.GetItemAsync(req);
 
             return response.Item.ToWorkflowInstance();
+        }
+
+        public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids)
+        {
+            if (ids == null)
+            {
+                return new List<WorkflowInstance>();
+            }
+
+            var keys = new Dictionary<string, AttributeValue>();
+            foreach (var id in ids)
+            {
+                keys.Add("id", new AttributeValue { S = id });
+            }
+
+            var request = new BatchGetItemRequest
+            {
+                RequestItems = new Dictionary<string, KeysAndAttributes>()
+                {
+                    {
+                        $"{_tablePrefix}-{WORKFLOW_TABLE}",
+                        new KeysAndAttributes
+                        {
+                            Keys = new List<Dictionary<string, AttributeValue> >() { keys }
+                        }
+                    }
+                }
+            };
+
+            var result = new List<Dictionary<string, AttributeValue>>();
+            BatchGetItemResponse response;
+            do
+            {
+                // Making request
+                response = await _client.BatchGetItemAsync(request);
+
+                // Check the response
+                var responses = response.Responses; // Attribute list in the response.
+                foreach (var tableResponse in responses)
+                {
+                    result.AddRange(tableResponse.Value);
+                }
+
+                // Any unprocessed keys? could happen if you exceed ProvisionedThroughput or some other error.
+                Dictionary<string, KeysAndAttributes> unprocessedKeys = response.UnprocessedKeys;
+                request.RequestItems = unprocessedKeys;
+            } while (response.UnprocessedKeys.Count > 0);
+
+            return result.Select(i => i.ToWorkflowInstance());
         }
 
         public async Task<string> CreateEventSubscription(EventSubscription subscription)
