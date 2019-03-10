@@ -51,7 +51,7 @@ namespace WorkflowCore.Services
 
             foreach (var pointer in exePointers)
             {
-                if (pointer.Status == PointerStatus.Cancelled)
+                if (!pointer.Active)
                     continue;
 
                 var step = def.Steps.FindById(pointer.StepId);
