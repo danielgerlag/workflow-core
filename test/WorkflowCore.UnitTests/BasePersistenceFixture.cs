@@ -110,7 +110,7 @@ namespace WorkflowCore.UnitTests
                 SleepUntil = new DateTime(2000, 1, 1).ToUniversalTime(),
                 Scope = new List<string>() { "4", "3", "2", "1" }
             });
-            var workflowId02 = Subject.CreateNewWorkflow(workflow01).Result;
+            var workflowId02 = Subject.CreateNewWorkflow(workflow02).Result;
 
             var workflow03 = new WorkflowInstance()
             {
@@ -130,7 +130,7 @@ namespace WorkflowCore.UnitTests
                 SleepUntil = new DateTime(2000, 1, 1).ToUniversalTime(),
                 Scope = new List<string>() { "4", "3", "2", "1" }
             });
-            var workflowId03 = Subject.CreateNewWorkflow(workflow01).Result;
+            var workflowId03 = Subject.CreateNewWorkflow(workflow03).Result;
 
             var retrievedWorkflows = Subject.GetWorkflowInstances(new[] { workflowId01, workflowId02, workflowId03 }).Result;
 
