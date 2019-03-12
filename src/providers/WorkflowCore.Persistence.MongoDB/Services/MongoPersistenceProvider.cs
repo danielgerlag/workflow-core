@@ -121,7 +121,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                 return new List<WorkflowInstance>();
             }
 
-            var result = await WorkflowInstances.FindAsync(x => ids.Contains(x.Id, StringComparer.OrdinalIgnoreCase));
+            var result = await WorkflowInstances.FindAsync(x => ids.Contains(x.Id));
             return await result.ToListAsync();
         }
 

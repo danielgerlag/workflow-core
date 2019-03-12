@@ -70,7 +70,7 @@ namespace WorkflowCore.Services
 
             lock (_instances)
             {
-                return _instances.Where(x => ids.Contains(x.Id, StringComparer.OrdinalIgnoreCase));
+                return _instances.Where(x => ids.Contains(x.Id));
             }
         }
 
