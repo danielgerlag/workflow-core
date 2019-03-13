@@ -153,5 +153,10 @@ namespace WorkflowCore.Services
             if (!_shutdown)
                 Stop();
         }
+        
+        public bool GetShutdownState()
+        {
+            return _shutdown;
+        }
     }
 }
