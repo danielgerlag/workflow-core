@@ -125,10 +125,16 @@ namespace WorkflowCore.Providers.AWS.Services
                 return new List<WorkflowInstance>();
             }
 
-            var keys = new Dictionary<string, AttributeValue>();
+            var keys = new KeysAndAttributes() { Keys = new List<Dictionary<string, AttributeValue>>() };
             foreach (var id in ids)
             {
-                keys.Add("id", new AttributeValue { S = id });
+                var key = new Dictionary<string, AttributeValue>()
+                {
+                    {
+                        "id", new AttributeValue { S = id }
+                    }
+                };
+                keys.Keys.Add(key);
             }
 
             var request = new BatchGetItemRequest
@@ -136,11 +142,7 @@ namespace WorkflowCore.Providers.AWS.Services
                 RequestItems = new Dictionary<string, KeysAndAttributes>()
                 {
                     {
-                        $"{_tablePrefix}-{WORKFLOW_TABLE}",
-                        new KeysAndAttributes
-                        {
-                            Keys = new List<Dictionary<string, AttributeValue> >() { keys }
-                        }
+                        $"{_tablePrefix}-{WORKFLOW_TABLE}", keys
                     }
                 }
             };
