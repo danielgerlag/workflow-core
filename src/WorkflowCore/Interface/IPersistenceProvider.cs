@@ -7,7 +7,7 @@ namespace WorkflowCore.Interface
 {
     /// <remarks>
     /// The implemention of this interface will be responsible for
-    /// persisiting running workflow instances to a durable store
+    /// persisting running workflow instances to a durable store
     /// </remarks>
     public interface IPersistenceProvider
     {
