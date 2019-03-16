@@ -39,15 +39,15 @@ namespace WorkflowCore.Services
 
                     foreach (var ptr in toCancel)
                     {
-                        ptr.EndTime = DateTime.Now.ToUniversalTime();
-                        ptr.Active = false;
-                        ptr.Status = PointerStatus.Cancelled;
-
                         if (step.ProceedOnCancel)
                         {
                             _executionResultProcessor.ProcessExecutionResult(workflow, workflowDef, ptr, step, ExecutionResult.Next(), executionResult);
                         }
-                        
+
+                        ptr.EndTime = DateTime.Now.ToUniversalTime();
+                        ptr.Active = false;
+                        ptr.Status = PointerStatus.Cancelled;
+
                         foreach (var descendent in workflow.ExecutionPointers.FindByScope(ptr.Id).Where(x => x.Status != PointerStatus.Complete && x.Status != PointerStatus.Cancelled))
                         {
                             descendent.EndTime = DateTime.Now.ToUniversalTime();
