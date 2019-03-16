@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
+using FluentAssertions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
-using Xunit;
-using FluentAssertions;
 using WorkflowCore.TestAssets;
-using System.Threading.Tasks;
+using Xunit;
 
 namespace WorkflowCore.UnitTests
 {
@@ -50,7 +50,7 @@ namespace WorkflowCore.UnitTests
                 NextExecution = 0,
                 Version = 1,
                 WorkflowDefinitionId = "My Workflow",
-                Reference =  "My Reference"
+                Reference = "My Reference"
             };
             workflow.ExecutionPointers.Add(new ExecutionPointer()
             {
@@ -67,6 +67,89 @@ namespace WorkflowCore.UnitTests
             retrievedWorkflow.ShouldBeEquivalentTo(workflow);
             retrievedWorkflow.ExecutionPointers.FindById("1")
                 .Scope.Should().ContainInOrder(workflow.ExecutionPointers.FindById("1").Scope);
+        }
+
+        [Fact]
+        public void GetWorkflowInstances_should_retrieve_workflows()
+        {
+            var workflow01 = new WorkflowInstance()
+            {
+                Data = new TestData() { Value1 = 7 },
+                Description = "My Description",
+                Status = WorkflowStatus.Runnable,
+                NextExecution = 0,
+                Version = 1,
+                WorkflowDefinitionId = "My Workflow",
+                Reference = "My Reference"
+            };
+            workflow01.ExecutionPointers.Add(new ExecutionPointer()
+            {
+                Id = "1",
+                Active = true,
+                StepId = 0,
+                SleepUntil = new DateTime(2000, 1, 1).ToUniversalTime(),
+                Scope = new List<string>() { "4", "3", "2", "1" }
+            });
+            var workflowId01 = Subject.CreateNewWorkflow(workflow01).Result;
+
+            var workflow02 = new WorkflowInstance()
+            {
+                Data = new TestData() { Value1 = 7 },
+                Description = "My Description",
+                Status = WorkflowStatus.Runnable,
+                NextExecution = 0,
+                Version = 1,
+                WorkflowDefinitionId = "My Workflow",
+                Reference = "My Reference"
+            };
+            workflow02.ExecutionPointers.Add(new ExecutionPointer()
+            {
+                Id = "1",
+                Active = true,
+                StepId = 0,
+                SleepUntil = new DateTime(2000, 1, 1).ToUniversalTime(),
+                Scope = new List<string>() { "4", "3", "2", "1" }
+            });
+            var workflowId02 = Subject.CreateNewWorkflow(workflow02).Result;
+
+            var workflow03 = new WorkflowInstance()
+            {
+                Data = new TestData() { Value1 = 7 },
+                Description = "My Description",
+                Status = WorkflowStatus.Runnable,
+                NextExecution = 0,
+                Version = 1,
+                WorkflowDefinitionId = "My Workflow",
+                Reference = "My Reference"
+            };
+            workflow03.ExecutionPointers.Add(new ExecutionPointer()
+            {
+                Id = "1",
+                Active = true,
+                StepId = 0,
+                SleepUntil = new DateTime(2000, 1, 1).ToUniversalTime(),
+                Scope = new List<string>() { "4", "3", "2", "1" }
+            });
+            var workflowId03 = Subject.CreateNewWorkflow(workflow03).Result;
+
+            var retrievedWorkflows = Subject.GetWorkflowInstances(new[] { workflowId01, workflowId02, workflowId03 }).Result;
+
+            retrievedWorkflows.Count().ShouldBeEquivalentTo(3);
+
+            var retrievedWorkflow01 = retrievedWorkflows.Single(o => o.Id == workflowId01);
+            retrievedWorkflow01.ShouldBeEquivalentTo(workflow01);
+            retrievedWorkflow01.ExecutionPointers.FindById("1")
+                .Scope.Should().ContainInOrder(workflow01.ExecutionPointers.FindById("1").Scope);
+
+            var retrievedWorkflow02 = retrievedWorkflows.Single(o => o.Id == workflowId02);
+            retrievedWorkflow02.ShouldBeEquivalentTo(workflow02);
+            retrievedWorkflow02.ExecutionPointers.FindById("1")
+                .Scope.Should().ContainInOrder(workflow02.ExecutionPointers.FindById("1").Scope);
+
+            var retrievedWorkflow03 = retrievedWorkflows.Single(o => o.Id == workflowId03);
+            retrievedWorkflow03.ShouldBeEquivalentTo(workflow03);
+            retrievedWorkflow03.ExecutionPointers.FindById("1")
+                .Scope.Should().ContainInOrder(workflow03.ExecutionPointers.FindById("1").Scope);
         }
 
         [Fact]

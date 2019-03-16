@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -73,6 +74,17 @@ namespace WorkflowCore.Providers.Redis.Services
         {
             var raw = await _redis.HashGetAsync($"{_prefix}.{WORKFLOW_SET}", Id);
             return JsonConvert.DeserializeObject<WorkflowInstance>(raw, _serializerSettings);
+        }
+
+        public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids)
+        {
+            if (ids == null)
+            {
+                return new List<WorkflowInstance>();
+            }
+
+            var raw = await _redis.HashGetAsync($"{_prefix}.{WORKFLOW_SET}", Array.ConvertAll(ids.ToArray(), x => (RedisValue)x));
+            return raw.Select(r => JsonConvert.DeserializeObject<WorkflowInstance>(r, _serializerSettings));
         }
 
         public async Task<string> CreateEventSubscription(EventSubscription subscription)
