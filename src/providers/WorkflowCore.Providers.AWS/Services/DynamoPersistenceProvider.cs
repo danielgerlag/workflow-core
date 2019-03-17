@@ -151,19 +151,11 @@ namespace WorkflowCore.Providers.AWS.Services
             BatchGetItemResponse response;
             do
             {
-                // Making request
                 response = await _client.BatchGetItemAsync(request);
-
-                // Check the response
-                var responses = response.Responses; // Attribute list in the response.
-                foreach (var tableResponse in responses)
-                {
+                foreach (var tableResponse in response.Responses)
                     result.AddRange(tableResponse.Value);
-                }
 
-                // Any unprocessed keys? could happen if you exceed ProvisionedThroughput or some other error.
-                Dictionary<string, KeysAndAttributes> unprocessedKeys = response.UnprocessedKeys;
-                request.RequestItems = unprocessedKeys;
+                request.RequestItems = response.UnprocessedKeys;
             } while (response.UnprocessedKeys.Count > 0);
 
             return result.Select(i => i.ToWorkflowInstance());
