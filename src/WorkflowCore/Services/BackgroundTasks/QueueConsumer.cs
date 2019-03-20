@@ -11,7 +11,7 @@ namespace WorkflowCore.Services.BackgroundTasks
     internal abstract class QueueConsumer : IBackgroundTask
     {
         protected abstract QueueType Queue { get; }
-        protected virtual int MaxConcurrentItems => Math.Max(Environment.ProcessorCount, 2);
+        protected virtual int MaxConcurrentItems => Math.Max(Environment.ProcessorCount * Options.MaxConcurrentItemsMultiplier, 2);
 
         protected readonly IQueueProvider QueueProvider;
         protected readonly ILogger Logger;
