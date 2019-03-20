@@ -13,6 +13,7 @@ namespace WorkflowCore.Models
         internal TimeSpan PollInterval;
         internal TimeSpan IdleTime;
         internal TimeSpan ErrorRetryInterval;
+        internal int MaxConcurrentItemsMultiplier;
 
         public IServiceCollection Services { get; private set; }
 
@@ -21,7 +22,8 @@ namespace WorkflowCore.Models
             Services = services;
             PollInterval = TimeSpan.FromSeconds(10);
             IdleTime = TimeSpan.FromMilliseconds(100);
-            ErrorRetryInterval = TimeSpan.FromSeconds(60);            
+            ErrorRetryInterval = TimeSpan.FromSeconds(60);
+            MaxConcurrentItemsMultiplier = 1;
 
             QueueFactory = new Func<IServiceProvider, IQueueProvider>(sp => new SingleNodeQueueProvider());
             LockFactory = new Func<IServiceProvider, IDistributedLockProvider>(sp => new SingleNodeLockProvider());
@@ -51,6 +53,12 @@ namespace WorkflowCore.Models
         public void UseErrorRetryInterval(TimeSpan interval)
         {
             ErrorRetryInterval = interval;
+        }
+        
+        public void UseMaxConcurrentItemsMultiplier(int multiplier)
+        {
+            MaxConcurrentItemsMultiplier = multiplier > 0 && multiplier <= 10 ? multiplier 
+            : throw new ArgumentOutOfRangeException($"{nameof(multiplier)} must be a value from 1 through 10");
         }
     }
         
