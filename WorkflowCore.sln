@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2026
+VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{EF47161E-E399-451C-BDE8-E92AAD3BD761}"
 EndProject
@@ -91,6 +91,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReleaseNotes", "ReleaseNote
 		ReleaseNotes\1.3.3.md = ReleaseNotes\1.3.3.md
 		ReleaseNotes\1.4.0.md = ReleaseNotes\1.4.0.md
 		ReleaseNotes\1.6.0.md = ReleaseNotes\1.6.0.md
+		ReleaseNotes\1.6.6.md = ReleaseNotes\1.6.6.md
+		ReleaseNotes\1.6.8.md = ReleaseNotes\1.6.8.md
+		ReleaseNotes\1.6.9.md = ReleaseNotes\1.6.9.md
+		ReleaseNotes\1.7.0.md = ReleaseNotes\1.7.0.md
+		ReleaseNotes\1.8.0.md = ReleaseNotes\1.8.0.md
+		ReleaseNotes\1.8.1.md = ReleaseNotes\1.8.1.md
+		ReleaseNotes\1.9.0.md = ReleaseNotes\1.9.0.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample14", "src\samples\WorkflowCore.Sample14\WorkflowCore.Sample14.csproj", "{6BC66637-B42A-4334-ADFB-DBEC9F29D293}"
@@ -110,6 +117,22 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample17", "src\samples\WorkflowCore.Sample17\WorkflowCore.Sample17.csproj", "{42F475BC-95F4-42E1-8CCD-7B9C27487E33}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.QueueProviders.SqlServer", "src\providers\WorkflowCore.QueueProviders.SqlServer\WorkflowCore.QueueProviders.SqlServer.csproj", "{7EDD9353-F5C2-414C-AE51-4B0F1C5E105A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Providers.AWS", "src\providers\WorkflowCore.Providers.AWS\WorkflowCore.Providers.AWS.csproj", "{5E82A137-0954-46A1-8C46-13C00F0E4842}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Persistence.MySQL", "src\providers\WorkflowCore.Persistence.MySQL\WorkflowCore.Persistence.MySQL.csproj", "{453E260D-DBDC-4DDC-BC9C-CA500CED7897}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Tests.MySQL", "test\WorkflowCore.Tests.MySQL\WorkflowCore.Tests.MySQL.csproj", "{DF7F7ECA-1771-40C9-9CD0-AFEFC44E60DE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Tests.DynamoDB", "test\WorkflowCore.Tests.DynamoDB\WorkflowCore.Tests.DynamoDB.csproj", "{3ECEC028-7E2C-4983-B928-26C073B51BB7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Providers.Redis", "src\providers\WorkflowCore.Providers.Redis\WorkflowCore.Providers.Redis.csproj", "{435C6263-C6F8-4E93-B417-D861E9C22E18}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Providers.Elasticsearch", "src\providers\WorkflowCore.Providers.Elasticsearch\WorkflowCore.Providers.Elasticsearch.csproj", "{F6348170-B695-4D97-BAE6-4F0F643F3BEF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Tests.Elasticsearch", "test\WorkflowCore.Tests.Elasticsearch\WorkflowCore.Tests.Elasticsearch.csproj", "{44644716-0CE8-4837-B189-AB65AE2106AA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Tests.Redis", "test\WorkflowCore.Tests.Redis\WorkflowCore.Tests.Redis.csproj", "{78217204-B873-40B9-8875-E3925B2FBCEC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -281,6 +304,38 @@ Global
 		{7EDD9353-F5C2-414C-AE51-4B0F1C5E105A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7EDD9353-F5C2-414C-AE51-4B0F1C5E105A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7EDD9353-F5C2-414C-AE51-4B0F1C5E105A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E82A137-0954-46A1-8C46-13C00F0E4842}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E82A137-0954-46A1-8C46-13C00F0E4842}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E82A137-0954-46A1-8C46-13C00F0E4842}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E82A137-0954-46A1-8C46-13C00F0E4842}.Release|Any CPU.Build.0 = Release|Any CPU
+		{453E260D-DBDC-4DDC-BC9C-CA500CED7897}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{453E260D-DBDC-4DDC-BC9C-CA500CED7897}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{453E260D-DBDC-4DDC-BC9C-CA500CED7897}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{453E260D-DBDC-4DDC-BC9C-CA500CED7897}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF7F7ECA-1771-40C9-9CD0-AFEFC44E60DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF7F7ECA-1771-40C9-9CD0-AFEFC44E60DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF7F7ECA-1771-40C9-9CD0-AFEFC44E60DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF7F7ECA-1771-40C9-9CD0-AFEFC44E60DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3ECEC028-7E2C-4983-B928-26C073B51BB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3ECEC028-7E2C-4983-B928-26C073B51BB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3ECEC028-7E2C-4983-B928-26C073B51BB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3ECEC028-7E2C-4983-B928-26C073B51BB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{435C6263-C6F8-4E93-B417-D861E9C22E18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{435C6263-C6F8-4E93-B417-D861E9C22E18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{435C6263-C6F8-4E93-B417-D861E9C22E18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{435C6263-C6F8-4E93-B417-D861E9C22E18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6348170-B695-4D97-BAE6-4F0F643F3BEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6348170-B695-4D97-BAE6-4F0F643F3BEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6348170-B695-4D97-BAE6-4F0F643F3BEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6348170-B695-4D97-BAE6-4F0F643F3BEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44644716-0CE8-4837-B189-AB65AE2106AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44644716-0CE8-4837-B189-AB65AE2106AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44644716-0CE8-4837-B189-AB65AE2106AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44644716-0CE8-4837-B189-AB65AE2106AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78217204-B873-40B9-8875-E3925B2FBCEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78217204-B873-40B9-8875-E3925B2FBCEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78217204-B873-40B9-8875-E3925B2FBCEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78217204-B873-40B9-8875-E3925B2FBCEC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -330,6 +385,14 @@ Global
 		{6396453F-4D0E-4CD4-BC89-87E8970F2A80} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
 		{42F475BC-95F4-42E1-8CCD-7B9C27487E33} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
 		{7EDD9353-F5C2-414C-AE51-4B0F1C5E105A} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
+		{5E82A137-0954-46A1-8C46-13C00F0E4842} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
+		{453E260D-DBDC-4DDC-BC9C-CA500CED7897} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
+		{DF7F7ECA-1771-40C9-9CD0-AFEFC44E60DE} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
+		{3ECEC028-7E2C-4983-B928-26C073B51BB7} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
+		{435C6263-C6F8-4E93-B417-D861E9C22E18} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
+		{F6348170-B695-4D97-BAE6-4F0F643F3BEF} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
+		{44644716-0CE8-4837-B189-AB65AE2106AA} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
+		{78217204-B873-40B9-8875-E3925B2FBCEC} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DC0FA8D3-6449-4FDA-BB46-ECF58FAD23B4}

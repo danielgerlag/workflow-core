@@ -1,0 +1,18 @@
+version: '3.4'
+
+services:
+  webapisample:
+    image: ${DOCKER_REGISTRY-}webapisample
+    build:
+      context: .
+      dockerfile: WebApiSample/Dockerfile
+
+  elastic:
+    image: elasticsearch:6.5.4
+    expose:
+      - 9200    
+
+  mongo:
+    image: mongo:3.6
+    expose: 
+      - 27017

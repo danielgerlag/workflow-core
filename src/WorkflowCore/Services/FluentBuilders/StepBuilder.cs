@@ -26,6 +26,12 @@ namespace WorkflowCore.Services
             return this;
         }
 
+        public IStepBuilder<TData, TStepBody> Id(string id)
+        {
+            Step.ExternalId = id;
+            return this;
+        }
+
         public IStepBuilder<TData, TStep> Then<TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null)
             where TStep : IStepBody
         {
@@ -72,11 +78,23 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
+        public IStepBuilder<TData, TStepBody> Attach(string id)
+        {
+            Step.Outcomes.Add(new StepOutcome()
+            {
+                ExternalNextStepId = id
+            });
+
+            return this;
+        }
+
         public IStepOutcomeBuilder<TData> When(object outcomeValue, string label = null)
         {
-            StepOutcome result = new StepOutcome();
-            result.Value = x => outcomeValue;
-            result.Label = label;
+            StepOutcome result = new StepOutcome
+            {
+                Value = x => outcomeValue,
+                Label = label
+            };
             Step.Outcomes.Add(result);
             var outcomeBuilder = new StepOutcomeBuilder<TData>(WorkflowBuilder, result);
             return outcomeBuilder;
@@ -84,39 +102,38 @@ namespace WorkflowCore.Services
 
         public IStepBuilder<TData, TStepBody> Input<TInput>(Expression<Func<TStepBody, TInput>> stepProperty, Expression<Func<TData, TInput>> value)
         {
-            var mapping = new DataMapping();            
-            mapping.Source = value;
-            mapping.Target = stepProperty;
-            Step.Inputs.Add(mapping);
+            Step.Inputs.Add(new MemberMapParameter(value, stepProperty));
             return this;
         }
 
         public IStepBuilder<TData, TStepBody> Input<TInput>(Expression<Func<TStepBody, TInput>> stepProperty, Expression<Func<TData, IStepExecutionContext, TInput>> value)
         {
-            var mapping = new DataMapping();
-            mapping.Source = value;
-            mapping.Target = stepProperty;
-            Step.Inputs.Add(mapping);
+            Step.Inputs.Add(new MemberMapParameter(value, stepProperty));
+            return this;
+        }
+
+        public IStepBuilder<TData, TStepBody> Input(Action<TStepBody, TData> action)
+        {
+            Step.Inputs.Add(new ActionParameter<TStepBody, TData>(action));
             return this;
         }
 
         public IStepBuilder<TData, TStepBody> Output<TOutput>(Expression<Func<TData, TOutput>> dataProperty, Expression<Func<TStepBody, object>> value)
         {
-            var mapping = new DataMapping();
-            mapping.Source = value;
-            mapping.Target = dataProperty;
-            Step.Outputs.Add(mapping);
+            Step.Outputs.Add(new MemberMapParameter(value, dataProperty));
+            return this;
+        }
+
+        public IStepBuilder<TData, TStepBody> Output(Action<TStepBody, TData> action)
+        {
+            Step.Outputs.Add(new ActionParameter<TStepBody, TData>(action));
             return this;
         }
 
         public IStepBuilder<TData, WaitFor> WaitFor(string eventName, Expression<Func<TData, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null, Expression<Func<TData, bool>> cancelCondition = null)
         {
-            WorkflowStep<WaitFor> newStep;
-
-            if (cancelCondition != null)
-                newStep = new CancellableStep<WaitFor, TData>(cancelCondition);
-            else
-                newStep = new WorkflowStep<WaitFor>();
+            var newStep = new WorkflowStep<WaitFor>();
+            newStep.CancelCondition = cancelCondition;
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, WaitFor>(WorkflowBuilder, newStep);
@@ -134,12 +151,8 @@ namespace WorkflowCore.Services
 
         public IStepBuilder<TData, WaitFor> WaitFor(string eventName, Expression<Func<TData, IStepExecutionContext, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null, Expression<Func<TData, bool>> cancelCondition = null)
         {
-            WorkflowStep<WaitFor> newStep;
-
-            if (cancelCondition != null)
-                newStep = new CancellableStep<WaitFor, TData>(cancelCondition);
-            else
-                newStep = new WorkflowStep<WaitFor>();
+            var newStep = new WorkflowStep<WaitFor>();
+            newStep.CancelCondition = cancelCondition;
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, WaitFor>(WorkflowBuilder, newStep);
@@ -216,14 +229,7 @@ namespace WorkflowCore.Services
             var newStep = new WorkflowStep<Delay>();
 
             Expression<Func<Delay, TimeSpan>> inputExpr = (x => x.Period);
-
-            var mapping = new DataMapping()
-            {
-                Source = period,
-                Target = inputExpr
-            };
-
-            newStep.Inputs.Add(mapping);
+            newStep.Inputs.Add(new MemberMapParameter(period, inputExpr));
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, Delay>(WorkflowBuilder, newStep);
@@ -237,13 +243,7 @@ namespace WorkflowCore.Services
             var newStep = new WorkflowStep<Foreach>();
             
             Expression<Func<Foreach, IEnumerable>> inputExpr = (x => x.Collection);
-
-            var mapping = new DataMapping()
-            {
-                Source = collection,
-                Target = inputExpr
-            };
-            newStep.Inputs.Add(mapping);            
+            newStep.Inputs.Add(new MemberMapParameter(collection, inputExpr));            
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, Foreach>(WorkflowBuilder, newStep);                        
@@ -258,13 +258,7 @@ namespace WorkflowCore.Services
             var newStep = new WorkflowStep<While>();
 
             Expression<Func<While, bool>> inputExpr = (x => x.Condition);
-
-            var mapping = new DataMapping()
-            {
-                Source = condition,
-                Target = inputExpr
-            };
-            newStep.Inputs.Add(mapping);
+            newStep.Inputs.Add(new MemberMapParameter(condition, inputExpr));
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, While>(WorkflowBuilder, newStep);
@@ -279,14 +273,7 @@ namespace WorkflowCore.Services
             var newStep = new WorkflowStep<If>();
 
             Expression<Func<If, bool>> inputExpr = (x => x.Condition);
-
-            var mapping = new DataMapping()
-            {
-                Source = condition,
-                Target = inputExpr
-            };
-
-            newStep.Inputs.Add(mapping);
+            newStep.Inputs.Add(new MemberMapParameter(condition, inputExpr));
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, If>(WorkflowBuilder, newStep);
@@ -300,13 +287,7 @@ namespace WorkflowCore.Services
         {
             var newStep = new WorkflowStep<When>();
             Expression<Func<When, object>> inputExpr = (x => x.ExpectedOutcome);
-            var mapping = new DataMapping()
-            {
-                Source = outcomeValue,
-                Target = inputExpr
-            };
-
-            newStep.Inputs.Add(mapping);
+            newStep.Inputs.Add(new MemberMapParameter(outcomeValue, inputExpr));
 
             IStepBuilder<TData, OutcomeSwitch> switchBuilder;
 
@@ -361,14 +342,7 @@ namespace WorkflowCore.Services
         {
             var newStep = new WorkflowStep<Schedule>();
             Expression<Func<Schedule, TimeSpan>> inputExpr = (x => x.Interval);
-
-            var mapping = new DataMapping()
-            {
-                Source = time,
-                Target = inputExpr
-            };
-
-            newStep.Inputs.Add(mapping);
+            newStep.Inputs.Add(new MemberMapParameter(time, inputExpr));
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new ReturnStepBuilder<TData, Schedule, TStepBody>(WorkflowBuilder, newStep, this);
@@ -379,11 +353,13 @@ namespace WorkflowCore.Services
 
         public IContainerStepBuilder<TData, Recur, TStepBody> Recur(Expression<Func<TData, TimeSpan>> interval, Expression<Func<TData, bool>> until)
         {
-            var newStep = new CancellableStep<Recur, TData>(until);
+            var newStep = new WorkflowStep<Recur>();
+            newStep.CancelCondition = until;
+
             Expression<Func<Recur, TimeSpan>> intervalExpr = (x => x.Interval);
             Expression<Func<Recur, bool>> untilExpr = (x => x.StopCondition);
-            newStep.Inputs.Add(new DataMapping() { Source = interval, Target = intervalExpr });
-            newStep.Inputs.Add(new DataMapping() { Source = until, Target = untilExpr });
+            newStep.Inputs.Add(new MemberMapParameter(interval, intervalExpr));
+            newStep.Inputs.Add(new MemberMapParameter(until, untilExpr));
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new ReturnStepBuilder<TData, Recur, TStepBody>(WorkflowBuilder, newStep, this);
@@ -446,6 +422,13 @@ namespace WorkflowCore.Services
             builder.Invoke(WorkflowBuilder);
             stepBuilder.Step.Children.Add(stepBuilder.Step.Id + 1); //TODO: make more elegant
 
+            return this;
+        }
+
+        public IStepBuilder<TData, TStepBody> CancelCondition(Expression<Func<TData, bool>> cancelCondition, bool proceedAfterCancel = false)
+        {
+            Step.CancelCondition = cancelCondition;
+            Step.ProceedOnCancel = proceedAfterCancel;
             return this;
         }
     }

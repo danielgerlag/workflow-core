@@ -19,6 +19,7 @@ namespace WorkflowCore.Sample03
             //start the workflow host
             var host = serviceProvider.GetService<IWorkflowHost>();
             host.RegisterWorkflow<PassingDataWorkflow, MyDataClass>();
+            host.RegisterWorkflow<PassingDataWorkflow2, Dictionary<string, int>>();
             host.Start();
 
             var initialData = new MyDataClass
@@ -27,7 +28,16 @@ namespace WorkflowCore.Sample03
                 Value2 = 3
             };
 
-            host.StartWorkflow("PassingDataWorkflow", 1, initialData);
+            //host.StartWorkflow("PassingDataWorkflow", 1, initialData);
+
+
+            var initialData2 = new Dictionary<string, int>
+            {
+                ["Value1"] = 7,
+                ["Value2"] = 2
+            };
+
+            host.StartWorkflow("PassingDataWorkflow2", 1, initialData2);
 
             Console.ReadLine();
             host.Stop();

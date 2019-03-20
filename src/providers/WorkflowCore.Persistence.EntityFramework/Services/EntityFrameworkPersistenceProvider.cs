@@ -26,7 +26,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             _canCreateDB = canCreateDB;
             _canMigrateDB = canMigrateDB;
         }
-        
+
         public async Task<string> CreateEventSubscription(EventSubscription subscription)
         {
             using (var db = ConstructDbContext())
@@ -96,7 +96,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 return result;
             }
         }
-        
+
         public async Task<WorkflowInstance> GetWorkflowInstance(string Id)
         {
             using (var db = ConstructDbContext())
@@ -112,6 +112,26 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     return null;
 
                 return raw.ToWorkflowInstance();
+            }
+        }
+
+        public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids)
+        {
+            if (ids == null)
+            {
+                return new List<WorkflowInstance>();
+            }
+
+            using (var db = ConstructDbContext())
+            {
+                var uids = ids.Select(i => new Guid(i));
+                var raw = db.Set<PersistedWorkflow>()
+                    .Include(wf => wf.ExecutionPointers)
+                    .ThenInclude(ep => ep.ExtensionAttributes)
+                    .Include(wf => wf.ExecutionPointers)
+                    .Where(x => uids.Contains(x.InstanceId));
+
+                return (await raw.ToListAsync()).Select(i => i.ToWorkflowInstance());
             }
         }
 
@@ -143,7 +163,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 await db.SaveChangesAsync();
             }
         }
-                
+
         public virtual void EnsureStoreExists()
         {
             using (var context = ConstructDbContext())
@@ -283,7 +303,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 }
             }
         }
-        
+
         private WorkflowDbContext ConstructDbContext()
         {
             return _contextFactory.Build();

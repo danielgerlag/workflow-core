@@ -20,7 +20,7 @@ public class MyWorkflow : IWorkflow
         builder
            .StartWith<Task1>()
            .Then<Task2>()
-           .Then<Task3>;
+           .Then<Task3>();
     }
 }
 ```
@@ -66,7 +66,7 @@ public class MyWorkflow : IWorkflow
             .StartWith<CreateUser>()
                 .Input(step => step.Email, data => data.Email)
                 .Input(step => step.Password, data => data.Password)
-                .Output(data => data.UserId, step => step.UserId);
+                .Output(data => data.UserId, step => step.UserId)
            .Then<SendConfirmationEmail>()
                .WaitFor("confirmation", data => data.UserId)
            .Then<UpdateUser>()
@@ -114,15 +114,22 @@ There are several persistence providers available as separate Nuget packages.
 
 * MemoryPersistenceProvider *(Default provider, for demo and testing purposes)*
 * [MongoDB](src/providers/WorkflowCore.Persistence.MongoDB)
+* [Amazon DynamoDB](src/providers/WorkflowCore.Providers.AWS)
 * [SQL Server](src/providers/WorkflowCore.Persistence.SqlServer)
 * [PostgreSQL](src/providers/WorkflowCore.Persistence.PostgreSQL)
 * [Sqlite](src/providers/WorkflowCore.Persistence.Sqlite)
-* Redis *(coming soon...)*
+* [MySQL](src/providers/WorkflowCore.Persistence.MySQL)
+* [Redis](src/providers/WorkflowCore.Providers.Redis)
+
+## Search
+
+A search index provider can be plugged in to Workflow Core, enabling you to index your workflows and search against the data and state of them.
+These are also available as separate Nuget packages.
+* [Elasticsearch](src/providers/WorkflowCore.Providers.Elasticsearch)
 
 ## Extensions
 
 * [User (human) workflows](src/extensions/WorkflowCore.Users)
-* [HTTP wrapper for Workflow Host Service](src/extensions/WorkflowCore.WebAPI)
 
 
 ## Samples
@@ -155,7 +162,7 @@ There are several persistence providers available as separate Nuget packages.
 
 * [Looping](src/samples/WorkflowCore.Sample02)
 
-* [Exposing a REST API](src/samples/WorkflowCore.Sample07)
+* [Exposing a REST API](src/samples/WebApiSample)
 
 * [Human(User) Workflow](src/samples/WorkflowCore.Sample08)
 
@@ -166,13 +173,14 @@ There are several persistence providers available as separate Nuget packages.
 
 * **Daniel Gerlag** - *Initial work*
 * **Jackie Ja**
-* **Aaron Scribnor**
+* **Aaron Scribner**
 * **Roberto Paterlini**
 
 ## Ports
 
 * [JWorkflow (Java)](https://github.com/danielgerlag/jworkflow)
 * [workflow-es (Node.js)](https://github.com/danielgerlag/workflow-es)
+* [liteflow (Python)](https://github.com/danielgerlag/liteflow)
 * [workflow_rb (Ruby)](https://github.com/danielgerlag/workflow_rb)
 
 ## License

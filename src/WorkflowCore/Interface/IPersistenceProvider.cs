@@ -7,7 +7,7 @@ namespace WorkflowCore.Interface
 {
     /// <remarks>
     /// The implemention of this interface will be responsible for
-    /// persisiting running workflow instances to a durable store    
+    /// persisting running workflow instances to a durable store
     /// </remarks>
     public interface IPersistenceProvider
     {
@@ -17,9 +17,12 @@ namespace WorkflowCore.Interface
 
         Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt);
 
+        [Obsolete]
         Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take);
 
         Task<WorkflowInstance> GetWorkflowInstance(string Id);
+
+        Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids);
 
         Task<string> CreateEventSubscription(EventSubscription subscription);
 

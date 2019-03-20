@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
@@ -12,47 +13,42 @@ namespace WorkflowCore.Services
     /// </summary>
     public class SingleNodeQueueProvider : IQueueProvider
     {
-                
-        private readonly BlockingCollection<string> _runQueue = new BlockingCollection<string>();
-        private readonly BlockingCollection<string> _eventQueue = new BlockingCollection<string>();
+        
+        private readonly Dictionary<QueueType, BlockingCollection<string>> _queues = new Dictionary<QueueType, BlockingCollection<string>>()
+        {
+            [QueueType.Workflow] = new BlockingCollection<string>(),
+            [QueueType.Event] = new BlockingCollection<string>(),
+            [QueueType.Index] = new BlockingCollection<string>()
+        };
 
         public bool IsDequeueBlocking => true;
 
-        public async Task QueueWork(string id, QueueType queue)
+        public Task QueueWork(string id, QueueType queue)
         {
-            SelectQueue(queue).Add(id);
+            _queues[queue].Add(id);
+            return Task.CompletedTask;
         }
 
-        public async Task<string> DequeueWork(QueueType queue, CancellationToken cancellationToken)
-        {
-            if (SelectQueue(queue).TryTake(out string id, 100, cancellationToken))
-                return id;
+        public Task<string> DequeueWork(QueueType queue, CancellationToken cancellationToken)
+        {            
+            if (_queues[queue].TryTake(out string id, 100, cancellationToken))
+                return Task.FromResult(id);
 
-            return null;
+            return Task.FromResult<string>(null);
         }
 
-        public async Task Start()
+        public Task Start()
         {
+            return Task.CompletedTask;
         }
 
-        public async Task Stop()
+        public Task Stop()
         {
+            return Task.CompletedTask;
         }
 
         public void Dispose()
         {            
-        }
-
-        private BlockingCollection<string> SelectQueue(QueueType queue)
-        {
-            switch (queue)
-            {
-                case QueueType.Workflow:
-                    return _runQueue;                    
-                case QueueType.Event:
-                    return _eventQueue;
-            }
-            return null;
         }
         
     }

@@ -18,56 +18,9 @@
     {
       "Id": "Print",
       "StepType": "ScratchPad.PrintMessage, ScratchPad",
-      "NextStepId": "saga",
-      "Inputs": { "Message": "data.Value3 + \" - \" + DateTime.Now.ToString()" }
-    },
-
-    {
-      "Id": "saga",
-      "StepType": "WorkflowCore.Primitives.Sequence, WorkflowCore",
       "NextStepId": "Bye",
-      "Saga": true,
-      "Do": [
-        [
-          {
-            "Id": "do1",
-            "StepType": "ScratchPad.PrintMessage, ScratchPad",
-            "NextStepId": "do2",
-            "Inputs": { "Message": "\"inner 1\"" },
-            "CompensateWith": [
-              {
-                "Id": "comp0",
-                "StepType": "ScratchPad.PrintMessage, ScratchPad",
-                "Inputs": { "Message": "\"undoing do1\"" }
-              }
-            ]
-          },
-          {
-            "Id": "do2",
-            "StepType": "ScratchPad.Throw, ScratchPad",
-            "NextStepId": "do3",
-            "CompensateWith": [
-              {
-                "Id": "comp1",
-                "NextStepId": "comp2",
-                "StepType": "ScratchPad.PrintMessage, ScratchPad",
-                "Inputs": { "Message": "\"undoing do2\"" }
-              },
-              {
-                "Id": "comp2",
-                "StepType": "ScratchPad.PrintMessage, ScratchPad",
-                "Inputs": { "Message": "\"still undoing do2\"" }
-              }
-            ]
-          },
-          {
-            "Id": "do3",
-            "StepType": "ScratchPad.PrintMessage, ScratchPad",
-            "Inputs": { "Message": "\"inner 3\"" }
-          }
-        ]
-      ]
-    },
+      "Inputs": { "Message": "data.Value3 + \" - \" + DateTime.Now.ToString()" }
+    },    
     
     {
       "Id": "Bye",

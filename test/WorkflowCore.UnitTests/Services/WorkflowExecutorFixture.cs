@@ -22,7 +22,10 @@ namespace WorkflowCore.UnitTests.Services
         protected IPersistenceProvider PersistenceProvider;
         protected IWorkflowRegistry Registry;
         protected IExecutionResultProcessor ResultProcesser;
+        protected ILifeCycleEventPublisher EventHub;
+        protected ICancellationProcessor CancellationProcessor;
         protected IServiceProvider ServiceProvider;
+        protected IScopeProvider ScopeProvider;
         protected IDateTimeProvider DateTimeProvider;
         protected WorkflowOptions Options;
 
@@ -31,11 +34,18 @@ namespace WorkflowCore.UnitTests.Services
             Host = A.Fake<IWorkflowHost>();
             PersistenceProvider = A.Fake<IPersistenceProvider>();
             ServiceProvider = A.Fake<IServiceProvider>();
+            ScopeProvider = A.Fake<IScopeProvider>();
             Registry = A.Fake<IWorkflowRegistry>();
             ResultProcesser = A.Fake<IExecutionResultProcessor>();
+            EventHub = A.Fake<ILifeCycleEventPublisher>();
+            CancellationProcessor = A.Fake<ICancellationProcessor>();
             DateTimeProvider = A.Fake<IDateTimeProvider>();
 
             Options = new WorkflowOptions(A.Fake<IServiceCollection>());
+
+            var scope = A.Fake<IServiceScope>();
+            A.CallTo(() => ScopeProvider.CreateScope()).Returns(scope);
+            A.CallTo(() => scope.ServiceProvider).Returns(ServiceProvider);
 
             A.CallTo(() => DateTimeProvider.Now).Returns(DateTime.Now);
 
@@ -43,7 +53,7 @@ namespace WorkflowCore.UnitTests.Services
             var loggerFactory = new LoggerFactory();
             loggerFactory.AddConsole(LogLevel.Debug);            
 
-            Subject = new WorkflowExecutor(Registry, ServiceProvider, DateTimeProvider, ResultProcesser, Options, loggerFactory);
+            Subject = new WorkflowExecutor(Registry, ServiceProvider, ScopeProvider, DateTimeProvider, ResultProcesser, EventHub, CancellationProcessor, Options, loggerFactory);
         }
 
         [Fact(DisplayName = "Should execute active step")]
@@ -62,10 +72,10 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                })
             };            
 
             //act
@@ -92,10 +102,10 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                })
             };
 
             //act
@@ -123,10 +133,10 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = false, StepId = 0 }
-                }
+                    new ExecutionPointer() { Id = "1", Active = false, StepId = 0 }
+                })
             };
             
             //act
@@ -140,20 +150,15 @@ namespace WorkflowCore.UnitTests.Services
         public void should_map_inputs()
         {
             //arrange
-            Expression<Func<IStepWithProperties, int>> p1 = x => x.Property1;
-            Expression<Func<DataClass, IStepExecutionContext, int>> v1 = (x, context) => x.Value1;
+            var param = A.Fake<IStepParameter>();
 
             var step1Body = A.Fake<IStepWithProperties>();            
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
-            WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>()
+            WorkflowStep step1 = BuildFakeStep(step1Body, new List<IStepParameter>()
                 {
-                    new DataMapping()
-                    {
-                        Source = v1,
-                        Target = p1
-                    }
+                    param
                 }
-            , new List<DataMapping>());
+            , new List<IStepParameter>());
 
             Given1StepWorkflow(step1, "Workflow", 1);
 
@@ -165,36 +170,32 @@ namespace WorkflowCore.UnitTests.Services
                 NextExecution = 0,
                 Id = "001",
                 Data = new DataClass() { Value1 = 5 },
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                })
             };
 
             //act
             Subject.Execute(instance);
 
             //assert
-            step1Body.Property1.Should().Be(5);
+            A.CallTo(() => param.AssignInput(A<object>.Ignored, step1Body, A<IStepExecutionContext>.Ignored))
+                .MustHaveHappened();
         }
 
         [Fact(DisplayName = "Should map outputs")]
         public void should_map_outputs()
         {
-            //arrange
-            Expression<Func<IStepWithProperties, int>> p1 = x => x.Property1;
-            Expression<Func<DataClass, IStepExecutionContext, int>> v1 = (x, context) => x.Value1;
+            //arrange            
+            var param = A.Fake<IStepParameter>();
 
             var step1Body = A.Fake<IStepWithProperties>();
             A.CallTo(() => step1Body.Property1).Returns(7);
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
-            WorkflowStep step1 = BuildFakeStep(step1Body, new List<DataMapping>(), new List<DataMapping>()
+            WorkflowStep step1 = BuildFakeStep(step1Body, new List<IStepParameter>(), new List<IStepParameter>()
                 {
-                    new DataMapping()
-                    {
-                        Source = p1,
-                        Target = v1
-                    }
+                    param
                 }
             );
 
@@ -210,18 +211,21 @@ namespace WorkflowCore.UnitTests.Services
                 NextExecution = 0,
                 Id = "001",
                 Data = data,
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                })
             };
             
             //act
             Subject.Execute(instance);
 
             //assert
-            data.Value1.Should().Be(7);
+            A.CallTo(() => param.AssignOutput(data, step1Body, A<IStepExecutionContext>.Ignored))
+                .MustHaveHappened();
         }
+
+        
 
         [Fact(DisplayName = "Should handle step exception")]
         public void should_handle_step_exception()
@@ -239,10 +243,10 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                })
             };
 
             //act
@@ -250,7 +254,7 @@ namespace WorkflowCore.UnitTests.Services
 
             //assert
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).MustHaveHappened();
-            A.CallTo(() => ResultProcesser.HandleStepException(instance, A<WorkflowDefinition>.Ignored, A<ExecutionPointer>.Ignored, step1)).MustHaveHappened();
+            A.CallTo(() => ResultProcesser.HandleStepException(instance, A<WorkflowDefinition>.Ignored, A<ExecutionPointer>.Ignored, step1, A<Exception>.Ignored)).MustHaveHappened();
             A.CallTo(() => ResultProcesser.ProcessExecutionResult(instance, A<WorkflowDefinition>.Ignored, A<ExecutionPointer>.Ignored, step1, A<ExecutionResult>.Ignored, A<WorkflowExecutorResult>.Ignored)).MustNotHaveHappened();            
         }
 
@@ -270,10 +274,10 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Active = true, StepId = 0 }
-                }
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                })
             };
 
             //act
@@ -281,6 +285,35 @@ namespace WorkflowCore.UnitTests.Services
 
             //assert
             A.CallTo(() => step1.AfterWorkflowIteration(A<WorkflowExecutorResult>.Ignored, A<WorkflowDefinition>.Ignored, instance, A<ExecutionPointer>.Ignored)).MustHaveHappened();
+        }
+
+        [Fact(DisplayName = "Should process cancellations")]
+        public void should_process_cancellations()
+        {
+            //arrange            
+            var step1Body = A.Fake<IStepBody>();
+            A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Persist(null));
+            WorkflowStep step1 = BuildFakeStep(step1Body);
+            Given1StepWorkflow(step1, "Workflow", 1);
+
+            var instance = new WorkflowInstance
+            {
+                WorkflowDefinitionId = "Workflow",
+                Version = 1,
+                Status = WorkflowStatus.Runnable,
+                NextExecution = 0,
+                Id = "001",
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
+                {
+                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                })
+            };
+
+            //act
+            Subject.Execute(instance);
+
+            //assert
+            A.CallTo(() => CancellationProcessor.ProcessCancellations(instance, A<WorkflowDefinition>.Ignored, A<WorkflowExecutorResult>.Ignored)).MustHaveHappened();
         }
 
 
@@ -291,7 +324,7 @@ namespace WorkflowCore.UnitTests.Services
                 Id = id,
                 Version = version,
                 DataType = typeof(object),
-                Steps = new List<WorkflowStep>()
+                Steps = new WorkflowStepCollection()
                 {
                     step1
                 }
@@ -301,10 +334,10 @@ namespace WorkflowCore.UnitTests.Services
 
         private WorkflowStep BuildFakeStep(IStepBody stepBody)
         {
-            return BuildFakeStep(stepBody, new List<DataMapping>(), new List<DataMapping>());
+            return BuildFakeStep(stepBody, new List<IStepParameter>(), new List<IStepParameter>());
         }
 
-        private WorkflowStep BuildFakeStep(IStepBody stepBody, List<DataMapping> inputs, List<DataMapping> outputs)
+        private WorkflowStep BuildFakeStep(IStepBody stepBody, List<IStepParameter> inputs, List<IStepParameter> outputs)
         {
             var result = A.Fake<WorkflowStep>();
             A.CallTo(() => result.Id).Returns(0);
@@ -324,7 +357,8 @@ namespace WorkflowCore.UnitTests.Services
         {
             int Property1 { get; set; }
             int Property2 { get; set; }
-            int Property3 { get; set; }            
+            int Property3 { get; set; }
+            DataClass Property4 { get; set; }
         }
 
         public class DataClass
@@ -332,6 +366,18 @@ namespace WorkflowCore.UnitTests.Services
             public int Value1 { get; set; }
             public int Value2 { get; set; }
             public int Value3 { get; set; }
+            public object Value4 { get; set; }
+        }
+
+        public class DynamicDataClass
+        {
+            public Dictionary<string, int> Storage { get; set; } = new Dictionary<string, int>();
+
+            public int this[string propertyName]
+            {
+                get => Storage[propertyName];
+                set => Storage[propertyName] = value;
+            }
         }
     }
 }

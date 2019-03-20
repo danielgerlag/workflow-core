@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
+using WorkflowCore.Models.LifeCycleEvents;
 
 namespace WorkflowCore.Services
 {
@@ -12,12 +13,16 @@ namespace WorkflowCore.Services
         private readonly IExecutionPointerFactory _pointerFactory;
         private readonly IDateTimeProvider _datetimeProvider;
         private readonly ILogger _logger;
+        private readonly ILifeCycleEventPublisher _eventPublisher;
+        private readonly IEnumerable<IWorkflowErrorHandler> _errorHandlers;
         private readonly WorkflowOptions _options;
 
-        public ExecutionResultProcessor(IExecutionPointerFactory pointerFactory, IDateTimeProvider datetimeProvider, WorkflowOptions options, ILoggerFactory loggerFactory)
+        public ExecutionResultProcessor(IExecutionPointerFactory pointerFactory, IDateTimeProvider datetimeProvider, ILifeCycleEventPublisher eventPublisher, IEnumerable<IWorkflowErrorHandler> errorHandlers, WorkflowOptions options, ILoggerFactory loggerFactory)
         {
             _pointerFactory = pointerFactory;
             _datetimeProvider = datetimeProvider;
+            _eventPublisher = eventPublisher;
+            _errorHandlers = errorHandlers;
             _options = options;
             _logger = loggerFactory.CreateLogger<ExecutionResultProcessor>();
         }
@@ -59,6 +64,17 @@ namespace WorkflowCore.Services
                 {                    
                     workflow.ExecutionPointers.Add(_pointerFactory.BuildNextPointer(def, pointer, outcomeTarget));
                 }
+
+                _eventPublisher.PublishNotification(new StepCompleted()
+                {
+                    EventTimeUtc = _datetimeProvider.Now,
+                    Reference = workflow.Reference,
+                    ExecutionPointerId = pointer.Id,
+                    StepId = step.Id,
+                    WorkflowInstanceId = workflow.Id,
+                    WorkflowDefinitionId = workflow.WorkflowDefinitionId,
+                    Version = workflow.Version
+                });
             }
             else
             {
@@ -72,101 +88,38 @@ namespace WorkflowCore.Services
             }
         }
 
-        public void HandleStepException(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step)
-        {            
-            pointer.Status = PointerStatus.Failed;            
-            var compensatingStepId = FindScopeCompensationStepId(workflow, def, pointer);
-            var errorOption = (step.ErrorBehavior ?? (compensatingStepId.HasValue ? WorkflowErrorHandling.Compensate : def.DefaultErrorBehavior));
-            SelectErrorStrategy(errorOption, workflow, def, pointer, step);
-        }
-
-        private void SelectErrorStrategy(WorkflowErrorHandling errorOption, WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step)
+        public void HandleStepException(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, Exception exception)
         {
-            switch (errorOption)
+            _eventPublisher.PublishNotification(new WorkflowError()
             {
-                case WorkflowErrorHandling.Retry:
-                    pointer.RetryCount++;
-                    pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(step.RetryInterval ?? def.DefaultErrorRetryInterval ?? _options.ErrorRetryInterval);
-                    step.PrimeForRetry(pointer);
-                    break;
-                case WorkflowErrorHandling.Suspend:
-                    workflow.Status = WorkflowStatus.Suspended;
-                    break;
-                case WorkflowErrorHandling.Terminate:
-                    workflow.Status = WorkflowStatus.Terminated;
-                    break;
-                case WorkflowErrorHandling.Compensate:
-                    Compensate(workflow, def, pointer);
-                    break;
+                EventTimeUtc = _datetimeProvider.Now,
+                Reference = workflow.Reference,
+                WorkflowInstanceId = workflow.Id,
+                WorkflowDefinitionId = workflow.WorkflowDefinitionId,
+                Version = workflow.Version,
+                ExecutionPointerId = pointer.Id,
+                StepId = step.Id,
+                Message = exception.Message
+            });
+            pointer.Status = PointerStatus.Failed;
+            
+            var queue = new Queue<ExecutionPointer>();
+            queue.Enqueue(pointer);
+
+            while (queue.Count > 0)
+            {
+                var exceptionPointer = queue.Dequeue();
+                var exceptionStep = def.Steps.FindById(exceptionPointer.StepId);
+                var compensatingStepId = FindScopeCompensationStepId(workflow, def, exceptionPointer);
+                var errorOption = (exceptionStep.ErrorBehavior ?? (compensatingStepId.HasValue ? WorkflowErrorHandling.Compensate : def.DefaultErrorBehavior));
+
+                foreach (var handler in _errorHandlers.Where(x => x.Type == errorOption))
+                {
+                    handler.Handle(workflow, def, exceptionPointer, exceptionStep, exception, queue);
+                }
             }
         }
         
-        private void Compensate(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer exceptionPointer)
-        {            
-            var scope = new Stack<string>(exceptionPointer.Scope);
-            scope.Push(exceptionPointer.Id);
-
-            exceptionPointer.Active = false;
-            exceptionPointer.EndTime = _datetimeProvider.Now.ToUniversalTime();
-            exceptionPointer.Status = PointerStatus.Failed;
-
-            while (scope.Any())
-            {
-                var pointerId = scope.Pop();
-                var pointer = workflow.ExecutionPointers.First(x => x.Id == pointerId);
-                var step = def.Steps.First(x => x.Id == pointer.StepId);
-
-                var resume = true;
-                var revert = false;
-
-                if (scope.Any())
-                {
-                    var parentId = scope.Peek();
-                    var parentPointer = workflow.ExecutionPointers.First(x => x.Id == parentId);
-                    var parentStep = def.Steps.First(x => x.Id == parentPointer.StepId);
-                    resume = parentStep.ResumeChildrenAfterCompensation;
-                    revert = parentStep.RevertChildrenAfterCompensation;
-                }
-
-                if ((step.ErrorBehavior ?? WorkflowErrorHandling.Compensate) != WorkflowErrorHandling.Compensate)
-                {
-                    SelectErrorStrategy(step.ErrorBehavior ?? WorkflowErrorHandling.Retry, workflow, def, pointer, step);
-                    continue;
-                }
-
-                if (step.CompensationStepId.HasValue)
-                {
-                    pointer.Active = false;
-                    pointer.EndTime = _datetimeProvider.Now.ToUniversalTime();
-                    pointer.Status = PointerStatus.Compensated;
-
-                    var compensationPointer = _pointerFactory.BuildCompensationPointer(def, pointer, exceptionPointer, step.CompensationStepId.Value);
-                    workflow.ExecutionPointers.Add(compensationPointer);
-                    
-                    if (resume)
-                    {
-                        foreach (var outcomeTarget in step.Outcomes.Where(x => x.GetValue(workflow.Data) == null))
-                            workflow.ExecutionPointers.Add(_pointerFactory.BuildNextPointer(def, pointer, outcomeTarget));
-                    }
-                }
-
-                if (revert)
-                {
-                    var prevSiblings = workflow.ExecutionPointers.Where(x => pointer.Scope.SequenceEqual(x.Scope) && x.Id != pointer.Id && x.Status == PointerStatus.Complete).ToList();
-                    foreach (var siblingPointer in prevSiblings)
-                    {
-                        var siblingStep = def.Steps.First(x => x.Id == siblingPointer.StepId);
-                        if (siblingStep.CompensationStepId.HasValue)
-                        {
-                            var compensationPointer = _pointerFactory.BuildCompensationPointer(def, siblingPointer, exceptionPointer, siblingStep.CompensationStepId.Value);
-                            workflow.ExecutionPointers.Add(compensationPointer);
-                            siblingPointer.Status = PointerStatus.Compensated;
-                        }
-                    }
-                }
-            }
-        }
-
         private int? FindScopeCompensationStepId(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer currentPointer)
         {
             var scope = new Stack<string>(currentPointer.Scope);
@@ -175,8 +128,8 @@ namespace WorkflowCore.Services
             while (scope.Count > 0)
             {
                 var pointerId = scope.Pop();
-                var pointer = workflow.ExecutionPointers.First(x => x.Id == pointerId);
-                var step = def.Steps.First(x => x.Id == pointer.StepId);
+                var pointer = workflow.ExecutionPointers.FindById(pointerId);
+                var step = def.Steps.FindById(pointer.StepId);
                 if (step.CompensationStepId.HasValue)
                     return step.CompensationStepId.Value;
             }

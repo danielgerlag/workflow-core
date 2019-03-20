@@ -53,9 +53,9 @@ namespace WorkflowCore.Services.DefinitionStorage
         }
 
 
-        private List<WorkflowStep> ConvertSteps(ICollection<StepSourceV1> source, Type dataType)
+        private WorkflowStepCollection ConvertSteps(ICollection<StepSourceV1> source, Type dataType)
         {
-            var result = new List<WorkflowStep>();
+            var result = new WorkflowStepCollection();
             int i = 0;
             var stack = new Stack<StepSourceV1>(source.Reverse<StepSourceV1>());
             var parents = new List<StepSourceV1>();
@@ -69,26 +69,25 @@ namespace WorkflowCore.Services.DefinitionStorage
                 var containerType = typeof(WorkflowStep<>).MakeGenericType(stepType);
                 var targetStep = (containerType.GetConstructor(new Type[] { }).Invoke(null) as WorkflowStep);
 
-                if (!string.IsNullOrEmpty(nextStep.CancelCondition))
-                {
-                    containerType = typeof(CancellableStep<,>).MakeGenericType(stepType, dataType);
-                    var cancelExprType = typeof(Expression<>).MakeGenericType(typeof(Func<,>).MakeGenericType(dataType, typeof(bool)));
-                    var dataParameter = Expression.Parameter(dataType, "data");
-                    var cancelExpr = DynamicExpressionParser.ParseLambda(new[] { dataParameter }, typeof(bool), nextStep.CancelCondition);
-                    targetStep = (containerType.GetConstructor(new Type[] { cancelExprType }).Invoke(new[] { cancelExpr }) as WorkflowStep);
-                }
-
-                if (nextStep.Saga)  //TODO: cancellable saga???
+                if (nextStep.Saga)
                 {
                     containerType = typeof(SagaContainer<>).MakeGenericType(stepType);
                     targetStep = (containerType.GetConstructor(new Type[] { }).Invoke(null) as WorkflowStep);
+                }
+
+                if (!string.IsNullOrEmpty(nextStep.CancelCondition))
+                {
+                    var cancelExprType = typeof(Expression<>).MakeGenericType(typeof(Func<,>).MakeGenericType(dataType, typeof(bool)));
+                    var dataParameter = Expression.Parameter(dataType, "data");
+                    var cancelExpr = DynamicExpressionParser.ParseLambda(new[] { dataParameter }, typeof(bool), nextStep.CancelCondition);
+                    targetStep.CancelCondition = cancelExpr;
                 }
 
                 targetStep.Id = i;
                 targetStep.Name = nextStep.Name;
                 targetStep.ErrorBehavior = nextStep.ErrorBehavior;
                 targetStep.RetryInterval = nextStep.RetryInterval;
-                targetStep.Tag = $"{nextStep.Id}";
+                targetStep.ExternalId = $"{nextStep.Id}";
 
                 AttachInputs(nextStep, dataType, stepType, targetStep);
                 AttachOutputs(nextStep, dataType, stepType, targetStep);
@@ -115,7 +114,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                 }
 
                 if (!string.IsNullOrEmpty(nextStep.NextStepId))
-                    targetStep.Outcomes.Add(new StepOutcome() { Tag = $"{nextStep.NextStepId}" });
+                    targetStep.Outcomes.Add(new StepOutcome() { ExternalNextStepId = $"{nextStep.NextStepId}" });
 
                 result.Add(targetStep);
                 
@@ -124,26 +123,26 @@ namespace WorkflowCore.Services.DefinitionStorage
 
             foreach (var step in result)
             {
-                if (result.Any(x => x.Tag == step.Tag && x.Id != step.Id))
-                    throw new WorkflowDefinitionLoadException($"Duplicate step Id {step.Tag}");
+                if (result.Any(x => x.ExternalId == step.ExternalId && x.Id != step.Id))
+                    throw new WorkflowDefinitionLoadException($"Duplicate step Id {step.ExternalId}");
 
                 foreach (var outcome in step.Outcomes)
                 {
-                    if (result.All(x => x.Tag != outcome.Tag))
-                        throw new WorkflowDefinitionLoadException($"Cannot find step id {outcome.Tag}");
+                    if (result.All(x => x.ExternalId != outcome.ExternalNextStepId))
+                        throw new WorkflowDefinitionLoadException($"Cannot find step id {outcome.ExternalNextStepId}");
 
-                    outcome.NextStep = result.Single(x => x.Tag == outcome.Tag).Id;
+                    outcome.NextStep = result.Single(x => x.ExternalId == outcome.ExternalNextStepId).Id;
                 }
             }
 
             foreach (var parent in parents)
             {
-                var target = result.Single(x => x.Tag == parent.Id);
+                var target = result.Single(x => x.ExternalId == parent.Id);
                 foreach (var branch in parent.Do)
                 {
                     var childTags = branch.Select(x => x.Id).ToList();
                     target.Children.AddRange(result
-                        .Where(x => childTags.Contains(x.Tag))
+                        .Where(x => childTags.Contains(x.ExternalId))
                         .OrderBy(x => x.Id)
                         .Select(x => x.Id)
                         .Take(1)
@@ -153,11 +152,11 @@ namespace WorkflowCore.Services.DefinitionStorage
 
             foreach (var item in compensatables)
             {
-                var target = result.Single(x => x.Tag == item.Id);
+                var target = result.Single(x => x.ExternalId == item.Id);
                 var tag = item.CompensateWith.Select(x => x.Id).FirstOrDefault();
                 if (tag != null)
                 {
-                    var compStep = result.FirstOrDefault(x => x.Tag == tag);
+                    var compStep = result.FirstOrDefault(x => x.ExternalId == tag);
                     if (compStep != null)
                         target.CompensationStepId = compStep.Id;
                 }
@@ -173,13 +172,12 @@ namespace WorkflowCore.Services.DefinitionStorage
                 var dataParameter = Expression.Parameter(dataType, "data");
                 var contextParameter = Expression.Parameter(typeof(IStepExecutionContext), "context");
                 var sourceExpr = DynamicExpressionParser.ParseLambda(new [] { dataParameter, contextParameter }, typeof(object), input.Value);
-                var targetExpr = Expression.Property(Expression.Parameter(stepType), input.Key);
 
-                step.Inputs.Add(new DataMapping()
-                {
-                    Source = sourceExpr,
-                    Target = Expression.Lambda(targetExpr)
-                });
+                var stepParameter = Expression.Parameter(stepType, "step");
+                var targetProperty = Expression.Property(stepParameter, input.Key);
+                var targetExpr = Expression.Lambda(targetProperty, stepParameter);
+
+                step.Inputs.Add(new MemberMapParameter(sourceExpr, targetExpr));
             }
         }
 
@@ -189,13 +187,32 @@ namespace WorkflowCore.Services.DefinitionStorage
             {
                 var stepParameter = Expression.Parameter(stepType, "step");
                 var sourceExpr = DynamicExpressionParser.ParseLambda(new[] { stepParameter }, typeof(object), output.Value);
-                var targetExpr = Expression.Property(Expression.Parameter(dataType), output.Key);
 
-                step.Outputs.Add(new DataMapping()
+                var dataParameter = Expression.Parameter(dataType, "data");
+                Expression targetProperty;
+                
+                // Check if our datatype has a matching property
+                var propertyInfo = dataType.GetProperty(output.Key);
+                if (propertyInfo != null)
                 {
-                    Source = sourceExpr,
-                    Target = Expression.Lambda(targetExpr)
-                });
+                    targetProperty = Expression.Property(dataParameter, propertyInfo);
+                    var targetExpr = Expression.Lambda(targetProperty, dataParameter);
+                    step.Outputs.Add(new MemberMapParameter(sourceExpr, targetExpr));
+                }
+                else
+                {
+                    // If we did not find a matching property try to find a Indexer with string parameter
+                    propertyInfo = dataType.GetProperty("Item");
+                    targetProperty = Expression.Property(dataParameter, propertyInfo, Expression.Constant(output.Key));
+                    
+                    Action<IStepBody, object> acn = (pStep, pData) =>
+                    {
+                        object resolvedValue = sourceExpr.Compile().DynamicInvoke(pStep); ;
+                        propertyInfo.SetValue(pData, resolvedValue, new object[] { output.Key });
+                    };
+
+                    step.Outputs.Add(new ActionParameter<IStepBody, object>(acn));
+                }
             }
         }
 

@@ -1,15 +1,18 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
-//using RabbitMQ.Client;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon;
+using Amazon.Runtime;
 using WorkflowCore.Interface;
 using WorkflowCore.Persistence.MongoDB.Services;
 using WorkflowCore.Services;
+using Amazon.DynamoDBv2;
+using Amazon.SQS;
 
 namespace WorkflowCore.Sample04
 {
@@ -58,7 +61,22 @@ namespace WorkflowCore.Sample04
             //    x.UseSqlServerLocking(@"Server=.\SQLEXPRESS;Database=WorkflowCore;Trusted_Connection=True;");
             //});
 
-            //services.AddWorkflow(x => x.UseRedlock(new System.Net.DnsEndPoint("127.0.0.1", 32768)));
+            //services.AddWorkflow(cfg =>
+            //{
+            //    var ddbConfig = new AmazonDynamoDBConfig() { RegionEndpoint = RegionEndpoint.USWest2 };
+
+            //    cfg.UseAwsDynamoPersistence(new EnvironmentVariablesAWSCredentials(), ddbConfig, "sample4");
+            //    cfg.UseAwsDynamoLocking(new EnvironmentVariablesAWSCredentials(), ddbConfig, "workflow-core-locks");
+            //    cfg.UseAwsSimpleQueueService(new EnvironmentVariablesAWSCredentials(), new AmazonSQSConfig() { RegionEndpoint = RegionEndpoint.USWest2 });                
+            //});
+
+            //services.AddWorkflow(cfg =>
+            //{
+            //    cfg.UseRedisPersistence("localhost:6379", "sample4");
+            //    cfg.UseRedisLocking("localhost:6379");
+            //    cfg.UseRedisQueues("localhost:6379", "sample4");
+            //    cfg.UseRedisEventHub("localhost:6379", "channel1");
+            //});
 
             //services.AddWorkflow(x =>
             //{

@@ -22,6 +22,13 @@ namespace WorkflowCore.Interface
         IStepBuilder<TData, TStepBody> Name(string name);
 
         /// <summary>
+        /// Specifies a custom Id to reference this step
+        /// </summary>
+        /// <param name="id">A custom Id to reference this step</param>
+        /// <returns></returns>
+        IStepBuilder<TData, TStepBody> Id(string id);
+
+        /// <summary>
         /// Specify the next step in the workflow
         /// </summary>
         /// <typeparam name="TStep">The type of the step to execute</typeparam>
@@ -52,6 +59,13 @@ namespace WorkflowCore.Interface
         IStepBuilder<TData, ActionStepBody> Then(Action<IStepExecutionContext> body);
 
         /// <summary>
+        /// Specify the next step in the workflow by Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        IStepBuilder<TData, TStepBody> Attach(string id);
+
+        /// <summary>
         /// Configure an outcome for this step, then wire it to another step
         /// </summary>
         /// <param name="outcomeValue"></param>
@@ -78,6 +92,13 @@ namespace WorkflowCore.Interface
         IStepBuilder<TData, TStepBody> Input<TInput>(Expression<Func<TStepBody, TInput>> stepProperty, Expression<Func<TData, IStepExecutionContext, TInput>> value);
 
         /// <summary>
+        /// Manipulate properties on the step before its executed.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        IStepBuilder<TData, TStepBody> Input(Action<TStepBody, TData> action);
+
+        /// <summary>
         /// Map properties on the workflow data object to properties on the step after the step executes
         /// </summary>
         /// <typeparam name="TOutput"></typeparam>
@@ -85,6 +106,13 @@ namespace WorkflowCore.Interface
         /// <param name="value"></param>
         /// <returns></returns>
         IStepBuilder<TData, TStepBody> Output<TOutput>(Expression<Func<TData, TOutput>> dataProperty, Expression<Func<TStepBody, object>> value);
+
+        /// <summary>
+        /// Manipulate properties on the data object after the step executes
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        IStepBuilder<TData, TStepBody> Output(Action<TStepBody, TData> action);
 
         /// <summary>
         /// Wait here until to specified event is published
@@ -213,6 +241,13 @@ namespace WorkflowCore.Interface
         /// <param name="builder"></param>
         /// <returns></returns>
         IStepBuilder<TData, TStepBody> CompensateWithSequence(Action<IWorkflowBuilder<TData>> builder);
+
+        /// <summary>
+        /// Prematurely cancel the execution of this step on a condition
+        /// </summary>
+        /// <param name="cancelCondition"></param>
+        /// <returns></returns>
+        IStepBuilder<TData, TStepBody> CancelCondition(Expression<Func<TData, bool>> cancelCondition, bool proceedAfterCancel = false);
         
     }
 }

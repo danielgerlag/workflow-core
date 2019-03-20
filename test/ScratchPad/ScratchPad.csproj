@@ -13,14 +13,21 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\providers\WorkflowCore.Persistence.PostgreSQL\WorkflowCore.Persistence.PostgreSQL.csproj" />
     <ProjectReference Include="..\..\src\providers\WorkflowCore.Persistence.SqlServer\WorkflowCore.Persistence.SqlServer.csproj" />
+    <ProjectReference Include="..\..\src\providers\WorkflowCore.Providers.AWS\WorkflowCore.Providers.AWS.csproj" />
+    <ProjectReference Include="..\..\src\providers\WorkflowCore.Providers.Elasticsearch\WorkflowCore.Providers.Elasticsearch.csproj" />
+    <ProjectReference Include="..\..\src\samples\WorkflowCore.Sample01\WorkflowCore.Sample01.csproj" />
+    <ProjectReference Include="..\..\src\samples\WorkflowCore.Sample02\WorkflowCore.Sample02.csproj" />
+    <ProjectReference Include="..\..\src\samples\WorkflowCore.Sample03\WorkflowCore.Sample03.csproj" />
+    <ProjectReference Include="..\..\src\samples\WorkflowCore.Sample04\WorkflowCore.Sample04.csproj" />
     <ProjectReference Include="..\..\src\WorkflowCore\WorkflowCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.17.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>

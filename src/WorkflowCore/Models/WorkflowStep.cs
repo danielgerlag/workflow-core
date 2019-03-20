@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 using WorkflowCore.Interface;
 
@@ -13,15 +14,15 @@ namespace WorkflowCore.Models
 
         public virtual string Name { get; set; }
 
-        public virtual string Tag { get; set; }
+        public virtual string ExternalId { get; set; }
 
         public virtual List<int> Children { get; set; } = new List<int>();
 
         public virtual List<StepOutcome> Outcomes { get; set; } = new List<StepOutcome>();
 
-        public virtual List<DataMapping> Inputs { get; set; } = new List<DataMapping>();
+        public virtual List<IStepParameter> Inputs { get; set; } = new List<IStepParameter>();
 
-        public virtual List<DataMapping> Outputs { get; set; } = new List<DataMapping>();
+        public virtual List<IStepParameter> Outputs { get; set; } = new List<IStepParameter>();
 
         public virtual WorkflowErrorHandling? ErrorBehavior { get; set; }
 
@@ -32,6 +33,10 @@ namespace WorkflowCore.Models
         public virtual bool ResumeChildrenAfterCompensation => true;
 
         public virtual bool RevertChildrenAfterCompensation => false;
+
+        public virtual LambdaExpression CancelCondition { get; set; }
+
+        public bool ProceedOnCancel { get; set; } = false;
 
         public virtual ExecutionPipelineDirective InitForExecution(WorkflowExecutorResult executorResult, WorkflowDefinition defintion, WorkflowInstance workflow, ExecutionPointer executionPointer)
         {
@@ -61,6 +66,7 @@ namespace WorkflowCore.Models
         /// <param name="executionPointer"></param>
         public virtual void AfterWorkflowIteration(WorkflowExecutorResult executorResult, WorkflowDefinition defintion, WorkflowInstance workflow, ExecutionPointer executionPointer)
         {
+            
         }
 
         public virtual IStepBody ConstructBody(IServiceProvider serviceProvider)

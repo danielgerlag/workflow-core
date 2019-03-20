@@ -13,9 +13,13 @@
 
   <ItemGroup>
     <None Remove="stored-definition.json" />
+    <None Remove="stored-dynamic-definition.json" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="stored-dynamic-definition.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="stored-definition.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
@@ -28,7 +32,7 @@
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="4.19.0" />
     <PackageReference Include="Moq" Version="4.7.99" />
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     <PackageReference Include="NUnit" Version="3.6.1" />
   </ItemGroup>
 
