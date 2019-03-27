@@ -38,7 +38,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
         public class DataIOWorkflow : IWorkflow<MyDataClass>
         {
-            public string Id => "DataIOWorkflow";
+            public string Id => "DynamicDataIOWorkflow";
             public int Version => 1;
             public void Build(IWorkflowBuilder<MyDataClass> builder)
             {
