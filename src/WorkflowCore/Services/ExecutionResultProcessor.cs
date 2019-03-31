@@ -110,8 +110,8 @@ namespace WorkflowCore.Services
             {
                 var exceptionPointer = queue.Dequeue();
                 var exceptionStep = def.Steps.FindById(exceptionPointer.StepId);
-                var compensatingStepId = FindScopeCompensationStepId(workflow, def, exceptionPointer);
-                var errorOption = (exceptionStep.ErrorBehavior ?? (compensatingStepId.HasValue ? WorkflowErrorHandling.Compensate : def.DefaultErrorBehavior));
+                var shouldCompensate = ShouldCompensate(workflow, def, exceptionPointer);
+                var errorOption = (exceptionStep.ErrorBehavior ?? (shouldCompensate ? WorkflowErrorHandling.Compensate : def.DefaultErrorBehavior));
 
                 foreach (var handler in _errorHandlers.Where(x => x.Type == errorOption))
                 {
@@ -120,7 +120,7 @@ namespace WorkflowCore.Services
             }
         }
         
-        private int? FindScopeCompensationStepId(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer currentPointer)
+        private bool ShouldCompensate(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer currentPointer)
         {
             var scope = new Stack<string>(currentPointer.Scope);
             scope.Push(currentPointer.Id);
@@ -130,11 +130,11 @@ namespace WorkflowCore.Services
                 var pointerId = scope.Pop();
                 var pointer = workflow.ExecutionPointers.FindById(pointerId);
                 var step = def.Steps.FindById(pointer.StepId);
-                if (step.CompensationStepId.HasValue)
-                    return step.CompensationStepId.Value;
+                if ((step.CompensationStepId.HasValue) || (step.RevertChildrenAfterCompensation))
+                    return true;
             }
 
-            return null;
+            return false;
         }
     }
 }
