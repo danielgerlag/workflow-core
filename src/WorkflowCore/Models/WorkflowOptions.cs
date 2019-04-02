@@ -8,7 +8,7 @@ namespace WorkflowCore.Models
 {
     public class WorkflowOptions
     {
-        internal static readonly int MinimumNumberOfConcurrentItems = 2;
+        internal static readonly int MinimumNumberOfConcurrentWorkflows = 2;
 
         internal Func<IServiceProvider, IPersistenceProvider> PersistanceFactory;
         internal Func<IServiceProvider, IQueueProvider> QueueFactory;
@@ -18,7 +18,7 @@ namespace WorkflowCore.Models
         internal TimeSpan PollInterval;
         internal TimeSpan IdleTime;
         internal TimeSpan ErrorRetryInterval;
-        internal int? MaxConcurrentItems;
+        internal int? MaxConcurrentWorkflows;
 
         public IServiceCollection Services { get; private set; }
 
@@ -71,14 +71,14 @@ namespace WorkflowCore.Models
             ErrorRetryInterval = interval;
         }
 
-        public void UseMaxConcurrentItems(int? maxConcurrentItems)
+        public void UseMaxConcurrentWorkflows(int? maxConcurrentWorkflows)
         {
-            if (maxConcurrentItems.HasValue && maxConcurrentItems.Value < MinimumNumberOfConcurrentItems)
+            if (maxConcurrentWorkflows.HasValue && maxConcurrentWorkflows.Value < MinimumNumberOfConcurrentWorkflows)
             {
-                throw new ArgumentOutOfRangeException($"If {nameof(maxConcurrentItems)} is specified, it cannot be less than ${MinimumNumberOfConcurrentItems}.");
+                throw new ArgumentOutOfRangeException($"If {nameof(maxConcurrentWorkflows)} is specified, it cannot be less than ${MinimumNumberOfConcurrentWorkflows}.");
             }
 
-            MaxConcurrentItems = maxConcurrentItems;
+            MaxConcurrentWorkflows = maxConcurrentWorkflows;
         }
     }
         
