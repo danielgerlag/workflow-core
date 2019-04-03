@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,14 +40,14 @@ namespace WorkflowCore.Services.BackgroundTasks
                 if (evt.EventTime <= _datetimeProvider.Now.ToUniversalTime())
                 {
                     var subs = await _persistenceStore.GetSubcriptions(evt.EventName, evt.EventKey, evt.EventTime);
-                    var success = true;
+                    var complete = true;
 
                     foreach (var sub in subs.ToList())
                     {
-                        success = success && await SeedSubscription(evt, sub, cancellationToken);
+                        complete = complete && await SeedSubscription(evt, sub, cancellationToken);
                     }
 
-                    if (success)
+                    if (complete)
                     {
                         await _persistenceStore.MarkEventProcessed(itemId);
                     }
@@ -60,6 +61,20 @@ namespace WorkflowCore.Services.BackgroundTasks
         
         private async Task<bool> SeedSubscription(Event evt, EventSubscription sub, CancellationToken cancellationToken)
         {
+            var toQueue = new List<string>();
+            foreach (var eventId in await _persistenceStore.GetEvents(sub.EventName, sub.EventKey, sub.SubscribeAsOf))
+            {
+                if (eventId == evt.Id)
+                    continue;
+
+                var siblingEvent = await _persistenceStore.GetEvent(eventId);
+                if ((!siblingEvent.IsProcessed) && (siblingEvent.EventTime < evt.EventTime))
+                    return false;
+
+                if (!siblingEvent.IsProcessed)
+                    toQueue.Add(siblingEvent.Id);
+            }            
+
             if (!await _lockProvider.AcquireLock(sub.WorkflowId, cancellationToken))
             {
                 Logger.LogInformation("Workflow locked {0}", sub.WorkflowId);
@@ -90,6 +105,8 @@ namespace WorkflowCore.Services.BackgroundTasks
             {
                 await _lockProvider.ReleaseLock(sub.WorkflowId);
                 await QueueProvider.QueueWork(sub.WorkflowId, QueueType.Workflow);
+                foreach (var eventId in toQueue)
+                    await QueueProvider.QueueWork(eventId, QueueType.Event);
             }
         }
     }
