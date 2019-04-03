@@ -69,11 +69,14 @@ namespace WorkflowCore.Services.BackgroundTasks
 
                 var siblingEvent = await _persistenceStore.GetEvent(eventId);
                 if ((!siblingEvent.IsProcessed) && (siblingEvent.EventTime < evt.EventTime))
+                {
+                    await QueueProvider.QueueWork(eventId, QueueType.Event);
                     return false;
+                }
 
                 if (!siblingEvent.IsProcessed)
                     toQueue.Add(siblingEvent.Id);
-            }            
+            }
 
             if (!await _lockProvider.AcquireLock(sub.WorkflowId, cancellationToken))
             {
