@@ -40,17 +40,17 @@ namespace WorkflowCore.Services.BackgroundTasks
                 if (evt.EventTime <= _datetimeProvider.Now.ToUniversalTime())
                 {
                     var subs = await _persistenceStore.GetSubcriptions(evt.EventName, evt.EventKey, evt.EventTime);
+                    var toQueue = new List<string>();
                     var complete = true;
 
                     foreach (var sub in subs.ToList())
-                    {
-                        complete = complete && await SeedSubscription(evt, sub, cancellationToken);
-                    }
+                        complete = complete && await SeedSubscription(evt, sub, toQueue, cancellationToken);
 
                     if (complete)
-                    {
                         await _persistenceStore.MarkEventProcessed(itemId);
-                    }
+
+                    foreach (var eventId in toQueue)
+                        await QueueProvider.QueueWork(eventId, QueueType.Event);
                 }
             }
             finally
@@ -59,9 +59,8 @@ namespace WorkflowCore.Services.BackgroundTasks
             }
         }
         
-        private async Task<bool> SeedSubscription(Event evt, EventSubscription sub, CancellationToken cancellationToken)
-        {
-            var toQueue = new List<string>();
+        private async Task<bool> SeedSubscription(Event evt, EventSubscription sub, List<string> toQueue, CancellationToken cancellationToken)
+        {            
             foreach (var eventId in await _persistenceStore.GetEvents(sub.EventName, sub.EventKey, sub.SubscribeAsOf))
             {
                 if (eventId == evt.Id)
@@ -108,8 +107,6 @@ namespace WorkflowCore.Services.BackgroundTasks
             {
                 await _lockProvider.ReleaseLock(sub.WorkflowId);
                 await QueueProvider.QueueWork(sub.WorkflowId, QueueType.Workflow);
-                foreach (var eventId in toQueue)
-                    await QueueProvider.QueueWork(eventId, QueueType.Event);
             }
         }
     }
