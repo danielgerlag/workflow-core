@@ -61,8 +61,8 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
 
         public async Task Start()
         {
-            if (_canCreateDb) _migrator.CreateDb();
-            if (_canMigrateDb) _migrator.MigrateDb();
+            if (_canCreateDb) await _migrator.CreateDbAsync();
+            if (_canMigrateDb) await _migrator.MigrateDbAsync();
         }
 
         public async Task Stop()
@@ -92,10 +92,10 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             SqlConnection cn = new SqlConnection(_connectionString);
             try
             {
-                cn.Open();
+                await cn.OpenAsync();
                 var par = _config.GetByQueue(queue);
 
-                _sqlCommandExecutor.ExecuteCommand(cn, null, _queueWorkCommand,
+                await _sqlCommandExecutor.ExecuteCommandAsync(cn, null, _queueWorkCommand,
                     new SqlParameter("@initiatorService", par.InitiatorService),
                     new SqlParameter("@targetService", par.TargetService),
                     new SqlParameter("@contractName", par.ContractName),
@@ -121,10 +121,11 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             SqlConnection cn = new SqlConnection(_connectionString);
             try
             {
-                cn.Open();
+                await cn.OpenAsync(cancellationToken);
+
                 var par = _config.GetByQueue(queue);                
                 var sql = _dequeueWorkCommand.Replace("{queueName}", par.QueueName);
-                var msg = _sqlCommandExecutor.ExecuteScalar<object>(cn, null, sql);
+                var msg = await _sqlCommandExecutor.ExecuteScalarAsync<object>(cn, null, sql);
                 return msg is DBNull ? null : (string)msg;
                 
             }

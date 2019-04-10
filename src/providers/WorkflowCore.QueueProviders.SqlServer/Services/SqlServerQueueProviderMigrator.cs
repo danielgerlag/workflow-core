@@ -4,7 +4,7 @@ using System;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text.RegularExpressions;
-
+using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.QueueProviders.SqlServer.Interfaces;
 
@@ -30,10 +30,10 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
 
         #region Migrate
 
-        public void MigrateDb()
+        public async Task MigrateDbAsync()
         {
             var cn = new SqlConnection(_connectionString);
-            cn.Open();
+            await cn.OpenAsync();
             var tx = cn.BeginTransaction();
             try
             {
@@ -46,14 +46,14 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
 
                 foreach (var item in queueConfigurations)
                 {
-                    CreateMessageType(cn, tx, item.MsgType);
+                    await CreateMessageType(cn, tx, item.MsgType);
 
-                    CreateContract(cn, tx, item.ContractName, item.MsgType);
+                    await CreateContract(cn, tx, item.ContractName, item.MsgType);
 
-                    CreateQueue(cn, tx, item.QueueName);
+                    await CreateQueue(cn, tx, item.QueueName);
 
-                    CreateService(cn, tx, item.InitiatorService, item.QueueName, item.ContractName);
-                    CreateService(cn, tx, item.TargetService, item.QueueName, item.ContractName);
+                    await CreateService(cn, tx, item.InitiatorService, item.QueueName, item.ContractName);
+                    await CreateService(cn, tx, item.TargetService, item.QueueName, item.ContractName);
                 }
                 
                 tx.Commit();
@@ -69,53 +69,53 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             }
         }
 
-        private void CreateService(SqlConnection cn, SqlTransaction tx, string name, string queueName, string contractName)
+        private async Task CreateService(SqlConnection cn, SqlTransaction tx, string name, string queueName, string contractName)
         {
             var cmdtext = @"select name from sys.services where name=@name";
-            var existing = _sqlCommandExecutor.ExecuteScalar<string>(cn, tx, cmdtext, new SqlParameter("@name", name));
+            var existing = await _sqlCommandExecutor.ExecuteScalarAsync<string>(cn, tx, cmdtext, new SqlParameter("@name", name));
 
             if (!string.IsNullOrEmpty(existing))
                 return;
             
-            _sqlCommandExecutor.ExecuteCommand(cn, tx, $"CREATE SERVICE [{name}] ON QUEUE [{queueName}]([{contractName}]);");
+            await _sqlCommandExecutor.ExecuteCommandAsync(cn, tx, $"CREATE SERVICE [{name}] ON QUEUE [{queueName}]([{contractName}]);");
         }
 
-        private void CreateQueue(SqlConnection cn, SqlTransaction tx, string queueName)
+        private async Task CreateQueue(SqlConnection cn, SqlTransaction tx, string queueName)
         {
             var cmdtext = @"select name from sys.service_queues where name=@name";
-            var existing = _sqlCommandExecutor.ExecuteScalar<string>(cn, tx, cmdtext, new SqlParameter("@name", queueName));
+            var existing = await _sqlCommandExecutor.ExecuteScalarAsync<string>(cn, tx, cmdtext, new SqlParameter("@name", queueName));
 
             if (!string.IsNullOrEmpty(existing))
                 return;
                         
-            _sqlCommandExecutor.ExecuteCommand(cn, tx, $"CREATE QUEUE [{queueName}];");
+            await _sqlCommandExecutor.ExecuteCommandAsync(cn, tx, $"CREATE QUEUE [{queueName}];");
         }
 
-        private void CreateContract(SqlConnection cn, SqlTransaction tx, string contractName, string messageName)
+        private async Task CreateContract(SqlConnection cn, SqlTransaction tx, string contractName, string messageName)
         {
             var cmdtext = @"select name from sys.service_contracts where name=@name";
-            var existing = _sqlCommandExecutor.ExecuteScalar<string>(cn, tx, cmdtext, new SqlParameter("@name", contractName));
+            var existing = await _sqlCommandExecutor.ExecuteScalarAsync<string>(cn, tx, cmdtext, new SqlParameter("@name", contractName));
 
             if (!string.IsNullOrEmpty(existing))
                 return;
                         
-            _sqlCommandExecutor.ExecuteCommand(cn, tx, $"CREATE CONTRACT [{contractName}] ( [{messageName}] SENT BY INITIATOR);");
+            await _sqlCommandExecutor.ExecuteCommandAsync(cn, tx, $"CREATE CONTRACT [{contractName}] ( [{messageName}] SENT BY INITIATOR);");
         }
 
-        private void CreateMessageType(SqlConnection cn, SqlTransaction tx, string message)
+        private async Task CreateMessageType(SqlConnection cn, SqlTransaction tx, string message)
         {
             var cmdtext = @"select name from sys.service_message_types where name=@name";
-            var existing = _sqlCommandExecutor.ExecuteScalar<string>(cn, tx, cmdtext, new SqlParameter("@name", message));
+            var existing = await _sqlCommandExecutor.ExecuteScalarAsync<string>(cn, tx, cmdtext, new SqlParameter("@name", message));
 
             if (!string.IsNullOrEmpty(existing))
                 return;
             
-            _sqlCommandExecutor.ExecuteCommand(cn, tx, $"CREATE MESSAGE TYPE [{message}] VALIDATION = NONE;");
+            await _sqlCommandExecutor.ExecuteCommandAsync(cn, tx, $"CREATE MESSAGE TYPE [{message}] VALIDATION = NONE;");
         }
 
         #endregion
 
-        public void CreateDb()
+        public async Task CreateDbAsync()
         {
             var builder = new SqlConnectionStringBuilder(_connectionString);
             var masterBuilder = new SqlConnectionStringBuilder(_connectionString);
@@ -125,20 +125,20 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
 
             bool dbPresente;
             var cn = new SqlConnection(masterCnStr);
-            cn.Open();
+            await cn.OpenAsync();
             try
             {
                 var cmd = cn.CreateCommand();
                 cmd.CommandText = "select name from sys.databases where name = @dbname";
                 cmd.Parameters.AddWithValue("@dbname", builder.InitialCatalog);
-                var found = cmd.ExecuteScalar();
+                var found = await cmd.ExecuteScalarAsync();
                 dbPresente = (found != null);
 
                 if (!dbPresente)
                 {   
                     var createCmd = cn.CreateCommand();
                     createCmd.CommandText = "create database [" + builder.InitialCatalog + "]";
-                    createCmd.ExecuteNonQuery();
+                    await createCmd.ExecuteNonQueryAsync();
                 }
             }
             finally
@@ -146,15 +146,15 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                 cn.Close();
             }            
 
-            EnableBroker(masterCnStr, builder.InitialCatalog);
+            await EnableBroker(masterCnStr, builder.InitialCatalog);
         }
 
-        private void EnableBroker(string masterCn, string db)
+        private async Task EnableBroker(string masterCn, string db)
         {
             var cn = new SqlConnection(masterCn);
-            cn.Open();
+            await cn.OpenAsync();
 
-            var isBrokerEnabled = _sqlCommandExecutor.ExecuteScalar<bool>(cn, null, @"select is_broker_enabled from sys.databases where name = @name", new SqlParameter("@name", db));
+            var isBrokerEnabled = await _sqlCommandExecutor.ExecuteScalarAsync<bool>(cn, null, @"select is_broker_enabled from sys.databases where name = @name", new SqlParameter("@name", db));
 
             if (isBrokerEnabled)
                 return;
@@ -162,7 +162,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             var tx = cn.BeginTransaction();
             try
             {
-                _sqlCommandExecutor.ExecuteCommand(cn, tx, $"ALTER DATABASE [{db}] SET ENABLE_BROKER;");
+                await _sqlCommandExecutor.ExecuteCommandAsync(cn, tx, $"ALTER DATABASE [{db}] SET ENABLE_BROKER;");
                 tx.Commit();
             }
             catch

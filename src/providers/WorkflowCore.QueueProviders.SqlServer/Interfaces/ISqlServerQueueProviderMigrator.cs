@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace WorkflowCore.QueueProviders.SqlServer.Interfaces
 {
     public interface ISqlServerQueueProviderMigrator
     {
-        void MigrateDb();
-        void CreateDb();
+        Task MigrateDbAsync();
+        Task CreateDbAsync();
     }
 }
