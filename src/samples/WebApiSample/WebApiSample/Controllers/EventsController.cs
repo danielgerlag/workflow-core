@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using WebApiSample.Workflows;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
@@ -22,9 +23,9 @@ namespace WebApiSample.Controllers
         }
 
         [HttpPost("{eventName}/{eventKey}")]
-        public async Task<IActionResult> Post(string eventName, string eventKey, [FromBody]object eventData)
+        public async Task<IActionResult> Post(string eventName, string eventKey, [FromBody]MyDataClass eventData)
         {
-            await _workflowService.PublishEvent(eventName, eventKey, eventData);
+            await _workflowService.PublishEvent(eventName, eventKey, eventData.Value1);
             return Ok();
         }
 
