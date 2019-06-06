@@ -8,16 +8,24 @@ namespace WorkflowCore.Models
 {
     public class ActionParameter<TStepBody, TData> : IStepParameter
     {
-        private readonly Action<TStepBody, TData> _action;
+        private readonly Action<TStepBody, TData, IStepExecutionContext> _action;
      
-        public ActionParameter(Action<TStepBody, TData> action)
+        public ActionParameter(Action<TStepBody, TData, IStepExecutionContext> action)
         {
             _action = action;
         }
 
+        public ActionParameter(Action<TStepBody, TData> action)
+        {
+            _action = new Action<TStepBody, TData, IStepExecutionContext>((body, data, context) =>
+            {
+                action(body, data);
+            });
+        }
+
         private void Assign(object data, IStepBody step, IStepExecutionContext context)
         {
-            _action.Invoke((TStepBody)step, (TData)data);
+            _action.Invoke((TStepBody)step, (TData)data, context);
         }
 
         public void AssignInput(object data, IStepBody body, IStepExecutionContext context)
