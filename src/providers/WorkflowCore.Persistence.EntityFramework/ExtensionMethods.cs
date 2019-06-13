@@ -27,7 +27,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             persistable.Status = instance.Status;
             persistable.CreateTime = instance.CreateTime;
             persistable.CompleteTime = instance.CompleteTime;
-            persistable.ExecutionPointers = persistance.ExecutionPointers ?? new PersistedExecutionPointerCollection(instance.ExecutionPointers.Count);
+            persistable.ExecutionPointers = persistable.ExecutionPointers ?? new PersistedExecutionPointerCollection(instance.ExecutionPointers.Count);
             
             foreach (var ep in instance.ExecutionPointers)
             {
