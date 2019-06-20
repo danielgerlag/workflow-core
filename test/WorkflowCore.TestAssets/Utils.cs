@@ -20,8 +20,12 @@ namespace WorkflowCore.TestAssets
 
         public static string GetTestDefinitionJson()
         {
-            //return Properties.Resources.ResourceManager.GetString("stored_definition");
             return File.ReadAllText("stored-definition.json");
+        }
+
+        public static string GetTestDefinitionYaml()
+        {
+            return File.ReadAllText("stored-definition.yaml");
         }
 
         public static string GetTestDefinitionDynamicJson()

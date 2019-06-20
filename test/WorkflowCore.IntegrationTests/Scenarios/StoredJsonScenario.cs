@@ -10,9 +10,9 @@ using WorkflowCore.TestAssets.DataTypes;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
-    public class StoredScenario : JsonWorkflowTest
+    public class StoredJsonScenario : JsonWorkflowTest
     {   
-        public StoredScenario()
+        public StoredJsonScenario()
         {
             Setup();
         }

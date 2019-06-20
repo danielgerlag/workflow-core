@@ -26,10 +26,10 @@ namespace WorkflowCore.Services.DefinitionStorage
             _registry = registry;
         }
                         
-        public WorkflowDefinition LoadDefinition(string json)
+        public WorkflowDefinition LoadDefinition(string source, Func<string, DefinitionSourceV1> deserializer)
         {
-            var source = JsonConvert.DeserializeObject<DefinitionSourceV1>(json);
-            var def = Convert(source);
+            var sourceObj = deserializer(source);
+            var def = Convert(sourceObj);
             _registry.RegisterWorkflow(def);
             return def;
         }
