@@ -10,7 +10,6 @@
 
 namespace WorkflowCore.TestAssets.Properties {
     using System;
-    using System.Reflection;
     
     
     /// <summary>
@@ -40,7 +39,7 @@ namespace WorkflowCore.TestAssets.Properties {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("WorkflowCore.TestAssets.Properties.Resources", typeof(Resources).GetTypeInfo().Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("WorkflowCore.TestAssets.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -71,21 +70,28 @@ namespace WorkflowCore.TestAssets.Properties {
         ///    {
         ///      &quot;Id&quot;: &quot;Step1&quot;,
         ///      &quot;StepType&quot;: &quot;WorkflowCore.TestAssets.Steps.Counter, WorkflowCore.TestAssets&quot;,
-        ///
-        ///      &quot;NextStepId&quot;: &quot;Generate&quot;
+        ///      &quot;ErrorBehavior&quot;: &quot;Retry&quot;,
+        ///      &quot;Inputs&quot;: { &quot;Value&quot;: &quot;data.Counter1&quot; },
+        ///      &quot;Outputs&quot;: { &quot;Counter1&quot;: &quot;step.Value&quot; },
+        ///      &quot;NextStepId&quot;: &quot;Step2&quot;
         ///    },
         ///    {
-        ///      &quot;Id&quot;: &quot;Generate&quot;,
-        ///      &quot;StepType&quot;: &quot;ScratchPad.GenerateMessage, ScratchPad&quot;,
-        ///      &quot;NextStepId&quot;: &quot;Print&quot;,
-        ///      &quot;Outputs&quot;: { &quot;Value3&quot;: &quot;step.Message&quot; }
-        ///    },
-        ///    {
-        ///      &quot;I [rest of string was truncated]&quot;;.
+        ///      &quot;Id&quot;: &quot;Step2&quot;,
+        ///      &quot;StepType&quot;: &quot;WorkflowCore.TestAsset [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string stored_definition {
+        public static string stored_definition_json {
             get {
-                return ResourceManager.GetString("stored_definition", resourceCulture);
+                return ResourceManager.GetString("stored_definition_json", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        public static byte[] stored_definition_yaml {
+            get {
+                object obj = ResourceManager.GetObject("stored_definition_yaml", resourceCulture);
+                return ((byte[])(obj));
             }
         }
     }

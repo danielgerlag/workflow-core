@@ -2,9 +2,8 @@
 
   <PropertyGroup>
     <AssemblyTitle>Workflow Core extensions for human workflow</AssemblyTitle>
-    <VersionPrefix>1.6.2</VersionPrefix>
     <Authors>Daniel Gerlag</Authors>
-    <TargetFramework>netstandard1.3</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>WorkflowCore.Users</AssemblyName>
     <PackageId>WorkflowCore.Users</PackageId>
     <PackageTags>workflow;.NET;Core;state machine;WorkflowCore;human;user</PackageTags>
@@ -12,15 +11,13 @@
     <PackageLicenseUrl>https://github.com/danielgerlag/workflow-core/blob/master/LICENSE.md</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/danielgerlag/workflow-core.git</RepositoryUrl>
-    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
-    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <Description>Provides extensions for Workflow Core to enable human workflows.</Description>
-    <Version>1.8.2</Version>
-    <AssemblyVersion>1.8.2.0</AssemblyVersion>
-    <FileVersion>1.8.2.0</FileVersion>
+    <Version>2.0.0</Version>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.0" />
   </ItemGroup>
 
 </Project>

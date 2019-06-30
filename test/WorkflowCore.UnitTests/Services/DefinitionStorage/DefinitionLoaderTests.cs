@@ -29,7 +29,7 @@ namespace WorkflowCore.UnitTests.Services.DefinitionStorage
         [Fact(DisplayName = "Should register workflow")]
         public void RegisterDefinition()
         {
-            _subject.LoadDefinition("{\"Id\": \"HelloWorld\", \"Version\": 1, \"Steps\": []}");
+            _subject.LoadDefinition("{\"Id\": \"HelloWorld\", \"Version\": 1, \"Steps\": []}", Deserializers.Json);
 
             A.CallTo(() => _registry.RegisterWorkflow(A<WorkflowDefinition>.That.Matches(x => x.Id == "HelloWorld"))).MustHaveHappened();
             A.CallTo(() => _registry.RegisterWorkflow(A<WorkflowDefinition>.That.Matches(x => x.Version == 1))).MustHaveHappened();
@@ -39,7 +39,7 @@ namespace WorkflowCore.UnitTests.Services.DefinitionStorage
         [Fact(DisplayName = "Should parse definition")]
         public void ParseDefinition()
         {
-            _subject.LoadDefinition(TestAssets.Utils.GetTestDefinitionJson());
+            _subject.LoadDefinition(TestAssets.Utils.GetTestDefinitionJson(), Deserializers.Json);
 
             A.CallTo(() => _registry.RegisterWorkflow(A<WorkflowDefinition>.That.Matches(x => x.Id == "Test"))).MustHaveHappened();
             A.CallTo(() => _registry.RegisterWorkflow(A<WorkflowDefinition>.That.Matches(x => x.Version == 1))).MustHaveHappened();
@@ -51,7 +51,7 @@ namespace WorkflowCore.UnitTests.Services.DefinitionStorage
         [Fact(DisplayName = "Should parse definition")]
         public void ParseDefinitionDynamic()
         {
-            _subject.LoadDefinition(TestAssets.Utils.GetTestDefinitionDynamicJson());
+            _subject.LoadDefinition(TestAssets.Utils.GetTestDefinitionDynamicJson(), Deserializers.Json);
 
             A.CallTo(() => _registry.RegisterWorkflow(A<WorkflowDefinition>.That.Matches(x => x.Id == "Test"))).MustHaveHappened();
             A.CallTo(() => _registry.RegisterWorkflow(A<WorkflowDefinition>.That.Matches(x => x.Version == 1))).MustHaveHappened();

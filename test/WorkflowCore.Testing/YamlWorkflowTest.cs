@@ -12,7 +12,7 @@ using WorkflowCore.Services.DefinitionStorage;
 
 namespace WorkflowCore.Testing
 {
-    public abstract class JsonWorkflowTest : IDisposable
+    public abstract class YamlWorkflowTest : IDisposable
     {
         protected IWorkflowHost Host;
         protected IPersistenceProvider PersistenceProvider;
@@ -56,7 +56,7 @@ namespace WorkflowCore.Testing
 
         public string StartWorkflow(string json, object data)
         {
-            var def = DefinitionLoader.LoadDefinition(json, Deserializers.Json);
+            var def = DefinitionLoader.LoadDefinition(json, Deserializers.Yaml);
             var workflowId = Host.StartWorkflow(def.Id, data).Result;
             return workflowId;
         }

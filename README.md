@@ -25,9 +25,9 @@ public class MyWorkflow : IWorkflow
 }
 ```
 
-## JSON Workflow Definitions
+## JSON / YAML Workflow Definitions
 
-Define your workflows in JSON
+Define your workflows in JSON or YAML
 
 ```json
 {
@@ -45,6 +45,17 @@ Define your workflows in JSON
     }
   ]
 }
+```
+
+```yaml
+Id: HelloWorld
+Version: 1
+Steps:
+- Id: Hello
+  StepType: MyApp.HelloWorld, MyApp
+  NextStepId: Bye
+- Id: Bye
+  StepType: MyApp.GoodbyeWorld, MyApp
 ```
 
 ### Sample use cases

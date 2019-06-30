@@ -1,11 +1,13 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using Newtonsoft.Json.Linq;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Primitives;
@@ -24,10 +26,10 @@ namespace WorkflowCore.Services.DefinitionStorage
             _registry = registry;
         }
                         
-        public WorkflowDefinition LoadDefinition(string json)
+        public WorkflowDefinition LoadDefinition(string source, Func<string, DefinitionSourceV1> deserializer)
         {
-            var source = JsonConvert.DeserializeObject<DefinitionSourceV1>(json);
-            var def = Convert(source);
+            var sourceObj = deserializer(source);
+            var def = Convert(sourceObj);
             _registry.RegisterWorkflow(def);
             return def;
         }
@@ -171,13 +173,24 @@ namespace WorkflowCore.Services.DefinitionStorage
             {
                 var dataParameter = Expression.Parameter(dataType, "data");
                 var contextParameter = Expression.Parameter(typeof(IStepExecutionContext), "context");
-                var sourceExpr = DynamicExpressionParser.ParseLambda(new [] { dataParameter, contextParameter }, typeof(object), input.Value);
+                var environmentVarsParameter = Expression.Parameter(typeof(IDictionary), "environment");
+                var stepProperty = stepType.GetProperty(input.Key);
 
-                var stepParameter = Expression.Parameter(stepType, "step");
-                var targetProperty = Expression.Property(stepParameter, input.Key);
-                var targetExpr = Expression.Lambda(targetProperty, stepParameter);
+                if (input.Value is string)
+                {
+                    var acn = BuildScalarInputAction(input, dataParameter, contextParameter, environmentVarsParameter, stepProperty);
+                    step.Inputs.Add(new ActionParameter<IStepBody, object>(acn));
+                    continue;
+                }
 
-                step.Inputs.Add(new MemberMapParameter(sourceExpr, targetExpr));
+                if ((input.Value is IDictionary<string, object>) || (input.Value is IDictionary<object, object>))
+                {
+                    var acn = BuildObjectInputAction(input, dataParameter, contextParameter, environmentVarsParameter, stepProperty);
+                    step.Inputs.Add(new ActionParameter<IStepBody, object>(acn));
+                    continue;
+                }
+
+                throw new ArgumentException($"Unknown type for input {input.Key} on {source.Id}");
             }
         }
 
@@ -219,6 +232,53 @@ namespace WorkflowCore.Services.DefinitionStorage
         private Type FindType(string name)
         {
             return Type.GetType(name, true, true);
+        }
+
+        private static Action<IStepBody, object, IStepExecutionContext> BuildScalarInputAction(KeyValuePair<string, object> input, ParameterExpression dataParameter, ParameterExpression contextParameter, ParameterExpression environmentVarsParameter, PropertyInfo stepProperty)
+        {
+            var expr = System.Convert.ToString(input.Value);
+            var sourceExpr = DynamicExpressionParser.ParseLambda(new[] { dataParameter, contextParameter, environmentVarsParameter }, typeof(object), expr);
+
+            void acn(IStepBody pStep, object pData, IStepExecutionContext pContext)
+            {
+                object resolvedValue = sourceExpr.Compile().DynamicInvoke(pData, pContext, Environment.GetEnvironmentVariables());
+                if (stepProperty.PropertyType.IsEnum)
+                    stepProperty.SetValue(pStep, Enum.Parse(stepProperty.PropertyType, (string)resolvedValue, true));
+                else
+                    stepProperty.SetValue(pStep, System.Convert.ChangeType(resolvedValue, stepProperty.PropertyType));
+            }
+            return acn;
+        }
+
+        private static Action<IStepBody, object, IStepExecutionContext> BuildObjectInputAction(KeyValuePair<string, object> input, ParameterExpression dataParameter, ParameterExpression contextParameter, ParameterExpression environmentVarsParameter, PropertyInfo stepProperty)
+        {
+            void acn(IStepBody pStep, object pData, IStepExecutionContext pContext)
+            {
+                var stack = new Stack<JObject>();
+                var destObj = JObject.FromObject(input.Value);
+                stack.Push(destObj);
+
+                while (stack.Count > 0)
+                {
+                    var subobj = stack.Pop();
+                    foreach (var prop in subobj.Properties().ToList())
+                    {
+                        if (prop.Name.StartsWith("@"))
+                        {
+                            var sourceExpr = DynamicExpressionParser.ParseLambda(new[] { dataParameter, contextParameter, environmentVarsParameter }, typeof(object), prop.Value.ToString());
+                            object resolvedValue = sourceExpr.Compile().DynamicInvoke(pData, pContext, Environment.GetEnvironmentVariables());
+                            subobj.Remove(prop.Name);
+                            subobj.Add(prop.Name.TrimStart('@'), JToken.FromObject(resolvedValue));
+                        }
+                    }
+
+                    foreach (var child in subobj.Children<JObject>())
+                        stack.Push(child);
+                }
+
+                stepProperty.SetValue(pStep, destObj);
+            }
+            return acn;
         }
 
     }

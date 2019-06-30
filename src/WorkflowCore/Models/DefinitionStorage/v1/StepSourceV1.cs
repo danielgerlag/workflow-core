@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Text;
 
 namespace WorkflowCore.Models.DefinitionStorage.v1
@@ -26,7 +27,7 @@ namespace WorkflowCore.Models.DefinitionStorage.v1
 
         public string NextStepId { get; set; }
 
-        public Dictionary<string, string> Inputs { get; set; } = new Dictionary<string, string>();
+        public ExpandoObject Inputs { get; set; } = new ExpandoObject();
 
         public Dictionary<string, string> Outputs { get; set; } = new Dictionary<string, string>();
 
