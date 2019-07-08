@@ -74,7 +74,7 @@ namespace WorkflowCore.Providers.Azure.Services
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError($"Error releasing lock - {ex.Message}");
+                            _logger.LogError(ex, $"Error releasing lock - {ex.Message}");
                         }                        
                         _locks.Remove(entry);
                     }
@@ -114,7 +114,7 @@ namespace WorkflowCore.Providers.Azure.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError($"Error renewing leases - {ex.Message}");
+                    _logger.LogError(ex, $"Error renewing leases - {ex.Message}");
                 }
                 finally
                 {
@@ -131,7 +131,7 @@ namespace WorkflowCore.Providers.Azure.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error renewing lease - {ex.Message}");
+                _logger.LogError(ex, $"Error renewing lease - {ex.Message}");
             }
         }
     }

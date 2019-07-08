@@ -68,7 +68,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     _errorCounts.Remove(itemId);
                 }
 
-                Logger.LogError(default(EventId), $"Unable to index workfow - {itemId} - {e.Message}");
+                Logger.LogError(default(EventId), e, $"Unable to index workfow - {itemId} - {e.Message}");
             }
         }
 

@@ -67,7 +67,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, ex.Message);
             }
 
             try
@@ -92,7 +92,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, ex.Message);
             }
         }
     }
