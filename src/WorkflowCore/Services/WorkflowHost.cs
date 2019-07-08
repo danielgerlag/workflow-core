@@ -86,7 +86,7 @@ namespace WorkflowCore.Services
             _lifeCycleEventHub.Start().Wait();
             _searchIndex.Start().Wait();
             
-            Logger.LogInformation("Starting backgroud tasks");
+            Logger.LogInformation("Starting background tasks");
 
             foreach (var task in _backgroundTasks)
                 task.Start();
