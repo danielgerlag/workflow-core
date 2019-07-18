@@ -194,7 +194,7 @@ These are also available as separate Nuget packages.
 * **Aaron Scribner**
 * **Roberto Paterlini**
 
-# Related Projects
+## Related Projects
 
 * [Conductor](https://github.com/danielgerlag/conductor) (Stand-alone workflow server built on Workflow Core)
 
