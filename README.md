@@ -4,6 +4,13 @@
 
 Workflow Core is a light weight workflow engine targeting .NET Standard.  Think: long running processes with multiple tasks that need to track state.  It supports pluggable persistence and concurrency providers to allow for multi-node clusters.
 
+### Announcements
+
+#### New related project: Conductor
+Conductor is a stand-alone workflow server as opposed to a library that uses Workflow Core internally. It exposes an API that allows you to store workflow definitions, track running workflows, manage events and define lambdas and scripts for usage in your workflows.
+
+https://github.com/danielgerlag/conductor
+
 ## Documentation
 
 See [Tutorial here.](https://github.com/danielgerlag/workflow-core/wiki)
@@ -187,12 +194,15 @@ These are also available as separate Nuget packages.
 * **Aaron Scribner**
 * **Roberto Paterlini**
 
+# Related Projects
+
+* [Conductor](https://github.com/danielgerlag/conductor) (Stand-alone workflow server built on Workflow Core)
+
 ## Ports
 
 * [JWorkflow (Java)](https://github.com/danielgerlag/jworkflow)
 * [workflow-es (Node.js)](https://github.com/danielgerlag/workflow-es)
 * [liteflow (Python)](https://github.com/danielgerlag/liteflow)
-* [workflow_rb (Ruby)](https://github.com/danielgerlag/workflow_rb)
 
 ## License
 
