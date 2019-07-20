@@ -80,7 +80,7 @@ namespace WorkflowCore.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("Workflow {0} raised error on step {1} Message: {2}", workflow.Id, pointer.StepId, ex.Message);
+                    _logger.LogError(ex, "Workflow {0} raised error on step {1} Message: {2}", workflow.Id, pointer.StepId, ex.Message);
                     wfResult.Errors.Add(new ExecutionError()
                     {
                         WorkflowId = workflow.Id,

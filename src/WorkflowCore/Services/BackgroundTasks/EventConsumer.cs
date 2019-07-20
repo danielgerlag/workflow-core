@@ -100,7 +100,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex.Message);
+                Logger.LogError(ex, ex.Message);
                 return false;
             }
             finally

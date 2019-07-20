@@ -31,7 +31,7 @@ namespace WorkflowCore.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(default(EventId), ex.Message, ex);
+                    _logger.LogError(default(EventId), ex, ex.Message);
                 }
                 if (cancel)
                 {
