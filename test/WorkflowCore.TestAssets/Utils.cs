@@ -33,9 +33,9 @@ namespace WorkflowCore.TestAssets
             return File.ReadAllText("stored-dynamic-definition.json");
         }
 
-        public static string GetTestDefinitionJsonInputExc()
+        public static string GetTestDefinitionJsonMissingInputProperty()
         {
-            return File.ReadAllText("stored-definition-input-exc.json");
+            return File.ReadAllText("stored-def-missing-input-property.json");
         }
     }
 }

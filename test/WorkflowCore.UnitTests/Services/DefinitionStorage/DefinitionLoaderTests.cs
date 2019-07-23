@@ -62,7 +62,7 @@ namespace WorkflowCore.UnitTests.Services.DefinitionStorage
         [Fact(DisplayName = "Should throw error for bad input property name on step")]
         public void ParseDefinitionInputException()
         {
-            Assert.Throws<ArgumentException>(() => _subject.LoadDefinition(TestAssets.Utils.GetTestDefinitionJsonInputExc(), Deserializers.Json));
+            Assert.Throws<ArgumentException>(() => _subject.LoadDefinition(TestAssets.Utils.GetTestDefinitionJsonMissingInputProperty(), Deserializers.Json));
         }
 
         private bool MatchTestDefinition(WorkflowDefinition def)
