@@ -1,4 +1,4 @@
-## Loading workflow definitions from JSON
+# Loading workflow definitions from JSON
 
 Simply grab the `DefinitionLoader` from the IoC container and call the `.LoadDefinition` method
 

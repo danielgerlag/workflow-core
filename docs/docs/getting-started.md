@@ -1,11 +1,12 @@
-## Basic Concepts
+# Basic Concepts
 
-### Steps
+## Steps
 
-A workflow consists of a series of connected steps.  Each step produces an outcome value and subsequent steps are triggered by subscribing to a particular outcome of a preceeding step.  The default outcome of *null* can be used for a basic linear workflow.
-Steps are usually defined by inheriting from the `StepBody` or `StepBodyAsync` abstract classes and implementing the Run/RunAsync method.  They can also be created inline while defining the workflow structure.
+A workflow consists of a series of connected steps.  Each step can have inputs and produce outputs that can be passed back to the workflow within which it exists.
 
-#### First we define some steps
+Steps are defined by creating a class that inherits from the `StepBody` or `StepBodyAsync` abstract classes and implementing the Run/RunAsync method.  They can also be created inline while defining the workflow structure.
+
+### First we define some steps
 
 ```C#
 public class HelloWorld : StepBody
@@ -19,7 +20,7 @@ public class HelloWorld : StepBody
 ```
 *The `StepBody` and `StepBodyAsync` class implementations are constructed by the workflow host which first tries to use IServiceProvider for dependency injection, if it can't construct it with this method, it will search for a parameterless constructor*
 
-#### Then we define the workflow structure by composing a chain of steps.  The is done by implementing the IWorkflow interface.
+### Then we define the workflow structure by composing a chain of steps.  The is done by implementing the IWorkflow interface
 
 ```C#
 public class HelloWorldWorkflow : IWorkflow
@@ -37,7 +38,27 @@ public class HelloWorldWorkflow : IWorkflow
 ```
 The *IWorkflow* interface also has a readonly Id property and readonly Version property.  These are generally static and are used by the workflow host to identify a workflow definition.
 
-#### You can also define your steps inline
+This workflow implemented in JSON would look like this
+```json
+{
+  "Id": "HelloWorld",
+  "Version": 1,
+  "Steps": [
+    {
+      "Id": "Hello",
+      "StepType": "MyApp.HelloWorld, MyApp",
+      "NextStepId": "Bye"
+    },        
+    {
+      "Id": "Bye",
+      "StepType": "MyApp.GoodbyeWorld, MyApp"
+    }
+  ]
+}
+```
+
+
+### You can also define your steps inline
 
 ```C#
 public class HelloWorldWorkflow : IWorkflow
@@ -64,28 +85,11 @@ public class HelloWorldWorkflow : IWorkflow
 
 Each running workflow is persisted to the chosen persistence provider between each step, where it can be picked up at a later point in time to continue execution.  The outcome result of your step can instruct the workflow host to defer further execution of the workflow until a future point in time or in response to an external event.
 
-The first time a particular step within the workflow is called, the PersistenceData property on the context object is *null*.  The ExecutionResult produced by the Run method can either cause the workflow to proceed to the next step by providing an outcome value, instruct the workflow to sleep for a defined period or simply not move the workflow forward.  If no outcome value is produced, then the step becomes re-entrant by setting PersistenceData, so the workflow host will call this step again in the future buy will populate the PersistenceData with it's previous value.
-
-For example, this step will initially run with *null* PersistenceData and put the workflow to sleep for 12 hours, while setting the PersistenceData to *new Object()*.  12 hours later, the step will be called again but context.PersistenceData will now contain the object constructed in the previous iteration, and will now produce an outcome value of *null*, causing the workflow to move forward.
-
-```C#
-public class SleepStep : StepBody
-{
-    public override ExecutionResult Run(IStepExecutionContext context)
-    {
-        if (context.PersistenceData == null)
-            return ExecutionResult.Sleep(Timespan.FromHours(12), new Object());
-        else
-            return ExecutionResult.Next();
-    }
-}
-```
-
-### Host
+## Host
 
 The workflow host is the service responsible for executing workflows.  It does this by polling the persistence provider for workflow instances that are ready to run, executes them and then passes them back to the persistence provider to by stored for the next time they are run.  It is also responsible for publishing events to any workflows that may be waiting on one.
 
-#### Setup
+### Setup
 
 Use the *AddWorkflow* extension method for *IServiceCollection* to configure the workflow host upon startup of your application.
 By default, it is configured with *MemoryPersistenceProvider* and *SingleNodeConcurrencyProvider* for testing purposes.  You can also configure a DB persistence provider at this point.
@@ -94,7 +98,7 @@ By default, it is configured with *MemoryPersistenceProvider* and *SingleNodeCon
 services.AddWorkflow();
 ```
 
-#### Usage
+### Usage
 
 When your application starts, grab the workflow host from the built-in dependency injection framework *IServiceProvider*.  Make sure you call *RegisterWorkflow*, so that the workflow host knows about all your workflows, and then call *Start()* to fire up the thread pool that executes workflows.  Use the *StartWorkflow* method to initiate a new instance of a particular workflow.
 
@@ -110,6 +114,84 @@ Console.ReadLine();
 host.Stop();
 ```
 
+## Passing data between steps
+
+Each step is intended to be a black-box, therefore they support inputs and outputs.  These inputs and outputs can be mapped to a data class that defines the custom data relevant to each workflow instance.
+
+The following sample shows how to define inputs and outputs on a step, it then shows how define a workflow with a typed class for internal data and how to map the inputs and outputs to properties on the custom data class.
+
+```C#
+//Our workflow step with inputs and outputs
+public class AddNumbers : StepBody
+{
+    public int Input1 { get; set; }
+
+    public int Input2 { get; set; }
+
+    public int Output { get; set; }
+
+    public override ExecutionResult Run(IStepExecutionContext context)
+    {
+        Output = (Input1 + Input2);
+        return ExecutionResult.Next();
+    }
+}
+
+//Our class to define the internal data of our workflow
+public class MyDataClass
+{
+    public int Value1 { get; set; }
+    public int Value2 { get; set; }
+    public int Value3 { get; set; }
+}
+
+//Our workflow definition with strongly typed internal data and mapped inputs & outputs
+public class PassingDataWorkflow : IWorkflow<MyDataClass>
+{  
+    public void Build(IWorkflowBuilder<MyDataClass> builder)
+    {
+        builder            
+            .StartWith<AddNumbers>()
+                .Input(step => step.Input1, data => data.Value1)
+                .Input(step => step.Input2, data => data.Value2)
+                .Output(data => data.Value3, step => step.Output)
+            .Then<CustomMessage>()
+                .Input(step => step.Message, data => "The answer is " + data.Value3.ToString());
+    }
+    ...
+}
+
+```
+
+or in jSON format
+```json
+{
+  "Id": "AddWorkflow",
+  "Version": 1,
+  "DataType": "MyApp.MyDataClass, MyApp",
+  "Steps": [
+	{
+      "Id": "Add",
+      "StepType": "MyApp.AddNumbers, MyApp",
+      "NextStepId": "ShowResult",
+      "Inputs": { 
+          "Value1": "data.Value1",
+          "Value2": "data.Value2" 
+       },
+      "Outputs": { 
+          "Answer": "step.Output" 
+      }
+    },    
+    {
+      "Id": "ShowResult",
+      "StepType": "MyApp.CustomMessage, MyApp",
+      "Inputs": { 
+          "Message": "\"The answer is \" + data.Value1" 
+       }
+    }
+  ]
+}
+```
 
 
 ## Injecting dependencies into steps

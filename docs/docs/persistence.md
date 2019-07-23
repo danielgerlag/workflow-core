@@ -1,4 +1,4 @@
-### Persistence
+# Persistence
 
 Since workflows are typically long running processes, they will need to be persisted to storage between steps.
 There are several persistence providers available as separate Nuget packages.

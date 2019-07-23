@@ -1,6 +1,6 @@
-### Control Structures
+# Control Structures
 
-#### Parallel ForEach
+## Parallel ForEach
 
 Use the .ForEach method to start a parallel for loop
 
@@ -24,7 +24,7 @@ public class ForEachWorkflow : IWorkflow
 }
 ```
 
-#### While Loops
+## While Loops
 
 Use the .While method to start a while construct
 
@@ -49,7 +49,7 @@ public class WhileWorkflow : IWorkflow<MyData>
 }
 ```
 
-#### If Conditions
+## If Conditions
 
 Use the .If method to start an if condition
 
@@ -73,7 +73,7 @@ public class IfWorkflow : IWorkflow<MyData>
 }
 ```
 
-#### Parallel Paths
+## Parallel Paths
 
 Use the .Parallel() method to branch parallel tasks
 
@@ -101,4 +101,33 @@ public class ParallelWorkflow : IWorkflow<MyData>
             .Then<SayGoodbye>();
     }        
 }
+```
+
+## Schedule
+
+Use `.Schedule` to register a future set of steps to run asynchronously in the background within your workflow.
+
+
+```c#
+builder
+    .StartWith(context => Console.WriteLine("Hello"))
+    .Schedule(data => TimeSpan.FromSeconds(5)).Do(schedule => schedule
+        .StartWith(context => Console.WriteLine("Doing scheduled tasks"))
+    )
+    .Then(context => Console.WriteLine("Doing normal tasks"));
+```
+
+
+## Recur
+
+Use `.Recur` to setup a set of recurring background steps within your workflow, until a certain condition is met
+
+
+```c#
+builder
+    .StartWith(context => Console.WriteLine("Hello"))
+    .Recur(data => TimeSpan.FromSeconds(5), data => data.Counter > 5).Do(recur => recur
+        .StartWith(context => Console.WriteLine("Doing recurring task"))
+    )
+    .Then(context => Console.WriteLine("Carry on"));
 ```

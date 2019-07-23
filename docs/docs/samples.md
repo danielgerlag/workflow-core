@@ -1,4 +1,4 @@
-## Samples
+# Samples
 
 [Hello World](../tree/master/src/samples/WorkflowCore.Sample01)
 

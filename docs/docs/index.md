@@ -1,17 +1,28 @@
-# Welcome to MkDocs
+# Workflow Core
 
-For full documentation visit [mkdocs.org](https://mkdocs.org).
+Workflow Core is a light weight workflow engine targeting .NET Standard.  Think: long running processes with multiple tasks that need to track state.  It supports pluggable persistence and concurrency providers to allow for multi-node clusters.
 
-## Commands
+## Installing
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs help` - Print this help message.
+Install the NuGet package "WorkflowCore"
 
-## Project layout
+```
+PM> Install-Package WorkflowCore
+```
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+## Fluent API
+
+Define workflows with the fluent API.
+
+```c#
+public class MyWorkflow : IWorkflow
+{
+    public void Build(IWorkflowBuilder<MyData> builder)
+    {    
+        builder
+           .StartWith<Task1>()
+           .Then<Task2>()
+           .Then<Task3>;
+    }
+}
+```
