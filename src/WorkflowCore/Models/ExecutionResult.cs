@@ -19,6 +19,8 @@ namespace WorkflowCore.Models
 
         public DateTime EventAsOf { get; set; }
 
+        public bool EventReWait { get; private set; }
+
         public List<object> BranchValues { get; set; } = new List<object>();
 
         public ExecutionResult()
@@ -86,6 +88,18 @@ namespace WorkflowCore.Models
                 EventName = eventName,
                 EventKey = eventKey,
                 EventAsOf = effectiveDate.ToUniversalTime()
+            };
+        }
+
+        public static ExecutionResult ReWaitForEvent(string eventName, string eventKey, DateTime effectiveDate)
+        {
+            return new ExecutionResult()
+            {
+                Proceed = false,
+                EventName = eventName,
+                EventKey = eventKey,
+                EventAsOf = effectiveDate.ToUniversalTime(),
+                EventReWait = true
             };
         }
     }

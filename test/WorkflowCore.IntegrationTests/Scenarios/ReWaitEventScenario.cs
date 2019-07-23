@@ -32,7 +32,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                         if (data.Value > 3)
                             return ExecutionResult.Next();
 
-                        return ExecutionResult.WaitForEvent("MyEvent", data.Value + "", DateTime.Now);
+                        return ExecutionResult.ReWaitForEvent("MyEvent", data.Value + "", DateTime.Now);
                     });
             }
         }
