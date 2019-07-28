@@ -1,17 +1,18 @@
-# Loading workflow definitions from JSON
+# Loading workflow definitions from JSON or YAML
 
 Simply grab the `DefinitionLoader` from the IoC container and call the `.LoadDefinition` method
 
 ```c#
+using using WorkflowCore.Services.DefinitionStorage;
+...
 var loader = serviceProvider.GetService<IDefinitionLoader>();
-loader.LoadDefinition(...);
+loader.LoadDefinition("<<json or yaml string here>>", Deserializers.Json);
 ```
 
-## Format of the JSON definition
+## Common DSL
 
-### Basics
-
-The JSON format defines the steps within the workflow by referencing the fully qualified class names.
+Both the JSON and YAML formats follow a common DSL, where step types within the workflow are referenced by the fully qualified class names.
+Built-in step types typically live in the `WorklfowCore.Primitives` namespace.
 
 | Field                   | Description                 |
 | ----------------------- | --------------------------- |
@@ -41,6 +42,16 @@ The JSON format defines the steps within the workflow by referencing the fully q
     }
   ]
 }
+```
+```yaml
+Id: HelloWorld
+Version: 1
+Steps:
+- Id: Hello
+  StepType: MyApp.HelloWorld, MyApp
+  NextStepId: Bye
+- Id: Bye
+  StepType: MyApp.GoodbyeWorld, MyApp
 ```
 
 ### Inputs and Outputs
@@ -81,6 +92,25 @@ Full details of the capabilities of  expression language can be found [here](htt
   ]
 }
 ```
+```yaml
+Id: AddWorkflow
+Version: 1
+DataType: MyApp.MyDataClass, MyApp
+Steps:
+- Id: Hello
+  StepType: MyApp.HelloWorld, MyApp
+  NextStepId: Add
+- Id: Add
+  StepType: MyApp.AddNumbers, MyApp
+  NextStepId: Bye
+  Inputs:
+    Value1: data.Value1
+    Value2: data.Value2
+  Outputs:
+    Answer: step.Result
+- Id: Bye
+  StepType: MyApp.GoodbyeWorld, MyApp
+```
 
 ```json
 {
@@ -100,6 +130,20 @@ Full details of the capabilities of  expression language can be found [here](htt
     }
   ]
 }
+```
+```yaml
+Id: AddWorkflow
+Version: 1
+DataType: MyApp.MyDataClass, MyApp
+Steps:
+- Id: Hello
+  StepType: MyApp.HelloWorld, MyApp
+  NextStepId: Print
+- Id: Print
+  StepType: MyApp.PrintMessage, MyApp
+  Inputs:
+    Message: '"Hi there!"'
+
 ```
 
 ### WaitFor
@@ -127,6 +171,17 @@ The `.WaitFor` can be implemented using 3 inputs as follows
     }
 }
 ```
+```yaml
+Id: MyWaitStep
+StepType: WorkflowCore.Primitives.WaitFor, WorkflowCore
+NextStepId: "..."
+CancelCondition: "..."
+Inputs:
+  EventName: '"Event1"'
+  EventKey: '"Key1"'
+  EffectiveDate: DateTime.Now
+
+```
 
 ### If
 
@@ -134,22 +189,36 @@ The `.If` can be implemented as follows
 
 ```json
 {
-      "Id": "MyIfStep",
-      "StepType": "WorkflowCore.Primitives.If, WorkflowCore",
-      "NextStepId": "...",
-      "Inputs": { "Condition": "<<expression to evaluate>>" },
-      "Do": [[
-          {
-            "Id": "do1",
-            "StepType": "MyApp.DoSomething1, MyApp",
-            "NextStepId": "do2"
-          },
-          {
-            "Id": "do2",
-            "StepType": "MyApp.DoSomething2, MyApp"
-          }
-      ]]
+    "Id": "MyIfStep",
+    "StepType": "WorkflowCore.Primitives.If, WorkflowCore",
+    "NextStepId": "...",
+    "Inputs": { "Condition": "<<expression to evaluate>>" },
+    "Do": [[
+        {
+          "Id": "do1",
+          "StepType": "MyApp.DoSomething1, MyApp",
+          "NextStepId": "do2"
+        },
+        {
+          "Id": "do2",
+          "StepType": "MyApp.DoSomething2, MyApp"
+        }
+    ]]
 }
+```
+```yaml
+Id: MyIfStep
+StepType: WorkflowCore.Primitives.If, WorkflowCore
+NextStepId: "..."
+Inputs:
+  Condition: "<<expression to evaluate>>"
+Do:
+- - Id: do1
+    StepType: MyApp.DoSomething1, MyApp
+    NextStepId: do2
+  - Id: do2
+    StepType: MyApp.DoSomething2, MyApp
+
 ```
 
 ### While
@@ -158,22 +227,36 @@ The `.While` can be implemented as follows
 
 ```json
 {
-      "Id": "MyWhileStep",
-      "StepType": "WorkflowCore.Primitives.While, WorkflowCore",
-      "NextStepId": "...",
-      "Inputs": { "Condition": "<<expression to evaluate>>" },
-      "Do": [[
-          {
-            "Id": "do1",
-            "StepType": "MyApp.DoSomething1, MyApp",
-            "NextStepId": "do2"
-          },
-          {
-            "Id": "do2",
-            "StepType": "MyApp.DoSomething2, MyApp"
-          }
-      ]]
+  "Id": "MyWhileStep",
+  "StepType": "WorkflowCore.Primitives.While, WorkflowCore",
+  "NextStepId": "...",
+  "Inputs": { "Condition": "<<expression to evaluate>>" },
+  "Do": [[
+      {
+        "Id": "do1",
+        "StepType": "MyApp.DoSomething1, MyApp",
+        "NextStepId": "do2"
+      },
+      {
+        "Id": "do2",
+        "StepType": "MyApp.DoSomething2, MyApp"
+      }
+  ]]
 }
+```
+```yaml
+Id: MyWhileStep
+StepType: WorkflowCore.Primitives.While, WorkflowCore
+NextStepId: "..."
+Inputs:
+  Condition: "<<expression to evaluate>>"
+Do:
+- - Id: do1
+    StepType: MyApp.DoSomething1, MyApp
+    NextStepId: do2
+  - Id: do2
+    StepType: MyApp.DoSomething2, MyApp
+
 ```
 
 ### ForEach
@@ -182,22 +265,35 @@ The `.ForEach` can be implemented as follows
 
 ```json
 {
-      "Id": "MyForEachStep",
-      "StepType": "WorkflowCore.Primitives.ForEach, WorkflowCore",
-      "NextStepId": "...",
-      "Inputs": { "Collection": "<<expression to evaluate>>" },
-      "Do": [[
-          {
-            "Id": "do1",
-            "StepType": "MyApp.DoSomething1, MyApp",
-            "NextStepId": "do2"
-          },
-          {
-            "Id": "do2",
-            "StepType": "MyApp.DoSomething2, MyApp"
-          }
-      ]]
+  "Id": "MyForEachStep",
+  "StepType": "WorkflowCore.Primitives.ForEach, WorkflowCore",
+  "NextStepId": "...",
+  "Inputs": { "Collection": "<<expression to evaluate>>" },
+  "Do": [[
+      {
+        "Id": "do1",
+        "StepType": "MyApp.DoSomething1, MyApp",
+        "NextStepId": "do2"
+      },
+      {
+        "Id": "do2",
+        "StepType": "MyApp.DoSomething2, MyApp"
+      }
+  ]]
 }
+```
+```yaml
+Id: MyForEachStep
+StepType: WorkflowCore.Primitives.ForEach, WorkflowCore
+NextStepId: "..."
+Inputs:
+  Collection: "<<expression to evaluate>>"
+Do:
+- - Id: do1
+    StepType: MyApp.DoSomething1, MyApp
+    NextStepId: do2
+  - Id: do2
+    StepType: MyApp.DoSomething2, MyApp
 ```
 
 ### Delay
@@ -206,11 +302,18 @@ The `.Delay` can be implemented as follows
 
 ```json
 {
-      "Id": "MyDelayStep",
-      "StepType": "WorkflowCore.Primitives.Delay, WorkflowCore",
-      "NextStepId": "...",
-      "Inputs": { "Period": "<<expression to evaluate>>" }
+  "Id": "MyDelayStep",
+  "StepType": "WorkflowCore.Primitives.Delay, WorkflowCore",
+  "NextStepId": "...",
+  "Inputs": { "Period": "<<expression to evaluate>>" }
 }
+```
+```yaml
+Id: MyDelayStep
+StepType: WorkflowCore.Primitives.Delay, WorkflowCore
+NextStepId: "..."
+Inputs:
+  Period: "<<expression to evaluate>>"
 ```
 
 
@@ -224,7 +327,7 @@ The `.Parallel` can be implemented as follows
       "StepType": "WorkflowCore.Primitives.Sequence, WorkflowCore",
       "NextStepId": "...",
       "Do": [
-		[ /* Branch 1 */
+		[ 
 		  {
 		    "Id": "Branch1.Step1",
 		    "StepType": "MyApp.DoSomething1, MyApp",
@@ -235,7 +338,7 @@ The `.Parallel` can be implemented as follows
 		    "StepType": "MyApp.DoSomething2, MyApp"
 		  }
 		],			
-		[ /* Branch 2 */
+		[ 
 		  {
 		    "Id": "Branch2.Step1",
 		    "StepType": "MyApp.DoSomething1, MyApp",
@@ -249,6 +352,22 @@ The `.Parallel` can be implemented as follows
 	  ]
 }
 ```
+```yaml
+Id: MyParallelStep
+StepType: WorkflowCore.Primitives.Sequence, WorkflowCore
+NextStepId: "..."
+Do:
+- - Id: Branch1.Step1
+    StepType: MyApp.DoSomething1, MyApp
+    NextStepId: Branch1.Step2
+  - Id: Branch1.Step2
+    StepType: MyApp.DoSomething2, MyApp
+- - Id: Branch2.Step1
+    StepType: MyApp.DoSomething1, MyApp
+    NextStepId: Branch2.Step2
+  - Id: Branch2.Step2
+    StepType: MyApp.DoSomething2, MyApp
+```
 
 ### Schedule
 
@@ -256,21 +375,33 @@ The `.Schedule` can be implemented as follows
 
 ```json
 {
-      "Id": "MyScheduleStep",
-      "StepType": "WorkflowCore.Primitives.Schedule, WorkflowCore",
-      "Inputs": { "Interval": "<<expression to evaluate>>" },
-      "Do": [[
-          {
-            "Id": "do1",
-            "StepType": "MyApp.DoSomething1, MyApp",
-            "NextStepId": "do2"
-          },
-          {
-            "Id": "do2",
-            "StepType": "MyApp.DoSomething2, MyApp"
-          }
-      ]]
+  "Id": "MyScheduleStep",
+  "StepType": "WorkflowCore.Primitives.Schedule, WorkflowCore",
+  "Inputs": { "Interval": "<<expression to evaluate>>" },
+  "Do": [[
+      {
+        "Id": "do1",
+        "StepType": "MyApp.DoSomething1, MyApp",
+        "NextStepId": "do2"
+      },
+      {
+        "Id": "do2",
+        "StepType": "MyApp.DoSomething2, MyApp"
+      }
+  ]]
 }
+```
+```yaml
+Id: MyScheduleStep
+StepType: WorkflowCore.Primitives.Schedule, WorkflowCore
+Inputs:
+  Interval: "<<expression to evaluate>>"
+Do:
+- - Id: do1
+    StepType: MyApp.DoSomething1, MyApp
+    NextStepId: do2
+  - Id: do2
+    StepType: MyApp.DoSomething2, MyApp
 ```
 
 ### Recur
@@ -279,22 +410,35 @@ The `.Recur` can be implemented as follows
 
 ```json
 {
-      "Id": "MyScheduleStep",
-      "StepType": "WorkflowCore.Primitives.Recur, WorkflowCore",
-      "Inputs": { 
-        "Interval": "<<expression to evaluate>>",
-        "StopCondition": "<<expression to evaluate>>" 
+  "Id": "MyScheduleStep",
+  "StepType": "WorkflowCore.Primitives.Recur, WorkflowCore",
+  "Inputs": { 
+    "Interval": "<<expression to evaluate>>",
+    "StopCondition": "<<expression to evaluate>>" 
+  },
+  "Do": [[
+      {
+        "Id": "do1",
+        "StepType": "MyApp.DoSomething1, MyApp",
+        "NextStepId": "do2"
       },
-      "Do": [[
-          {
-            "Id": "do1",
-            "StepType": "MyApp.DoSomething1, MyApp",
-            "NextStepId": "do2"
-          },
-          {
-            "Id": "do2",
-            "StepType": "MyApp.DoSomething2, MyApp"
-          }
-      ]]
+      {
+        "Id": "do2",
+        "StepType": "MyApp.DoSomething2, MyApp"
+      }
+  ]]
 }
+```
+```yaml
+Id: MyScheduleStep
+StepType: WorkflowCore.Primitives.Recur, WorkflowCore
+Inputs:
+  Interval: "<<expression to evaluate>>"
+  StopCondition: "<<expression to evaluate>>"
+Do:
+- - Id: do1
+    StepType: MyApp.DoSomething1, MyApp
+    NextStepId: do2
+  - Id: do2
+    StepType: MyApp.DoSomething2, MyApp
 ```

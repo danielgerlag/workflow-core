@@ -6,8 +6,8 @@ By default, the WorkflowHost service will run as a single node using the built-i
 
 * SingleNodeQueueProvider *(Default built-in provider)*
 * [Azure Storage Queues](https://github.com/danielgerlag/workflow-core/tree/master/src/providers/WorkflowCore.Providers.Azure)
-* [Redis](../tree/master/src/providers/WorkflowCore.Providers.Redis)
-* [RabbitMQ](../tree/master/src/providers/WorkflowCore.QueueProviders.RabbitMQ)
+* [Redis](https://github.com/danielgerlag/workflow-core/tree/master/src/providers/WorkflowCore.Providers.Redis)
+* [RabbitMQ](https://github.com/danielgerlag/workflow-core/tree/master/src/providers/WorkflowCore.QueueProviders.RabbitMQ)
 * [AWS Simple Queue Service](https://github.com/danielgerlag/workflow-core/tree/master/src/providers/WorkflowCore.Providers.AWS)
 
 
@@ -15,6 +15,6 @@ By default, the WorkflowHost service will run as a single node using the built-i
 
 * SingleNodeLockProvider *(Default built-in provider)*
 * [Azure Storage Leases](https://github.com/danielgerlag/workflow-core/tree/master/src/providers/WorkflowCore.Providers.Azure)
-* [Redis](../tree/master/src/providers/WorkflowCore.Providers.Redis)
+* [Redis](https://github.com/danielgerlag/workflow-core/tree/master/src/providers/WorkflowCore.Providers.Redis)
 * [AWS DynamoDB](https://github.com/danielgerlag/workflow-core/tree/master/src/providers/WorkflowCore.Providers.AWS)
 

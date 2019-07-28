@@ -4,9 +4,9 @@ Since workflows are typically long running processes, they will need to be persi
 There are several persistence providers available as separate Nuget packages.
 
 * MemoryPersistenceProvider *(Default provider, for demo and testing purposes)*
-* [MongoDB](../tree/master/src/providers/WorkflowCore.Persistence.MongoDB)
-* [SQL Server](../tree/master/src/providers/WorkflowCore.Persistence.SqlServer)
-* [PostgreSQL](../tree/master/src/providers/WorkflowCore.Persistence.PostgreSQL)
-* [Sqlite](../tree/master/src/providers/WorkflowCore.Persistence.Sqlite)
-* [Amazon DynamoDB](../tree/master/src/providers/WorkflowCore.Providers.AWS)
-* [Redis](../tree/master/src/providers/WorkflowCore.Providers.Redis)
+* [MongoDB](https://github.com/danielgerlag/workflow-core/tree/master/src/providers/WorkflowCore.Persistence.MongoDB)
+* [SQL Server](https://github.com/danielgerlag/workflow-core/tree/master/src/providers/WorkflowCore.Persistence.SqlServer)
+* [PostgreSQL](https://github.com/danielgerlag/workflow-core/tree/master/src/providers/WorkflowCore.Persistence.PostgreSQL)
+* [Sqlite](https://github.com/danielgerlag/workflow-core/tree/master/src/providers/WorkflowCore.Persistence.Sqlite)
+* [Amazon DynamoDB](https://github.com/danielgerlag/workflow-core/tree/master/src/providers/WorkflowCore.Providers.AWS)
+* [Redis](https://github.com/danielgerlag/workflow-core/tree/master/src/providers/WorkflowCore.Providers.Redis)

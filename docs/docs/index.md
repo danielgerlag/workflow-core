@@ -6,8 +6,14 @@ Workflow Core is a light weight workflow engine targeting .NET Standard.  Think:
 
 Install the NuGet package "WorkflowCore"
 
+Using nuget
 ```
 PM> Install-Package WorkflowCore
+```
+
+Using .net cli
+```
+dotnet add package WorkflowCore
 ```
 
 ## Fluent API

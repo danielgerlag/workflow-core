@@ -1,7 +1,7 @@
 site_name: Workflow Core
 nav:
     - Home: index.md
-    - Getting started: geting-started.md
+    - Getting started: getting-started.md
     - External events: external-events.md
     - Error handing: error-handling.md
     - Control structures: control-structures.md

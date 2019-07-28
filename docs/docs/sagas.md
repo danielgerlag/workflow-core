@@ -67,9 +67,9 @@ builder
         })
 ```
 
-## Expressing a saga in JSON
+## Expressing a saga in JSON or YAML
 
-A saga transaction can be expressed in JSON, by using the `WorkflowCore.Primitives.Sequence` step and setting the `Saga` parameter to `true`.
+A saga transaction can be expressed in JSON or YAML, by using the `WorkflowCore.Primitives.Sequence` step and setting the `Saga` parameter to `true`.
 
 The compensation steps can be defined by specifying the `CompensateWith` parameter.
 
@@ -126,4 +126,36 @@ The compensation steps can be defined by specifying the `CompensateWith` paramet
     }
   ]
 }
+```
+
+```yaml
+Id: Saga-Sample
+Version: 1
+DataType: MyApp.MyDataClass, MyApp
+Steps:
+- Id: Hello
+  StepType: MyApp.HelloWorld, MyApp
+  NextStepId: MySaga
+- Id: MySaga
+  StepType: WorkflowCore.Primitives.Sequence, WorkflowCore
+  NextStepId: Bye
+  Saga: true
+  Do:
+  - - Id: do1
+      StepType: MyApp.Task1, MyApp
+      NextStepId: do2
+      CompensateWith:
+      - Id: undo1
+        StepType: MyApp.UndoTask1, MyApp
+    - Id: do2
+      StepType: MyApp.Task2, MyApp
+      CompensateWith:
+      - Id: undo2-1
+        NextStepId: undo2-2
+        StepType: MyApp.UndoTask2, MyApp
+      - Id: undo2-2
+        StepType: MyApp.DoSomethingElse, MyApp
+- Id: Bye
+  StepType: MyApp.GoodbyeWorld, MyApp
+
 ```

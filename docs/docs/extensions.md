@@ -1,3 +1,3 @@
 ## Extensions
 
-* [User (human) workflows](../tree/master/src/extensions/WorkflowCore.Users)
+* [User (human) workflows](https://github.com/danielgerlag/workflow-core/tree/master/src/extensions/WorkflowCore.Users)

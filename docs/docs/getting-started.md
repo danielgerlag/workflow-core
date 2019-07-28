@@ -36,7 +36,7 @@ public class HelloWorldWorkflow : IWorkflow
     }  
 }
 ```
-The *IWorkflow* interface also has a readonly Id property and readonly Version property.  These are generally static and are used by the workflow host to identify a workflow definition.
+The *IWorkflow* interface also has a readonly Id property and readonly Version property.  These are used by the workflow host to identify a workflow definition.
 
 This workflow implemented in JSON would look like this
 ```json
@@ -193,10 +193,30 @@ or in jSON format
 }
 ```
 
+or in YAML format
+```yaml
+Id: AddWorkflow
+Version: 1
+DataType: MyApp.MyDataClass, MyApp
+Steps:
+- Id: Add
+  StepType: MyApp.AddNumbers, MyApp
+  NextStepId: ShowResult
+  Inputs:
+    Value1: data.Value1
+    Value2: data.Value2
+  Outputs:
+    Answer: step.Output
+- Id: ShowResult
+  StepType: MyApp.CustomMessage, MyApp
+  Inputs:
+    Message: '"The answer is " + data.Value1'
+```
+
 
 ## Injecting dependencies into steps
 
-Illustrates the use of dependency injection for workflow steps.
+If you register your step classes with the IoC container, the workflow host will use the IoC container to construct them and therefore inject any required dependencies.  This example illustrates the use of dependency injection for workflow steps.
 
 Consider the following service
 
@@ -236,6 +256,7 @@ public class DoSomething : StepBody
 ```
 
 Simply add both the service and the workflow step as transients to the service collection when setting up your IoC container.
+(Avoid registering steps as singletons, since multiple concurrent workflows may need to use them at once.)
 
 ```C#
 IServiceCollection services = new ServiceCollection();
