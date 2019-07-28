@@ -13,7 +13,7 @@ https://github.com/danielgerlag/conductor
 
 ## Documentation
 
-See [Tutorial here.](https://github.com/danielgerlag/workflow-core/wiki)
+See [Tutorial here.](https://workflow-core.readthedocs.io)
 
 ## Fluent API
 
