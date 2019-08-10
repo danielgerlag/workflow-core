@@ -59,13 +59,18 @@ namespace WorkflowCore.UnitTests.Services.DefinitionStorage
             A.CallTo(() => _registry.RegisterWorkflow(A<WorkflowDefinition>.That.Matches(MatchTestDefinition, ""))).MustHaveHappened();
         }
 
+        [Fact(DisplayName = "Should throw error for bad input property name on step")]
+        public void ParseDefinitionInputException()
+        {
+            Assert.Throws<ArgumentException>(() => _subject.LoadDefinition(TestAssets.Utils.GetTestDefinitionJsonMissingInputProperty(), Deserializers.Json));
+        }
 
         private bool MatchTestDefinition(WorkflowDefinition def)
         {
             //TODO: make this better
             var step1 = def.Steps.Single(s => s.ExternalId == "Step1");
             var step2 = def.Steps.Single(s => s.ExternalId == "Step2");
-            
+
             step1.Outcomes.Count.Should().Be(1);
             step1.Inputs.Count.Should().Be(1);
             step1.Outputs.Count.Should().Be(1);

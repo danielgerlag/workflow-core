@@ -1,0 +1,19 @@
+﻿{
+  "Id": "Test",
+  "Version": 1,
+  "Description": "",
+  "DataType": "WorkflowCore.TestAssets.DataTypes.CounterBoard, WorkflowCore.TestAssets",
+  "Steps": [
+    {
+      "Id": "Step1",
+      "StepType": "WorkflowCore.TestAssets.Steps.Counter, WorkflowCore.TestAssets",
+      "ErrorBehavior": "Retry",
+      "Inputs": {
+        "Value1": "data.Counter1"
+      },
+      "Outputs": {
+        "Counter1": "step.Value"
+      }
+    }
+  ]
+}

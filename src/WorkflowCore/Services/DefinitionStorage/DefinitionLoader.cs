@@ -25,7 +25,7 @@ namespace WorkflowCore.Services.DefinitionStorage
         {
             _registry = registry;
         }
-                        
+
         public WorkflowDefinition LoadDefinition(string source, Func<string, DefinitionSourceV1> deserializer)
         {
             var sourceObj = deserializer(source);
@@ -119,7 +119,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                     targetStep.Outcomes.Add(new StepOutcome() { ExternalNextStepId = $"{nextStep.NextStepId}" });
 
                 result.Add(targetStep);
-                
+
                 i++;
             }
 
@@ -176,6 +176,11 @@ namespace WorkflowCore.Services.DefinitionStorage
                 var environmentVarsParameter = Expression.Parameter(typeof(IDictionary), "environment");
                 var stepProperty = stepType.GetProperty(input.Key);
 
+                if (stepProperty == null)
+                {
+                    throw new ArgumentException($"Unknown property for input {input.Key} on {source.Id}");
+                }
+
                 if (input.Value is string)
                 {
                     var acn = BuildScalarInputAction(input, dataParameter, contextParameter, environmentVarsParameter, stepProperty);
@@ -203,7 +208,7 @@ namespace WorkflowCore.Services.DefinitionStorage
 
                 var dataParameter = Expression.Parameter(dataType, "data");
                 Expression targetProperty;
-                
+
                 // Check if our datatype has a matching property
                 var propertyInfo = dataType.GetProperty(output.Key);
                 if (propertyInfo != null)
@@ -217,7 +222,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                     // If we did not find a matching property try to find a Indexer with string parameter
                     propertyInfo = dataType.GetProperty("Item");
                     targetProperty = Expression.Property(dataParameter, propertyInfo, Expression.Constant(output.Key));
-                    
+
                     Action<IStepBody, object> acn = (pStep, pData) =>
                     {
                         object resolvedValue = sourceExpr.Compile().DynamicInvoke(pStep); ;
