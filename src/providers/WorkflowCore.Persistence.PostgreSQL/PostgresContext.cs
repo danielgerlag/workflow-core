@@ -12,11 +12,13 @@ namespace WorkflowCore.Persistence.PostgreSQL
     public class PostgresContext : WorkflowDbContext
     {
         private readonly string _connectionString;
+        private readonly string _schemaName;
 
-        public PostgresContext(string connectionString)
+        public PostgresContext(string connectionString,string schemaName)
             :base()
         {   
             _connectionString = connectionString;
+            _schemaName = schemaName;
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -27,37 +29,37 @@ namespace WorkflowCore.Persistence.PostgreSQL
 
         protected override void ConfigureSubscriptionStorage(EntityTypeBuilder<PersistedSubscription> builder)
         {
-            builder.ToTable("Subscription", "wfc");
+            builder.ToTable("Subscription", _schemaName);
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
 
         protected override void ConfigureWorkflowStorage(EntityTypeBuilder<PersistedWorkflow> builder)
         {
-            builder.ToTable("Workflow", "wfc");
+            builder.ToTable("Workflow", _schemaName);
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
                 
         protected override void ConfigureExecutionPointerStorage(EntityTypeBuilder<PersistedExecutionPointer> builder)
         {
-            builder.ToTable("ExecutionPointer", "wfc");
+            builder.ToTable("ExecutionPointer", _schemaName);
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
 
         protected override void ConfigureExecutionErrorStorage(EntityTypeBuilder<PersistedExecutionError> builder)
         {
-            builder.ToTable("ExecutionError", "wfc");
+            builder.ToTable("ExecutionError", _schemaName);
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
 
         protected override void ConfigureExetensionAttributeStorage(EntityTypeBuilder<PersistedExtensionAttribute> builder)
         {
-            builder.ToTable("ExtensionAttribute", "wfc");
+            builder.ToTable("ExtensionAttribute", _schemaName);
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
 
         protected override void ConfigureEventStorage(EntityTypeBuilder<PersistedEvent> builder)
         {
-            builder.ToTable("Event", "wfc");
+            builder.ToTable("Event", _schemaName);
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
     }
