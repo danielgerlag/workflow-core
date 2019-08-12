@@ -29,6 +29,8 @@ namespace WorkflowCore.Services.BackgroundTasks
 
         protected abstract Task ProcessItem(string itemId, CancellationToken cancellationToken);
 
+        protected virtual Task OnPostExecuteItem(string itemId, CancellationToken cancellationToken) { return Task.CompletedTask; }
+
         public virtual void Start()
         {
             if (DispatchTask != null)
@@ -99,6 +101,9 @@ namespace WorkflowCore.Services.BackgroundTasks
                             {
                                 activeTasks.Remove((string)data);
                             }
+
+                            // make sure the active tasks in this queue consumer has removed before putting the future task into this queue
+                            await OnPostExecuteItem((string)data, _cancellationTokenSource.Token);
                         }
                     }, item);
                     lock (activeTasks)

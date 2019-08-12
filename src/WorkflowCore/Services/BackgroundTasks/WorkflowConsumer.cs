@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -17,6 +18,8 @@ namespace WorkflowCore.Services.BackgroundTasks
 
         protected override int MaxConcurrentItems => Options.MaxConcurrentWorkflows;
         protected override QueueType Queue => QueueType.Workflow;
+
+        private Dictionary<string, WorkflowInstance> NextExecutionWorkflows = new Dictionary<string, WorkflowInstance>();
 
         public WorkflowConsumer(IPooledObjectPolicy<IPersistenceProvider> persistencePoolPolicy, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IPooledObjectPolicy<IWorkflowExecutor> executorPoolPolicy, IDateTimeProvider datetimeProvider, WorkflowOptions options)
             : base(queueProvider, loggerFactory, options)
@@ -75,7 +78,10 @@ namespace WorkflowCore.Services.BackgroundTasks
 
                         if ((workflow.Status == WorkflowStatus.Runnable) && workflow.NextExecution.HasValue && workflow.NextExecution.Value < readAheadTicks)
                         {
-                            new Task(() => FutureQueue(workflow, cancellationToken)).Start();
+                            lock (NextExecutionWorkflows)
+                            {
+                                NextExecutionWorkflows.Add(itemId, workflow);
+                            }
                         }
                     }
                 }
@@ -85,7 +91,20 @@ namespace WorkflowCore.Services.BackgroundTasks
                 _persistenceStorePool.Return(persistenceStore);
             }
         }
-        
+
+        protected override async Task OnPostExecuteItem(string itemId, CancellationToken cancellationToken)
+        {
+            if (NextExecutionWorkflows.TryGetValue(itemId, out var workflow))
+            {
+                await FutureQueue(workflow, cancellationToken);
+
+                lock (NextExecutionWorkflows)
+                {
+                    NextExecutionWorkflows.Remove(itemId);
+                }
+            }
+        }
+
         private async Task SubscribeEvent(EventSubscription subscription, IPersistenceProvider persistenceStore)
         {
             //TODO: move to own class
@@ -100,7 +119,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             }
         }
 
-        private async void FutureQueue(WorkflowInstance workflow, CancellationToken cancellationToken)
+        private async Task FutureQueue(WorkflowInstance workflow, CancellationToken cancellationToken)
         {
             try
             {
