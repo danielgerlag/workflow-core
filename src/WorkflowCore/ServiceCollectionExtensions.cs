@@ -63,6 +63,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddTransient<Foreach>();
 
+            services.AddSingleton<IStepExecutionContextAccessor, StepExecutionContextAccessor>();
+
             return services;
         }
     }

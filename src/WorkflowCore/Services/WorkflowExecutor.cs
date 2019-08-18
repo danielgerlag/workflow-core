@@ -141,6 +141,21 @@ namespace WorkflowCore.Services
             {
                 _logger.LogDebug("Starting step {0} on workflow {1}", step.Name, workflow.Id);
 
+                IStepExecutionContext context = new StepExecutionContext()
+                {
+                    Workflow = workflow,
+                    Step = step,
+                    PersistenceData = pointer.PersistenceData,
+                    ExecutionPointer = pointer,
+                    Item = pointer.ContextItem
+                };
+
+                if (scope.ServiceProvider.GetService<IStepExecutionContextAccessor>()
+                    is StepExecutionContextAccessor accessor)
+                {
+                    accessor.StepExecutionContext = context;
+                }
+
                 IStepBody body = step.ConstructBody(scope.ServiceProvider);
 
                 if (body == null)
@@ -156,15 +171,6 @@ namespace WorkflowCore.Services
                     });
                     return;
                 }
-
-                IStepExecutionContext context = new StepExecutionContext()
-                {
-                    Workflow = workflow,
-                    Step = step,
-                    PersistenceData = pointer.PersistenceData,
-                    ExecutionPointer = pointer,
-                    Item = pointer.ContextItem
-                };
 
                 foreach (var input in step.Inputs)
                     input.AssignInput(workflow.Data, body, context);
