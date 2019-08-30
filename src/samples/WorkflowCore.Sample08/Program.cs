@@ -40,14 +40,18 @@ namespace WorkflowCore.Sample08
                 }
 
                 //Thread.Sleep(500);
-                
-                Console.ReadLine();
-                Console.WriteLine();
-                Console.WriteLine("Choosing " + item.Options.First().Key);
 
-                host.PublishUserAction(openItems.First().Key, @"domain\john", item.Options.First().Value).Wait();
+                var input = Console.ReadLine();
+                Console.WriteLine();
+                var optionselected = item.Options.Single(x => x.Value == input);
+                Console.WriteLine("Choosing " + optionselected.Key);
+
+                host.PublishUserAction(optionselected.Key, @"domain\john", optionselected.Value).Wait();
             }
 
+            timer.Dispose();
+            timer = null;
+            Console.WriteLine("Workflow ended.");
             Console.ReadLine();
             host.Stop();
         }
@@ -85,6 +89,6 @@ namespace WorkflowCore.Sample08
             return serviceProvider;
         }
 
-        
+
     }
 }
