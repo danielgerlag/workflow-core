@@ -77,6 +77,8 @@ namespace WorkflowCore.Services.BackgroundTasks
                     if (activeTasks.ContainsKey(item))
                     {
                         secondPasses.Add(item);
+                        if (!EnableSecondPasses)
+                            await QueueProvider.QueueWork(item, Queue);
                         continue;
                     }
 
