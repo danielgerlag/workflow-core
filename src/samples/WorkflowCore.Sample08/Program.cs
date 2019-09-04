@@ -43,12 +43,16 @@ namespace WorkflowCore.Sample08
 
                 var input = Console.ReadLine();
                 Console.WriteLine();
-                var optionselected = item.Options.Single(x => x.Value == input);
-                Console.WriteLine("Choosing " + optionselected.Key);
 
-                host.PublishUserAction(optionselected.Key, @"domain\john", optionselected.Value).Wait();
+                string key = item.Key;
+                string value = item.Options.Single(x => x.Value == input).Value;
+
+                Console.WriteLine("Choosing key:" + key + " value:" + value);
+
+                host.PublishUserAction(key, @"domain\john", value).Wait();
             }
-
+            Thread.Sleep(1000);
+            Console.WriteLine("Open user actions left:" + host.GetOpenUserActions(workflowId).Count().ToString());
             timer.Dispose();
             timer = null;
             Console.WriteLine("Workflow ended.");
