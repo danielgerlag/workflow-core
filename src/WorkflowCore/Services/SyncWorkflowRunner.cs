@@ -9,7 +9,7 @@ using WorkflowCore.Models.LifeCycleEvents;
 
 namespace WorkflowCore.Services
 {
-    public class SyncRunner : ISyncRunner
+    public class SyncWorkflowRunner : ISyncWorkflowRunner
     {
         private readonly IWorkflowHost _host;
         private readonly IWorkflowExecutor _executor;
@@ -19,7 +19,7 @@ namespace WorkflowCore.Services
         private readonly IExecutionPointerFactory _pointerFactory;
         private readonly IQueueProvider _queueService;
 
-        public SyncRunner(IWorkflowHost host, IWorkflowExecutor executor, IDistributedLockProvider lockService, IWorkflowRegistry registry, IPersistenceProvider persistenceStore, IExecutionPointerFactory pointerFactory, IQueueProvider queueService)
+        public SyncWorkflowRunner(IWorkflowHost host, IWorkflowExecutor executor, IDistributedLockProvider lockService, IWorkflowRegistry registry, IPersistenceProvider persistenceStore, IExecutionPointerFactory pointerFactory, IQueueProvider queueService)
         {
             _host = host;
             _executor = executor;
@@ -30,7 +30,7 @@ namespace WorkflowCore.Services
             _queueService = queueService;
         }
 
-        public async Task<WorkflowInstance> RunWorkflowSync<TData>(string workflowId, int version, TData data, string reference, TimeSpan timeOut)
+        public async Task<WorkflowInstance> RunWorkflowSync<TData>(string workflowId, int version, TData data, string reference, TimeSpan timeOut, bool persistSate = true)
             where TData : new()
         {
             var def = _registry.GetDefinition(workflowId, version);
@@ -47,7 +47,7 @@ namespace WorkflowCore.Services
                 Description = def.Description,
                 NextExecution = 0,
                 CreateTime = DateTime.Now.ToUniversalTime(),
-                Status = WorkflowStatus.Runnable,
+                Status = WorkflowStatus.Suspended,
                 Reference = reference
             };
 
@@ -63,7 +63,14 @@ namespace WorkflowCore.Services
 
             var stopWatch = new Stopwatch();
 
-            var id = await _persistenceStore.CreateNewWorkflow(wf);
+            var id = Guid.NewGuid().ToString();
+
+            if (persistSate)
+                id = await _persistenceStore.CreateNewWorkflow(wf);
+            else
+                wf.Id = id;
+
+            wf.Status = WorkflowStatus.Runnable;
             
             if (!await _lockService.AcquireLock(id, CancellationToken.None))
             {
@@ -76,7 +83,8 @@ namespace WorkflowCore.Services
                 while ((wf.Status == WorkflowStatus.Runnable) && (timeOut.TotalMilliseconds > stopWatch.ElapsedMilliseconds))
                 {
                     await _executor.Execute(wf);
-                    await _persistenceStore.PersistWorkflow(wf);
+                    if (persistSate)
+                        await _persistenceStore.PersistWorkflow(wf);
                 }
             }
             finally
@@ -84,8 +92,10 @@ namespace WorkflowCore.Services
                 stopWatch.Stop();
                 await _lockService.ReleaseLock(id);
             }
-            
-            await _queueService.QueueWork(id, QueueType.Index);
+
+            if (persistSate)
+                await _queueService.QueueWork(id, QueueType.Index);
+
             return wf;
         }
     }
