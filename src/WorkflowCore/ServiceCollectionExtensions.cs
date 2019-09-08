@@ -59,6 +59,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<IPooledObjectPolicy<IPersistenceProvider>, InjectedObjectPoolPolicy<IPersistenceProvider>>();
             services.AddTransient<IPooledObjectPolicy<IWorkflowExecutor>, InjectedObjectPoolPolicy<IWorkflowExecutor>>();
 
+            services.AddTransient<ISyncWorkflowRunner, SyncWorkflowRunner>();
             services.AddTransient<IDefinitionLoader, DefinitionLoader>();
 
             services.AddTransient<Foreach>();
