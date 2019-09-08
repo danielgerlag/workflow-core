@@ -79,12 +79,17 @@ namespace WorkflowCore.Services
 
         public void Start()
         {
+            StartAsync(CancellationToken.None).Wait();
+        }
+        
+        public async Task StartAsync(CancellationToken cancellationToken)
+        {
             _shutdown = false;
             PersistenceStore.EnsureStoreExists();
-            QueueProvider.Start().Wait();
-            LockProvider.Start().Wait();
-            _lifeCycleEventHub.Start().Wait();
-            _searchIndex.Start().Wait();
+            await QueueProvider.Start();
+            await LockProvider.Start();
+            await _lifeCycleEventHub.Start();
+            await _searchIndex.Start();
             
             Logger.LogInformation("Starting background tasks");
 
@@ -94,6 +99,11 @@ namespace WorkflowCore.Services
 
         public void Stop()
         {
+            StopAsync(CancellationToken.None).Wait();
+        }
+        
+        public async Task StopAsync(CancellationToken cancellationToken)
+        {
             _shutdown = true;
 
             Logger.LogInformation("Stopping background tasks");
@@ -102,10 +112,10 @@ namespace WorkflowCore.Services
 
             Logger.LogInformation("Worker tasks stopped");
 
-            QueueProvider.Stop().Wait();
-            LockProvider.Stop().Wait();
-            _searchIndex.Stop().Wait();
-            _lifeCycleEventHub.Stop().Wait();
+            await QueueProvider.Stop();
+            await LockProvider.Stop();
+            await _searchIndex.Stop();
+            await _lifeCycleEventHub.Stop();
         }
 
         public void RegisterWorkflow<TWorkflow>()

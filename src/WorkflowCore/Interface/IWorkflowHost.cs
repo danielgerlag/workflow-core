@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
 using WorkflowCore.Models;
 using WorkflowCore.Models.LifeCycleEvents;
 
 namespace WorkflowCore.Interface
 {
-    public interface IWorkflowHost : IWorkflowController
+    public interface IWorkflowHost : IWorkflowController, IHostedService
     {
         /// <summary>
         /// Start the workflow host, this enable execution of workflows
