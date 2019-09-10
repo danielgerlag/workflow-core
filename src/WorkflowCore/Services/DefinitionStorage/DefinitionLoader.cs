@@ -208,6 +208,33 @@ namespace WorkflowCore.Services.DefinitionStorage
 
                 var dataParameter = Expression.Parameter(dataType, "data");
                 Expression targetProperty;
+                
+                // If the property has a point, check for a nested type
+                Expression parentExpression = dataParameter;
+                Type parentDataType = dataType;
+                string key = output.Key;
+                bool continueLoop = key.Contains(".");
+                while (continueLoop)
+                {
+                    var indexOfPoint = key.IndexOf(".", StringComparison.InvariantCultureIgnoreCase);
+                    var subPropertyName = key.Substring(0,indexOfPoint);
+                    var subProperty = parentDataType.GetProperty(subPropertyName);
+                    key = key.Substring(indexOfPoint + 1);
+                    continueLoop = key.Contains(".");
+                    var subPropertyParameterProperty = Expression.Property(parentExpression, subProperty);
+                    parentExpression = subPropertyParameterProperty;
+                    parentDataType = subProperty.PropertyType;
+                    if(!continueLoop)
+                    {
+                        subPropertyName = key;
+                        subProperty = parentDataType.GetProperty(subPropertyName);
+                        subPropertyParameterProperty = Expression.Property(parentExpression, subProperty);
+                        var subPropertyTarget =
+                            Expression.Lambda(subPropertyParameterProperty, dataParameter);
+                        step.Outputs.Add(new MemberMapParameter(sourceExpr, subPropertyTarget));
+                        return;
+                    }
+                }
 
                 // Check if our datatype has a matching property
                 var propertyInfo = dataType.GetProperty(output.Key);
