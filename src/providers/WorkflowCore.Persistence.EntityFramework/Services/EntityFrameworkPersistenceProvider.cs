@@ -182,7 +182,9 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             }
         }
 
-        public async Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf)
+        public Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf) => GetSubscriptions(eventName, eventKey, asOf);
+
+        public async Task<IEnumerable<EventSubscription>> GetSubscriptions(string eventName, string eventKey, DateTime asOf)
         {
             using (var db = ConstructDbContext())
             {

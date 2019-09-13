@@ -39,7 +39,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                 var evt = await _persistenceStore.GetEvent(itemId);
                 if (evt.EventTime <= _datetimeProvider.Now.ToUniversalTime())
                 {
-                    var subs = await _persistenceStore.GetSubcriptions(evt.EventName, evt.EventKey, evt.EventTime);
+                    var subs = await _persistenceStore.GetSubscriptions(evt.EventName, evt.EventKey, evt.EventTime);
                     var toQueue = new List<string>();
                     var complete = true;
 

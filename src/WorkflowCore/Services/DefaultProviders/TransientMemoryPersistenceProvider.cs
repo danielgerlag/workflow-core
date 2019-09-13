@@ -32,7 +32,9 @@ namespace WorkflowCore.Services
 
         public Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt) => _innerService.GetRunnableInstances(asAt);
 
-        public Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf) => _innerService.GetSubcriptions(eventName, eventKey, asOf);
+        public Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf) => GetSubscriptions(eventName, eventKey, asOf);
+
+        public Task<IEnumerable<EventSubscription>> GetSubscriptions(string eventName, string eventKey, DateTime asOf) => _innerService.GetSubscriptions(eventName, eventKey, asOf);
 
         public Task<WorkflowInstance> GetWorkflowInstance(string Id) => _innerService.GetWorkflowInstance(Id);
 

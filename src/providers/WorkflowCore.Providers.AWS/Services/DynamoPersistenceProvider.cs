@@ -177,7 +177,9 @@ namespace WorkflowCore.Providers.AWS.Services
             return subscription.Id;
         }
 
-        public async Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf)
+        public Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf) => GetSubscriptions(eventName, eventKey, asOf);
+
+        public async Task<IEnumerable<EventSubscription>> GetSubscriptions(string eventName, string eventKey, DateTime asOf)
         {
             var result = new List<EventSubscription>();
             var asOfTicks = asOf.ToUniversalTime().Ticks;

@@ -75,7 +75,7 @@ namespace WorkflowCore.Testing
 
         protected IEnumerable<EventSubscription> GetActiveSubscriptons(string eventName, string eventKey)
         {
-            return PersistenceProvider.GetSubcriptions(eventName, eventKey, DateTime.MaxValue).Result;
+            return PersistenceProvider.GetSubscriptions(eventName, eventKey, DateTime.MaxValue).Result;
         }
 
         protected void WaitForEventSubscription(string eventName, string eventKey, TimeSpan timeOut)
