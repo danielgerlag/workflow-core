@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Persistence.MongoDB.Services;
 
@@ -18,6 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 var db = client.GetDatabase(databaseName);
                 return new MongoPersistenceProvider(db);
             });
+            options.Services.AddTransient<IWorkflowPurger, WorkflowPurger>();
             return options;
         }
     }
