@@ -97,6 +97,7 @@ namespace WorkflowCore.Interface
         /// <param name="action"></param>
         /// <returns></returns>
         IStepBuilder<TData, TStepBody> Input(Action<TStepBody, TData> action);
+        IStepBuilder<TData, TStepBody> Input(Action<TStepBody, TData, IStepExecutionContext> action);
 
         /// <summary>
         /// Map properties on the workflow data object to properties on the step after the step executes
