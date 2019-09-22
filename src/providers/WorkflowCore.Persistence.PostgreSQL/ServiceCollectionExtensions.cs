@@ -15,7 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection
             string connectionString, bool canCreateDB, bool canMigrateDB, string schemaName="wfc")
         {
             options.UsePersistence(sp => new EntityFrameworkPersistenceProvider(new PostgresContextFactory(connectionString, schemaName), canCreateDB, canMigrateDB));
-            options.Services.AddTransient<IWorkflowPurger, WorkflowPurger>();
+            options.Services.AddTransient<IWorkflowPurger>(sp => new WorkflowPurger(new PostgresContextFactory(connectionString, schemaName)));
             return options;
         }
     }
