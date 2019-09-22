@@ -19,7 +19,12 @@ namespace Microsoft.Extensions.DependencyInjection
                 var db = client.GetDatabase(databaseName);
                 return new MongoPersistenceProvider(db);
             });
-            options.Services.AddTransient<IWorkflowPurger, WorkflowPurger>();
+            options.Services.AddTransient<IWorkflowPurger>(sp =>
+            {
+                var client = new MongoClient(mongoUrl);
+                var db = client.GetDatabase(databaseName);
+                return new WorkflowPurger(db);
+            });
             return options;
         }
     }
