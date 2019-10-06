@@ -13,6 +13,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 {
     public class MongoPersistenceProvider : IPersistenceProvider
     {
+        internal const string WorkflowCollectionName = "wfc.workflows";
         private readonly IMongoDatabase _database;
 
         public MongoPersistenceProvider(IMongoDatabase database)
@@ -77,7 +78,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             }
         }
 
-        private IMongoCollection<WorkflowInstance> WorkflowInstances => _database.GetCollection<WorkflowInstance>("wfc.workflows");
+        private IMongoCollection<WorkflowInstance> WorkflowInstances => _database.GetCollection<WorkflowInstance>(WorkflowCollectionName);
 
         private IMongoCollection<EventSubscription> EventSubscriptions => _database.GetCollection<EventSubscription>("wfc.subscriptions");
 
