@@ -75,7 +75,7 @@ namespace WorkflowCore.Services.BackgroundTasks
 
                         if ((workflow.Status == WorkflowStatus.Runnable) && workflow.NextExecution.HasValue && workflow.NextExecution.Value < readAheadTicks)
                         {
-                            new Task(() => FutureQueue(workflow, cancellationToken)).Start();
+                            FutureQueue(workflow, cancellationToken).Start();
                         }
                     }
                 }
@@ -100,7 +100,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             }
         }
 
-        private async void FutureQueue(WorkflowInstance workflow, CancellationToken cancellationToken)
+        private async Task FutureQueue(WorkflowInstance workflow, CancellationToken cancellationToken)
         {
             try
             {

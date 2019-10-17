@@ -34,7 +34,7 @@ namespace WorkflowCore.Services.DefinitionStorage
             return def;
         }
 
-        private WorkflowDefinition Convert(DefinitionSourceV1 source)
+        private static WorkflowDefinition Convert(DefinitionSourceV1 source)
         {
             var dataType = typeof(object);
             if (!string.IsNullOrEmpty(source.DataType))
@@ -55,7 +55,7 @@ namespace WorkflowCore.Services.DefinitionStorage
         }
 
 
-        private WorkflowStepCollection ConvertSteps(ICollection<StepSourceV1> source, Type dataType)
+        private static WorkflowStepCollection ConvertSteps(ICollection<StepSourceV1> source, Type dataType)
         {
             var result = new WorkflowStepCollection();
             int i = 0;
@@ -167,7 +167,7 @@ namespace WorkflowCore.Services.DefinitionStorage
             return result;
         }
 
-        private void AttachInputs(StepSourceV1 source, Type dataType, Type stepType, WorkflowStep step)
+        private static void AttachInputs(StepSourceV1 source, Type dataType, Type stepType, WorkflowStep step)
         {
             foreach (var input in source.Inputs)
             {
@@ -199,7 +199,7 @@ namespace WorkflowCore.Services.DefinitionStorage
             }
         }
 
-        private void AttachOutputs(StepSourceV1 source, Type dataType, Type stepType, WorkflowStep step)
+        private static void AttachOutputs(StepSourceV1 source, Type dataType, Type stepType, WorkflowStep step)
         {
             foreach (var output in source.Outputs)
             {
@@ -234,7 +234,7 @@ namespace WorkflowCore.Services.DefinitionStorage
             }
         }
 
-        private Type FindType(string name)
+        private static Type FindType(string name)
         {
             return Type.GetType(name, true, true);
         }

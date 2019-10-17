@@ -27,7 +27,7 @@ namespace WorkflowCore.Services.BackgroundTasks
 
         public void Start()
         {
-            _pollTimer = new Timer(new TimerCallback(PollRunnables), null, TimeSpan.FromSeconds(0), _options.PollInterval);
+            _pollTimer = new Timer(PollRunnables, null, TimeSpan.FromSeconds(0), _options.PollInterval);
         }
 
         public void Stop()

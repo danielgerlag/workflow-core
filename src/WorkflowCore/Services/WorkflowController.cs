@@ -75,7 +75,7 @@ namespace WorkflowCore.Services
                 if (typeof(TData) == def.DataType)
                     wf.Data = new TData();
                 else
-                    wf.Data = def.DataType.GetConstructor(new Type[0]).Invoke(new object[0]);
+                    wf.Data = def.DataType.GetConstructor(new Type[0])?.Invoke(new object[0]);
             }
 
             wf.ExecutionPointers.Add(_pointerFactory.BuildGenesisPointer(def));
@@ -121,23 +121,20 @@ namespace WorkflowCore.Services
             try
             {
                 var wf = await _persistenceStore.GetWorkflowInstance(workflowId);
-                if (wf.Status == WorkflowStatus.Runnable)
+                if (wf.Status != WorkflowStatus.Runnable) return false;
+                
+                wf.Status = WorkflowStatus.Suspended;
+                await _persistenceStore.PersistWorkflow(wf);
+                await _queueProvider.QueueWork(workflowId, QueueType.Index);
+                await _eventHub.PublishNotification(new WorkflowSuspended()
                 {
-                    wf.Status = WorkflowStatus.Suspended;
-                    await _persistenceStore.PersistWorkflow(wf);
-                    await _queueProvider.QueueWork(workflowId, QueueType.Index);
-                    await _eventHub.PublishNotification(new WorkflowSuspended()
-                    {
-                        EventTimeUtc = DateTime.UtcNow,
-                        Reference = wf.Reference,
-                        WorkflowInstanceId = wf.Id,
-                        WorkflowDefinitionId = wf.WorkflowDefinitionId,
-                        Version = wf.Version
-                    });
-                    return true;
-                }
-
-                return false;
+                    EventTimeUtc = DateTime.UtcNow,
+                    Reference = wf.Reference,
+                    WorkflowInstanceId = wf.Id,
+                    WorkflowDefinitionId = wf.WorkflowDefinitionId,
+                    Version = wf.Version
+                });
+                return true;
             }
             finally
             {

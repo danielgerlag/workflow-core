@@ -79,10 +79,7 @@ namespace WorkflowCore.Services
             WorkflowStep<TStep> step = new WorkflowStep<TStep>();
             var stepBuilder = new StepBuilder<TData, TStep>(this, step);
 
-            if (stepSetup != null)
-            {
-                stepSetup.Invoke(stepBuilder);
-            }
+            stepSetup?.Invoke(stepBuilder);
 
             step.Name = step.Name ?? typeof(TStep).Name;
             AddStep(step);
@@ -91,8 +88,7 @@ namespace WorkflowCore.Services
 
         public IStepBuilder<TData, InlineStepBody> StartWith(Func<IStepExecutionContext, ExecutionResult> body)
         {
-            WorkflowStepInline newStep = new WorkflowStepInline();
-            newStep.Body = body;
+            WorkflowStepInline newStep = new WorkflowStepInline {Body = body};
             var stepBuilder = new StepBuilder<TData, InlineStepBody>(this, newStep);
             AddStep(newStep);
             return stepBuilder;

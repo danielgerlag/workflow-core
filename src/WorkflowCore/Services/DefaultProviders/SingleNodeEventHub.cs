@@ -10,7 +10,7 @@ namespace WorkflowCore.Services
 {
     public class SingleNodeEventHub : ILifeCycleEventHub
     {
-        private ICollection<Action<LifeCycleEvent>> _subscribers = new HashSet<Action<LifeCycleEvent>>();
+        private readonly ICollection<Action<LifeCycleEvent>> _subscribers = new HashSet<Action<LifeCycleEvent>>();
         private readonly ILogger _logger;
 
         public SingleNodeEventHub(ILoggerFactory loggerFactory)
@@ -30,7 +30,7 @@ namespace WorkflowCore.Services
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning(default(EventId), ex, $"Error on event subscriber: {ex.Message}");
+                        _logger.LogWarning(default, ex, $"Error on event subscriber: {ex.Message}");
                     }
                 }
             });

@@ -39,10 +39,7 @@ namespace WorkflowCore.Services
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, TStep>(WorkflowBuilder, newStep);
 
-            if (stepSetup != null)
-            {
-                stepSetup.Invoke(stepBuilder);
-            }
+            stepSetup?.Invoke(stepBuilder);
 
             newStep.Name = newStep.Name ?? typeof(TStep).Name;
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
@@ -59,9 +56,8 @@ namespace WorkflowCore.Services
         }
 
         public IStepBuilder<TData, InlineStepBody> Then(Func<IStepExecutionContext, ExecutionResult> body)
-        {            
-            WorkflowStepInline newStep = new WorkflowStepInline();
-            newStep.Body = body;
+        {
+            WorkflowStepInline newStep = new WorkflowStepInline {Body = body};
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, InlineStepBody>(WorkflowBuilder, newStep);
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
@@ -138,8 +134,7 @@ namespace WorkflowCore.Services
 
         public IStepBuilder<TData, WaitFor> WaitFor(string eventName, Expression<Func<TData, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null, Expression<Func<TData, bool>> cancelCondition = null)
         {
-            var newStep = new WorkflowStep<WaitFor>();
-            newStep.CancelCondition = cancelCondition;
+            var newStep = new WorkflowStep<WaitFor> {CancelCondition = cancelCondition};
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, WaitFor>(WorkflowBuilder, newStep);
@@ -157,8 +152,7 @@ namespace WorkflowCore.Services
 
         public IStepBuilder<TData, WaitFor> WaitFor(string eventName, Expression<Func<TData, IStepExecutionContext, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null, Expression<Func<TData, bool>> cancelCondition = null)
         {
-            var newStep = new WorkflowStep<WaitFor>();
-            newStep.CancelCondition = cancelCondition;
+            var newStep = new WorkflowStep<WaitFor> {CancelCondition = cancelCondition};
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, WaitFor>(WorkflowBuilder, newStep);
@@ -388,10 +382,7 @@ namespace WorkflowCore.Services
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, TStep>(WorkflowBuilder, newStep);
 
-            if (stepSetup != null)
-            {
-                stepSetup.Invoke(stepBuilder);
-            }
+            stepSetup?.Invoke(stepBuilder);
 
             newStep.Name = newStep.Name ?? typeof(TStep).Name;
             Step.CompensationStepId = newStep.Id;
@@ -401,8 +392,7 @@ namespace WorkflowCore.Services
 
         public IStepBuilder<TData, TStepBody> CompensateWith(Func<IStepExecutionContext, ExecutionResult> body)
         {
-            WorkflowStepInline newStep = new WorkflowStepInline();
-            newStep.Body = body;
+            WorkflowStepInline newStep = new WorkflowStepInline {Body = body};
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, InlineStepBody>(WorkflowBuilder, newStep);
             Step.CompensationStepId = newStep.Id;

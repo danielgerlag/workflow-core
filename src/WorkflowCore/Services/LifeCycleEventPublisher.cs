@@ -38,7 +38,7 @@ namespace WorkflowCore.Services
                 throw new InvalidOperationException();
             }
 
-            _dispatchTask = new Task(Execute);
+            _dispatchTask = Execute();
             _dispatchTask.Start();
         }
 
@@ -54,7 +54,7 @@ namespace WorkflowCore.Services
             _outbox.Dispose();
         }
 
-        private async void Execute()
+        private async Task Execute()
         {
             foreach (var evt in _outbox.GetConsumingEnumerable())
             {
@@ -64,7 +64,7 @@ namespace WorkflowCore.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(default(EventId), ex, ex.Message);
+                    _logger.LogError(default, ex, ex.Message);
                 }
             }
         }

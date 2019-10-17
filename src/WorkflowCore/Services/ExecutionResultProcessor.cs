@@ -120,7 +120,7 @@ namespace WorkflowCore.Services
             }
         }
         
-        private bool ShouldCompensate(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer currentPointer)
+        private static bool ShouldCompensate(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer currentPointer)
         {
             var scope = new Stack<string>(currentPointer.Scope);
             scope.Push(currentPointer.Id);

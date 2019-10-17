@@ -73,7 +73,7 @@ namespace WorkflowCore.Services
             };
         }
 
-        private string GenerateId()
+        private static string GenerateId()
         {
             return Guid.NewGuid().ToString();
         }

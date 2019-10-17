@@ -61,7 +61,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                 {
                     if (activeTasks.Count >= MaxConcurrentItems)
                     {
-                        await Task.Delay(Options.IdleTime);
+                        await Task.Delay(Options.IdleTime, cancelToken);
                         continue;
                     }
 
@@ -84,7 +84,7 @@ namespace WorkflowCore.Services.BackgroundTasks
 
                     secondPasses.Remove(item);
 
-                    var task = new Task(async (object data) =>
+                    var task = new Task(async data =>
                     {
                         try
                         {

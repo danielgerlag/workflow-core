@@ -58,7 +58,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                 }
                 if (errCount < 20)
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(10));
+                    await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
                     await QueueProvider.QueueWork(itemId, Queue);
                     return;
                 }
@@ -68,7 +68,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     _errorCounts.Remove(itemId);
                 }
 
-                Logger.LogError(default(EventId), e, $"Unable to index workfow - {itemId} - {e.Message}");
+                Logger.LogError(default, e, $"Unable to index workfow - {itemId} - {e.Message}");
             }
         }
 

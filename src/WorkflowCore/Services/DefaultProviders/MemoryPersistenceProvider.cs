@@ -85,7 +85,7 @@ namespace WorkflowCore.Services
                     result = result.Where(x => x.Status == status.Value);
                 }
 
-                if (!String.IsNullOrEmpty(type))
+                if (!string.IsNullOrEmpty(type))
                 {
                     result = result.Where(x => x.WorkflowDefinitionId == type);
                 }
