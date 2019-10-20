@@ -7,7 +7,7 @@ Workflow Core is a light weight embeddable workflow engine targeting .NET Standa
 ### Announcements
 
 #### New related project: Conductor
-Conductor is a stand-alone workflow server as opposed to a library that uses Workflow Core internally. It exposes an API that allows you to store workflow definitions, track running workflows, manage events and define lambdas and scripts for usage in your workflows.
+Conductor is a stand-alone workflow server as opposed to a library that uses Workflow Core internally. It exposes an API that allows you to store workflow definitions, track running workflows, manage events and define custom steps and scripts for usage in your workflows.
 
 https://github.com/danielgerlag/conductor
 
