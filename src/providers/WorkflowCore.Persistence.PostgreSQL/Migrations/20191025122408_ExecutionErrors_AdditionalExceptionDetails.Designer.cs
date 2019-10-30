@@ -2,28 +2,29 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using WorkflowCore.Persistence.SqlServer;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using WorkflowCore.Persistence.PostgreSQL;
 
-namespace WorkflowCore.Persistence.SqlServer.Migrations
+namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 {
-    [DbContext(typeof(SqlServerContext))]
-    partial class SqlServerPersistenceProviderModelSnapshot : ModelSnapshot
+    [DbContext(typeof(PostgresContext))]
+    [Migration("20191025122408_ExecutionErrors_AdditionalExceptionDetails")]
+    partial class ExecutionErrors_AdditionalExceptionDetails
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
                 .HasAnnotation("ProductVersion", "2.1.0-rtm-30799")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedEvent", b =>
                 {
                     b.Property<long>("PersistenceId")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("EventData");
 
@@ -56,8 +57,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionError", b =>
                 {
                     b.Property<long>("PersistenceId")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<DateTime>("ErrorTime");
 
@@ -89,8 +89,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", b =>
                 {
                     b.Property<long>("PersistenceId")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<bool>("Active");
 
@@ -147,8 +146,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExtensionAttribute", b =>
                 {
                     b.Property<long>("PersistenceId")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("AttributeKey")
                         .HasMaxLength(100);
@@ -167,8 +165,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedSubscription", b =>
                 {
                     b.Property<long>("PersistenceId")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("EventKey")
                         .HasMaxLength(200);
@@ -201,8 +198,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedWorkflow", b =>
                 {
                     b.Property<long>("PersistenceId")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .ValueGeneratedOnAdd();
 
                     b.Property<DateTime?>("CompleteTime");
 
@@ -212,8 +208,6 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
                     b.Property<string>("Description")
                         .HasMaxLength(500);
-
-                    b.Property<int>("ExecutionErrorCount");
 
                     b.Property<Guid>("InstanceId")
                         .HasMaxLength(200);

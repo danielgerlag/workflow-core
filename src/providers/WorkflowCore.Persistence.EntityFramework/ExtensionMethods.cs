@@ -26,8 +26,9 @@ namespace WorkflowCore.Persistence.EntityFramework
             persistable.WorkflowDefinitionId = instance.WorkflowDefinitionId;
             persistable.Status = instance.Status;
             persistable.CreateTime = instance.CreateTime;
-            persistable.CompleteTime = instance.CompleteTime;            
-            
+            persistable.CompleteTime = instance.CompleteTime;
+            persistable.ExecutionErrorCount = instance.ExecutionErrorCount;
+
             foreach (var ep in instance.ExecutionPointers)
             {
                 var persistedEP = persistable.ExecutionPointers.FindById(ep.Id);
@@ -84,11 +85,19 @@ namespace WorkflowCore.Persistence.EntityFramework
 
         internal static PersistedExecutionError ToPersistable(this ExecutionError instance)
         {
-            var result = new PersistedExecutionError();            
-            result.ErrorTime = instance.ErrorTime;
-            result.Message = instance.Message;
-            result.ExecutionPointerId = instance.ExecutionPointerId;
-            result.WorkflowId = instance.WorkflowId;
+            var result = new PersistedExecutionError
+            {
+                ErrorTime = instance.ErrorTime,
+                Message = instance.Message,
+                ExecutionPointerId = instance.ExecutionPointerId,
+                WorkflowId = instance.WorkflowId,
+                Type = instance.Type,
+                Source = instance.Source,
+                StackTrace = instance.StackTrace,
+                TargetSiteName = instance.TargetSiteName,
+                TargetSiteModule = instance.TargetSiteModule,
+                HelpLink = instance.HelpLink
+            };
 
             return result;
         }
@@ -133,6 +142,8 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.CreateTime = DateTime.SpecifyKind(instance.CreateTime, DateTimeKind.Utc);
             if (instance.CompleteTime.HasValue)
                 result.CompleteTime = DateTime.SpecifyKind(instance.CompleteTime.Value, DateTimeKind.Utc);
+
+            result.ExecutionErrorCount = instance.ExecutionErrorCount;
 
             result.ExecutionPointers = new ExecutionPointerCollection(instance.ExecutionPointers.Count + 8);
 
@@ -207,6 +218,25 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.EventTime = DateTime.SpecifyKind(instance.EventTime, DateTimeKind.Utc);
             result.IsProcessed = instance.IsProcessed;
             result.EventData = JsonConvert.DeserializeObject(instance.EventData, SerializerSettings);
+
+            return result;
+        }
+
+        internal static ExecutionError ToExecutionError(this PersistedExecutionError instance)
+        {
+            var result = new ExecutionError
+            {
+                ErrorTime = instance.ErrorTime,
+                Message = instance.Message,
+                ExecutionPointerId = instance.ExecutionPointerId,
+                WorkflowId = instance.WorkflowId,
+                Type = instance.Type,
+                Source = instance.Source,
+                StackTrace = instance.StackTrace,
+                TargetSiteName = instance.TargetSiteName,
+                TargetSiteModule = instance.TargetSiteModule,
+                HelpLink = instance.HelpLink
+            };
 
             return result;
         }

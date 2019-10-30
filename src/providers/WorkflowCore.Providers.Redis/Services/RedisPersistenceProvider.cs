@@ -181,9 +181,20 @@ namespace WorkflowCore.Providers.Redis.Services
             await _redis.SortedSetAddAsync($"{_prefix}.{EVENT_SET}.{RUNNABLE_INDEX}", evt.Id, evt.EventTime.Ticks);
         }
 
+        /// <inheritdoc/>
+        public bool SupportsPersistingErrors => false;
+
         public Task PersistErrors(IEnumerable<ExecutionError> errors)
         {
+            //ToDo: Implement persistence and update "SupportsPersistingErrors" field to 'true'
             return Task.CompletedTask;
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<ExecutionError>> GetExecutionErrors(string workflowId)
+        {
+            //ToDo: Implement retrieval of ExecutionErrors
+            return new List<ExecutionError>();
         }
 
         public void EnsureStoreExists()

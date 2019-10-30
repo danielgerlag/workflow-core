@@ -38,6 +38,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                 x.MapProperty(y => y.Status);
                 x.MapProperty(y => y.CreateTime);
                 x.MapProperty(y => y.CompleteTime);
+                x.MapProperty(y => y.ExecutionErrorCount);
                 x.MapProperty(y => y.ExecutionPointers);
             });
 
@@ -126,21 +127,23 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take)
         {
-            IMongoQueryable<WorkflowInstance> result = WorkflowInstances.AsQueryable();
+            IMongoQueryable<WorkflowInstance> query = WorkflowInstances.AsQueryable();
 
             if (status.HasValue)
-                result = result.Where(x => x.Status == status.Value);
+                query = query.Where(x => x.Status == status.Value);
 
             if (!String.IsNullOrEmpty(type))
-                result = result.Where(x => x.WorkflowDefinitionId == type);
+                query = query.Where(x => x.WorkflowDefinitionId == type);
 
             if (createdFrom.HasValue)
-                result = result.Where(x => x.CreateTime >= createdFrom.Value);
+                query = query.Where(x => x.CreateTime >= createdFrom.Value);
 
             if (createdTo.HasValue)
-                result = result.Where(x => x.CreateTime <= createdTo.Value);
+                query = query.Where(x => x.CreateTime <= createdTo.Value);
 
-            return await result.Skip(skip).Take(take).ToListAsync();
+            query = query.Skip(skip).Take(take);
+
+            return await query.ToListAsync();
         }
 
         public async Task<string> CreateEventSubscription(EventSubscription subscription)
@@ -214,10 +217,22 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             await Events.UpdateOneAsync(x => x.Id == id, update);
         }
 
+        /// <inheritdoc/>
+        public bool SupportsPersistingErrors => true;
+
         public async Task PersistErrors(IEnumerable<ExecutionError> errors)
         {
             if (errors.Any())
                 await ExecutionErrors.InsertManyAsync(errors);
+        }
+
+        public async Task<IEnumerable<ExecutionError>> GetExecutionErrors(string workflowId)
+        {
+            IMongoQueryable<ExecutionError> query = ExecutionErrors.AsQueryable();
+
+            query = query.Where(x => x.WorkflowId == workflowId);
+            var rawResult = await query.ToListAsync();
+            return rawResult.Any() ? rawResult : new List<ExecutionError>();
         }
     }
 }

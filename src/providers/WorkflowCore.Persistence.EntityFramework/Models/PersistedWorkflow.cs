@@ -38,6 +38,12 @@ namespace WorkflowCore.Persistence.EntityFramework.Models
         public DateTime? CompleteTime { get; set; }
 
         public WorkflowStatus Status { get; set; }
-        
+
+        /// <summary>
+        /// A count of how many <see cref="ExecutionError"/>'s have been generated against this <see cref="WorkflowInstance"/>.
+        /// Errors can be retrieved separately due to the high amount of errors that may be generated.
+        /// </summary>
+        public int ExecutionErrorCount { get; set; }
+
     }
 }

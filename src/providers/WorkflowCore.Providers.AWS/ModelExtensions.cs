@@ -35,6 +35,8 @@ namespace WorkflowCore.Providers.AWS
             if (source.CompleteTime.HasValue)
                 result["complete_time"] = new AttributeValue() { N = source.CompleteTime.Value.Ticks.ToString() };
             
+            result["execution_error_count"] = new AttributeValue(source.ExecutionErrorCount.ToString());
+
             var pointers = new List<AttributeValue>();
             foreach (var pointer in source.ExecutionPointers)
             {
@@ -59,7 +61,8 @@ namespace WorkflowCore.Providers.AWS
                 Status = (WorkflowStatus)Convert.ToInt32(source["workflow_status"].N),
                 NextExecution = Convert.ToInt64(source["next_execution"].N),
                 CreateTime = new DateTime(Convert.ToInt64(source["create_time"].N)),
-                Data = JsonConvert.DeserializeObject(source["data"].S, SerializerSettings)
+                Data = JsonConvert.DeserializeObject(source["data"].S, SerializerSettings),
+                ExecutionErrorCount = Convert.ToInt32(source["execution_error_count"].S)
             };
 
             if (source.ContainsKey("description"))

@@ -82,9 +82,12 @@ namespace WorkflowCore.Services
                 stopWatch.Start();
                 while ((wf.Status == WorkflowStatus.Runnable) && (timeOut.TotalMilliseconds > stopWatch.ElapsedMilliseconds))
                 {
-                    await _executor.Execute(wf);
+                    WorkflowExecutorResult result = await _executor.Execute(wf);
                     if (persistSate)
+                    {
                         await _persistenceStore.PersistWorkflow(wf);
+                        await _persistenceStore.PersistErrors(result.Errors);
+                    }
                 }
             }
             finally

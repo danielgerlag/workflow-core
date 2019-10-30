@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,7 +14,8 @@ namespace WorkflowCore.Services
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
     /// <summary>
-    /// In-memory implementation of IPersistenceProvider for demo and testing purposes
+    /// In-memory implementation of IPersistenceProvider for demo and testing purposes.
+    /// Supports Error Persistence.
     /// </summary>
     public class MemoryPersistenceProvider : ISingletonMemoryProvider
     {
@@ -78,32 +78,33 @@ namespace WorkflowCore.Services
         {
             lock (_instances)
             {
-                var result = _instances.AsQueryable();
+                var query = _instances.AsQueryable();
 
                 if (status.HasValue)
                 {
-                    result = result.Where(x => x.Status == status.Value);
+                    query = query.Where(x => x.Status == status.Value);
                 }
 
                 if (!String.IsNullOrEmpty(type))
                 {
-                    result = result.Where(x => x.WorkflowDefinitionId == type);
+                    query = query.Where(x => x.WorkflowDefinitionId == type);
                 }
 
                 if (createdFrom.HasValue)
                 {
-                    result = result.Where(x => x.CreateTime >= createdFrom.Value);
+                    query = query.Where(x => x.CreateTime >= createdFrom.Value);
                 }
 
                 if (createdTo.HasValue)
                 {
-                    result = result.Where(x => x.CreateTime <= createdTo.Value);
+                    query = query.Where(x => x.CreateTime <= createdTo.Value);
                 }
 
-                return result.Skip(skip).Take(take).ToList();
+                query = query.Skip(skip).Take(take);
+
+                return query.ToList();
             }
         }
-
 
         public async Task<string> CreateEventSubscription(EventSubscription subscription)
         {
@@ -201,11 +202,23 @@ namespace WorkflowCore.Services
             }
         }
 
+        /// <inheritdoc/>
+        public bool SupportsPersistingErrors => true;
+
         public async Task PersistErrors(IEnumerable<ExecutionError> errors)
         {
             lock (errors)
             {
                 _errors.AddRange(errors);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<ExecutionError>> GetExecutionErrors(string workflowId)
+        {
+            lock (_errors)
+            {
+                return _errors.Where(x => x.WorkflowId == workflowId).ToList();
             }
         }
     }
