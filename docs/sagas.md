@@ -15,7 +15,7 @@ builder
         .Then<Task3>()
             .CompensateWith<UndoTask3>()
     )
-    .OnError(Models.WorkflowErrorHandling.Retry, TimeSpan.FromSeconds(5))
+        .CompensateWith<CleanUp>()
     .Then(context => Console.WriteLine("End"));
 ```
 
@@ -34,7 +34,7 @@ builder
         .Then<Task3>()
             .CompensateWith<UndoTask3>()
     )
-        .CompensateWith<CleanUp>()
+    .OnError(Models.WorkflowErrorHandling.Retry, TimeSpan.FromSeconds(5))
     .Then(context => Console.WriteLine("End"));
 ```
 
