@@ -72,7 +72,12 @@ namespace WorkflowCore.Services
             return _workflowController.StartWorkflow(workflowId, version, data, reference);
         }
 
-        public Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null)
+        public async void AddWorkflowData(string workflowId, string key, object data)
+        {
+	        _workflowController.AddWorkflowData(workflowId, key, data);
+        }
+
+		public Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null)
         {
             return _workflowController.PublishEvent(eventName, eventKey, eventData, effectiveDate);
         }

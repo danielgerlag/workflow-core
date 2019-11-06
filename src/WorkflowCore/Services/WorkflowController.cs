@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -94,7 +95,25 @@ namespace WorkflowCore.Services
             return id;
         }
 
-        public async Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null)
+
+        public async void AddWorkflowData(string workflowId, string key, object data)
+        {
+	        var wf = await _persistenceStore.GetWorkflowInstance(workflowId);
+	        var dict = (wf.Data as IDictionary<string, object>);
+	        if (dict == null) throw new NullReferenceException("unable to load workflow data as dictionary");
+	        if (dict.ContainsKey(key))
+	        {
+		        dict[key] = data;
+	        }
+	        else
+	        {
+		        dict.Add(key, data);
+	        }
+
+	        await _persistenceStore.PersistWorkflow(wf);
+        }
+
+		public async Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null)
         {
             _logger.LogDebug("Creating event {0} {1}", eventName, eventKey);
             Event evt = new Event();
