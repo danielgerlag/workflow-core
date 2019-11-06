@@ -20,11 +20,12 @@ namespace WorkflowCore.Services
         private readonly IExecutionResultProcessor _executionResultProcessor;
         private readonly ICancellationProcessor _cancellationProcessor;
         private readonly ILifeCycleEventPublisher _publisher;
-        private readonly WorkflowOptions _options;
+        private readonly IWorkflowController _workflowController;
+		private readonly WorkflowOptions _options;
 
-        private IWorkflowHost Host => _serviceProvider.GetService<IWorkflowHost>();
+		private IWorkflowHost Host => _serviceProvider.GetService<IWorkflowHost>();
 
-        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IScopeProvider scopeProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, ILifeCycleEventPublisher publisher, ICancellationProcessor cancellationProcessor, WorkflowOptions options, ILoggerFactory loggerFactory)
+        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IScopeProvider scopeProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, ILifeCycleEventPublisher publisher, ICancellationProcessor cancellationProcessor, WorkflowOptions options, ILoggerFactory loggerFactory, IWorkflowController workflowController)
         {
             _serviceProvider = serviceProvider;
             _scopeProvider = scopeProvider;
@@ -35,6 +36,7 @@ namespace WorkflowCore.Services
             _options = options;
             _logger = loggerFactory.CreateLogger<WorkflowExecutor>();
             _executionResultProcessor = executionResultProcessor;
+            _workflowController = workflowController;
         }
 
         public async Task<WorkflowExecutorResult> Execute(WorkflowInstance workflow)
@@ -109,7 +111,8 @@ namespace WorkflowCore.Services
                 case ExecutionPipelineDirective.EndWorkflow:
                     workflow.Status = WorkflowStatus.Complete;
                     workflow.CompleteTime = _datetimeProvider.Now.ToUniversalTime();
-                    return false;
+                    _workflowController.PublishEvent("WorkFlowEnded", workflow.Id, null);
+					return false;
             }
 
             if (pointer.Status != PointerStatus.Running)
@@ -176,7 +179,8 @@ namespace WorkflowCore.Services
                     case ExecutionPipelineDirective.EndWorkflow:
                         workflow.Status = WorkflowStatus.Complete;
                         workflow.CompleteTime = _datetimeProvider.Now.ToUniversalTime();
-                        return;
+                        _workflowController.PublishEvent("WorkFlowEnded", workflow.Id, null);
+						return;
                 }
 
                 var result = await body.RunAsync(context);
@@ -246,7 +250,8 @@ namespace WorkflowCore.Services
             
             workflow.Status = WorkflowStatus.Complete;
             workflow.CompleteTime = _datetimeProvider.Now.ToUniversalTime();
-            _publisher.PublishNotification(new WorkflowCompleted()
+            _workflowController.PublishEvent("WorkFlowEnded", workflow.Id, null);
+			_publisher.PublishNotification(new WorkflowCompleted()
             {
                 EventTimeUtc = _datetimeProvider.Now,
                 Reference = workflow.Reference,
