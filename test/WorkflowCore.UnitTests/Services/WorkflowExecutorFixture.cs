@@ -28,8 +28,9 @@ namespace WorkflowCore.UnitTests.Services
         protected IScopeProvider ScopeProvider;
         protected IDateTimeProvider DateTimeProvider;
         protected WorkflowOptions Options;
+        protected IWorkflowController WorkFlowController;
 
-        public WorkflowExecutorFixture()
+		public WorkflowExecutorFixture()
         {
             Host = A.Fake<IWorkflowHost>();
             PersistenceProvider = A.Fake<IPersistenceProvider>();
@@ -40,8 +41,9 @@ namespace WorkflowCore.UnitTests.Services
             EventHub = A.Fake<ILifeCycleEventPublisher>();
             CancellationProcessor = A.Fake<ICancellationProcessor>();
             DateTimeProvider = A.Fake<IDateTimeProvider>();
+            WorkFlowController = A.Fake<IWorkflowController>();
 
-            Options = new WorkflowOptions(A.Fake<IServiceCollection>());
+			Options = new WorkflowOptions(A.Fake<IServiceCollection>());
 
             var scope = A.Fake<IServiceScope>();
             A.CallTo(() => ScopeProvider.CreateScope()).Returns(scope);
@@ -53,7 +55,7 @@ namespace WorkflowCore.UnitTests.Services
             var loggerFactory = new LoggerFactory();
             loggerFactory.AddConsole(LogLevel.Debug);            
 
-            Subject = new WorkflowExecutor(Registry, ServiceProvider, ScopeProvider, DateTimeProvider, ResultProcesser, EventHub, CancellationProcessor, Options, loggerFactory);
+            Subject = new WorkflowExecutor(Registry, ServiceProvider, ScopeProvider, DateTimeProvider, ResultProcesser, EventHub, CancellationProcessor, Options, loggerFactory, WorkFlowController);
         }
 
         [Fact(DisplayName = "Should execute active step")]
