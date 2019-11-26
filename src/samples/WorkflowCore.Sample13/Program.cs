@@ -41,7 +41,7 @@ namespace WorkflowCore.Sample13
 
             //services.AddWorkflow(x =>
             //{
-            //    x.UseAzureSyncronization(@"UseDevelopmentStorage=true");
+            //    x.UseAzureSynchronization(@"UseDevelopmentStorage=true");
             //    x.UseMongoDB(@"mongodb://localhost:27017", "workflow-test002");
             //});
 
