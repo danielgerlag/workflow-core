@@ -22,13 +22,13 @@ dotnet add package WorkflowCore.Providers.Azure
 ## Usage
 
 Use the `IServiceCollection` extension methods when building your service provider
-* .UseAzureSyncronization
-* .UseAzureServiceBus
+* .UseAzureSynchronization
+* .UseAzureServiceBusEventHub
 
 ```C#
 services.AddWorkflow(options => 
 {
-	options.UseAzureSyncronization("azure storage connection string");
-	options.UseAzureServiceBus("service bus connection string", "topic name", "subscription name");
+	options.UseAzureSynchronization("azure storage connection string");
+	options.UseAzureServiceBusEventHub("service bus connection string", "topic name", "subscription name");
 });
 ```
