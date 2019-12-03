@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver.Linq;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -24,6 +26,13 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         static MongoPersistenceProvider()
         {
+            ConventionRegistry.Register(
+                "workflow.conventions",
+                new ConventionPack
+                {
+                    new EnumRepresentationConvention(BsonType.String)
+                }, t => t.FullName?.StartsWith("WorkflowCore") ?? false);
+
             BsonClassMap.RegisterClassMap<WorkflowInstance>(x =>
             {
                 x.MapIdProperty(y => y.Id)
