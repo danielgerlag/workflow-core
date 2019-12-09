@@ -5,7 +5,7 @@ using WorkflowCore.Interface;
 
 namespace WorkflowCore.Models
 {
-    public interface IWorkflowStep<TStepBody> : IWorkflowStep
+    public interface IWorkflowStep<out TStepBody> : IWorkflowStep
         where TStepBody : IStepBody
     {
     }

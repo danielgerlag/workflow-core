@@ -9,7 +9,6 @@ namespace WorkflowCore.Interface
     public interface IStepBuilder<TData, TStepBody>
         where TStepBody : IStepBody
     {
-
         IWorkflowBuilder<TData> WorkflowBuilder { get; }        
 
         IWorkflowStep<TStepBody> Step { get; set; }
