@@ -13,7 +13,7 @@ namespace WorkflowCore.Services
 
         public IWorkflowBuilder<TData> WorkflowBuilder { get; private set; }
 
-        public WorkflowStep<TStepBody> Step { get; set; }
+        public IWorkflowStep<TStepBody> Step { get; set; }
         
         public ParallelStepBuilder(IWorkflowBuilder<TData> workflowBuilder, IStepBuilder<TData, TStepBody> stepBuilder, IStepBuilder<TData, Sequence> referenceBuilder)
         {

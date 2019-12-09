@@ -6,7 +6,7 @@ using WorkflowCore.Interface;
 
 namespace WorkflowCore.Models
 {
-    public abstract class WorkflowStep
+    public abstract class WorkflowStep : IWorkflowStep
     {
         public abstract Type BodyType { get; }
 
@@ -82,7 +82,7 @@ namespace WorkflowCore.Models
         }
     }
 
-    public class WorkflowStep<TStepBody> : WorkflowStep
+    public class WorkflowStep<TStepBody> : WorkflowStep, IWorkflowStep<TStepBody>
         where TStepBody : IStepBody 
     {
         public override Type BodyType => typeof(TStepBody);

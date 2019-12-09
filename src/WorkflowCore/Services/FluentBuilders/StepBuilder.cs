@@ -12,9 +12,9 @@ namespace WorkflowCore.Services
     {
         public IWorkflowBuilder<TData> WorkflowBuilder { get; private set; }
 
-        public WorkflowStep<TStepBody> Step { get; set; }
+        public IWorkflowStep<TStepBody> Step { get; set; }
 
-        public StepBuilder(IWorkflowBuilder<TData> workflowBuilder, WorkflowStep<TStepBody> step)
+        public StepBuilder(IWorkflowBuilder<TData> workflowBuilder, IWorkflowStep<TStepBody> step)
         {
             WorkflowBuilder = workflowBuilder;
             Step = step;

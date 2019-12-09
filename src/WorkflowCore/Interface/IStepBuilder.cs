@@ -12,7 +12,7 @@ namespace WorkflowCore.Interface
 
         IWorkflowBuilder<TData> WorkflowBuilder { get; }        
 
-        WorkflowStep<TStepBody> Step { get; set; }
+        IWorkflowStep<TStepBody> Step { get; set; }
 
         /// <summary>
         /// Specifies a display name for the step
