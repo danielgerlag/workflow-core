@@ -102,6 +102,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.StepId = instance.StepId;
             result.WorkflowId = instance.WorkflowId;
             result.SubscribeAsOf = DateTime.SpecifyKind(instance.SubscribeAsOf, DateTimeKind.Utc);
+            result.SubscriptionData = JsonConvert.SerializeObject(instance.SubscriptionData, SerializerSettings);
 
             return result;
         }
@@ -194,6 +195,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.StepId = instance.StepId;
             result.WorkflowId = instance.WorkflowId;
             result.SubscribeAsOf = DateTime.SpecifyKind(instance.SubscribeAsOf, DateTimeKind.Utc);
+            result.SubscriptionData = JsonConvert.DeserializeObject(instance.SubscriptionData, SerializerSettings);
 
             return result;
         }

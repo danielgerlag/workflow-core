@@ -90,6 +90,7 @@ namespace WorkflowCore.Providers.AWS
                 ["workflow_id"] = new AttributeValue(source.WorkflowId),
                 ["step_id"] = new AttributeValue(source.StepId.ToString()),
                 ["subscribe_as_of"] = new AttributeValue() { N = source.SubscribeAsOf.Ticks.ToString() },
+                ["subscription_data"] = new AttributeValue(JsonConvert.SerializeObject(source.SubscriptionData, SerializerSettings)),
                 ["event_slug"] = new AttributeValue($"{source.EventName}:{source.EventKey}")
             };
         }
@@ -103,7 +104,8 @@ namespace WorkflowCore.Providers.AWS
                 EventKey = source["event_key"].S,
                 WorkflowId = source["workflow_id"].S,
                 StepId = Convert.ToInt32(source["step_id"].S),
-                SubscribeAsOf = new DateTime(Convert.ToInt64(source["subscribe_as_of"].N))
+                SubscribeAsOf = new DateTime(Convert.ToInt64(source["subscribe_as_of"].N)),
+                SubscriptionData = JsonConvert.DeserializeObject(source["subscription_data"].S, SerializerSettings)
             };
         }
 

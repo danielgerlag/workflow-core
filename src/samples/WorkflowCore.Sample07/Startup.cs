@@ -24,7 +24,7 @@ namespace WorkflowCore.Sample07
         
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole();
+            //loggerFactory.AddConsole();
 
             //start the workflow host
             var host = app.ApplicationServices.GetService<IWorkflowHost>();

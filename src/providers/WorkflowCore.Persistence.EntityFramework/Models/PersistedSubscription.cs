@@ -27,5 +27,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Models
         public string EventKey { get; set; }
 
         public DateTime SubscribeAsOf { get; set; }
+
+        public string SubscriptionData { get; set; }
     }
 }

@@ -35,9 +35,6 @@ namespace WorkflowCore.Sample02
             services.AddWorkflow();
             var serviceProvider = services.BuildServiceProvider();
 
-            //config logging
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            loggerFactory.AddDebug();
             return serviceProvider;
         }
     }
