@@ -60,7 +60,7 @@ namespace WorkflowCore.Services.ErrorHandlers
                 }
 
                 scopePointer.Active = false;
-                scopePointer.EndTime = _datetimeProvider.Now.ToUniversalTime();
+                scopePointer.EndTime = _datetimeProvider.UtcNow;
                 scopePointer.Status = PointerStatus.Failed;
 
                 if (scopeStep.CompensationStepId.HasValue)

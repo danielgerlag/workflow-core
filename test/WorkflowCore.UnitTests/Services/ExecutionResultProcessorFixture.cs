@@ -34,6 +34,7 @@ namespace WorkflowCore.UnitTests.Services
             Options = new WorkflowOptions(A.Fake<IServiceCollection>());
 
             A.CallTo(() => DateTimeProvider.Now).Returns(DateTime.Now);
+            A.CallTo(() => DateTimeProvider.UtcNow).Returns(DateTime.UtcNow);
 
             //config logging
             var loggerFactory = new LoggerFactory();

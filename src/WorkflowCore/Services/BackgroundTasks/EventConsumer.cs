@@ -37,7 +37,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var evt = await _persistenceStore.GetEvent(itemId);
-                if (evt.EventTime <= _datetimeProvider.Now.ToUniversalTime())
+                if (evt.EventTime <= _datetimeProvider.UtcNow)
                 {
                     var subs = await _persistenceStore.GetSubcriptions(evt.EventName, evt.EventKey, evt.EventTime);
                     var toQueue = new List<string>();

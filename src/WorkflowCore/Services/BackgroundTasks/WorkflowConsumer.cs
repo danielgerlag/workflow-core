@@ -71,7 +71,7 @@ namespace WorkflowCore.Services.BackgroundTasks
 
                         await persistenceStore.PersistErrors(result.Errors);
 
-                        var readAheadTicks = _datetimeProvider.Now.Add(Options.PollInterval).ToUniversalTime().Ticks;
+                        var readAheadTicks = _datetimeProvider.UtcNow.Add(Options.PollInterval).Ticks;
 
                         if ((workflow.Status == WorkflowStatus.Runnable) && workflow.NextExecution.HasValue && workflow.NextExecution.Value < readAheadTicks)
                         {
@@ -109,7 +109,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     return;
                 }
 
-                var target = (workflow.NextExecution.Value - _datetimeProvider.Now.ToUniversalTime().Ticks);
+                var target = (workflow.NextExecution.Value - _datetimeProvider.UtcNow.Ticks);
                 if (target > 0)
                 {
                     await Task.Delay(TimeSpan.FromTicks(target), cancellationToken);

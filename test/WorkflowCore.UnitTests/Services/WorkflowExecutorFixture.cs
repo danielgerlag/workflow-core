@@ -48,6 +48,7 @@ namespace WorkflowCore.UnitTests.Services
             A.CallTo(() => scope.ServiceProvider).Returns(ServiceProvider);
 
             A.CallTo(() => DateTimeProvider.Now).Returns(DateTime.Now);
+            A.CallTo(() => DateTimeProvider.UtcNow).Returns(DateTime.UtcNow);
 
             //config logging
             var loggerFactory = new LoggerFactory();

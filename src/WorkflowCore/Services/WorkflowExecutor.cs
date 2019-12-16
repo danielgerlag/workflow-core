@@ -41,7 +41,7 @@ namespace WorkflowCore.Services
         {
             var wfResult = new WorkflowExecutorResult();
 
-            var exePointers = new List<ExecutionPointer>(workflow.ExecutionPointers.Where(x => x.Active && (!x.SleepUntil.HasValue || x.SleepUntil < _datetimeProvider.Now.ToUniversalTime())));
+            var exePointers = new List<ExecutionPointer>(workflow.ExecutionPointers.Where(x => x.Active && (!x.SleepUntil.HasValue || x.SleepUntil < _datetimeProvider.UtcNow)));
             var def = _registry.GetDefinition(workflow.WorkflowDefinitionId, workflow.Version);
             if (def == null)
             {
@@ -60,12 +60,12 @@ namespace WorkflowCore.Services
                 if (step == null)
                 {
                     _logger.LogError("Unable to find step {0} in workflow definition", pointer.StepId);
-                    pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(_options.ErrorRetryInterval);
+                    pointer.SleepUntil = _datetimeProvider.UtcNow.Add(_options.ErrorRetryInterval);
                     wfResult.Errors.Add(new ExecutionError()
                     {
                         WorkflowId = workflow.Id,
                         ExecutionPointerId = pointer.Id,
-                        ErrorTime = _datetimeProvider.Now.ToUniversalTime(),
+                        ErrorTime = _datetimeProvider.UtcNow,
                         Message = $"Unable to find step {pointer.StepId} in workflow definition"
                     });
                     continue;
@@ -85,7 +85,7 @@ namespace WorkflowCore.Services
                     {
                         WorkflowId = workflow.Id,
                         ExecutionPointerId = pointer.Id,
-                        ErrorTime = _datetimeProvider.Now.ToUniversalTime(),
+                        ErrorTime = _datetimeProvider.UtcNow,
                         Message = ex.Message
                     });
                         
@@ -108,7 +108,7 @@ namespace WorkflowCore.Services
                     return false;
                 case ExecutionPipelineDirective.EndWorkflow:
                     workflow.Status = WorkflowStatus.Complete;
-                    workflow.CompleteTime = _datetimeProvider.Now.ToUniversalTime();
+                    workflow.CompleteTime = _datetimeProvider.UtcNow;
                     return false;
             }
 
@@ -117,7 +117,7 @@ namespace WorkflowCore.Services
                 pointer.Status = PointerStatus.Running;
                 _publisher.PublishNotification(new StepStarted()
                 {
-                    EventTimeUtc = _datetimeProvider.Now,
+                    EventTimeUtc = _datetimeProvider.UtcNow,
                     Reference = workflow.Reference,
                     ExecutionPointerId = pointer.Id,
                     StepId = step.Id,
@@ -129,7 +129,7 @@ namespace WorkflowCore.Services
 
             if (!pointer.StartTime.HasValue)
             {
-                pointer.StartTime = _datetimeProvider.Now.ToUniversalTime();
+                pointer.StartTime = _datetimeProvider.UtcNow;
             }
 
             return true;
@@ -146,12 +146,12 @@ namespace WorkflowCore.Services
                 if (body == null)
                 {
                     _logger.LogError("Unable to construct step body {0}", step.BodyType.ToString());
-                    pointer.SleepUntil = _datetimeProvider.Now.ToUniversalTime().Add(_options.ErrorRetryInterval);
+                    pointer.SleepUntil = _datetimeProvider.UtcNow.Add(_options.ErrorRetryInterval);
                     wfResult.Errors.Add(new ExecutionError()
                     {
                         WorkflowId = workflow.Id,
                         ExecutionPointerId = pointer.Id,
-                        ErrorTime = _datetimeProvider.Now.ToUniversalTime(),
+                        ErrorTime = _datetimeProvider.UtcNow,
                         Message = $"Unable to construct step body {step.BodyType.ToString()}"
                     });
                     return;
@@ -175,7 +175,7 @@ namespace WorkflowCore.Services
                         return;
                     case ExecutionPipelineDirective.EndWorkflow:
                         workflow.Status = WorkflowStatus.Complete;
-                        workflow.CompleteTime = _datetimeProvider.Now.ToUniversalTime();
+                        workflow.CompleteTime = _datetimeProvider.UtcNow;
                         return;
                 }
 
@@ -245,10 +245,10 @@ namespace WorkflowCore.Services
                 return;
             
             workflow.Status = WorkflowStatus.Complete;
-            workflow.CompleteTime = _datetimeProvider.Now.ToUniversalTime();
+            workflow.CompleteTime = _datetimeProvider.UtcNow;
             _publisher.PublishNotification(new WorkflowCompleted()
             {
-                EventTimeUtc = _datetimeProvider.Now,
+                EventTimeUtc = _datetimeProvider.UtcNow,
                 Reference = workflow.Reference,
                 WorkflowInstanceId = workflow.Id,
                 WorkflowDefinitionId = workflow.WorkflowDefinitionId,
