@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WorkflowCore.Persistence.PostgreSQL;
@@ -9,9 +10,10 @@ using WorkflowCore.Persistence.PostgreSQL;
 namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 {
     [DbContext(typeof(PostgresContext))]
-    partial class PostgresPersistenceProviderModelSnapshot : ModelSnapshot
+    [Migration("20191025122408_ExecutionErrors_AdditionalExceptionDetails")]
+    partial class ExecutionErrors_AdditionalExceptionDetails
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -175,8 +177,6 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
                     b.Property<DateTime>("SubscribeAsOf");
 
-                    b.Property<string>("SubscriptionData");
-
                     b.Property<Guid>("SubscriptionId")
                         .HasMaxLength(200);
 
@@ -208,8 +208,6 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
                     b.Property<string>("Description")
                         .HasMaxLength(500);
-
-                    b.Property<int>("ExecutionErrorCount");
 
                     b.Property<Guid>("InstanceId")
                         .HasMaxLength(200);

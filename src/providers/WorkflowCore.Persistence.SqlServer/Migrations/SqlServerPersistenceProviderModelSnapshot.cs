@@ -64,7 +64,19 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                     b.Property<string>("ExecutionPointerId")
                         .HasMaxLength(100);
 
+                    b.Property<string>("HelpLink");
+
                     b.Property<string>("Message");
+
+                    b.Property<string>("Source");
+
+                    b.Property<string>("StackTrace");
+
+                    b.Property<string>("TargetSiteModule");
+
+                    b.Property<string>("TargetSiteName");
+
+                    b.Property<string>("Type");
 
                     b.Property<string>("WorkflowId")
                         .HasMaxLength(100);
@@ -202,6 +214,8 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 
                     b.Property<string>("Description")
                         .HasMaxLength(500);
+
+                    b.Property<int>("ExecutionErrorCount");
 
                     b.Property<Guid>("InstanceId")
                         .HasMaxLength(200);

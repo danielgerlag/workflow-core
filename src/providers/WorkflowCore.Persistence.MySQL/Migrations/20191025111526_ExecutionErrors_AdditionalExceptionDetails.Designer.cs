@@ -2,22 +2,22 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using WorkflowCore.Persistence.PostgreSQL;
+using WorkflowCore.Persistence.MySQL;
 
-namespace WorkflowCore.Persistence.PostgreSQL.Migrations
+namespace WorkflowCore.Persistence.MySQL.Migrations
 {
-    [DbContext(typeof(PostgresContext))]
-    partial class PostgresPersistenceProviderModelSnapshot : ModelSnapshot
+    [DbContext(typeof(MysqlContext))]
+    [Migration("20191025111526_ExecutionErrors_AdditionalExceptionDetails")]
+    partial class ExecutionErrors_AdditionalExceptionDetails
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
                 .HasAnnotation("ProductVersion", "2.1.0-rtm-30799")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedEvent", b =>
                 {
@@ -49,7 +49,7 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
                     b.HasIndex("EventName", "EventKey");
 
-                    b.ToTable("Event","wfc");
+                    b.ToTable("Event");
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionError", b =>
@@ -81,7 +81,7 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
                     b.HasKey("PersistenceId");
 
-                    b.ToTable("ExecutionError","wfc");
+                    b.ToTable("ExecutionError");
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", b =>
@@ -138,7 +138,7 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
                     b.HasIndex("WorkflowId");
 
-                    b.ToTable("ExecutionPointer","wfc");
+                    b.ToTable("ExecutionPointer");
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExtensionAttribute", b =>
@@ -157,7 +157,7 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
                     b.HasIndex("ExecutionPointerId");
 
-                    b.ToTable("ExtensionAttribute","wfc");
+                    b.ToTable("ExtensionAttribute");
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedSubscription", b =>
@@ -175,8 +175,6 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
                     b.Property<DateTime>("SubscribeAsOf");
 
-                    b.Property<string>("SubscriptionData");
-
                     b.Property<Guid>("SubscriptionId")
                         .HasMaxLength(200);
 
@@ -192,7 +190,7 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                     b.HasIndex("SubscriptionId")
                         .IsUnique();
 
-                    b.ToTable("Subscription","wfc");
+                    b.ToTable("Subscription");
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedWorkflow", b =>
@@ -208,8 +206,6 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
                     b.Property<string>("Description")
                         .HasMaxLength(500);
-
-                    b.Property<int>("ExecutionErrorCount");
 
                     b.Property<Guid>("InstanceId")
                         .HasMaxLength(200);
@@ -233,7 +229,7 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 
                     b.HasIndex("NextExecution");
 
-                    b.ToTable("Workflow","wfc");
+                    b.ToTable("Workflow");
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", b =>

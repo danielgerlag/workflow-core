@@ -359,10 +359,20 @@ namespace WorkflowCore.Providers.AWS.Services
             await _client.UpdateItemAsync(request);
         }
 
+        /// <inheritdoc/>
+        public bool SupportsPersistingErrors => false;
+
         public Task PersistErrors(IEnumerable<ExecutionError> errors)
         {
-            //TODO
+            //ToDo: Implement persistence and update "SupportsPersistingErrors" field to 'true'
             return Task.CompletedTask;
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<ExecutionError>> GetExecutionErrors(string workflowId)
+        {
+            //ToDo: Implement retrieval of ExecutionErrors
+            return new List<ExecutionError>();
         }
 
         public void EnsureStoreExists()
