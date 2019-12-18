@@ -15,5 +15,7 @@ namespace WorkflowCore.Models
         public DateTime EventTime { get; set; }
 
         public bool IsProcessed { get; set; }
+        
+        public const string EventTypeActivity = "WorkflowCore.Activity";
     }
 }

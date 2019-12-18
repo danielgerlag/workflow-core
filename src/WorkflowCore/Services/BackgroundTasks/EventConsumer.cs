@@ -11,16 +11,20 @@ namespace WorkflowCore.Services.BackgroundTasks
 {
     internal class EventConsumer : QueueConsumer, IBackgroundTask
     {
-        private readonly IPersistenceProvider _persistenceStore;
+        private readonly IWorkflowRepository _workflowRepository;
+        private readonly ISubscriptionRepository _subscriptionRepository;
+        private readonly IEventRepository _eventRepository;
         private readonly IDistributedLockProvider _lockProvider;
         private readonly IDateTimeProvider _datetimeProvider;
         protected override int MaxConcurrentItems => 2;
         protected override QueueType Queue => QueueType.Event;
 
-        public EventConsumer(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, WorkflowOptions options, IDateTimeProvider datetimeProvider)
+        public EventConsumer(IWorkflowRepository workflowRepository, ISubscriptionRepository subscriptionRepository, IEventRepository eventRepository, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, WorkflowOptions options, IDateTimeProvider datetimeProvider)
             : base(queueProvider, loggerFactory, options)
         {
-            _persistenceStore = persistenceStore;
+            _workflowRepository = workflowRepository;
+            _subscriptionRepository = subscriptionRepository;
+            _eventRepository = eventRepository;
             _lockProvider = lockProvider;
             _datetimeProvider = datetimeProvider;
         }
@@ -36,10 +40,10 @@ namespace WorkflowCore.Services.BackgroundTasks
             try
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var evt = await _persistenceStore.GetEvent(itemId);
+                var evt = await _eventRepository.GetEvent(itemId);
                 if (evt.EventTime <= _datetimeProvider.UtcNow)
                 {
-                    var subs = await _persistenceStore.GetSubcriptions(evt.EventName, evt.EventKey, evt.EventTime);
+                    var subs = await _subscriptionRepository.GetSubscriptions(evt.EventName, evt.EventKey, evt.EventTime);
                     var toQueue = new List<string>();
                     var complete = true;
 
@@ -47,7 +51,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                         complete = complete && await SeedSubscription(evt, sub, toQueue, cancellationToken);
 
                     if (complete)
-                        await _persistenceStore.MarkEventProcessed(itemId);
+                        await _eventRepository.MarkEventProcessed(itemId);
 
                     foreach (var eventId in toQueue)
                         await QueueProvider.QueueWork(eventId, QueueType.Event);
@@ -61,12 +65,12 @@ namespace WorkflowCore.Services.BackgroundTasks
         
         private async Task<bool> SeedSubscription(Event evt, EventSubscription sub, List<string> toQueue, CancellationToken cancellationToken)
         {            
-            foreach (var eventId in await _persistenceStore.GetEvents(sub.EventName, sub.EventKey, sub.SubscribeAsOf))
+            foreach (var eventId in await _eventRepository.GetEvents(sub.EventName, sub.EventKey, sub.SubscribeAsOf))
             {
                 if (eventId == evt.Id)
                     continue;
 
-                var siblingEvent = await _persistenceStore.GetEvent(eventId);
+                var siblingEvent = await _eventRepository.GetEvent(eventId);
                 if ((!siblingEvent.IsProcessed) && (siblingEvent.EventTime < evt.EventTime))
                 {
                     await QueueProvider.QueueWork(eventId, QueueType.Event);
@@ -85,7 +89,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             
             try
             {
-                var workflow = await _persistenceStore.GetWorkflowInstance(sub.WorkflowId);
+                var workflow = await _workflowRepository.GetWorkflowInstance(sub.WorkflowId);
                 var pointers = workflow.ExecutionPointers.Where(p => p.EventName == sub.EventName && p.EventKey == sub.EventKey && !p.EventPublished && p.EndTime == null);
                 foreach (var p in pointers)
                 {
@@ -94,8 +98,8 @@ namespace WorkflowCore.Services.BackgroundTasks
                     p.Active = true;
                 }
                 workflow.NextExecution = 0;
-                await _persistenceStore.PersistWorkflow(workflow);
-                await _persistenceStore.TerminateSubscription(sub.Id);
+                await _workflowRepository.PersistWorkflow(workflow);
+                await _subscriptionRepository.TerminateSubscription(sub.Id);
                 return true;
             }
             catch (Exception ex)

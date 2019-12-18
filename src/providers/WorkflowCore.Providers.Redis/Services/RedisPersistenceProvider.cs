@@ -97,7 +97,7 @@ namespace WorkflowCore.Providers.Redis.Services
             return subscription.Id;
         }
 
-        public async Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf)
+        public async Task<IEnumerable<EventSubscription>> GetSubscriptions(string eventName, string eventKey, DateTime asOf)
         {
             var result = new List<EventSubscription>();
             var data = await _redis.SortedSetRangeByScoreAsync($"{_prefix}.{SUBSCRIPTION_SET}.{EVENTSLUG_INDEX}.{eventName}-{eventKey}", -1, asOf.Ticks);
@@ -118,6 +118,42 @@ namespace WorkflowCore.Providers.Redis.Services
             var existing = JsonConvert.DeserializeObject<EventSubscription>(existingRaw, _serializerSettings);
             await _redis.HashDeleteAsync($"{_prefix}.{SUBSCRIPTION_SET}", eventSubscriptionId);
             await _redis.SortedSetRemoveAsync($"{_prefix}.{SUBSCRIPTION_SET}.{EVENTSLUG_INDEX}.{existing.EventName}-{existing.EventKey}", eventSubscriptionId);
+        }
+
+        public async Task<EventSubscription> GetSubscription(string eventSubscriptionId)
+        {
+            var raw = await _redis.HashGetAsync($"{_prefix}.{SUBSCRIPTION_SET}", eventSubscriptionId);
+            return JsonConvert.DeserializeObject<EventSubscription>(raw, _serializerSettings);
+        }
+
+        public async Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, DateTime asOf)
+        {
+            return (await GetSubscriptions(eventName, eventKey, asOf)).FirstOrDefault(sub => string.IsNullOrEmpty(sub.ExternalToken));
+        }
+
+        public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry)
+        {
+            var item = JsonConvert.DeserializeObject<EventSubscription>(await _redis.HashGetAsync($"{_prefix}.{SUBSCRIPTION_SET}", eventSubscriptionId), _serializerSettings);
+            if (item.ExternalToken != null)
+                return false;
+            item.ExternalToken = token;
+            item.ExternalWorkerId = workerId;
+            item.ExternalTokenExpiry = expiry;
+            var str = JsonConvert.SerializeObject(item, _serializerSettings);
+            await _redis.HashSetAsync($"{_prefix}.{SUBSCRIPTION_SET}", eventSubscriptionId, str);
+            return true;
+        }
+
+        public async Task ClearSubscriptionToken(string eventSubscriptionId, string token)
+        {
+            var item = JsonConvert.DeserializeObject<EventSubscription>(await _redis.HashGetAsync($"{_prefix}.{SUBSCRIPTION_SET}", eventSubscriptionId), _serializerSettings);
+            if (item.ExternalToken != token)
+                return;
+            item.ExternalToken = null;
+            item.ExternalWorkerId = null;
+            item.ExternalTokenExpiry = null;
+            var str = JsonConvert.SerializeObject(item, _serializerSettings);
+            await _redis.HashSetAsync($"{_prefix}.{SUBSCRIPTION_SET}", eventSubscriptionId, str);
         }
 
         public async Task<string> CreateEvent(Event newEvent)

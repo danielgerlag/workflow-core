@@ -32,7 +32,7 @@ namespace WorkflowCore.Services
 
         public Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt) => _innerService.GetRunnableInstances(asAt);
 
-        public Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf) => _innerService.GetSubcriptions(eventName, eventKey, asOf);
+        public Task<IEnumerable<EventSubscription>> GetSubscriptions(string eventName, string eventKey, DateTime asOf) => _innerService.GetSubscriptions(eventName, eventKey, asOf);
 
         public Task<WorkflowInstance> GetWorkflowInstance(string Id) => _innerService.GetWorkflowInstance(Id);
 
@@ -49,5 +49,12 @@ namespace WorkflowCore.Services
         public Task PersistWorkflow(WorkflowInstance workflow) => _innerService.PersistWorkflow(workflow);
 
         public Task TerminateSubscription(string eventSubscriptionId) => _innerService.TerminateSubscription(eventSubscriptionId);
+        public Task<EventSubscription> GetSubscription(string eventSubscriptionId) => _innerService.GetSubscription(eventSubscriptionId);
+
+        public Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, DateTime asOf) => _innerService.GetFirstOpenSubscription(eventName, eventKey, asOf);
+
+        public Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry) => _innerService.SetSubscriptionToken(eventSubscriptionId, token, workerId, expiry);
+
+        public Task ClearSubscriptionToken(string eventSubscriptionId, string token) => _innerService.ClearSubscriptionToken(eventSubscriptionId, token);
     }
 }

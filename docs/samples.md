@@ -6,6 +6,8 @@
 
 [Events](https://github.com/danielgerlag/workflow-core/tree/master/src/samples/WorkflowCore.Sample04)
 
+[Activity Workers](https://github.com/danielgerlag/workflow-core/tree/master/src/samples/WorkflowCore.Sample18)
+
 [Dependency Injection](https://github.com/danielgerlag/workflow-core/tree/master/src/samples/WorkflowCore.Sample15)
 
 [Parallel ForEach](https://github.com/danielgerlag/workflow-core/tree/master/src/samples/WorkflowCore.Sample09)

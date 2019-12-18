@@ -137,6 +137,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Tests.Redis", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.DSL", "src\WorkflowCore.DSL\WorkflowCore.DSL.csproj", "{20B98905-08CB-4854-8E2C-A31A078383E9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Sample18", "src\samples\WorkflowCore.Sample18\WorkflowCore.Sample18.csproj", "{5BE6D628-B9DB-4C76-AAEB-8F3800509A84}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -335,6 +337,10 @@ Global
 		{20B98905-08CB-4854-8E2C-A31A078383E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20B98905-08CB-4854-8E2C-A31A078383E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20B98905-08CB-4854-8E2C-A31A078383E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BE6D628-B9DB-4C76-AAEB-8F3800509A84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BE6D628-B9DB-4C76-AAEB-8F3800509A84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BE6D628-B9DB-4C76-AAEB-8F3800509A84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BE6D628-B9DB-4C76-AAEB-8F3800509A84}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -391,6 +397,7 @@ Global
 		{44644716-0CE8-4837-B189-AB65AE2106AA} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
 		{78217204-B873-40B9-8875-E3925B2FBCEC} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
 		{20B98905-08CB-4854-8E2C-A31A078383E9} = {EF47161E-E399-451C-BDE8-E92AAD3BD761}
+		{5BE6D628-B9DB-4C76-AAEB-8F3800509A84} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DC0FA8D3-6449-4FDA-BB46-ECF58FAD23B4}

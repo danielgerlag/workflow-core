@@ -25,6 +25,9 @@ namespace Microsoft.Extensions.DependencyInjection
             setupAction?.Invoke(options);
             services.AddSingleton<ISingletonMemoryProvider, MemoryPersistenceProvider>();
             services.AddTransient<IPersistenceProvider>(options.PersistanceFactory);
+            services.AddTransient<IWorkflowRepository>(options.PersistanceFactory);
+            services.AddTransient<ISubscriptionRepository>(options.PersistanceFactory);
+            services.AddTransient<IEventRepository>(options.PersistanceFactory);
             services.AddSingleton<IQueueProvider>(options.QueueFactory);
             services.AddSingleton<IDistributedLockProvider>(options.LockFactory);
             services.AddSingleton<ILifeCycleEventHub>(options.EventHubFactory);
@@ -46,6 +49,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<IWorkflowErrorHandler, SuspendHandler>();
 
             services.AddSingleton<IWorkflowController, WorkflowController>();
+            services.AddSingleton<IActivityController, ActivityController>();
             services.AddSingleton<IWorkflowHost, WorkflowHost>();
             services.AddTransient<IScopeProvider, ScopeProvider>();
             services.AddTransient<IWorkflowExecutor, WorkflowExecutor>();

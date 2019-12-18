@@ -177,7 +177,7 @@ namespace WorkflowCore.Providers.AWS.Services
             return subscription.Id;
         }
 
-        public async Task<IEnumerable<EventSubscription>> GetSubcriptions(string eventName, string eventKey, DateTime asOf)
+        public async Task<IEnumerable<EventSubscription>> GetSubscriptions(string eventName, string eventKey, DateTime asOf)
         {
             var result = new List<EventSubscription>();
             var asOfTicks = asOf.ToUniversalTime().Ticks;
@@ -368,6 +368,106 @@ namespace WorkflowCore.Providers.AWS.Services
         public void EnsureStoreExists()
         {
             _provisioner.ProvisionTables().Wait();
+        }
+
+        public async Task<EventSubscription> GetSubscription(string eventSubscriptionId)
+        {
+            var req = new GetItemRequest()
+            {
+                TableName = $"{_tablePrefix}-{SUBCRIPTION_TABLE}",
+                Key = new Dictionary<string, AttributeValue>
+                {
+                    { "id", new AttributeValue(eventSubscriptionId) }
+                }
+            };
+            var response = await _client.GetItemAsync(req);
+
+            return response.Item.ToEventSubscription();
+        }
+
+        public async Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, DateTime asOf)
+        {
+            var result = new List<EventSubscription>();
+            var asOfTicks = asOf.ToUniversalTime().Ticks;
+
+            var request = new QueryRequest()
+            {
+                TableName = $"{_tablePrefix}-{SUBCRIPTION_TABLE}",
+                IndexName = "ix_slug",
+                Select = "ALL_PROJECTED_ATTRIBUTES",
+                KeyConditionExpression = "event_slug = :slug and subscribe_as_of <= :as_of",
+                FilterExpression = "attribute_not_exists(external_token)",
+                Limit = 1,
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    {
+                        ":slug", new AttributeValue($"{eventName}:{eventKey}")
+                    },
+                    {
+                        ":as_of", new AttributeValue()
+                        {
+                            N = Convert.ToString(asOfTicks)
+                        }
+                    }
+                },
+                ScanIndexForward = true
+            };
+
+            var response = await _client.QueryAsync(request);
+
+            foreach (var item in response.Items)
+                result.Add(item.ToEventSubscription());
+
+            return result.FirstOrDefault();
+        }
+
+        public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry)
+        {
+            var request = new UpdateItemRequest()
+            {
+                TableName = $"{_tablePrefix}-{SUBCRIPTION_TABLE}",
+                Key = new Dictionary<string, AttributeValue>
+                {
+                    { "id", new AttributeValue(eventSubscriptionId) }
+                },
+                UpdateExpression = "SET external_token = :external_token, external_worker_id = :external_worker_id, external_token_expiry = :external_token_expiry",
+                ConditionExpression = "attribute_not_exists(external_token)",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
+                {
+                    { ":external_token" , new AttributeValue() { S = token } },
+                    { ":external_worker_id" , new AttributeValue() { S = workerId } },
+                    { ":external_token_expiry" , new AttributeValue() { N = expiry.Ticks.ToString() } }
+                }
+            };
+            try
+            {
+                await _client.UpdateItemAsync(request);
+                return true;
+            }
+            catch (ConditionalCheckFailedException)
+            {
+                return false;
+            }
+        }
+
+        public async Task ClearSubscriptionToken(string eventSubscriptionId, string token)
+        {
+            var request = new UpdateItemRequest()
+            {
+                TableName = $"{_tablePrefix}-{SUBCRIPTION_TABLE}",
+                Key = new Dictionary<string, AttributeValue>
+                {
+                    { "id", new AttributeValue(eventSubscriptionId) }
+                },
+                UpdateExpression = "REMOVE external_token, external_worker_id, external_token_expiry",
+                ConditionExpression = "external_token = :external_token",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
+                {
+                    { ":external_token" , new AttributeValue() { S = token } },
+                }
+            };
+            
+            await _client.UpdateItemAsync(request);
         }
     }
 }

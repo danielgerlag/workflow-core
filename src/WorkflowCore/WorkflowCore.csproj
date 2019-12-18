@@ -16,10 +16,11 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <Description>Workflow Core is a light weight workflow engine targeting .NET Standard.</Description>
     <Version>2.2.0</Version>
-    <AssemblyVersion>2.2.0.0</AssemblyVersion>
-    <FileVersion>2.2.0.0</FileVersion>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <FileVersion>3.0.0.0</FileVersion>
     <PackageReleaseNotes></PackageReleaseNotes>
     <PackageIconUrl>https://github.com/danielgerlag/workflow-core/raw/master/src/logo.png</PackageIconUrl>
+    <PackageVersion>3.0.0</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -121,7 +121,7 @@ namespace WorkflowCore.Providers.AWS.Services
                     WriteCapacityUnits = 1
                 }
             };
-
+            
             var createRequest = new CreateTableRequest($"{_tablePrefix}-{DynamoPersistenceProvider.SUBCRIPTION_TABLE}", new List<KeySchemaElement>()
             {
                 new KeySchemaElement("id", KeyType.HASH)

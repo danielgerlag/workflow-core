@@ -1,30 +1,29 @@
 ﻿{
-  "Id": "HelloWorld",
+  "Id": "Test02",
   "Version": 1,
   "Description": "",
-  "DataType": "ScratchPad.MyDataClass, ScratchPad",
+  "DataType": "ScratchPad.WfData, ScratchPad",
   "Steps": [
     {
       "Id": "Hello",
       "StepType": "ScratchPad.HelloWorld, ScratchPad",
-      "NextStepId": "Generate"
+      "NextStepId": "act"
     },
     {
-      "Id": "Generate",
-      "StepType": "ScratchPad.GenerateMessage, ScratchPad",
+      "Id": "act",
+      "StepType": "WorkflowCore.Primitives.Activity, WorkflowCore",
       "NextStepId": "Print",
-      "Outputs": { "Value3": "step.Message" }
+      "Inputs": 
+      {
+        "ActivityName": "\"act1\"",
+        "Parameters": "data.Value1" 
+      },
+      "Outputs": { "Value3": "step.Result" }
     },
     {
       "Id": "Print",
-      "StepType": "ScratchPad.PrintMessage, ScratchPad",
-      "NextStepId": "Bye",
-      "Inputs": { "Message": "data.Value3 + \" - \" + DateTime.Now.ToString()" }
-    },    
-    
-    {
-      "Id": "Bye",
-      "StepType": "ScratchPad.GoodbyeWorld, ScratchPad"
-    }
+      "StepType": "ScratchPad.CustomMessage, ScratchPad",
+      "Inputs": { "Message": "data.Value3" }
+    }    
   ]
 }

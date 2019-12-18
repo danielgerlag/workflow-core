@@ -6,7 +6,7 @@ using WorkflowCore.Models.LifeCycleEvents;
 
 namespace WorkflowCore.Interface
 {
-    public interface IWorkflowHost : IWorkflowController, IHostedService
+    public interface IWorkflowHost : IWorkflowController, IActivityController, IHostedService
     {
         /// <summary>
         /// Start the workflow host, this enable execution of workflows

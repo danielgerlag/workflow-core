@@ -149,7 +149,7 @@ Steps:
 
 ### WaitFor
 
-The `.WaitFor` can be implemented using 3 inputs as follows
+The `.WaitFor` can be implemented using inputs as follows
 
 | Field                  | Description                 |
 | ---------------------- | --------------------------- |
@@ -183,6 +183,43 @@ Inputs:
   EffectiveDate: DateTime.Now
 
 ```
+
+### Activity
+
+The `.Activity` can be implemented using inputs as follows
+
+| Field                  | Description                 |
+| ---------------------- | --------------------------- |
+| CancelCondition        | Optional expression to specify a cancel condition  |
+| Inputs.ActivityName    | Expression to specify the activity name            |
+| Inputs.Parameters      | Expression to specify the parameters to pass the activity worker                |
+| Inputs.EffectiveDate   | Optional expression to specify the effective date  |
+
+
+```json
+{
+    "Id": "MyActivityStep",
+    "StepType": "WorkflowCore.Primitives.Activity, WorkflowCore",
+    "NextStepId": "...",
+    "CancelCondition": "...",
+    "Inputs": {
+        "ActivityName": "\"my-activity\"",
+        "Parameters": "data.SomeValue"
+    }
+}
+```
+```yaml
+Id: MyActivityStep
+StepType: WorkflowCore.Primitives.Activity, WorkflowCore
+NextStepId: "..."
+CancelCondition: "..."
+Inputs:
+  ActivityName: '"my-activity"'
+  EventKey: '"Key1"'
+  Parameters: data.SomeValue
+
+```
+
 
 ### If
 

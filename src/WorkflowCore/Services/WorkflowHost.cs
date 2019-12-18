@@ -19,6 +19,7 @@ namespace WorkflowCore.Services
 
         private readonly IEnumerable<IBackgroundTask> _backgroundTasks;
         private readonly IWorkflowController _workflowController;
+        private readonly IActivityController _activityController;
 
         public event StepErrorEventHandler OnStepError;
         public event LifeCycleEventHandler OnLifeCycleEvent;
@@ -34,7 +35,7 @@ namespace WorkflowCore.Services
         private readonly ILifeCycleEventHub _lifeCycleEventHub;
         private readonly ISearchIndex _searchIndex;
 
-        public WorkflowHost(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, WorkflowOptions options, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IEnumerable<IBackgroundTask> backgroundTasks, IWorkflowController workflowController, ILifeCycleEventHub lifeCycleEventHub, ISearchIndex searchIndex)
+        public WorkflowHost(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, WorkflowOptions options, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IEnumerable<IBackgroundTask> backgroundTasks, IWorkflowController workflowController, ILifeCycleEventHub lifeCycleEventHub, ISearchIndex searchIndex, IActivityController activityController)
         {
             PersistenceStore = persistenceStore;
             QueueProvider = queueProvider;
@@ -46,6 +47,7 @@ namespace WorkflowCore.Services
             _backgroundTasks = backgroundTasks;
             _workflowController = workflowController;
             _searchIndex = searchIndex;
+            _activityController = activityController;
             _lifeCycleEventHub = lifeCycleEventHub;
             _lifeCycleEventHub.Subscribe(HandleLifeCycleEvent);
         }
@@ -162,6 +164,26 @@ namespace WorkflowCore.Services
         {
             if (!_shutdown)
                 Stop();
+        }
+
+        public Task<PendingActivity> GetPendingActivity(string activityName, string workerId, TimeSpan? timeout = null)
+        {
+            return _activityController.GetPendingActivity(activityName, workerId, timeout);
+        }
+
+        public Task ReleaseActivityToken(string token)
+        {
+            return _activityController.ReleaseActivityToken(token);
+        }
+
+        public Task SubmitActivitySuccess(string token, object result)
+        {
+            return _activityController.SubmitActivitySuccess(token, result);
+        }
+
+        public Task SubmitActivityFailure(string token, object result)
+        {
+            return _activityController.SubmitActivityFailure(token, result);
         }
     }
 }

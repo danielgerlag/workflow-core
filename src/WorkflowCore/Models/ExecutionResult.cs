@@ -18,6 +18,8 @@ namespace WorkflowCore.Models
         public string EventKey { get; set; }
 
         public DateTime EventAsOf { get; set; }
+        
+        public object SubscriptionData { get; set; }
 
         public List<object> BranchValues { get; set; } = new List<object>();
 
@@ -85,6 +87,18 @@ namespace WorkflowCore.Models
                 Proceed = false,
                 EventName = eventName,
                 EventKey = eventKey,
+                EventAsOf = effectiveDate.ToUniversalTime()
+            };
+        }
+        
+        public static ExecutionResult WaitForActivity(string activityName, object subscriptionData, DateTime effectiveDate)
+        {
+            return new ExecutionResult()
+            {
+                Proceed = false,
+                EventName = Event.EventTypeActivity,
+                EventKey = activityName,
+                SubscriptionData = subscriptionData,
                 EventAsOf = effectiveDate.ToUniversalTime()
             };
         }
