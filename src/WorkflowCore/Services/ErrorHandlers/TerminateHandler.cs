@@ -24,7 +24,7 @@ namespace WorkflowCore.Services.ErrorHandlers
             workflow.Status = WorkflowStatus.Terminated;
             _eventPublisher.PublishNotification(new WorkflowTerminated()
             {
-                EventTimeUtc = _datetimeProvider.Now,
+                EventTimeUtc = _datetimeProvider.UtcNow,
                 Reference = workflow.Reference,
                 WorkflowInstanceId = workflow.Id,
                 WorkflowDefinitionId = workflow.WorkflowDefinitionId,
