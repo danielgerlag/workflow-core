@@ -82,31 +82,54 @@ namespace WorkflowCore.Providers.AWS
 
         public static Dictionary<string, AttributeValue> ToDynamoMap(this EventSubscription source)
         {
-            return new Dictionary<string, AttributeValue>
+            var result =  new Dictionary<string, AttributeValue>
             {
                 ["id"] = new AttributeValue(source.Id),
                 ["event_name"] = new AttributeValue(source.EventName),
                 ["event_key"] = new AttributeValue(source.EventKey),
                 ["workflow_id"] = new AttributeValue(source.WorkflowId),
+                ["execution_pointer_id"] = new AttributeValue(source.ExecutionPointerId),
                 ["step_id"] = new AttributeValue(source.StepId.ToString()),
                 ["subscribe_as_of"] = new AttributeValue() { N = source.SubscribeAsOf.Ticks.ToString() },
                 ["subscription_data"] = new AttributeValue(JsonConvert.SerializeObject(source.SubscriptionData, SerializerSettings)),
                 ["event_slug"] = new AttributeValue($"{source.EventName}:{source.EventKey}")
             };
+            if (!string.IsNullOrEmpty(source.ExternalToken))
+                result["external_token"] = new AttributeValue(source.ExternalToken);
+                    
+            if (!string.IsNullOrEmpty(source.ExternalWorkerId))
+                result["external_worker_id"] = new AttributeValue(source.ExternalWorkerId);
+
+            if (source.ExternalTokenExpiry.HasValue)
+                result["external_token_expiry"] = new AttributeValue() { N = source.ExternalTokenExpiry.Value.Ticks.ToString()};
+
+            return result;
         }
 
         public static EventSubscription ToEventSubscription(this Dictionary<string, AttributeValue> source)
         {
-            return new EventSubscription()
+            var result =  new EventSubscription()
             {
                 Id = source["id"].S,
                 EventName = source["event_name"].S,
                 EventKey = source["event_key"].S,
                 WorkflowId = source["workflow_id"].S,
+                ExecutionPointerId = source["execution_pointer_id"].S,
                 StepId = Convert.ToInt32(source["step_id"].S),
                 SubscribeAsOf = new DateTime(Convert.ToInt64(source["subscribe_as_of"].N)),
-                SubscriptionData = JsonConvert.DeserializeObject(source["subscription_data"].S, SerializerSettings)
+                SubscriptionData = JsonConvert.DeserializeObject(source["subscription_data"].S, SerializerSettings),
             };
+            
+            if (source.ContainsKey("external_token"))
+                result.ExternalToken = source["external_token"].S;
+            
+            if (source.ContainsKey("external_worker_id"))
+                result.ExternalWorkerId = source["external_worker_id"].S;
+            
+            if (source.ContainsKey("external_token_expiry"))
+                result.ExternalTokenExpiry = new DateTime(Int64.Parse(source["external_token_expiry"].N));
+            
+            return result;
         }
 
         public static Dictionary<string, AttributeValue> ToDynamoMap(this Event source)

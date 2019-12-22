@@ -15,7 +15,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.0-rtm-30799")
+                .HasAnnotation("ProductVersion", "3.1.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -23,21 +23,30 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                 {
                     b.Property<long>("PersistenceId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:IdentityIncrement", 1)
+                        .HasAnnotation("SqlServer:IdentitySeed", 1)
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("EventData");
+                    b.Property<string>("EventData")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("EventId");
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("EventKey")
+                        .HasColumnType("nvarchar(200)")
                         .HasMaxLength(200);
 
                     b.Property<string>("EventName")
+                        .HasColumnType("nvarchar(200)")
                         .HasMaxLength(200);
 
-                    b.Property<DateTime>("EventTime");
+                    b.Property<DateTime>("EventTime")
+                        .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsProcessed");
+                    b.Property<bool>("IsProcessed")
+                        .HasColumnType("bit");
 
                     b.HasKey("PersistenceId");
 
@@ -57,16 +66,23 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                 {
                     b.Property<long>("PersistenceId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:IdentityIncrement", 1)
+                        .HasAnnotation("SqlServer:IdentitySeed", 1)
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("ErrorTime");
+                    b.Property<DateTime>("ErrorTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("ExecutionPointerId")
+                        .HasColumnType("nvarchar(100)")
                         .HasMaxLength(100);
 
-                    b.Property<string>("Message");
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WorkflowId")
+                        .HasColumnType("nvarchar(100)")
                         .HasMaxLength(100);
 
                     b.HasKey("PersistenceId");
@@ -78,52 +94,75 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                 {
                     b.Property<long>("PersistenceId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:IdentityIncrement", 1)
+                        .HasAnnotation("SqlServer:IdentitySeed", 1)
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<bool>("Active");
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
 
-                    b.Property<string>("Children");
+                    b.Property<string>("Children")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ContextItem");
+                    b.Property<string>("ContextItem")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("EndTime");
+                    b.Property<DateTime?>("EndTime")
+                        .HasColumnType("datetime2");
 
-                    b.Property<string>("EventData");
+                    b.Property<string>("EventData")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EventKey")
+                        .HasColumnType("nvarchar(100)")
                         .HasMaxLength(100);
 
                     b.Property<string>("EventName")
+                        .HasColumnType("nvarchar(100)")
                         .HasMaxLength(100);
 
-                    b.Property<bool>("EventPublished");
+                    b.Property<bool>("EventPublished")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Id")
+                        .HasColumnType("nvarchar(50)")
                         .HasMaxLength(50);
 
-                    b.Property<string>("Outcome");
+                    b.Property<string>("Outcome")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PersistenceData");
+                    b.Property<string>("PersistenceData")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PredecessorId")
+                        .HasColumnType("nvarchar(100)")
                         .HasMaxLength(100);
 
-                    b.Property<int>("RetryCount");
+                    b.Property<int>("RetryCount")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Scope");
+                    b.Property<string>("Scope")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("SleepUntil");
+                    b.Property<DateTime?>("SleepUntil")
+                        .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("StartTime");
+                    b.Property<DateTime?>("StartTime")
+                        .HasColumnType("datetime2");
 
-                    b.Property<int>("Status");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
-                    b.Property<int>("StepId");
+                    b.Property<int>("StepId")
+                        .HasColumnType("int");
 
                     b.Property<string>("StepName")
+                        .HasColumnType("nvarchar(100)")
                         .HasMaxLength(100);
 
-                    b.Property<long>("WorkflowId");
+                    b.Property<long>("WorkflowId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("PersistenceId");
 
@@ -136,14 +175,20 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                 {
                     b.Property<long>("PersistenceId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:IdentityIncrement", 1)
+                        .HasAnnotation("SqlServer:IdentitySeed", 1)
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("AttributeKey")
+                        .HasColumnType("nvarchar(100)")
                         .HasMaxLength(100);
 
-                    b.Property<string>("AttributeValue");
+                    b.Property<string>("AttributeValue")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("ExecutionPointerId");
+                    b.Property<long>("ExecutionPointerId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("PersistenceId");
 
@@ -156,24 +201,49 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                 {
                     b.Property<long>("PersistenceId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:IdentityIncrement", 1)
+                        .HasAnnotation("SqlServer:IdentitySeed", 1)
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("EventKey")
+                        .HasColumnType("nvarchar(200)")
                         .HasMaxLength(200);
 
                     b.Property<string>("EventName")
+                        .HasColumnType("nvarchar(200)")
                         .HasMaxLength(200);
 
-                    b.Property<int>("StepId");
+                    b.Property<string>("ExecutionPointerId")
+                        .HasColumnType("nvarchar(200)")
+                        .HasMaxLength(200);
 
-                    b.Property<DateTime>("SubscribeAsOf");
+                    b.Property<string>("ExternalToken")
+                        .HasColumnType("nvarchar(200)")
+                        .HasMaxLength(200);
 
-                    b.Property<string>("SubscriptionData");
+                    b.Property<DateTime?>("ExternalTokenExpiry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ExternalWorkerId")
+                        .HasColumnType("nvarchar(200)")
+                        .HasMaxLength(200);
+
+                    b.Property<int>("StepId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("SubscribeAsOf")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SubscriptionData")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("SubscriptionId")
+                        .HasColumnType("uniqueidentifier")
                         .HasMaxLength(200);
 
                     b.Property<string>("WorkflowId")
+                        .HasColumnType("nvarchar(200)")
                         .HasMaxLength(200);
 
                     b.HasKey("PersistenceId");
@@ -192,30 +262,43 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                 {
                     b.Property<long>("PersistenceId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:IdentityIncrement", 1)
+                        .HasAnnotation("SqlServer:IdentitySeed", 1)
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime?>("CompleteTime");
+                    b.Property<DateTime?>("CompleteTime")
+                        .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("CreateTime");
+                    b.Property<DateTime>("CreateTime")
+                        .HasColumnType("datetime2");
 
-                    b.Property<string>("Data");
+                    b.Property<string>("Data")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
+                        .HasColumnType("nvarchar(500)")
                         .HasMaxLength(500);
 
                     b.Property<Guid>("InstanceId")
+                        .HasColumnType("uniqueidentifier")
                         .HasMaxLength(200);
 
-                    b.Property<long?>("NextExecution");
+                    b.Property<long?>("NextExecution")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Reference")
+                        .HasColumnType("nvarchar(200)")
                         .HasMaxLength(200);
 
-                    b.Property<int>("Status");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
-                    b.Property<int>("Version");
+                    b.Property<int>("Version")
+                        .HasColumnType("int");
 
                     b.Property<string>("WorkflowDefinitionId")
+                        .HasColumnType("nvarchar(200)")
                         .HasMaxLength(200);
 
                     b.HasKey("PersistenceId");
@@ -233,7 +316,8 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                     b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedWorkflow", "Workflow")
                         .WithMany("ExecutionPointers")
                         .HasForeignKey("WorkflowId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExtensionAttribute", b =>
@@ -241,7 +325,8 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                     b.HasOne("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", "ExecutionPointer")
                         .WithMany("ExtensionAttributes")
                         .HasForeignKey("ExecutionPointerId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

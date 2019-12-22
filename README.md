@@ -166,6 +166,8 @@ These are also available as separate Nuget packages.
 
 * [Events](src/samples/WorkflowCore.Sample04)
 
+* [Activity Workers](src/samples/WorkflowCore.Sample18)
+
 * [Parallel Tasks](src/samples/WorkflowCore.Sample13)
 
 * [Saga Transactions (with compensation)](src/samples/WorkflowCore.Sample17)

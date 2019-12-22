@@ -9,6 +9,7 @@
     <PackageProjectUrl>https://github.com/danielgerlag/workflow-core</PackageProjectUrl>
     <Description>Redis providers for Workflow Core (Persistence, queueing, distributed locking and event hubs)
 </Description>
+    <PackageVersion>3.0.0</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>

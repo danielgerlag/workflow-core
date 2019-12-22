@@ -437,5 +437,24 @@ namespace WorkflowCore.Services
             Step.ProceedOnCancel = proceedAfterCancel;
             return this;
         }
+
+        public IStepBuilder<TData, Activity> Activity(string activityName, Expression<Func<TData, object>> parameters = null, Expression<Func<TData, DateTime>> effectiveDate = null, Expression<Func<TData, bool>> cancelCondition = null)
+        {
+            var newStep = new WorkflowStep<Activity>();
+            newStep.CancelCondition = cancelCondition;
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, Activity>(WorkflowBuilder, newStep);
+            stepBuilder.Input((step) => step.ActivityName, (data) => activityName);
+            
+            if (parameters != null)
+                stepBuilder.Input((step) => step.Parameters, parameters);
+            
+            if (effectiveDate != null)
+                stepBuilder.Input((step) => step.EffectiveDate, effectiveDate);
+
+            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            return stepBuilder;
+        }
     }
 }

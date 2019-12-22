@@ -3,6 +3,7 @@ nav:
     - Home: index.md
     - Getting started: getting-started.md
     - External events: external-events.md
+    - Activity workers: activities.md
     - Error handing: error-handling.md
     - Control structures: control-structures.md
     - Saga transactions: sagas.md

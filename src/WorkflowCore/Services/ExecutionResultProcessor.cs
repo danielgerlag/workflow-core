@@ -48,9 +48,11 @@ namespace WorkflowCore.Services
                 {
                     WorkflowId = workflow.Id,
                     StepId = pointer.StepId,
+                    ExecutionPointerId = pointer.Id,
                     EventName = pointer.EventName,
                     EventKey = pointer.EventKey,
-                    SubscribeAsOf = result.EventAsOf
+                    SubscribeAsOf = result.EventAsOf,
+                    SubscriptionData = result.SubscriptionData
                 });
             }
 
