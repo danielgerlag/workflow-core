@@ -10,7 +10,7 @@ using WorkflowCore.Persistence.PostgreSQL;
 namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 {
     [DbContext(typeof(PostgresContext))]
-    [Migration("20191221210630_Activities")]
+    [Migration("20191222174302_Activities")]
     partial class Activities
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
