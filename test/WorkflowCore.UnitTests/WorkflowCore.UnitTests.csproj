@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\WorkflowCore.DSL\WorkflowCore.DSL.csproj" />
     <ProjectReference Include="..\..\src\WorkflowCore\WorkflowCore.csproj" />
     <ProjectReference Include="..\WorkflowCore.TestAssets\WorkflowCore.TestAssets.csproj" />
   </ItemGroup>

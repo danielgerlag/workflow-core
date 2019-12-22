@@ -1,6 +1,7 @@
 # Loading workflow definitions from JSON or YAML
 
-Simply grab the `DefinitionLoader` from the IoC container and call the `.LoadDefinition` method
+Install the `WorkflowCore.DSL` package from nuget and call `AddWorkflowDSL` on your service collection.
+Then grab the `DefinitionLoader` from the IoC container and call the `.LoadDefinition` method
 
 ```c#
 using WorkflowCore.Interface;

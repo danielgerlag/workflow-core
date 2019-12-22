@@ -38,4 +38,8 @@
     <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\DefinitionStorage\" />
+  </ItemGroup>
+
 </Project>

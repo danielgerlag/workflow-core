@@ -52,6 +52,7 @@ namespace WorkflowCore.Testing
         protected virtual void ConfigureServices(IServiceCollection services)
         {
             services.AddWorkflow();
+            services.AddWorkflowDSL();
         }
 
         public string StartWorkflow(string json, object data)

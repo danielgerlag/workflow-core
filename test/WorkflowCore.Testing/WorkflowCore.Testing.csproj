@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\WorkflowCore.DSL\WorkflowCore.DSL.csproj" />
     <ProjectReference Include="..\..\src\WorkflowCore\WorkflowCore.csproj" />
   </ItemGroup>
 
