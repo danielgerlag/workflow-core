@@ -177,7 +177,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
         public async Task<EventSubscription> GetSubscription(string eventSubscriptionId)
         {
             var result = await EventSubscriptions.FindAsync(x => x.Id == eventSubscriptionId);
-            return await result.FirstAsync();
+            return await result.FirstOrDefaultAsync();
         }
 
         public async Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, DateTime asOf)

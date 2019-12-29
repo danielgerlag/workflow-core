@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using WorkflowCore.Exceptions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
@@ -96,11 +97,14 @@ namespace WorkflowCore.Services
         {
             var tokenObj = Token.Decode(token);
             var sub = await _subscriptionRepository.GetSubscription(tokenObj.SubscriptionId);
+            if (sub == null)
+                throw new NotFoundException();
+
             if (sub.ExternalToken != token)
-                throw new InvalidOperationException("Token mismatch");
+                throw new NotFoundException("Token mismatch");
 
             if (!await _lockProvider.AcquireLock(sub.WorkflowId, CancellationToken.None))
-                throw new InvalidOperationException("Workflow is locked");
+                throw new WorkflowLockedException();
 
             try
             {
