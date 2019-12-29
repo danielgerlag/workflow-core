@@ -43,7 +43,23 @@ namespace WorkflowCore.Services.BackgroundTasks
                 var evt = await _eventRepository.GetEvent(itemId);
                 if (evt.EventTime <= _datetimeProvider.UtcNow)
                 {
-                    var subs = await _subscriptionRepository.GetSubscriptions(evt.EventName, evt.EventKey, evt.EventTime);
+                    IEnumerable<EventSubscription> subs = null;
+                    if (evt.EventData is ActivityResult)
+                    {
+                        var activity = await _subscriptionRepository.GetSubscription((evt.EventData as ActivityResult).SubscriptionId);
+                        if (activity == null)
+                        {
+                            Logger.LogWarning($"Activity already processed - {(evt.EventData as ActivityResult).SubscriptionId}");
+                            await _eventRepository.MarkEventProcessed(itemId);
+                            return;
+                        }
+                        subs = new List<EventSubscription>() { activity };
+                    }
+                    else
+                    {
+                        subs = await _subscriptionRepository.GetSubscriptions(evt.EventName, evt.EventKey, evt.EventTime);
+                    }
+
                     var toQueue = new List<string>();
                     var complete = true;
 
@@ -90,7 +106,13 @@ namespace WorkflowCore.Services.BackgroundTasks
             try
             {
                 var workflow = await _workflowRepository.GetWorkflowInstance(sub.WorkflowId);
-                var pointers = workflow.ExecutionPointers.Where(p => p.EventName == sub.EventName && p.EventKey == sub.EventKey && !p.EventPublished && p.EndTime == null);
+                IEnumerable<ExecutionPointer> pointers = null;
+                
+                if (!string.IsNullOrEmpty(sub.ExecutionPointerId))
+                    pointers = workflow.ExecutionPointers.Where(p => p.Id == sub.ExecutionPointerId && !p.EventPublished && p.EndTime == null);
+                else
+                    pointers = workflow.ExecutionPointers.Where(p => p.EventName == sub.EventName && p.EventKey == sub.EventKey && !p.EventPublished && p.EndTime == null);
+
                 foreach (var p in pointers)
                 {
                     p.EventData = evt.EventData;
