@@ -92,11 +92,14 @@ namespace WorkflowCore.Services.BackgroundTasks
             Logger.LogDebug("Subscribing to event {0} {1} for workflow {2} step {3}", subscription.EventName, subscription.EventKey, subscription.WorkflowId, subscription.StepId);
             
             await persistenceStore.CreateEventSubscription(subscription);
-            var events = await persistenceStore.GetEvents(subscription.EventName, subscription.EventKey, subscription.SubscribeAsOf);
-            foreach (var evt in events)
+            if (subscription.EventName != Event.EventTypeActivity)
             {
-                await persistenceStore.MarkEventUnprocessed(evt);
-                await QueueProvider.QueueWork(evt, QueueType.Event);
+                var events = await persistenceStore.GetEvents(subscription.EventName, subscription.EventKey, subscription.SubscribeAsOf);
+                foreach (var evt in events)
+                {
+                    await persistenceStore.MarkEventUnprocessed(evt);
+                    await QueueProvider.QueueWork(evt, QueueType.Event);
+                }
             }
         }
 
