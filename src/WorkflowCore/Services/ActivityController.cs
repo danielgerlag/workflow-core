@@ -13,20 +13,16 @@ namespace WorkflowCore.Services
 {
     public class ActivityController : IActivityController
     {
-        private readonly IWorkflowRepository _persistenceStore;
         private readonly ISubscriptionRepository _subscriptionRepository;
         private readonly IDistributedLockProvider _lockProvider;
         private readonly IDateTimeProvider _dateTimeProvider;
-        private readonly IQueueProvider _queueProvider;
         private readonly IWorkflowController _workflowController;
 
-        public ActivityController(ISubscriptionRepository subscriptionRepository, IWorkflowRepository persistenceStore, IWorkflowController workflowController, IDateTimeProvider dateTimeProvider, IDistributedLockProvider lockProvider, IQueueProvider queueProvider)
+        public ActivityController(ISubscriptionRepository subscriptionRepository, IWorkflowController workflowController, IDateTimeProvider dateTimeProvider, IDistributedLockProvider lockProvider)
         {
-            _persistenceStore = persistenceStore;
             _subscriptionRepository = subscriptionRepository;
             _dateTimeProvider = dateTimeProvider;
             _lockProvider = lockProvider;
-            _queueProvider = queueProvider;
             _workflowController = workflowController;
         }
         
@@ -108,28 +104,6 @@ namespace WorkflowCore.Services
             result.SubscriptionId = sub.Id;
 
             await _workflowController.PublishEvent(sub.EventName, sub.EventKey, result);
-
-            //if (!await _lockProvider.AcquireLock(sub.WorkflowId, CancellationToken.None))
-            //    throw new WorkflowLockedException();
-
-            //try
-            //{
-            //    var workflow = await _persistenceStore.GetWorkflowInstance(sub.WorkflowId);
-            //    var pointer = workflow.ExecutionPointers.Single(p => p.Id == sub.ExecutionPointerId);
-
-            //    pointer.EventData = result;
-            //    pointer.EventPublished = true;
-            //    pointer.Active = true;
-
-            //    workflow.NextExecution = 0;
-            //    await _persistenceStore.PersistWorkflow(workflow);
-            //    await _subscriptionRepository.TerminateSubscription(sub.Id);
-            //}
-            //finally
-            //{
-            //    await _lockProvider.ReleaseLock(sub.WorkflowId);
-            //    await _queueProvider.QueueWork(sub.WorkflowId, QueueType.Workflow);
-            //}
         }
 
         class Token
