@@ -18,7 +18,7 @@
     <Description>Provides support to persist workflows running on Workflow Core to a MongoDB database.</Description>
     <AssemblyVersion>3.0.1.0</AssemblyVersion>
     <FileVersion>3.0.1.0</FileVersion>
-    <PackageVersion>3.0.0</PackageVersion>
+    <PackageVersion>3.0.1</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
