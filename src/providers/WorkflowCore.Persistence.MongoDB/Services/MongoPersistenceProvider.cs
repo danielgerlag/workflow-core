@@ -94,6 +94,19 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                     Builders<Event>.IndexKeys.Ascending(x => x.IsProcessed),
                     new CreateIndexOptions {Background = true, Name = "idx_processed"}));
 
+                instance.Events.Indexes.CreateOne(new CreateIndexModel<Event>(
+                    Builders<Event>.IndexKeys
+                        .Ascending(x => x.EventName)
+                        .Ascending(x => x.EventKey)
+                        .Ascending(x => x.EventTime),
+                    new CreateIndexOptions { Background = true, Name = "idx_namekey" }));
+
+                instance.EventSubscriptions.Indexes.CreateOne(new CreateIndexModel<EventSubscription>(
+                    Builders<EventSubscription>.IndexKeys
+                        .Ascending(x => x.EventName)
+                        .Ascending(x => x.EventKey),
+                    new CreateIndexOptions { Background = true, Name = "idx_namekey" }));
+
                 indexesCreated = true;
             }
         }
