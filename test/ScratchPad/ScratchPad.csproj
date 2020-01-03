@@ -19,6 +19,7 @@
     <ProjectReference Include="..\..\src\samples\WorkflowCore.Sample02\WorkflowCore.Sample02.csproj" />
     <ProjectReference Include="..\..\src\samples\WorkflowCore.Sample03\WorkflowCore.Sample03.csproj" />
     <ProjectReference Include="..\..\src\samples\WorkflowCore.Sample04\WorkflowCore.Sample04.csproj" />
+    <ProjectReference Include="..\..\src\WorkflowCore.DSL\WorkflowCore.DSL.csproj" />
     <ProjectReference Include="..\..\src\WorkflowCore\WorkflowCore.csproj" />
   </ItemGroup>
 

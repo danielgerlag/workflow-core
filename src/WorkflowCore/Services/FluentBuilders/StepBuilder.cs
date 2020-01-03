@@ -90,9 +90,23 @@ namespace WorkflowCore.Services
 
         public IStepOutcomeBuilder<TData> When(object outcomeValue, string label = null)
         {
+            Expression<Func<object, object>> expr = x => outcomeValue;
             StepOutcome result = new StepOutcome
             {
-                Value = x => outcomeValue,
+                Value = expr,
+                Label = label
+            };
+            Step.Outcomes.Add(result);
+            var outcomeBuilder = new StepOutcomeBuilder<TData>(WorkflowBuilder, result);
+            return outcomeBuilder;
+        }
+        
+        public IStepOutcomeBuilder<TData> Case(object outcomeValue, string label = null)
+        {
+            Expression<Func<object, object>> expr = x => outcomeValue;
+            StepOutcome result = new StepOutcome
+            {
+                Value = expr,
                 Label = label
             };
             Step.Outcomes.Add(result);

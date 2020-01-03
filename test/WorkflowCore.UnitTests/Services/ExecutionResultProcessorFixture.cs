@@ -120,8 +120,10 @@ namespace WorkflowCore.UnitTests.Services
             var pointer1 = new ExecutionPointer() { Id = "1", Active = true, StepId = 0, Status = PointerStatus.Running };
             var pointer2 = new ExecutionPointer() { Id = "2" };
             var pointer3 = new ExecutionPointer() { Id = "3" };
-            var outcome1 = new StepOutcome() { NextStep = 1, Value = data => 10 };
-            var outcome2 = new StepOutcome() { NextStep = 2, Value = data => 20 };
+            Expression<Func<object, object>> expr1 = data => 10;
+            Expression<Func<object, object>> expr2 = data => 20;
+            var outcome1 = new StepOutcome() { NextStep = 1, Value = expr1 };
+            var outcome2 = new StepOutcome() { NextStep = 2, Value = expr2 };
             var step = A.Fake<WorkflowStep>();
             var workflowResult = new WorkflowExecutorResult();
             var instance = GivenWorkflow(pointer1);

@@ -72,6 +72,13 @@ namespace WorkflowCore.Interface
         /// <returns></returns>
         [Obsolete]
         IStepOutcomeBuilder<TData> When(object outcomeValue, string label = null);
+        
+        /// <summary>
+        /// Configure an outcome for this step, then wire it to another step
+        /// </summary>
+        /// <param name="outcomeValue"></param>
+        /// <returns></returns>
+        IStepOutcomeBuilder<TData> Case(object outcomeValue, string label = null);
 
         /// <summary>
         /// Map properties on the step to properties on the workflow data object before the step executes

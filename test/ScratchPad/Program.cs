@@ -63,6 +63,7 @@ namespace ScratchPad
                 //cfg.UseAwsSimpleQueueService(new EnvironmentVariablesAWSCredentials(), new AmazonSQSConfig() { RegionEndpoint = RegionEndpoint.USWest2 });
                 //cfg.UseAwsDynamoLocking(new EnvironmentVariablesAWSCredentials(), new AmazonDynamoDBConfig() { RegionEndpoint = RegionEndpoint.USWest2 }, "workflow-core-locks");
             });
+            services.AddWorkflowDSL();
 
             
             var serviceProvider = services.BuildServiceProvider();

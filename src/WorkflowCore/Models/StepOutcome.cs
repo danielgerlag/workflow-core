@@ -5,9 +5,9 @@ namespace WorkflowCore.Models
 {
     public class StepOutcome
     {
-        private Expression<Func<object, object>> _value;
+        private LambdaExpression _value;
 
-        public Expression<Func<object, object>> Value
+        public LambdaExpression Value
         {
             set { _value = value; }
         }
@@ -23,7 +23,7 @@ namespace WorkflowCore.Models
             if (_value == null)
                 return null;
 
-            return _value.Compile().Invoke(data);
+            return _value.Compile().DynamicInvoke(data);
         }
     }
 }
