@@ -63,9 +63,34 @@
     },
     {
       "Id": "Step4",
+      "NextStepId": "decide",
       "StepType": "WorkflowCore.TestAssets.Steps.Counter, WorkflowCore.TestAssets",
       "Inputs": { "Value": "data.Counter6" },
       "Outputs": { "Counter6": "step.Value" }
+    },
+    {
+      "Id": "decide",
+      "StepType": "WorkflowCore.Primitives.Decide, WorkflowCore",
+      "Inputs": {
+        "Expression": "data.Flag3"
+      },
+      "OutcomeSteps": {
+        "Outcome1": "true",
+        "Outcome2": "false"
+      }
+    },
+    {
+      "Id": "Outcome1",
+      "StepType": "WorkflowCore.TestAssets.Steps.Counter, WorkflowCore.TestAssets",
+      "Inputs": { "Value": "data.Counter7" },
+      "Outputs": { "Counter7": "step.Value" }
+    },
+    {
+      "Id": "Outcome2",
+      "StepType": "WorkflowCore.TestAssets.Steps.Counter, WorkflowCore.TestAssets",
+      "Inputs": { "Value": "data.Counter8" },
+      "Outputs": { "Counter8": "step.Value" }
     }
+
   ]
 }

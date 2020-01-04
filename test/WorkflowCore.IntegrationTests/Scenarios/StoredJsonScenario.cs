@@ -17,10 +17,10 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             Setup();
         }
 
-        [Fact(DisplayName = "Execute workflow from stored JSON definition")]
-        public void should_execute_json_workflow()
+        [Fact(DisplayName = "Execute branch 1")]
+        public void should_execute_branch1()
         {
-            var workflowId = StartWorkflow(TestAssets.Utils.GetTestDefinitionJson(), new CounterBoard() { Flag1 = true, Flag2 = true });
+            var workflowId = StartWorkflow(TestAssets.Utils.GetTestDefinitionJson(), new CounterBoard() { Flag1 = true, Flag2 = true, Flag3 = true });
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
             var data = GetData<CounterBoard>(workflowId);
@@ -32,8 +32,29 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             data.Counter4.Should().Be(1);
             data.Counter5.Should().Be(0);
             data.Counter6.Should().Be(1);
+            data.Counter7.Should().Be(1);
+            data.Counter8.Should().Be(0);
         }
-        
+
+        [Fact(DisplayName = "Execute branch 2")]
+        public void should_execute_branch2()
+        {
+            var workflowId = StartWorkflow(TestAssets.Utils.GetTestDefinitionJson(), new CounterBoard() { Flag1 = true, Flag2 = true, Flag3 = false });
+            WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
+
+            var data = GetData<CounterBoard>(workflowId);
+            GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
+            UnhandledStepErrors.Count.Should().Be(0);
+            data.Counter1.Should().Be(1);
+            data.Counter2.Should().Be(1);
+            data.Counter3.Should().Be(1);
+            data.Counter4.Should().Be(1);
+            data.Counter5.Should().Be(0);
+            data.Counter6.Should().Be(1);
+            data.Counter7.Should().Be(0);
+            data.Counter8.Should().Be(1);
+        }
+
         [Fact]
         public void should_execute_json_workflow_with_dynamic_data()
         {
