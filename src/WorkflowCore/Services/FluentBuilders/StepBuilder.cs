@@ -101,17 +101,16 @@ namespace WorkflowCore.Services
             return outcomeBuilder;
         }
         
-        public IStepOutcomeBuilder<TData> Case(object outcomeValue, string label = null)
+        public void Branch<TStep>(object outcomeValue, IStepBuilder<TData, TStep> branch)
+            where TStep : IStepBody
         {
             Expression<Func<object, object>> expr = x => outcomeValue;
             StepOutcome result = new StepOutcome
             {
                 Value = expr,
-                Label = label
+                NextStep = branch.Step.Id
             };
             Step.Outcomes.Add(result);
-            var outcomeBuilder = new StepOutcomeBuilder<TData>(WorkflowBuilder, result);
-            return outcomeBuilder;
         }
 
         public IStepBuilder<TData, TStepBody> Input<TInput>(Expression<Func<TStepBody, TInput>> stepProperty, Expression<Func<TData, TInput>> value)
@@ -253,6 +252,20 @@ namespace WorkflowCore.Services
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, Delay>(WorkflowBuilder, newStep);
+            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+
+            return stepBuilder;
+        }
+
+        public IStepBuilder<TData, Decide> Decide(Expression<Func<TData, object>> expression)
+        {
+            var newStep = new WorkflowStep<Decide>();
+
+            Expression<Func<Decide, object>> inputExpr = (x => x.Expression);
+            newStep.Inputs.Add(new MemberMapParameter(expression, inputExpr));
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, Decide>(WorkflowBuilder, newStep);
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
 
             return stepBuilder;

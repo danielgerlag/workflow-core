@@ -29,19 +29,10 @@ namespace ScratchPad
             
             host.StartWorkflow("Test02", 1, new WfData()
             {
-                Value1 = "data1",
+                Value1 = "twoz",
                 Value2 = "data2"
             });
 
-            var act = activityController.GetPendingActivity("act1", "worker1", TimeSpan.FromMinutes(1)).Result;
-
-            if (act != null)
-            {
-                Console.WriteLine("get act " + act.Token);
-                Console.WriteLine(act.Parameters);
-
-                activityController.SubmitActivitySuccess(act.Token, "BOO");
-            }
             
             
             Console.ReadLine();
@@ -107,6 +98,10 @@ namespace ScratchPad
         {
             builder                
                 .StartWith<HelloWorld>()
+                .Decide(data => data.Value1)
+                    .Outcome("one")
+                    .Then<CustomMessage>()
+                        .Input(step => step.Message, data => "hi from 1")
                 .Activity("act1", (data) => data.Value1)
                     .Output(data => data.Value3, step => step.Result)
                 .Then<CustomMessage>()

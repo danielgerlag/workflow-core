@@ -74,11 +74,12 @@ namespace WorkflowCore.Interface
         IStepOutcomeBuilder<TData> When(object outcomeValue, string label = null);
         
         /// <summary>
-        /// Configure an outcome for this step, then wire it to another step
+        /// Configure an outcome branch for this step, then wire it to another step
         /// </summary>
         /// <param name="outcomeValue"></param>
         /// <returns></returns>
-        IStepOutcomeBuilder<TData> Case(object outcomeValue, string label = null);
+        void Branch<TStep>(object outcomeValue, IStepBuilder<TData, TStep> branch)
+            where TStep : IStepBody;
 
         /// <summary>
         /// Map properties on the step to properties on the workflow data object before the step executes
@@ -165,6 +166,13 @@ namespace WorkflowCore.Interface
         /// <returns></returns>
         IStepBuilder<TData, Delay> Delay(Expression<Func<TData, TimeSpan>> period);
 
+        /// <summary>
+        /// Evaluate an expression and take a different path depending on the value
+        /// </summary>
+        /// <param name="expression">Expression to evaluate for decision</param>
+        /// <returns></returns>
+        IStepBuilder<TData, Decide> Decide(Expression<Func<TData, object>> expression);
+        
         /// <summary>
         /// Execute a block of steps, once for each item in a collection in a parallel foreach
         /// </summary>

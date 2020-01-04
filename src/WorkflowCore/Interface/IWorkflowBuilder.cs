@@ -27,5 +27,7 @@ namespace WorkflowCore.Interface
         IEnumerable<WorkflowStep> GetUpstreamSteps(int id);
 
         IWorkflowBuilder<TData> UseDefaultErrorBehavior(WorkflowErrorHandling behavior, TimeSpan? retryInterval = null);
+        
+        IStepBuilder<TData, TStep> CreateBranch<TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null) where TStep : IStepBody;
     }
 }

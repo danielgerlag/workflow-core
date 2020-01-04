@@ -118,6 +118,11 @@ namespace WorkflowCore.Services
             DefaultErrorRetryInterval = retryInterval;
             return this;
         }
+
+        IStepBuilder<TData, TStep> CreateBranch<TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null) where TStep : IStepBody
+        {
+            
+        }
     }
         
 }
