@@ -7,6 +7,8 @@ namespace WorkflowCore.Interface
 {
     public interface IWorkflowBuilder
     {
+        List<WorkflowStep> Steps { get; }
+
         int LastStep { get; }                
 
         IWorkflowBuilder<T> UseData<T>();
@@ -14,6 +16,8 @@ namespace WorkflowCore.Interface
         WorkflowDefinition Build(string id, int version);
 
         void AddStep(WorkflowStep step);
+
+        void AttachBranch(IWorkflowBuilder branch);
     }
 
     public interface IWorkflowBuilder<TData> : IWorkflowBuilder
@@ -27,7 +31,8 @@ namespace WorkflowCore.Interface
         IEnumerable<WorkflowStep> GetUpstreamSteps(int id);
 
         IWorkflowBuilder<TData> UseDefaultErrorBehavior(WorkflowErrorHandling behavior, TimeSpan? retryInterval = null);
-        
-        IStepBuilder<TData, TStep> CreateBranch<TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null) where TStep : IStepBody;
+
+        IWorkflowBuilder<TData> CreateBranch();
+                
     }
 }

@@ -16,7 +16,7 @@
       {
         "Expression": "data.Value1" 
       },
-      "OutcomeNextSteps":
+      "OutcomeSteps":
       {
         "Print1": "\"one\"",
         "Print2": "\"two\""

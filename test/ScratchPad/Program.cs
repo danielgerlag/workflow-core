@@ -22,14 +22,14 @@ namespace ScratchPad
             var host = serviceProvider.GetService<IWorkflowHost>();
             var loader = serviceProvider.GetService<IDefinitionLoader>();
             var activityController = serviceProvider.GetService<IActivityController>();
-            //host.RegisterWorkflow<Test01Workflow, WfData>();
-            loader.LoadDefinition(Properties.Resources.HelloWorld, Deserializers.Json);
+            host.RegisterWorkflow<Test01Workflow, WfData>();
+            //loader.LoadDefinition(Properties.Resources.HelloWorld, Deserializers.Json);
             
             host.Start();
             
-            host.StartWorkflow("Test02", 1, new WfData()
+            host.StartWorkflow("Test01", 1, new WfData()
             {
-                Value1 = "twoz",
+                Value1 = "two",
                 Value2 = "data2"
             });
 
@@ -96,16 +96,24 @@ namespace ScratchPad
     {
         public void Build(IWorkflowBuilder<WfData> builder)
         {
-            builder                
+            var branch1 = builder.CreateBranch()
+                .StartWith<CustomMessage>()
+                    .Input(step => step.Message, data => "hi from 1")
+                .Then<CustomMessage>()
+                    .Input(step => step.Message, data => "bye from 1");
+
+            var branch2 = builder.CreateBranch()
+                .StartWith<CustomMessage>()
+                    .Input(step => step.Message, data => "hi from 2")
+                .Then<CustomMessage>()
+                    .Input(step => step.Message, data => "bye from 2");
+
+
+            builder
                 .StartWith<HelloWorld>()
                 .Decide(data => data.Value1)
-                    .Outcome("one")
-                    .Then<CustomMessage>()
-                        .Input(step => step.Message, data => "hi from 1")
-                .Activity("act1", (data) => data.Value1)
-                    .Output(data => data.Value3, step => step.Result)
-                .Then<CustomMessage>()
-                    .Input(step => step.Message, data => data.Value3);
+                    .Branch("one", branch1)
+                    .Branch("two", branch2);
         }
 
         public string Id => "Test01";

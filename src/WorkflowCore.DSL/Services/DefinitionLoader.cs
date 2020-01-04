@@ -238,7 +238,7 @@ namespace WorkflowCore.Services.DefinitionStorage
             if (!string.IsNullOrEmpty(source.NextStepId))
                 step.Outcomes.Add(new StepOutcome() { ExternalNextStepId = $"{source.NextStepId}" });
             
-            foreach (var nextStep in source.OutcomeNextSteps)
+            foreach (var nextStep in source.OutcomeSteps)
             {
                 var dataParameter = Expression.Parameter(dataType, "data");
                 var sourceExpr = DynamicExpressionParser.ParseLambda(new[] { dataParameter }, typeof(object), nextStep.Value);
