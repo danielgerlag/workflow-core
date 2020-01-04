@@ -480,3 +480,69 @@ Do:
   - Id: do2
     StepType: MyApp.DoSomething2, MyApp
 ```
+
+### Decision Branches
+
+You can define multiple independent branches within your workflow and select one based on an expression value.
+Use the `Decide` primitive step and hook up your branches via the `OutcomeSteps` property.  The result of the input expression will be matched to the expressions listed in `OutcomeSteps`, and the matching next step(s) will be scheduled to execute next.
+
+```json
+{
+  "Id": "DecisionWorkflow",
+  "Version": 1,
+  "DataType": "MyApp.MyData, MyApp",
+  "Steps": [
+    {
+      "Id": "decide",
+      "StepType": "WorkflowCore.Primitives.Decide, WorkflowCore",
+      "Inputs": 
+      {
+        "Expression": "<<input expression to evaluate>>" 
+      },
+      "OutcomeSteps":
+      {
+        "Branch1": "<<result expression to match for branch 1>>",
+        "Branch2": "<<result expression to match for branch 2>>"
+      }
+    },
+    {
+      "Id": "Branch1",
+      "StepType": "MyApp.PrintMessage, MyApp",
+      "Inputs": 
+	  { 
+		  "Message": "\"Hello from 1\"" 
+	  }
+    },
+    {
+      "Id": "Branch2",
+      "StepType": "MyApp.PrintMessage, MyApp",
+      "Inputs": 
+	  { 
+	    "Message": "\"Hello from 2\"" 
+	  }
+    }
+  ]
+}
+```
+
+```yaml
+Id: DecisionWorkflow
+Version: 1
+DataType: MyApp.MyData, MyApp
+Steps:
+- Id: decide
+  StepType: WorkflowCore.Primitives.Decide, WorkflowCore
+  Inputs:
+    Expression: <<input expression to evaluate>>
+  OutcomeSteps:
+    Branch1: '<<result expression to match for branch 1>>'
+    Branch2: '<<result expression to match for branch 2>>'
+- Id: Branch1
+  StepType: MyApp.PrintMessage, MyApp
+  Inputs:
+    Message: '"Hello from 1"'
+- Id: Branch2
+  StepType: MyApp.PrintMessage, MyApp
+  Inputs:
+    Message: '"Hello from 2"'
+```
