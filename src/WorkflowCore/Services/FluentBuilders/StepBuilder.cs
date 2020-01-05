@@ -90,14 +90,32 @@ namespace WorkflowCore.Services
 
         public IStepOutcomeBuilder<TData> When(object outcomeValue, string label = null)
         {
+            Expression<Func<object, object>> expr = x => outcomeValue;
             StepOutcome result = new StepOutcome
             {
-                Value = x => outcomeValue,
+                Value = expr,
                 Label = label
             };
             Step.Outcomes.Add(result);
             var outcomeBuilder = new StepOutcomeBuilder<TData>(WorkflowBuilder, result);
             return outcomeBuilder;
+        }
+        
+        public IStepBuilder<TData, TStepBody> Branch<TStep>(object outcomeValue, IStepBuilder<TData, TStep> branch) where TStep : IStepBody
+        {
+            if (branch.WorkflowBuilder.Steps.Count == 0)
+                return this;
+
+            WorkflowBuilder.AttachBranch(branch.WorkflowBuilder);
+            Expression<Func<object, object>> expr = x => outcomeValue;
+
+            Step.Outcomes.Add(new StepOutcome
+            {
+                Value = expr,
+                NextStep = branch.WorkflowBuilder.Steps[0].Id
+            });
+
+            return this;
         }
 
         public IStepBuilder<TData, TStepBody> Input<TInput>(Expression<Func<TStepBody, TInput>> stepProperty, Expression<Func<TData, TInput>> value)
@@ -239,6 +257,20 @@ namespace WorkflowCore.Services
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, Delay>(WorkflowBuilder, newStep);
+            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+
+            return stepBuilder;
+        }
+
+        public IStepBuilder<TData, Decide> Decide(Expression<Func<TData, object>> expression)
+        {
+            var newStep = new WorkflowStep<Decide>();
+
+            Expression<Func<Decide, object>> inputExpr = (x => x.Expression);
+            newStep.Inputs.Add(new MemberMapParameter(expression, inputExpr));
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, Decide>(WorkflowBuilder, newStep);
             Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
 
             return stepBuilder;

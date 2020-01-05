@@ -7,23 +7,30 @@
     {
       "Id": "Hello",
       "StepType": "ScratchPad.HelloWorld, ScratchPad",
-      "NextStepId": "act"
+      "NextStepId": "decide"
     },
     {
-      "Id": "act",
-      "StepType": "WorkflowCore.Primitives.Activity, WorkflowCore",
-      "NextStepId": "Print",
+      "Id": "decide",
+      "StepType": "WorkflowCore.Primitives.Decide, WorkflowCore",
       "Inputs": 
       {
-        "ActivityName": "\"act1\"",
-        "Parameters": "data.Value1" 
+        "Expression": "data.Value1" 
       },
-      "Outputs": { "Value3": "step.Result" }
+      "OutcomeSteps":
+      {
+        "Print1": "\"one\"",
+        "Print2": "\"two\""
+      }
     },
     {
-      "Id": "Print",
+      "Id": "Print1",
       "StepType": "ScratchPad.CustomMessage, ScratchPad",
-      "Inputs": { "Message": "data.Value3" }
-    }    
+      "Inputs": { "Message": "\"Hello from 1\"" }
+    },
+    {
+      "Id": "Print2",
+      "StepType": "ScratchPad.CustomMessage, ScratchPad",
+      "Inputs": { "Message": "\"Hello from 2\"" }
+    }
   ]
 }

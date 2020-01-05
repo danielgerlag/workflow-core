@@ -93,7 +93,7 @@ namespace WorkflowCore.Services.DefinitionStorage
 
                 AttachInputs(nextStep, dataType, stepType, targetStep);
                 AttachOutputs(nextStep, dataType, stepType, targetStep);
-
+                
                 if (nextStep.Do != null)
                 {
                     foreach (var branch in nextStep.Do)
@@ -115,8 +115,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                         compensatables.Add(nextStep);
                 }
 
-                if (!string.IsNullOrEmpty(nextStep.NextStepId))
-                    targetStep.Outcomes.Add(new StepOutcome() { ExternalNextStepId = $"{nextStep.NextStepId}" });
+                AttachOutcomes(nextStep, dataType, targetStep);
 
                 result.Add(targetStep);
 
@@ -231,6 +230,23 @@ namespace WorkflowCore.Services.DefinitionStorage
 
                     step.Outputs.Add(new ActionParameter<IStepBody, object>(acn));
                 }
+            }
+        }
+
+        private void AttachOutcomes(StepSourceV1 source, Type dataType, WorkflowStep step)
+        {
+            if (!string.IsNullOrEmpty(source.NextStepId))
+                step.Outcomes.Add(new StepOutcome() { ExternalNextStepId = $"{source.NextStepId}" });
+            
+            foreach (var nextStep in source.OutcomeSteps)
+            {
+                var dataParameter = Expression.Parameter(dataType, "data");
+                var sourceExpr = DynamicExpressionParser.ParseLambda(new[] { dataParameter }, typeof(object), nextStep.Value);
+                step.Outcomes.Add(new StepOutcome()
+                {
+                    Value = sourceExpr,
+                    ExternalNextStepId = $"{nextStep.Key}"
+                });
             }
         }
 

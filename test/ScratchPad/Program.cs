@@ -22,26 +22,17 @@ namespace ScratchPad
             var host = serviceProvider.GetService<IWorkflowHost>();
             var loader = serviceProvider.GetService<IDefinitionLoader>();
             var activityController = serviceProvider.GetService<IActivityController>();
-            //host.RegisterWorkflow<Test01Workflow, WfData>();
-            loader.LoadDefinition(Properties.Resources.HelloWorld, Deserializers.Json);
+            host.RegisterWorkflow<Test01Workflow, WfData>();
+            //loader.LoadDefinition(Properties.Resources.HelloWorld, Deserializers.Json);
             
             host.Start();
             
-            host.StartWorkflow("Test02", 1, new WfData()
+            host.StartWorkflow("Test01", 1, new WfData()
             {
-                Value1 = "data1",
+                Value1 = "two",
                 Value2 = "data2"
             });
 
-            var act = activityController.GetPendingActivity("act1", "worker1", TimeSpan.FromMinutes(1)).Result;
-
-            if (act != null)
-            {
-                Console.WriteLine("get act " + act.Token);
-                Console.WriteLine(act.Parameters);
-
-                activityController.SubmitActivitySuccess(act.Token, "BOO");
-            }
             
             
             Console.ReadLine();
@@ -63,6 +54,7 @@ namespace ScratchPad
                 //cfg.UseAwsSimpleQueueService(new EnvironmentVariablesAWSCredentials(), new AmazonSQSConfig() { RegionEndpoint = RegionEndpoint.USWest2 });
                 //cfg.UseAwsDynamoLocking(new EnvironmentVariablesAWSCredentials(), new AmazonDynamoDBConfig() { RegionEndpoint = RegionEndpoint.USWest2 }, "workflow-core-locks");
             });
+            services.AddWorkflowDSL();
 
             
             var serviceProvider = services.BuildServiceProvider();
@@ -104,12 +96,24 @@ namespace ScratchPad
     {
         public void Build(IWorkflowBuilder<WfData> builder)
         {
-            builder                
-                .StartWith<HelloWorld>()
-                .Activity("act1", (data) => data.Value1)
-                    .Output(data => data.Value3, step => step.Result)
+            var branch1 = builder.CreateBranch()
+                .StartWith<CustomMessage>()
+                    .Input(step => step.Message, data => "hi from 1")
                 .Then<CustomMessage>()
-                    .Input(step => step.Message, data => data.Value3);
+                    .Input(step => step.Message, data => "bye from 1");
+
+            var branch2 = builder.CreateBranch()
+                .StartWith<CustomMessage>()
+                    .Input(step => step.Message, data => "hi from 2")
+                .Then<CustomMessage>()
+                    .Input(step => step.Message, data => "bye from 2");
+
+
+            builder
+                .StartWith<HelloWorld>()
+                .Decide(data => data.Value1)
+                    .Branch("one", branch1)
+                    .Branch("two", branch2);
         }
 
         public string Id => "Test01";

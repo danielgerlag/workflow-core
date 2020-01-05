@@ -13,23 +13,29 @@ namespace WorkflowCore.Sample12
 
         public void Build(IWorkflowBuilder<MyData> builder)
         {
+            var branch1 = builder.CreateBranch()
+                .StartWith<PrintMessage>()
+                    .Input(step => step.Message, data => "hi from 1")
+                .Then<PrintMessage>()
+                    .Input(step => step.Message, data => "bye from 1");
+
+            var branch2 = builder.CreateBranch()
+                .StartWith<PrintMessage>()
+                    .Input(step => step.Message, data => "hi from 2")
+                .Then<PrintMessage>()
+                    .Input(step => step.Message, data => "bye from 2");
+
+
             builder
                 .StartWith<SayHello>()
-                .Then<DetermineSomething>()
-                    .When(data => 1).Do(then => then
-                        .StartWith<PrintMessage>()
-                            .Input(step => step.Message, data => "Outcome was 1")
-                    )
-                    .When(data => 2).Do(then => then
-                        .StartWith<PrintMessage>()
-                            .Input(step => step.Message, data => "Outcome was 2")
-                    )                
-                .Then<SayGoodbye>();
+                .Decide(data => data.Value)
+                    .Branch(1, branch1)
+                    .Branch(2, branch2);
         }        
     }
 
     public class MyData
     {
-        public int Counter { get; set; }
+        public int Value { get; set; }
     }
 }

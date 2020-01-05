@@ -9,7 +9,9 @@ namespace WorkflowCore.Services
 {
     public class WorkflowBuilder : IWorkflowBuilder
     {
-        protected List<WorkflowStep> Steps { get; set; } = new List<WorkflowStep>();
+        public List<WorkflowStep> Steps { get; set; } = new List<WorkflowStep>();
+
+        protected ICollection<IWorkflowBuilder> Branches { get; set; } = new List<IWorkflowBuilder>();
 
         protected WorkflowErrorHandling DefaultErrorBehavior = WorkflowErrorHandling.Retry;
 
@@ -54,6 +56,28 @@ namespace WorkflowCore.Services
                     outcome.NextStep = Steps.Single(x => x.ExternalId == outcome.ExternalNextStepId).Id;
                 }
             }
+        }
+
+        public void AttachBranch(IWorkflowBuilder branch)
+        {
+            if (Branches.Contains(branch))
+                return;
+
+            foreach (var step in branch.Steps)
+            {
+                var oldId = step.Id;
+                AddStep(step);
+                foreach (var step2 in branch.Steps)
+                {
+                    foreach (var outcome in step2.Outcomes)
+                    {
+                        if (outcome.NextStep == oldId)
+                            outcome.NextStep = step.Id;
+                    }
+                }
+            }
+
+            Branches.Add(branch);
         }
 
     }
@@ -118,6 +142,13 @@ namespace WorkflowCore.Services
             DefaultErrorRetryInterval = retryInterval;
             return this;
         }
+
+        public IWorkflowBuilder<TData> CreateBranch()
+        {
+            var result = new WorkflowBuilder<TData>(new List<WorkflowStep>());
+            return result;
+        }
+                
     }
         
 }
