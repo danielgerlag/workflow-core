@@ -61,8 +61,8 @@ namespace WorkflowCore.Services
                 pointer.Active = false;
                 pointer.EndTime = _datetimeProvider.UtcNow;
                 pointer.Status = PointerStatus.Complete;
-
-                foreach (var outcomeTarget in step.Outcomes.Where(x => object.Equals(x.GetValue(workflow.Data), result.OutcomeValue) || x.GetValue(workflow.Data) == null))
+                                
+                foreach (var outcomeTarget in step.Outcomes.Where(x => x.Matches(result, workflow.Data)))
                 {                    
                     workflow.ExecutionPointers.Add(_pointerFactory.BuildNextPointer(def, pointer, outcomeTarget));
                 }

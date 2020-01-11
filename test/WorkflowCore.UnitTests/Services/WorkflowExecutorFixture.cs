@@ -348,7 +348,7 @@ namespace WorkflowCore.UnitTests.Services
             A.CallTo(() => result.ConstructBody(ServiceProvider)).Returns(stepBody);
             A.CallTo(() => result.Inputs).Returns(inputs);
             A.CallTo(() => result.Outputs).Returns(outputs);
-            A.CallTo(() => result.Outcomes).Returns(new List<StepOutcome>());
+            A.CallTo(() => result.Outcomes).Returns(new List<IStepOutcome>());
             A.CallTo(() => result.InitForExecution(A<WorkflowExecutorResult>.Ignored, A<WorkflowDefinition>.Ignored, A<WorkflowInstance>.Ignored, A<ExecutionPointer>.Ignored)).Returns(ExecutionPipelineDirective.Next);
             A.CallTo(() => result.BeforeExecute(A<WorkflowExecutorResult>.Ignored, A<IStepExecutionContext>.Ignored, A<ExecutionPointer>.Ignored, A<IStepBody>.Ignored)).Returns(ExecutionPipelineDirective.Next);
             return result;

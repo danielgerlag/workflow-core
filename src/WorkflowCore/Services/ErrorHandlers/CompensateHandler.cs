@@ -72,7 +72,7 @@ namespace WorkflowCore.Services.ErrorHandlers
 
                     if (resume)
                     {
-                        foreach (var outcomeTarget in scopeStep.Outcomes.Where(x => x.GetValue(workflow.Data) == null))
+                        foreach (var outcomeTarget in scopeStep.Outcomes.Where(x => x.Matches(workflow.Data)))
                             workflow.ExecutionPointers.Add(_pointerFactory.BuildNextPointer(def, scopePointer, outcomeTarget));
                     }
                 }

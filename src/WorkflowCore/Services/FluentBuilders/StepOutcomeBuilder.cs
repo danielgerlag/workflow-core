@@ -8,9 +8,9 @@ namespace WorkflowCore.Services
     public class StepOutcomeBuilder<TData> : IStepOutcomeBuilder<TData>
     {
         public IWorkflowBuilder<TData> WorkflowBuilder { get; private set; }
-        public StepOutcome Outcome { get; private set; }
+        public ValueOutcome Outcome { get; private set; }
         
-        public StepOutcomeBuilder(IWorkflowBuilder<TData> workflowBuilder, StepOutcome outcome)
+        public StepOutcomeBuilder(IWorkflowBuilder<TData> workflowBuilder, ValueOutcome outcome)
         {
             WorkflowBuilder = workflowBuilder;
             Outcome = outcome;

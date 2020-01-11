@@ -8,7 +8,7 @@ namespace WorkflowCore.Interface
     {
         IWorkflowBuilder<TData> WorkflowBuilder { get; }
 
-        StepOutcome Outcome { get; }
+        ValueOutcome Outcome { get; }
 
         IStepBuilder<TData, TStep> Then<TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null) where TStep : IStepBody;
 

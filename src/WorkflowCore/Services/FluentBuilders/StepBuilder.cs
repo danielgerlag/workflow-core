@@ -45,7 +45,7 @@ namespace WorkflowCore.Services
             }
 
             newStep.Name = newStep.Name ?? typeof(TStep).Name;
-            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Id });
 
             return stepBuilder;
         }
@@ -53,7 +53,7 @@ namespace WorkflowCore.Services
         public IStepBuilder<TData, TStep> Then<TStep>(IStepBuilder<TData, TStep> newStep)
             where TStep : IStepBody
         {
-            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Step.Id });
+            Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Step.Id });
             var stepBuilder = new StepBuilder<TData, TStep>(WorkflowBuilder, newStep.Step);
             return stepBuilder;
         }
@@ -64,7 +64,7 @@ namespace WorkflowCore.Services
             newStep.Body = body;
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, InlineStepBody>(WorkflowBuilder, newStep);
-            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Id });
             return stepBuilder;
         }
 
@@ -74,13 +74,13 @@ namespace WorkflowCore.Services
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, ActionStepBody>(WorkflowBuilder, newStep);
             stepBuilder.Input(x => x.Body, x => body);
-            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Id });
             return stepBuilder;
         }
 
         public IStepBuilder<TData, TStepBody> Attach(string id)
         {
-            Step.Outcomes.Add(new StepOutcome()
+            Step.Outcomes.Add(new ValueOutcome()
             {
                 ExternalNextStepId = id
             });
@@ -91,7 +91,7 @@ namespace WorkflowCore.Services
         public IStepOutcomeBuilder<TData> When(object outcomeValue, string label = null)
         {
             Expression<Func<object, object>> expr = x => outcomeValue;
-            StepOutcome result = new StepOutcome
+            ValueOutcome result = new ValueOutcome
             {
                 Value = expr,
                 Label = label
@@ -109,7 +109,7 @@ namespace WorkflowCore.Services
             WorkflowBuilder.AttachBranch(branch.WorkflowBuilder);
             Expression<Func<object, object>> expr = x => outcomeValue;
 
-            Step.Outcomes.Add(new StepOutcome
+            Step.Outcomes.Add(new ValueOutcome
             {
                 Value = expr,
                 NextStep = branch.WorkflowBuilder.Steps[0].Id
@@ -169,7 +169,7 @@ namespace WorkflowCore.Services
                 stepBuilder.Input((step) => step.EffectiveDate, effectiveDate);
             }
 
-            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Id });
             return stepBuilder;
         }
 
@@ -188,7 +188,7 @@ namespace WorkflowCore.Services
                 stepBuilder.Input((step) => step.EffectiveDate, effectiveDate);
             }
 
-            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Id });
             return stepBuilder;
         }
         
@@ -244,7 +244,7 @@ namespace WorkflowCore.Services
         {
             EndStep newStep = new EndStep();
             WorkflowBuilder.AddStep(newStep);
-            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Id });
             return this;
         }
 
@@ -257,7 +257,7 @@ namespace WorkflowCore.Services
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, Delay>(WorkflowBuilder, newStep);
-            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Id });
 
             return stepBuilder;
         }
@@ -271,7 +271,7 @@ namespace WorkflowCore.Services
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, Decide>(WorkflowBuilder, newStep);
-            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Id });
 
             return stepBuilder;
         }
@@ -286,7 +286,7 @@ namespace WorkflowCore.Services
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, Foreach>(WorkflowBuilder, newStep);                        
 
-            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Id });
 
             return stepBuilder;
         }
@@ -301,7 +301,7 @@ namespace WorkflowCore.Services
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, While>(WorkflowBuilder, newStep);
 
-            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Id });
 
             return stepBuilder;
         }
@@ -316,7 +316,7 @@ namespace WorkflowCore.Services
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, If>(WorkflowBuilder, newStep);
 
-            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Id });
 
             return stepBuilder;
         }
@@ -333,7 +333,7 @@ namespace WorkflowCore.Services
             {
                 var switchStep = new WorkflowStep<OutcomeSwitch>();
                 WorkflowBuilder.AddStep(switchStep);
-                Step.Outcomes.Add(new StepOutcome()
+                Step.Outcomes.Add(new ValueOutcome()
                 {
                     NextStep = switchStep.Id,
                     Label = label
@@ -357,7 +357,7 @@ namespace WorkflowCore.Services
             var newStep = new SagaContainer<Sequence>();
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, Sequence>(WorkflowBuilder, newStep);
-            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Id });
             builder.Invoke(WorkflowBuilder);
             stepBuilder.Step.Children.Add(stepBuilder.Step.Id + 1); //TODO: make more elegant
 
@@ -371,7 +371,7 @@ namespace WorkflowCore.Services
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new ParallelStepBuilder<TData, Sequence>(WorkflowBuilder, newBuilder, newBuilder);
 
-            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Id });
 
             return stepBuilder;
         }
@@ -384,7 +384,7 @@ namespace WorkflowCore.Services
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new ReturnStepBuilder<TData, Schedule, TStepBody>(WorkflowBuilder, newStep, this);
-            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Id });
 
             return stepBuilder;
         }
@@ -401,7 +401,7 @@ namespace WorkflowCore.Services
 
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new ReturnStepBuilder<TData, Recur, TStepBody>(WorkflowBuilder, newStep, this);
-            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Id });
 
             return stepBuilder;
         }
@@ -485,7 +485,7 @@ namespace WorkflowCore.Services
             if (effectiveDate != null)
                 stepBuilder.Input((step) => step.EffectiveDate, effectiveDate);
 
-            Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Id });
             return stepBuilder;
         }
     }

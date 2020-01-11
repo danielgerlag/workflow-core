@@ -28,7 +28,10 @@ namespace WorkflowCore.Users.Models
                 Dictionary<string, object> userOptions = new Dictionary<string, object>();
                 foreach (var outcome in Outcomes)
                 {
-                    userOptions[outcome.Label ?? Convert.ToString(outcome.GetValue(workflow.Data) ?? "Proceed")] = outcome.GetValue(workflow.Data);
+                    if (outcome is ValueOutcome)
+                    {
+                        userOptions[outcome.Label ?? Convert.ToString((outcome as ValueOutcome).GetValue(workflow.Data) ?? "Proceed")] = (outcome as ValueOutcome).GetValue(workflow.Data);
+                    }
                 }
                 executionPointer.ExtensionAttributes["UserOptions"] = userOptions;
 

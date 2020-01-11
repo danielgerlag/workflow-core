@@ -21,7 +21,7 @@ namespace WorkflowCore.Services
             };
         }
 
-        public ExecutionPointer BuildNextPointer(WorkflowDefinition def, ExecutionPointer pointer, StepOutcome outcomeTarget)
+        public ExecutionPointer BuildNextPointer(WorkflowDefinition def, ExecutionPointer pointer, IStepOutcome outcomeTarget)
         {
             var nextId = GenerateId();
             return new ExecutionPointer()

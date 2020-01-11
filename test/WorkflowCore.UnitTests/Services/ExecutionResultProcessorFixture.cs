@@ -50,13 +50,13 @@ namespace WorkflowCore.UnitTests.Services
             var definition = new WorkflowDefinition();
             var pointer1 = new ExecutionPointer() { Id = "1", Active = true, StepId = 0, Status = PointerStatus.Running };
             var pointer2 = new ExecutionPointer() { Id = "2" };
-            var outcome = new StepOutcome() { NextStep = 1 };
+            var outcome = new ValueOutcome() { NextStep = 1 };
             var step = A.Fake<WorkflowStep>();            
             var workflowResult = new WorkflowExecutorResult();
             var instance = GivenWorkflow(pointer1);
             var result = ExecutionResult.Next();
 
-            A.CallTo(() => step.Outcomes).Returns(new List<StepOutcome>() { outcome });
+            A.CallTo(() => step.Outcomes).Returns(new List<IStepOutcome>() { outcome });
             A.CallTo(() => PointerFactory.BuildNextPointer(definition, pointer1, outcome)).Returns(pointer2);
 
             //act
@@ -122,14 +122,14 @@ namespace WorkflowCore.UnitTests.Services
             var pointer3 = new ExecutionPointer() { Id = "3" };
             Expression<Func<object, object>> expr1 = data => 10;
             Expression<Func<object, object>> expr2 = data => 20;
-            var outcome1 = new StepOutcome() { NextStep = 1, Value = expr1 };
-            var outcome2 = new StepOutcome() { NextStep = 2, Value = expr2 };
+            var outcome1 = new ValueOutcome() { NextStep = 1, Value = expr1 };
+            var outcome2 = new ValueOutcome() { NextStep = 2, Value = expr2 };
             var step = A.Fake<WorkflowStep>();
             var workflowResult = new WorkflowExecutorResult();
             var instance = GivenWorkflow(pointer1);
             var result = ExecutionResult.Outcome(20);
 
-            A.CallTo(() => step.Outcomes).Returns(new List<StepOutcome>() { outcome1, outcome2 });
+            A.CallTo(() => step.Outcomes).Returns(new List<IStepOutcome>() { outcome1, outcome2 });
             A.CallTo(() => PointerFactory.BuildNextPointer(definition, pointer1, outcome1)).Returns(pointer2);
             A.CallTo(() => PointerFactory.BuildNextPointer(definition, pointer1, outcome2)).Returns(pointer3);
 

@@ -236,13 +236,13 @@ namespace WorkflowCore.Services.DefinitionStorage
         private void AttachOutcomes(StepSourceV1 source, Type dataType, WorkflowStep step)
         {
             if (!string.IsNullOrEmpty(source.NextStepId))
-                step.Outcomes.Add(new StepOutcome() { ExternalNextStepId = $"{source.NextStepId}" });
+                step.Outcomes.Add(new ValueOutcome() { ExternalNextStepId = $"{source.NextStepId}" });
             
             foreach (var nextStep in source.OutcomeSteps)
             {
                 var dataParameter = Expression.Parameter(dataType, "data");
                 var sourceExpr = DynamicExpressionParser.ParseLambda(new[] { dataParameter }, typeof(object), nextStep.Value);
-                step.Outcomes.Add(new StepOutcome()
+                step.Outcomes.Add(new ValueOutcome()
                 {
                     Value = sourceExpr,
                     ExternalNextStepId = $"{nextStep.Key}"

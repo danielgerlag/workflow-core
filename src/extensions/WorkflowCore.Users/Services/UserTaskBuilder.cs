@@ -53,7 +53,7 @@ namespace WorkflowCore.Users.Services
                 var lastStep = WorkflowBuilder.LastStep;
                 action.Invoke(WorkflowBuilder);
                 if (WorkflowBuilder.LastStep > lastStep)
-                    newStep.Outcomes.Add(new StepOutcome() { NextStep = lastStep + 1 });
+                    newStep.Outcomes.Add(new ValueOutcome() { NextStep = lastStep + 1 });
             }
 
             return this;

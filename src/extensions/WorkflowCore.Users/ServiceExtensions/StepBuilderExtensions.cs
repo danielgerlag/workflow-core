@@ -30,7 +30,7 @@ namespace WorkflowCore.Interface
                 stepSetup.Invoke(stepBuilder);
             newStep.Name = newStep.Name ?? typeof(UserStepContainer).Name;
 
-            builder.Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            builder.Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Id });
             return stepBuilder;
         }
 
@@ -64,7 +64,7 @@ namespace WorkflowCore.Interface
                 stepSetup.Invoke(stepBuilder);
 
             newStep.Name = newStep.Name ?? typeof(UserTask).Name;
-            builder.Step.Outcomes.Add(new StepOutcome() { NextStep = newStep.Id });
+            builder.Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Id });
 
             return stepBuilder;
         }

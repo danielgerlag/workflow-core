@@ -18,7 +18,7 @@ namespace WorkflowCore.Models
 
         public virtual List<int> Children { get; set; } = new List<int>();
 
-        public virtual List<StepOutcome> Outcomes { get; set; } = new List<StepOutcome>();
+        public virtual List<IStepOutcome> Outcomes { get; set; } = new List<IStepOutcome>();
 
         public virtual List<IStepParameter> Inputs { get; set; } = new List<IStepParameter>();
 
