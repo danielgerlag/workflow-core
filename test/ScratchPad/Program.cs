@@ -112,8 +112,8 @@ namespace ScratchPad
             builder
                 .StartWith<HelloWorld>()
                 .Decide(data => data.Value1)
-                    .Branch("one", branch1)
-                    .Branch("two", branch2);
+                    .Branch((data, outcome) => data.Value1 == "one", branch1)
+                    .Branch((data, outcome) => data.Value1 == "two", branch2);
         }
 
         public string Id => "Test01";

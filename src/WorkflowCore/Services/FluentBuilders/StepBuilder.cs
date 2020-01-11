@@ -118,6 +118,21 @@ namespace WorkflowCore.Services
             return this;
         }
 
+        public IStepBuilder<TData, TStepBody> Branch<TStep>(Expression<Func<TData, object, bool>> outcomeExpression, IStepBuilder<TData, TStep> branch) where TStep : IStepBody
+        {
+            if (branch.WorkflowBuilder.Steps.Count == 0)
+                return this;
+
+            WorkflowBuilder.AttachBranch(branch.WorkflowBuilder);            
+
+            Step.Outcomes.Add(new ExpressionOutcome<TData>(outcomeExpression)
+            {            
+                NextStep = branch.WorkflowBuilder.Steps[0].Id
+            });
+
+            return this;
+        }
+
         public IStepBuilder<TData, TStepBody> Input<TInput>(Expression<Func<TStepBody, TInput>> stepProperty, Expression<Func<TData, TInput>> value)
         {
             Step.Inputs.Add(new MemberMapParameter(value, stepProperty));

@@ -81,6 +81,13 @@ namespace WorkflowCore.Interface
         IStepBuilder<TData, TStepBody> Branch<TStep>(object outcomeValue, IStepBuilder<TData, TStep> branch) where TStep : IStepBody;
 
         /// <summary>
+        /// Configure an outcome branch for this step, then wire it to another step
+        /// </summary>
+        /// <param name="outcomeExpression"></param>
+        /// <returns></returns>
+        IStepBuilder<TData, TStepBody> Branch<TStep>(Expression<Func<TData, object, bool>> outcomeExpression, IStepBuilder<TData, TStep> branch) where TStep : IStepBody;
+
+        /// <summary>
         /// Map properties on the step to properties on the workflow data object before the step executes
         /// </summary>
         /// <typeparam name="TInput"></typeparam>
