@@ -136,10 +136,9 @@ builder
 
 You can define multiple independent branches within your workflow and select one based on an expression value.
 
-For the fluent API, we define our branches with the `CreateBranch()` method on the workflow builder.  We can then select a branch using the `Decide` step.
+For the fluent API, we define our branches with the `CreateBranch()` method on the workflow builder.  We can then select a branch using the `Branch` method.
 
-Use the `Decide` primitive step and hook up your branches via the `Branch` method.  The result of the input expression will be matched to the expressions listed via the `Branch` method, and the matching next step(s) will be scheduled to execute next.
-
+The select expressions will be matched to the branch listed via the `Branch` method, and the matching next step(s) will be scheduled to execute next.
 
 This workflow will select `branch1` if the value of `data.Value1` is `one`, and `branch2` if it is `two`.
 ```c#
@@ -159,6 +158,6 @@ var branch2 = builder.CreateBranch()
 builder
     .StartWith<HelloWorld>()
     .Decide(data => data.Value1)
-        .Branch("one", branch1)
-        .Branch("two", branch2);
+        .Branch((data, outcome) => data.Value1 == "one", branch1)
+        .Branch((data, outcome) => data.Value1 == "two", branch2);
 ```

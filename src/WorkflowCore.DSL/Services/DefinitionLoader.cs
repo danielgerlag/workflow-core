@@ -237,14 +237,16 @@ namespace WorkflowCore.Services.DefinitionStorage
         {
             if (!string.IsNullOrEmpty(source.NextStepId))
                 step.Outcomes.Add(new ValueOutcome() { ExternalNextStepId = $"{source.NextStepId}" });
-            
-            foreach (var nextStep in source.OutcomeSteps)
-            {
-                var dataParameter = Expression.Parameter(dataType, "data");
-                var sourceExpr = DynamicExpressionParser.ParseLambda(new[] { dataParameter }, typeof(object), nextStep.Value);
-                step.Outcomes.Add(new ValueOutcome()
+
+            var dataParameter = Expression.Parameter(dataType, "data");
+            var outcomeParameter = Expression.Parameter(typeof(object), "outcome");
+
+            foreach (var nextStep in source.SelectNextStep)
+            {                
+                var sourceDelegate = DynamicExpressionParser.ParseLambda(new[] { dataParameter, outcomeParameter }, typeof(object), nextStep.Value).Compile();
+                Expression<Func<object, object, bool>> sourceExpr = (data, outcome) => System.Convert.ToBoolean(sourceDelegate.DynamicInvoke(data, outcome));
+                step.Outcomes.Add(new ExpressionOutcome<object>(sourceExpr)
                 {
-                    Value = sourceExpr,
                     ExternalNextStepId = $"{nextStep.Key}"
                 });
             }

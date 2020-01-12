@@ -71,12 +71,9 @@
     {
       "Id": "decide",
       "StepType": "WorkflowCore.Primitives.Decide, WorkflowCore",
-      "Inputs": {
-        "Expression": "data.Flag3"
-      },
-      "OutcomeSteps": {
-        "Outcome1": "true",
-        "Outcome2": "false"
+      "SelectNextStep": {
+        "Outcome1": "data.Flag3",
+        "Outcome2": "!data.Flag3"
       }
     },
     {

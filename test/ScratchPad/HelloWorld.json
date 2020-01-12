@@ -12,14 +12,10 @@
     {
       "Id": "decide",
       "StepType": "WorkflowCore.Primitives.Decide, WorkflowCore",
-      "Inputs": 
+      "SelectNextStep":
       {
-        "Expression": "data.Value1" 
-      },
-      "OutcomeSteps":
-      {
-        "Print1": "\"one\"",
-        "Print2": "\"two\""
+        "Print1": "data.Value1 == \"one\"",
+        "Print2": "data.Value1 == \"two\""
       }
     },
     {

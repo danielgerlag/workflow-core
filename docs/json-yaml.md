@@ -484,7 +484,7 @@ Do:
 ### Decision Branches
 
 You can define multiple independent branches within your workflow and select one based on an expression value.
-Use the `Decide` primitive step and hook up your branches via the `OutcomeSteps` property.  The result of the input expression will be matched to the expressions listed in `OutcomeSteps`, and the matching next step(s) will be scheduled to execute next.
+Hook up your branches via the `SelectNextStep` property, instead of a `NextStepId`.  The expressions will be matched to the step Ids listed in `SelectNextStep`, and the matching next step(s) will be scheduled to execute next.
 
 ```json
 {
@@ -494,12 +494,8 @@ Use the `Decide` primitive step and hook up your branches via the `OutcomeSteps`
   "Steps": [
     {
       "Id": "decide",
-      "StepType": "WorkflowCore.Primitives.Decide, WorkflowCore",
-      "Inputs": 
-      {
-        "Expression": "<<input expression to evaluate>>" 
-      },
-      "OutcomeSteps":
+      "StepType": "...",
+      "SelectNextStep":
       {
         "Branch1": "<<result expression to match for branch 1>>",
         "Branch2": "<<result expression to match for branch 2>>"
