@@ -246,3 +246,4 @@ ModelManifest.xml
 *.migration_in_place_backup
 .idea/.idea.WorkflowCore/.idea
 riderModule.iml
+.DS_Store

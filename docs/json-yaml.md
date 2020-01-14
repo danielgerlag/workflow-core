@@ -147,398 +147,43 @@ Steps:
 
 ```
 
-### WaitFor
-
-The `.WaitFor` can be implemented using inputs as follows
-
-| Field                  | Description                 |
-| ---------------------- | --------------------------- |
-| CancelCondition        | Optional expression to specify a cancel condition  |
-| Inputs.EventName       | Expression to specify the event name               |
-| Inputs.EventKey        | Expression to specify the event key                |
-| Inputs.EffectiveDate   | Optional expression to specify the effective date  |
-
-
+You can also pass object graphs to step inputs as opposed to just scalar values
 ```json
-{
-    "Id": "MyWaitStep",
-    "StepType": "WorkflowCore.Primitives.WaitFor, WorkflowCore",
-    "NextStepId": "...",
-    "CancelCondition": "...",
-    "Inputs": {
-        "EventName": "\"Event1\"",
-        "EventKey": "\"Key1\"",
-        "EffectiveDate": "DateTime.Now"
-    }
-}
-```
-```yaml
-Id: MyWaitStep
-StepType: WorkflowCore.Primitives.WaitFor, WorkflowCore
-NextStepId: "..."
-CancelCondition: "..."
-Inputs:
-  EventName: '"Event1"'
-  EventKey: '"Key1"'
-  EffectiveDate: DateTime.Now
-
-```
-
-### Activity
-
-The `.Activity` can be implemented using inputs as follows
-
-| Field                  | Description                 |
-| ---------------------- | --------------------------- |
-| CancelCondition        | Optional expression to specify a cancel condition  |
-| Inputs.ActivityName    | Expression to specify the activity name            |
-| Inputs.Parameters      | Expression to specify the parameters to pass the activity worker                |
-| Inputs.EffectiveDate   | Optional expression to specify the effective date  |
-
-
-```json
-{
-    "Id": "MyActivityStep",
-    "StepType": "WorkflowCore.Primitives.Activity, WorkflowCore",
-    "NextStepId": "...",
-    "CancelCondition": "...",
-    "Inputs": {
-        "ActivityName": "\"my-activity\"",
-        "Parameters": "data.SomeValue"
-    }
-}
-```
-```yaml
-Id: MyActivityStep
-StepType: WorkflowCore.Primitives.Activity, WorkflowCore
-NextStepId: "..."
-CancelCondition: "..."
-Inputs:
-  ActivityName: '"my-activity"'
-  EventKey: '"Key1"'
-  Parameters: data.SomeValue
-
-```
-
-
-### If
-
-The `.If` can be implemented as follows
-
-```json
-{
-    "Id": "MyIfStep",
-    "StepType": "WorkflowCore.Primitives.If, WorkflowCore",
-    "NextStepId": "...",
-    "Inputs": { "Condition": "<<expression to evaluate>>" },
-    "Do": [[
-        {
-          "Id": "do1",
-          "StepType": "MyApp.DoSomething1, MyApp",
-          "NextStepId": "do2"
-        },
-        {
-          "Id": "do2",
-          "StepType": "MyApp.DoSomething2, MyApp"
-        }
-    ]]
-}
-```
-```yaml
-Id: MyIfStep
-StepType: WorkflowCore.Primitives.If, WorkflowCore
-NextStepId: "..."
-Inputs:
-  Condition: "<<expression to evaluate>>"
-Do:
-- - Id: do1
-    StepType: MyApp.DoSomething1, MyApp
-    NextStepId: do2
-  - Id: do2
-    StepType: MyApp.DoSomething2, MyApp
-
-```
-
-### While
-
-The `.While` can be implemented as follows
-
-```json
-{
-  "Id": "MyWhileStep",
-  "StepType": "WorkflowCore.Primitives.While, WorkflowCore",
-  "NextStepId": "...",
-  "Inputs": { "Condition": "<<expression to evaluate>>" },
-  "Do": [[
-      {
-        "Id": "do1",
-        "StepType": "MyApp.DoSomething1, MyApp",
-        "NextStepId": "do2"
-      },
-      {
-        "Id": "do2",
-        "StepType": "MyApp.DoSomething2, MyApp"
-      }
-  ]]
-}
-```
-```yaml
-Id: MyWhileStep
-StepType: WorkflowCore.Primitives.While, WorkflowCore
-NextStepId: "..."
-Inputs:
-  Condition: "<<expression to evaluate>>"
-Do:
-- - Id: do1
-    StepType: MyApp.DoSomething1, MyApp
-    NextStepId: do2
-  - Id: do2
-    StepType: MyApp.DoSomething2, MyApp
-
-```
-
-### ForEach
-
-The `.ForEach` can be implemented as follows
-
-```json
-{
-  "Id": "MyForEachStep",
-  "StepType": "WorkflowCore.Primitives.ForEach, WorkflowCore",
-  "NextStepId": "...",
-  "Inputs": { "Collection": "<<expression to evaluate>>" },
-  "Do": [[
-      {
-        "Id": "do1",
-        "StepType": "MyApp.DoSomething1, MyApp",
-        "NextStepId": "do2"
-      },
-      {
-        "Id": "do2",
-        "StepType": "MyApp.DoSomething2, MyApp"
-      }
-  ]]
-}
-```
-```yaml
-Id: MyForEachStep
-StepType: WorkflowCore.Primitives.ForEach, WorkflowCore
-NextStepId: "..."
-Inputs:
-  Collection: "<<expression to evaluate>>"
-Do:
-- - Id: do1
-    StepType: MyApp.DoSomething1, MyApp
-    NextStepId: do2
-  - Id: do2
-    StepType: MyApp.DoSomething2, MyApp
-```
-
-### Delay
-
-The `.Delay` can be implemented as follows
-
-```json
-{
-  "Id": "MyDelayStep",
-  "StepType": "WorkflowCore.Primitives.Delay, WorkflowCore",
-  "NextStepId": "...",
-  "Inputs": { "Period": "<<expression to evaluate>>" }
-}
-```
-```yaml
-Id: MyDelayStep
-StepType: WorkflowCore.Primitives.Delay, WorkflowCore
-NextStepId: "..."
-Inputs:
-  Period: "<<expression to evaluate>>"
-```
-
-
-### Parallel
-
-The `.Parallel` can be implemented as follows
-
-```json
-{
-      "Id": "MyParallelStep",
-      "StepType": "WorkflowCore.Primitives.Sequence, WorkflowCore",
-      "NextStepId": "...",
-      "Do": [
-		[ 
-		  {
-		    "Id": "Branch1.Step1",
-		    "StepType": "MyApp.DoSomething1, MyApp",
-		    "NextStepId": "Branch1.Step2"
-		  },
-		  {
-		    "Id": "Branch1.Step2",
-		    "StepType": "MyApp.DoSomething2, MyApp"
-		  }
-		],			
-		[ 
-		  {
-		    "Id": "Branch2.Step1",
-		    "StepType": "MyApp.DoSomething1, MyApp",
-		    "NextStepId": "Branch2.Step2"
-		  },
-		  {
-		    "Id": "Branch2.Step2",
-		    "StepType": "MyApp.DoSomething2, MyApp"
-		  }
-		]
-	  ]
-}
-```
-```yaml
-Id: MyParallelStep
-StepType: WorkflowCore.Primitives.Sequence, WorkflowCore
-NextStepId: "..."
-Do:
-- - Id: Branch1.Step1
-    StepType: MyApp.DoSomething1, MyApp
-    NextStepId: Branch1.Step2
-  - Id: Branch1.Step2
-    StepType: MyApp.DoSomething2, MyApp
-- - Id: Branch2.Step1
-    StepType: MyApp.DoSomething1, MyApp
-    NextStepId: Branch2.Step2
-  - Id: Branch2.Step2
-    StepType: MyApp.DoSomething2, MyApp
-```
-
-### Schedule
-
-The `.Schedule` can be implemented as follows
-
-```json
-{
-  "Id": "MyScheduleStep",
-  "StepType": "WorkflowCore.Primitives.Schedule, WorkflowCore",
-  "Inputs": { "Interval": "<<expression to evaluate>>" },
-  "Do": [[
-      {
-        "Id": "do1",
-        "StepType": "MyApp.DoSomething1, MyApp",
-        "NextStepId": "do2"
-      },
-      {
-        "Id": "do2",
-        "StepType": "MyApp.DoSomething2, MyApp"
-      }
-  ]]
-}
-```
-```yaml
-Id: MyScheduleStep
-StepType: WorkflowCore.Primitives.Schedule, WorkflowCore
-Inputs:
-  Interval: "<<expression to evaluate>>"
-Do:
-- - Id: do1
-    StepType: MyApp.DoSomething1, MyApp
-    NextStepId: do2
-  - Id: do2
-    StepType: MyApp.DoSomething2, MyApp
-```
-
-### Recur
-
-The `.Recur` can be implemented as follows
-
-```json
-{
-  "Id": "MyScheduleStep",
-  "StepType": "WorkflowCore.Primitives.Recur, WorkflowCore",
-  "Inputs": { 
-    "Interval": "<<expression to evaluate>>",
-    "StopCondition": "<<expression to evaluate>>" 
+"inputs": 
+{    
+  "Body": {
+      "Value1": 1,
+      "Value2": 2
   },
-  "Do": [[
-      {
-        "Id": "do1",
-        "StepType": "MyApp.DoSomething1, MyApp",
-        "NextStepId": "do2"
-      },
-      {
-        "Id": "do2",
-        "StepType": "MyApp.DoSomething2, MyApp"
-      }
-  ]]
-}
-```
-```yaml
-Id: MyScheduleStep
-StepType: WorkflowCore.Primitives.Recur, WorkflowCore
-Inputs:
-  Interval: "<<expression to evaluate>>"
-  StopCondition: "<<expression to evaluate>>"
-Do:
-- - Id: do1
-    StepType: MyApp.DoSomething1, MyApp
-    NextStepId: do2
-  - Id: do2
-    StepType: MyApp.DoSomething2, MyApp
+  "Headers": {
+      "Content-Type": "application/json"
+  }
+},
 ```
 
-### Decision Branches
-
-You can define multiple independent branches within your workflow and select one based on an expression value.
-Hook up your branches via the `SelectNextStep` property, instead of a `NextStepId`.  The expressions will be matched to the step Ids listed in `SelectNextStep`, and the matching next step(s) will be scheduled to execute next.
-
+If you want to evaluate an expression for a given property of your object, simply prepend and `@` and pass an expression string
 ```json
-{
-  "Id": "DecisionWorkflow",
-  "Version": 1,
-  "DataType": "MyApp.MyData, MyApp",
-  "Steps": [
-    {
-      "Id": "decide",
-      "StepType": "...",
-      "SelectNextStep":
-      {
-        "Branch1": "<<result expression to match for branch 1>>",
-        "Branch2": "<<result expression to match for branch 2>>"
-      }
-    },
-    {
-      "Id": "Branch1",
-      "StepType": "MyApp.PrintMessage, MyApp",
-      "Inputs": 
-	  { 
-		  "Message": "\"Hello from 1\"" 
-	  }
-    },
-    {
-      "Id": "Branch2",
-      "StepType": "MyApp.PrintMessage, MyApp",
-      "Inputs": 
-	  { 
-	    "Message": "\"Hello from 2\"" 
-	  }
-    }
-  ]
-}
+"inputs": 
+{    
+  "Body": {
+      "@Value1": "data.MyValue * 2",
+      "Value2": 5
+  },
+  "Headers": {
+      "Content-Type": "application/json"
+  }
+},
 ```
 
-```yaml
-Id: DecisionWorkflow
-Version: 1
-DataType: MyApp.MyData, MyApp
-Steps:
-- Id: decide
-  StepType: WorkflowCore.Primitives.Decide, WorkflowCore
-  Inputs:
-    Expression: <<input expression to evaluate>>
-  OutcomeSteps:
-    Branch1: '<<result expression to match for branch 1>>'
-    Branch2: '<<result expression to match for branch 2>>'
-- Id: Branch1
-  StepType: MyApp.PrintMessage, MyApp
-  Inputs:
-    Message: '"Hello from 1"'
-- Id: Branch2
-  StepType: MyApp.PrintMessage, MyApp
-  Inputs:
-    Message: '"Hello from 2"'
+#### Enums
+
+If your step has an enum property, you can just pass the string representation of the enum value and it will be automatically converted.
+
+#### Environment variables available in input expressions
+
+You can access environment variables from within input expressions.
+usage:
 ```
+environment["VARIABLE_NAME"]
+```
+

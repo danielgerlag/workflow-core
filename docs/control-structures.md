@@ -1,8 +1,104 @@
 # Control Structures
 
+## Decision Branches
+
+You can define multiple independent branches within your workflow and select one based on an expression value.
+
+#### Fluent API
+
+For the fluent API, we define our branches with the `CreateBranch()` method on the workflow builder.  We can then select a branch using the `Branch` method.
+
+The select expressions will be matched to the branch listed via the `Branch` method, and the matching next step(s) will be scheduled to execute next.  Matching multiple next steps will result in parallel branches running.
+
+This workflow will select `branch1` if the value of `data.Value1` is `one`, and `branch2` if it is `two`.
+```c#
+var branch1 = builder.CreateBranch()
+    .StartWith<PrintMessage>()
+        .Input(step => step.Message, data => "hi from 1")
+    .Then<PrintMessage>()
+        .Input(step => step.Message, data => "bye from 1");
+
+var branch2 = builder.CreateBranch()
+    .StartWith<PrintMessage>()
+        .Input(step => step.Message, data => "hi from 2")
+    .Then<PrintMessage>()
+        .Input(step => step.Message, data => "bye from 2");
+
+
+builder
+    .StartWith<HelloWorld>()
+    .Decide(data => data.Value1)
+        .Branch((data, outcome) => data.Value1 == "one", branch1)
+        .Branch((data, outcome) => data.Value1 == "two", branch2);
+```
+
+#### JSON / YAML API
+
+Hook up your branches via the `SelectNextStep` property, instead of a `NextStepId`.  The expressions will be matched to the step Ids listed in `SelectNextStep`, and the matching next step(s) will be scheduled to execute next.
+
+```json
+{
+  "Id": "DecisionWorkflow",
+  "Version": 1,
+  "DataType": "MyApp.MyData, MyApp",
+  "Steps": [
+    {
+      "Id": "decide",
+      "StepType": "...",
+      "SelectNextStep":
+      {
+        "Branch1": "<<result expression to match for branch 1>>",
+        "Branch2": "<<result expression to match for branch 2>>"
+      }
+    },
+    {
+      "Id": "Branch1",
+      "StepType": "MyApp.PrintMessage, MyApp",
+      "Inputs": 
+	  { 
+		  "Message": "\"Hello from 1\"" 
+	  }
+    },
+    {
+      "Id": "Branch2",
+      "StepType": "MyApp.PrintMessage, MyApp",
+      "Inputs": 
+	  { 
+	    "Message": "\"Hello from 2\"" 
+	  }
+    }
+  ]
+}
+```
+
+```yaml
+Id: DecisionWorkflow
+Version: 1
+DataType: MyApp.MyData, MyApp
+Steps:
+- Id: decide
+  StepType: WorkflowCore.Primitives.Decide, WorkflowCore
+  Inputs:
+    Expression: <<input expression to evaluate>>
+  OutcomeSteps:
+    Branch1: '<<result expression to match for branch 1>>'
+    Branch2: '<<result expression to match for branch 2>>'
+- Id: Branch1
+  StepType: MyApp.PrintMessage, MyApp
+  Inputs:
+    Message: '"Hello from 1"'
+- Id: Branch2
+  StepType: MyApp.PrintMessage, MyApp
+  Inputs:
+    Message: '"Hello from 2"'
+```
+
+
 ## Parallel ForEach
 
 Use the .ForEach method to start a parallel for loop
+
+#### Fluent API
 
 ```C#
 public class ForEachWorkflow : IWorkflow
@@ -24,9 +120,47 @@ public class ForEachWorkflow : IWorkflow
 }
 ```
 
+#### JSON / YAML API
+
+```json
+{
+  "Id": "MyForEachStep",
+  "StepType": "WorkflowCore.Primitives.ForEach, WorkflowCore",
+  "NextStepId": "...",
+  "Inputs": { "Collection": "<<expression to evaluate>>" },
+  "Do": [[
+      {
+        "Id": "do1",
+        "StepType": "MyApp.DoSomething1, MyApp",
+        "NextStepId": "do2"
+      },
+      {
+        "Id": "do2",
+        "StepType": "MyApp.DoSomething2, MyApp"
+      }
+  ]]
+}
+```
+```yaml
+Id: MyForEachStep
+StepType: WorkflowCore.Primitives.ForEach, WorkflowCore
+NextStepId: "..."
+Inputs:
+  Collection: "<<expression to evaluate>>"
+Do:
+- - Id: do1
+    StepType: MyApp.DoSomething1, MyApp
+    NextStepId: do2
+  - Id: do2
+    StepType: MyApp.DoSomething2, MyApp
+```
+
+
 ## While Loops
 
 Use the .While method to start a while construct
+
+#### Fluent API
 
 ```C#
 public class WhileWorkflow : IWorkflow<MyData>
@@ -49,9 +183,48 @@ public class WhileWorkflow : IWorkflow<MyData>
 }
 ```
 
+#### JSON / YAML API
+
+```json
+{
+  "Id": "MyWhileStep",
+  "StepType": "WorkflowCore.Primitives.While, WorkflowCore",
+  "NextStepId": "...",
+  "Inputs": { "Condition": "<<expression to evaluate>>" },
+  "Do": [[
+      {
+        "Id": "do1",
+        "StepType": "MyApp.DoSomething1, MyApp",
+        "NextStepId": "do2"
+      },
+      {
+        "Id": "do2",
+        "StepType": "MyApp.DoSomething2, MyApp"
+      }
+  ]]
+}
+```
+```yaml
+Id: MyWhileStep
+StepType: WorkflowCore.Primitives.While, WorkflowCore
+NextStepId: "..."
+Inputs:
+  Condition: "<<expression to evaluate>>"
+Do:
+- - Id: do1
+    StepType: MyApp.DoSomething1, MyApp
+    NextStepId: do2
+  - Id: do2
+    StepType: MyApp.DoSomething2, MyApp
+
+```
+
+
 ## If Conditions
 
 Use the .If method to start an if condition
+
+#### Fluent API
 
 ```C#
 public class IfWorkflow : IWorkflow<MyData>
@@ -73,9 +246,48 @@ public class IfWorkflow : IWorkflow<MyData>
 }
 ```
 
+#### JSON / YAML API
+
+```json
+{
+    "Id": "MyIfStep",
+    "StepType": "WorkflowCore.Primitives.If, WorkflowCore",
+    "NextStepId": "...",
+    "Inputs": { "Condition": "<<expression to evaluate>>" },
+    "Do": [[
+        {
+          "Id": "do1",
+          "StepType": "MyApp.DoSomething1, MyApp",
+          "NextStepId": "do2"
+        },
+        {
+          "Id": "do2",
+          "StepType": "MyApp.DoSomething2, MyApp"
+        }
+    ]]
+}
+```
+```yaml
+Id: MyIfStep
+StepType: WorkflowCore.Primitives.If, WorkflowCore
+NextStepId: "..."
+Inputs:
+  Condition: "<<expression to evaluate>>"
+Do:
+- - Id: do1
+    StepType: MyApp.DoSomething1, MyApp
+    NextStepId: do2
+  - Id: do2
+    StepType: MyApp.DoSomething2, MyApp
+
+```
+
+
 ## Parallel Paths
 
 Use the .Parallel() method to branch parallel tasks
+
+#### Fluent API
 
 ```C#
 public class ParallelWorkflow : IWorkflow<MyData>
@@ -103,10 +315,62 @@ public class ParallelWorkflow : IWorkflow<MyData>
 }
 ```
 
+#### JSON / YAML API
+
+```json
+{
+      "Id": "MyParallelStep",
+      "StepType": "WorkflowCore.Primitives.Sequence, WorkflowCore",
+      "NextStepId": "...",
+      "Do": [
+		[ 
+		  {
+		    "Id": "Branch1.Step1",
+		    "StepType": "MyApp.DoSomething1, MyApp",
+		    "NextStepId": "Branch1.Step2"
+		  },
+		  {
+		    "Id": "Branch1.Step2",
+		    "StepType": "MyApp.DoSomething2, MyApp"
+		  }
+		],			
+		[ 
+		  {
+		    "Id": "Branch2.Step1",
+		    "StepType": "MyApp.DoSomething1, MyApp",
+		    "NextStepId": "Branch2.Step2"
+		  },
+		  {
+		    "Id": "Branch2.Step2",
+		    "StepType": "MyApp.DoSomething2, MyApp"
+		  }
+		]
+	  ]
+}
+```
+```yaml
+Id: MyParallelStep
+StepType: WorkflowCore.Primitives.Sequence, WorkflowCore
+NextStepId: "..."
+Do:
+- - Id: Branch1.Step1
+    StepType: MyApp.DoSomething1, MyApp
+    NextStepId: Branch1.Step2
+  - Id: Branch1.Step2
+    StepType: MyApp.DoSomething2, MyApp
+- - Id: Branch2.Step1
+    StepType: MyApp.DoSomething1, MyApp
+    NextStepId: Branch2.Step2
+  - Id: Branch2.Step2
+    StepType: MyApp.DoSomething2, MyApp
+```
+
+
 ## Schedule
 
 Use `.Schedule` to register a future set of steps to run asynchronously in the background within your workflow.
 
+#### Fluent API
 
 ```c#
 builder
@@ -117,11 +381,68 @@ builder
     .Then(context => Console.WriteLine("Doing normal tasks"));
 ```
 
+#### JSON / YAML API
+
+```json
+{
+  "Id": "MyScheduleStep",
+  "StepType": "WorkflowCore.Primitives.Schedule, WorkflowCore",
+  "Inputs": { "Interval": "<<expression to evaluate>>" },
+  "Do": [[
+      {
+        "Id": "do1",
+        "StepType": "MyApp.DoSomething1, MyApp",
+        "NextStepId": "do2"
+      },
+      {
+        "Id": "do2",
+        "StepType": "MyApp.DoSomething2, MyApp"
+      }
+  ]]
+}
+```
+```yaml
+Id: MyScheduleStep
+StepType: WorkflowCore.Primitives.Schedule, WorkflowCore
+Inputs:
+  Interval: "<<expression to evaluate>>"
+Do:
+- - Id: do1
+    StepType: MyApp.DoSomething1, MyApp
+    NextStepId: do2
+  - Id: do2
+    StepType: MyApp.DoSomething2, MyApp
+```
+
+
+### Delay
+
+The `Delay` step will pause the current branch of your workflow for a specified period.
+
+#### JSON / YAML API
+
+```json
+{
+  "Id": "MyDelayStep",
+  "StepType": "WorkflowCore.Primitives.Delay, WorkflowCore",
+  "NextStepId": "...",
+  "Inputs": { "Period": "<<expression to evaluate>>" }
+}
+```
+```yaml
+Id: MyDelayStep
+StepType: WorkflowCore.Primitives.Delay, WorkflowCore
+NextStepId: "..."
+Inputs:
+  Period: "<<expression to evaluate>>"
+```
+
 
 ## Recur
 
 Use `.Recur` to setup a set of recurring background steps within your workflow, until a certain condition is met
 
+#### Fluent API
 
 ```c#
 builder
@@ -132,32 +453,40 @@ builder
     .Then(context => Console.WriteLine("Carry on"));
 ```
 
-### Decision Branches
+#### JSON / YAML API
 
-You can define multiple independent branches within your workflow and select one based on an expression value.
-
-For the fluent API, we define our branches with the `CreateBranch()` method on the workflow builder.  We can then select a branch using the `Branch` method.
-
-The select expressions will be matched to the branch listed via the `Branch` method, and the matching next step(s) will be scheduled to execute next.
-
-This workflow will select `branch1` if the value of `data.Value1` is `one`, and `branch2` if it is `two`.
-```c#
-var branch1 = builder.CreateBranch()
-    .StartWith<PrintMessage>()
-        .Input(step => step.Message, data => "hi from 1")
-    .Then<PrintMessage>()
-        .Input(step => step.Message, data => "bye from 1");
-
-var branch2 = builder.CreateBranch()
-    .StartWith<PrintMessage>()
-        .Input(step => step.Message, data => "hi from 2")
-    .Then<PrintMessage>()
-        .Input(step => step.Message, data => "bye from 2");
-
-
-builder
-    .StartWith<HelloWorld>()
-    .Decide(data => data.Value1)
-        .Branch((data, outcome) => data.Value1 == "one", branch1)
-        .Branch((data, outcome) => data.Value1 == "two", branch2);
+```json
+{
+  "Id": "MyScheduleStep",
+  "StepType": "WorkflowCore.Primitives.Recur, WorkflowCore",
+  "Inputs": { 
+    "Interval": "<<expression to evaluate>>",
+    "StopCondition": "<<expression to evaluate>>" 
+  },
+  "Do": [[
+      {
+        "Id": "do1",
+        "StepType": "MyApp.DoSomething1, MyApp",
+        "NextStepId": "do2"
+      },
+      {
+        "Id": "do2",
+        "StepType": "MyApp.DoSomething2, MyApp"
+      }
+  ]]
+}
 ```
+```yaml
+Id: MyScheduleStep
+StepType: WorkflowCore.Primitives.Recur, WorkflowCore
+Inputs:
+  Interval: "<<expression to evaluate>>"
+  StopCondition: "<<expression to evaluate>>"
+Do:
+- - Id: do1
+    StepType: MyApp.DoSomething1, MyApp
+    NextStepId: do2
+  - Id: do2
+    StepType: MyApp.DoSomething2, MyApp
+```
+
