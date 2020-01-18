@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -119,7 +120,8 @@ namespace WorkflowCore.Services.BackgroundTasks
                 }
             }
 
-            await Task.WhenAll(activeTasks.Values);
+            foreach (var task in activeTasks.Values)
+                task.Wait();
         }
 
         private async Task ExecuteItem(string itemId)

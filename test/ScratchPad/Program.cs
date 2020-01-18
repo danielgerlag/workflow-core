@@ -22,12 +22,12 @@ namespace ScratchPad
             var host = serviceProvider.GetService<IWorkflowHost>();
             var loader = serviceProvider.GetService<IDefinitionLoader>();
             var activityController = serviceProvider.GetService<IActivityController>();
-            //host.RegisterWorkflow<Test01Workflow, WfData>();
-            loader.LoadDefinition(Properties.Resources.HelloWorld, Deserializers.Json);
+            host.RegisterWorkflow<Test01Workflow, WfData>();
+            //loader.LoadDefinition(Properties.Resources.HelloWorld, Deserializers.Json);
             
             host.Start();
             
-            host.StartWorkflow("Test02", 1, new WfData()
+            host.StartWorkflow("Test01", 1, new WfData()
             {
                 Value1 = "two",
                 Value2 = "data2"
@@ -111,6 +111,13 @@ namespace ScratchPad
 
             builder
                 .StartWith<HelloWorld>()
+                .Then((context) =>
+                {
+                    Console.WriteLine("------1");
+                    Task.Delay(TimeSpan.FromSeconds(20)).Wait();
+                    Console.WriteLine("------2");
+                    return ExecutionResult.Next();
+                })
                 .Decide(data => data.Value1)
                     .Branch((data, outcome) => data.Value1 == "one", branch1)
                     .Branch((data, outcome) => data.Value1 == "two", branch2);
