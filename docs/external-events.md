@@ -25,3 +25,40 @@ host.PublishEvent("MyEvent", "0", "hello");
 
 You can also specify an effective date when waiting for events, which allows you to respond to events that may have already occurred in the past, or only ones that occur after the effective date.
 
+
+## JSON / YAML API
+
+The `.WaitFor` can be implemented using inputs as follows
+
+| Field                  | Description                 |
+| ---------------------- | --------------------------- |
+| CancelCondition        | Optional expression to specify a cancel condition  |
+| Inputs.EventName       | Expression to specify the event name               |
+| Inputs.EventKey        | Expression to specify the event key                |
+| Inputs.EffectiveDate   | Optional expression to specify the effective date  |
+
+
+```json
+{
+    "Id": "MyWaitStep",
+    "StepType": "WorkflowCore.Primitives.WaitFor, WorkflowCore",
+    "NextStepId": "...",
+    "CancelCondition": "...",
+    "Inputs": {
+        "EventName": "\"Event1\"",
+        "EventKey": "\"Key1\"",
+        "EffectiveDate": "DateTime.Now"
+    }
+}
+```
+```yaml
+Id: MyWaitStep
+StepType: WorkflowCore.Primitives.WaitFor, WorkflowCore
+NextStepId: "..."
+CancelCondition: "..."
+Inputs:
+  EventName: '"Event1"'
+  EventKey: '"Key1"'
+  EffectiveDate: DateTime.Now
+
+```

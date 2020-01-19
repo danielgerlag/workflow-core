@@ -7,7 +7,6 @@ In this example the workflow will wait for `activity-1`, before proceeding.  It 
 Then we create a worker to process the queue of activity items.  It uses the `GetPendingActivity` method to get an activity and the data that a workflow is waiting for.
 
 
-
 ```C#
 public class ActivityWorkflow : IWorkflow<MyData>
 {
@@ -48,3 +47,40 @@ The JSON representation of this step would look like this
     "Outputs": { "Value2": "step.Result" }
 }
 ```
+
+## JSON / YAML API
+
+The `Activity` step can be configured using inputs as follows
+
+| Field                  | Description                 |
+| ---------------------- | --------------------------- |
+| CancelCondition        | Optional expression to specify a cancel condition  |
+| Inputs.ActivityName    | Expression to specify the activity name            |
+| Inputs.Parameters      | Expression to specify the parameters to pass the activity worker                |
+| Inputs.EffectiveDate   | Optional expression to specify the effective date  |
+
+
+```json
+{
+    "Id": "MyActivityStep",
+    "StepType": "WorkflowCore.Primitives.Activity, WorkflowCore",
+    "NextStepId": "...",
+    "CancelCondition": "...",
+    "Inputs": {
+        "ActivityName": "\"my-activity\"",
+        "Parameters": "data.SomeValue"
+    }
+}
+```
+```yaml
+Id: MyActivityStep
+StepType: WorkflowCore.Primitives.Activity, WorkflowCore
+NextStepId: "..."
+CancelCondition: "..."
+Inputs:
+  ActivityName: '"my-activity"'
+  EventKey: '"Key1"'
+  Parameters: data.SomeValue
+
+```
+

@@ -2,6 +2,8 @@
 
 Each step can be configured with it's own error handling behavior, it can be retried at a later time, suspend the workflow or terminate the workflow.
 
+### Fluent API
+
 ```C#
 public void Build(IWorkflowBuilder<object> builder)
 {
@@ -12,4 +14,25 @@ public void Build(IWorkflowBuilder<object> builder)
 }
 ```
 
-The WorkflowHost service also has a .OnStepError event which can be used to intercept exceptions from workflow steps on a more global level.
+### JSON / YAML API
+
+ErrorBehavior
+
+```json
+{
+    "Id": "...",
+    "StepType": "...",
+    "ErrorBehavior": "Retry / Suspend / Terminate / Compensate",
+    "RetryInterval": "00:10:00"
+}
+```
+```yaml
+Id: "..."
+StepType: "..."
+ErrorBehavior: Retry / Suspend / Terminate / Compensate
+RetryInterval: '00:10:00'
+```
+
+## Global Error handling
+
+The WorkflowHost service also has a `.OnStepError` event which can be used to intercept exceptions from workflow steps on a more global level.
