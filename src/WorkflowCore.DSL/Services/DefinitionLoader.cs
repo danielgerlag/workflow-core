@@ -268,7 +268,12 @@ namespace WorkflowCore.Services.DefinitionStorage
                 if (stepProperty.PropertyType.IsEnum)
                     stepProperty.SetValue(pStep, Enum.Parse(stepProperty.PropertyType, (string)resolvedValue, true));
                 else
-                    stepProperty.SetValue(pStep, System.Convert.ChangeType(resolvedValue, stepProperty.PropertyType));
+                {
+                    if ((resolvedValue != null) && (stepProperty.PropertyType.IsAssignableFrom(resolvedValue.GetType())))
+                        stepProperty.SetValue(pStep, resolvedValue);
+                    else
+                        stepProperty.SetValue(pStep, System.Convert.ChangeType(resolvedValue, stepProperty.PropertyType));
+                }
             }
             return acn;
         }
