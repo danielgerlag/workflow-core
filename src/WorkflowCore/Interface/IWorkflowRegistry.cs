@@ -8,5 +8,6 @@ namespace WorkflowCore.Interface
         void RegisterWorkflow(WorkflowDefinition definition);
         void RegisterWorkflow<TData>(IWorkflow<TData> workflow) where TData : new();
         WorkflowDefinition GetDefinition(string workflowId, int? version = null);
+        void DeregisterWorkflow(string workflowId, int version);
     }
 }
