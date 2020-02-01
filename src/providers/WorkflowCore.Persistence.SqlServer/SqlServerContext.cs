@@ -21,7 +21,7 @@ namespace WorkflowCore.Persistence.SqlServer
 
             _connectionString = connectionString;
         }
-
+        
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
