@@ -39,6 +39,25 @@ namespace WorkflowCore.Testing
             Host.Start();
         }
 
+        protected virtual void Setup(IServiceCollection services)
+        {
+            // setup dependency injection
+            services.AddLogging();
+            ConfigureServices(services);
+
+            var serviceProvider = services.BuildServiceProvider();
+
+            //config logging
+            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+            //loggerFactory.AddConsole(LogLevel.Debug);
+
+            PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
+            DefinitionLoader = serviceProvider.GetService<IDefinitionLoader>();
+            Host = serviceProvider.GetService<IWorkflowHost>();
+            Host.OnStepError += Host_OnStepError;
+            Host.Start();
+        }
+
         private void Host_OnStepError(WorkflowInstance workflow, WorkflowStep step, Exception exception)
         {
             UnhandledStepErrors.Add(new StepError()
