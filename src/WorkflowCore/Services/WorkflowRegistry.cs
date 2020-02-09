@@ -33,6 +33,15 @@ namespace WorkflowCore.Services
             }
         }
 
+        public void DeregisterWorkflow(string workflowId, int version)
+        {
+            var definition = _registry.Find(x => x.Item1 == workflowId && x.Item2 == version);
+            if (definition != null)
+            {
+                _registry.Remove(definition);
+            }
+        }
+
         public void RegisterWorkflow(IWorkflow workflow)
         {
             if (_registry.Any(x => x.Item1 == workflow.Id && x.Item2 == workflow.Version))
@@ -68,6 +77,12 @@ namespace WorkflowCore.Services
             workflow.Build(builder);
             var def = builder.Build(workflow.Id, workflow.Version);
             _registry.Add(Tuple.Create(workflow.Id, workflow.Version, def));
+        }
+
+        public bool IsRegistered(string workflowId, int version)
+        {
+            var definition = _registry.Find(x => x.Item1 == workflowId && x.Item2 == version);
+            return (definition != null);
         }
     }
 }
