@@ -78,5 +78,11 @@ namespace WorkflowCore.Services
             var def = builder.Build(workflow.Id, workflow.Version);
             _registry.Add(Tuple.Create(workflow.Id, workflow.Version, def));
         }
+
+        public bool IsRegistered(string workflowId, int version)
+        {
+            var definition = _registry.Find(x => x.Item1 == workflowId && x.Item2 == version);
+            return (definition != null);
+        }
     }
 }
