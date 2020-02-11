@@ -45,6 +45,8 @@ namespace WorkflowCore.Models
         public object Outcome { get; set; }
 
         public PointerStatus Status { get; set; } = PointerStatus.Legacy;
+        
+        public Exception CurrentException { get; set; }
 
         public IReadOnlyCollection<string> Scope
         {

@@ -1,4 +1,5 @@
-﻿using WorkflowCore.Interface;
+﻿using System;
+using WorkflowCore.Interface;
 
 namespace WorkflowCore.Models
 {
@@ -13,5 +14,7 @@ namespace WorkflowCore.Models
         public object PersistenceData { get; set; }
 
         public object Item { get; set; }
+        
+        public Exception CurrentException { get; set; }
     }
 }

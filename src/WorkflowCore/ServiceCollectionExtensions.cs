@@ -47,6 +47,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<IWorkflowErrorHandler, RetryHandler>();
             services.AddTransient<IWorkflowErrorHandler, TerminateHandler>();
             services.AddTransient<IWorkflowErrorHandler, SuspendHandler>();
+            services.AddTransient<IWorkflowErrorHandler, CatchHandler>();
 
             services.AddSingleton<IWorkflowController, WorkflowController>();
             services.AddSingleton<IActivityController, ActivityController>();

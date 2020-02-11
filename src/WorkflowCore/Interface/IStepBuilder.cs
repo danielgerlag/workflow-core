@@ -219,6 +219,8 @@ namespace WorkflowCore.Interface
         /// <returns></returns>
         IStepBuilder<TData, Sequence> Saga(Action<IWorkflowBuilder<TData>> builder);
 
+        ITryStepBuilder<TData, Sequence> Try(Action<IWorkflowBuilder<TData>> builder);
+
         /// <summary>
         /// Schedule a block of steps to execute in parallel sometime in the future
         /// </summary>

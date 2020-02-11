@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -7,7 +8,9 @@ using WorkflowCore.Primitives;
 
 namespace WorkflowCore.Services
 {
-    public class StepBuilder<TData, TStepBody> : IStepBuilder<TData, TStepBody>, IContainerStepBuilder<TData, TStepBody, TStepBody>
+    public class StepBuilder<TData, TStepBody> 
+        : IContainerStepBuilder<TData, TStepBody, TStepBody>,
+          ICatchStepBuilder<TData, TStepBody>
         where TStepBody : IStepBody
     {
         public IWorkflowBuilder<TData> WorkflowBuilder { get; private set; }
@@ -379,6 +382,50 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
+        public ITryStepBuilder<TData, Sequence> Try(Action<IWorkflowBuilder<TData>> builder)
+        {
+            var newStep = new TryContainer<Sequence>();
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, Sequence>(WorkflowBuilder, newStep);
+            Step.Outcomes.Add(new StepOutcome { NextStep = newStep.Id });
+            builder.Invoke(WorkflowBuilder);
+            stepBuilder.Step.Children.Add(stepBuilder.Step.Id + 1); //TODO: make more elegant
+
+            return stepBuilder;
+        }
+
+        public ICatchStepBuilder<TData, TStepBody> Catch<TStep>(IEnumerable<Type> exceptionTypes, Action<IStepBuilder<TData, TStep>> stepSetup = null) 
+            where TStep : IStepBody 
+        {
+            var newStep = new WorkflowStep<TStep>();
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, TStep>(WorkflowBuilder, newStep);
+
+            stepSetup?.Invoke(stepBuilder);
+
+            newStep.Name = newStep.Name ?? typeof(TStep).Name;
+
+            foreach (var exceptionType in exceptionTypes)
+            {
+                Step.CatchStepsQueue.Enqueue(new KeyValuePair<Type, int>(exceptionType, newStep.Id));
+            }
+
+            return this;
+        }
+        
+        public ICatchStepBuilder<TData, TStepBody> Catch(IEnumerable<Type> exceptionTypes, Action<IStepExecutionContext> body)
+        {
+            var newStep = new WorkflowStep<ActionStepBody>();
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, ActionStepBody>(WorkflowBuilder, newStep);
+            stepBuilder.Input(x => x.Body, x => body);
+            foreach (var exceptionType in exceptionTypes)
+            {
+                Step.CatchStepsQueue.Enqueue(new KeyValuePair<Type, int>(exceptionType, newStep.Id));
+            }
+            return this;
+        }
+        
         public IParallelStepBuilder<TData, Sequence> Parallel()
         {
             var newStep = new WorkflowStep<Sequence>();

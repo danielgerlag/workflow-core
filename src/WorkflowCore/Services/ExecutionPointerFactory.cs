@@ -72,6 +72,23 @@ namespace WorkflowCore.Services
                 Scope = new List<string>(pointer.Scope)
             };
         }
+        
+        public ExecutionPointer BuildCatchPointer(WorkflowDefinition def, ExecutionPointer pointer, ExecutionPointer exceptionPointer, int catchStepId, Exception exception)
+        {
+            var nextId = GenerateId();
+            return new ExecutionPointer()
+            {
+                Id = nextId,
+                PredecessorId = exceptionPointer.Id,
+                StepId = catchStepId,
+                Active = true,
+                ContextItem = pointer.ContextItem,
+                Status = PointerStatus.Pending,
+                StepName = def.Steps.FindById(catchStepId).Name,
+                Scope = new List<string>(pointer.Scope),
+                CurrentException = exception
+            };
+        }
 
         private string GenerateId()
         {
