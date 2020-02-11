@@ -3,7 +3,7 @@ using System.Linq;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
-namespace WorkflowCore.Sample18
+namespace WorkflowCore.Sample19
 {
     class TryCatchWorkflow : IWorkflow
     {

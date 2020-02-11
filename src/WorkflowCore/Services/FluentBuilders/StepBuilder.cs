@@ -387,7 +387,7 @@ namespace WorkflowCore.Services
             var newStep = new TryContainer<Sequence>();
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, Sequence>(WorkflowBuilder, newStep);
-            Step.Outcomes.Add(new StepOutcome { NextStep = newStep.Id });
+            Step.Outcomes.Add(new ValueOutcome { NextStep = newStep.Id });
             builder.Invoke(WorkflowBuilder);
             stepBuilder.Step.Children.Add(stepBuilder.Step.Id + 1); //TODO: make more elegant
 
