@@ -6,6 +6,7 @@
     <Authors>Daniel Gerlag</Authors>
     <Company />
     <Product>WorkflowCore</Product>
+    <Configurations>Debug;Release;ReleaseDllOnly</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
