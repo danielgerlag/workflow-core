@@ -212,7 +212,11 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.ExecutionPointerId = instance.ExecutionPointerId;
             result.WorkflowId = instance.WorkflowId;
             result.SubscribeAsOf = DateTime.SpecifyKind(instance.SubscribeAsOf, DateTimeKind.Utc);
-            result.SubscriptionData = JsonConvert.DeserializeObject(instance.SubscriptionData, SerializerSettings);
+            // Oz, Added a check to stop null exception.
+            if (instance.SubscriptionData != null)
+            {
+                result.SubscriptionData = JsonConvert.DeserializeObject(instance.SubscriptionData, SerializerSettings);
+            }
             result.ExternalToken = instance.ExternalToken;
             result.ExternalTokenExpiry = instance.ExternalTokenExpiry;
             result.ExternalWorkerId = instance.ExternalWorkerId;
