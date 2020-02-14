@@ -5,17 +5,29 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Sample19
 {
-    class TryCatchWorkflow : IWorkflow
+    class TryCatchWorkflow : IWorkflow<TryCatchWorkflow.Data>
     {
         public string Id => "try-catch-sample";
         public int Version => 1;
 
-        public void Build(IWorkflowBuilder<object> builder)
-        { 
+        public void Build(IWorkflowBuilder<Data> builder)
+        {
             builder.StartWith(_ => ExecutionResult.Next())
-                .Try(b => b.StartWith(_ => throw new Exception("asdf")))
+                .Output(data => data.Message, step => "Custom Message")
+                .Try(b => b.StartWith(_ => throw new Exception("I am Exception1")))
                 .Catch(new[] {typeof(Exception)},
-                    ctx => Console.WriteLine("FFFFFF " + ctx.CurrentException.Message));
+            ctx => Console.WriteLine("FFFFFF " + ctx.CurrentException.Message))
+                .Then<CustomMessage>(s => s.Input(msg => msg.Message, data => data.Message));
+
+            // builder.StartWith(_ => ExecutionResult.Next())
+            //     .Try(b => b.StartWith(_ => throw new Exception("I am Exception1")))
+            //     .Catch<CustomMessage>(new[] {typeof(Exception)},
+                    // s => s.Input(msg => msg.Message, data => data.Message));
+        }
+
+        public class Data
+        {
+            public string Message { get; set; }
         }
     }
 }

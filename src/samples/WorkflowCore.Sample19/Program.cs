@@ -12,7 +12,7 @@ namespace WorkflowCore.Sample19
 
             //start the workflow host
             var host = serviceProvider.GetService<IWorkflowHost>();
-            host.RegisterWorkflow<TryCatchWorkflow>();
+            host.RegisterWorkflow<TryCatchWorkflow, TryCatchWorkflow.Data>();
             host.Start();
 
             Console.WriteLine("Starting workflow...");

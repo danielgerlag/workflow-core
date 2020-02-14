@@ -47,11 +47,14 @@ namespace WorkflowCore.Services.ErrorHandlers
                 while (scopeStep.CatchStepsQueue.Count != 0)
                 {
                     var nextCatchStepPair = scopeStep.CatchStepsQueue.Dequeue();
-                    if (nextCatchStepPair.Key.IsInstanceOfType(exception))
+                    var exceptionType = nextCatchStepPair.Key;
+                    var catchStepId = nextCatchStepPair.Value;
+                    if (exceptionType.IsInstanceOfType(exception))
                     {
-                        var catchPointer = _pointerFactory.BuildCatchPointer(def, scopePointer, exceptionPointer, nextCatchStepPair.Value, exception);
+                        var catchPointer = _pointerFactory.BuildCatchPointer(def, scopePointer, exceptionPointer, catchStepId, exception);
                         workflow.ExecutionPointers.Add(catchPointer);
                         scopeStep.CatchStepsQueue.Clear();
+                        scope.Clear();
                         break;
                     }
                 }
