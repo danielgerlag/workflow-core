@@ -7,7 +7,7 @@ namespace WorkflowCore.Primitives
         where TStepBody : IStepBody
     {
         public override bool ResumeChildrenAfterCompensation => false;
-        public override bool RevertChildrenAfterCompensation => true;
+        public override bool RevertChildrenAfterCompensation => false;
 
         public override void PrimeForRetry(ExecutionPointer pointer)
         {
