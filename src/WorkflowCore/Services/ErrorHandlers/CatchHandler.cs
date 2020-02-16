@@ -34,11 +34,12 @@ namespace WorkflowCore.Services.ErrorHandlers
                 var pointerId = scope.Pop();
                 var scopePointer = workflow.ExecutionPointers.FindById(pointerId);
                 var scopeStep = def.Steps.FindById(scopePointer.StepId);
+                
                 if ((scopeStep.ErrorBehavior ?? WorkflowErrorHandling.Catch) != WorkflowErrorHandling.Catch)
                 {
                     bubbleUpQueue.Enqueue(scopePointer);
                     continue;
-                }
+                } //TODO: research if it's needed
                 
                 scopePointer.Active = false;
                 scopePointer.EndTime = _datetimeProvider.Now.ToUniversalTime();
@@ -53,6 +54,10 @@ namespace WorkflowCore.Services.ErrorHandlers
                     {
                         var catchPointer = _pointerFactory.BuildCatchPointer(def, scopePointer, exceptionPointer, catchStepId, exception);
                         workflow.ExecutionPointers.Add(catchPointer);
+                        
+                        foreach (var outcomeTarget in scopeStep.Outcomes.Where(x => x.Matches(workflow.Data)))
+                            workflow.ExecutionPointers.Add(_pointerFactory.BuildNextPointer(def, scopePointer, outcomeTarget));
+
                         scopeStep.CatchStepsQueue.Clear();
                         scope.Clear();
                         break;
