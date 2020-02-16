@@ -21,11 +21,20 @@ namespace WorkflowCore.Sample19
             // ctx => Console.WriteLine($"Caught Exception, message: {ctx.CurrentException.Message}"))
             //     .Then<CustomMessage>(s => s.Input(msg => msg.Message, data => data.Message));
 
+            // builder.StartWith(_ => ExecutionResult.Next())
+            //     .Output(data => data.Message, step => "Custom Message")
+            //     .Try(b => b.StartWith(_ => throw new Exception("I am Exception1")))
+            //     .Catch<CustomMessage>(new[] {typeof(Exception)});
+            
             builder.StartWith(_ => ExecutionResult.Next())
                 .Output(data => data.Message, step => "Custom Message")
                 .Try(b => b.StartWith(_ => throw new Exception("I am Exception1")))
-                .Catch<CustomMessage>(new[] {typeof(Exception)},
-                    s => s.Input(msg => msg.Message, data => data.Message));
+                .Catch(new[] {typeof(Exception)}, _ =>
+                {
+                    Console.WriteLine("I caught an Exception");
+                    return ExecutionResult.Next();
+                })
+                .Then<CustomMessage>(s => s.Input(msg => msg.Message, data => data.Message));;
         }
 
         public class Data

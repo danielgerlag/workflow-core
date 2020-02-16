@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using WorkflowCore.Models;
 
 namespace WorkflowCore.Interface
 {
@@ -10,5 +11,11 @@ namespace WorkflowCore.Interface
             where TStep : IStepBody;
 
         ICatchStepBuilder<TData, TStepBody> Catch(IEnumerable<Type> exceptionTypes, Action<IStepExecutionContext> body);
+
+        ICatchStepBuilder<TData, TStepBody> Catch(IEnumerable<Type> exceptionTypes,
+            Func<IStepExecutionContext, ExecutionResult> body);
+
+        ICatchStepBuilder<TData, TStepBody> CatchWithSequence(IEnumerable<Type> exceptionTypes,
+            Action<IWorkflowBuilder<TData>> builder);
     }
 }

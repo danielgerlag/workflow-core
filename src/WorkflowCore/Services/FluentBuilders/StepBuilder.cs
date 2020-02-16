@@ -413,12 +413,39 @@ namespace WorkflowCore.Services
             return this;
         }
         
+        public ICatchStepBuilder<TData, TStepBody> Catch(IEnumerable<Type> exceptionTypes, Func<IStepExecutionContext, ExecutionResult> body)
+        {
+            WorkflowStepInline newStep = new WorkflowStepInline();
+            newStep.Body = body;
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, InlineStepBody>(WorkflowBuilder, newStep);
+            foreach (var exceptionType in exceptionTypes)
+            {
+                Step.CatchStepsQueue.Enqueue(new KeyValuePair<Type, int>(exceptionType, newStep.Id));
+            }
+            return this;
+        }
+        
         public ICatchStepBuilder<TData, TStepBody> Catch(IEnumerable<Type> exceptionTypes, Action<IStepExecutionContext> body)
         {
             var newStep = new WorkflowStep<ActionStepBody>();
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, ActionStepBody>(WorkflowBuilder, newStep);
             stepBuilder.Input(x => x.Body, x => body);
+            foreach (var exceptionType in exceptionTypes)
+            {
+                Step.CatchStepsQueue.Enqueue(new KeyValuePair<Type, int>(exceptionType, newStep.Id));
+            }
+            return this;
+        }
+        
+        public ICatchStepBuilder<TData, TStepBody> CatchWithSequence(IEnumerable<Type> exceptionTypes, Action<IWorkflowBuilder<TData>> builder)
+        {
+            var newStep = new WorkflowStep<Sequence>();
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, Sequence>(WorkflowBuilder, newStep);
+            builder.Invoke(WorkflowBuilder);
+            stepBuilder.Step.Children.Add(stepBuilder.Step.Id + 1); //TODO: make more elegant
             foreach (var exceptionType in exceptionTypes)
             {
                 Step.CatchStepsQueue.Enqueue(new KeyValuePair<Type, int>(exceptionType, newStep.Id));
