@@ -28,7 +28,8 @@ namespace WorkflowCore.Services.ErrorHandlers
                 Reference = workflow.Reference,
                 WorkflowInstanceId = workflow.Id,
                 WorkflowDefinitionId = workflow.WorkflowDefinitionId,
-                Version = workflow.Version
+                Version = workflow.Version,
+                Exception = exception
             });
         }
     }

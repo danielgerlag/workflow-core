@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace WorkflowCore.Models.LifeCycleEvents
 {
     public class WorkflowTerminated : LifeCycleEvent
     {
+        public Exception Exception { get; set; }
     }
 }

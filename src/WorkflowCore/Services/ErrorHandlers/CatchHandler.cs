@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
+using WorkflowCore.Models.LifeCycleEvents;
 
 namespace WorkflowCore.Services.ErrorHandlers
 {
@@ -28,6 +29,8 @@ namespace WorkflowCore.Services.ErrorHandlers
         {
             var scope = new Stack<string>(exceptionPointer.Scope.Reverse());
             scope.Push(exceptionPointer.Id);
+
+            var exceptionCaught = false;
 
             while (scope.Any())
             {
@@ -58,11 +61,27 @@ namespace WorkflowCore.Services.ErrorHandlers
                         foreach (var outcomeTarget in scopeStep.Outcomes.Where(x => x.Matches(workflow.Data)))
                             workflow.ExecutionPointers.Add(_pointerFactory.BuildNextPointer(def, scopePointer, outcomeTarget));
 
+                        exceptionCaught = true;
+                        
                         scopeStep.CatchStepsQueue.Clear();
                         scope.Clear();
                         break;
                     }
                 }
+            }
+
+            if (!exceptionCaught)
+            {
+                workflow.Status = WorkflowStatus.Terminated;
+                _eventPublisher.PublishNotification(new WorkflowTerminated()
+                {
+                    EventTimeUtc = _datetimeProvider.UtcNow,
+                    Reference = workflow.Reference,
+                    WorkflowInstanceId = workflow.Id,
+                    WorkflowDefinitionId = workflow.WorkflowDefinitionId,
+                    Version = workflow.Version,
+                    Exception = exception
+                });   
             }
         }
     }
