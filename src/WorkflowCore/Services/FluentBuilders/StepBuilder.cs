@@ -385,6 +385,7 @@ namespace WorkflowCore.Services
         public ITryStepBuilder<TData, Sequence> Try(Action<IWorkflowBuilder<TData>> builder)
         {
             var newStep = new WorkflowStep<Sequence>();
+            newStep.ErrorBehavior = WorkflowErrorHandling.Catch;
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, Sequence>(WorkflowBuilder, newStep);
             Step.Outcomes.Add(new ValueOutcome { NextStep = newStep.Id });
