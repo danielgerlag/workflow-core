@@ -13,8 +13,7 @@ namespace WorkflowCore.Tests.MySQL
         public static string RootPassword => "rootpwd123";
 
         public override TimeSpan TimeOut => TimeSpan.FromSeconds(60);
-
-        public override string ImageTag => "5.7.24";
+                
         public override string ImageName => "mysql";
         public override IList<string> EnvironmentVariables => new List<string> {
             $"MYSQL_ROOT_PASSWORD={RootPassword}"
