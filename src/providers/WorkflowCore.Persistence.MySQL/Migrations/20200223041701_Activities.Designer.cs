@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WorkflowCore.Persistence.MySQL;
 
 namespace WorkflowCore.Persistence.MySQL.Migrations
 {
     [DbContext(typeof(MysqlContext))]
-    partial class MysqlPersistenceProviderModelSnapshot : ModelSnapshot
+    [Migration("20200223041701_Activities")]
+    partial class Activities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
