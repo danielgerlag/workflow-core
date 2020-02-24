@@ -303,8 +303,23 @@ namespace WorkflowCore.Services.DefinitionStorage
                     foreach (var child in subobj.Children<JObject>())
                         stack.Push(child);
                 }
-
-                stepProperty.SetValue(pStep, destObj);
+                
+                object existingStepPropertyValue = stepProperty.GetValue(pStep);
+                if (existingStepPropertyValue == null)
+                {
+                    // here we need to create a new object from the JObject and set it to property
+                    object inputPropertyValue = destObj.ToObject(stepProperty.PropertyType);
+                    stepProperty.SetValue(pStep, inputPropertyValue);
+                }
+                else
+                {
+                    // here the property value is already not null so we will simply populate this object
+                    using (var jsonReader = destObj.CreateReader())
+                    {
+                        JsonSerializer serializer = new JsonSerializer();
+                        serializer.Populate(jsonReader, existingStepPropertyValue);
+                    }
+                }
             }
             return acn;
         }
