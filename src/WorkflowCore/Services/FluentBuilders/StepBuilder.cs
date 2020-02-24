@@ -157,6 +157,12 @@ namespace WorkflowCore.Services
             return this;
         }        
 
+        public IStepBuilder<TData, TStepBody> Output<TOutput>(Expression<Func<TData, IStepExecutionContext, TOutput>> dataProperty, Expression<Func<TStepBody, object>> value)
+        {
+            Step.Outputs.Add(new MemberMapParameter(value, dataProperty));
+            return this;
+        }
+
         public IStepBuilder<TData, TStepBody> Output<TOutput>(Expression<Func<TData, TOutput>> dataProperty, Expression<Func<TStepBody, object>> value)
         {
             Step.Outputs.Add(new MemberMapParameter(value, dataProperty));
@@ -335,7 +341,22 @@ namespace WorkflowCore.Services
 
             return stepBuilder;
         }
-        
+
+        public IContainerStepBuilder<TData, If, If> If(Expression<Func<TData, IStepExecutionContext, bool>> condition)
+        {
+            var newStep = new WorkflowStep<If>();
+
+            Expression<Func<If, bool>> inputExpr = (x => x.Condition);
+            newStep.Inputs.Add(new MemberMapParameter(condition, inputExpr));
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, If>(WorkflowBuilder, newStep);
+
+            Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Id });
+
+            return stepBuilder;
+        }
+
         public IContainerStepBuilder<TData, When, OutcomeSwitch> When(Expression<Func<TData, object>> outcomeValue, string label = null)
         {
             var newStep = new WorkflowStep<When>();
