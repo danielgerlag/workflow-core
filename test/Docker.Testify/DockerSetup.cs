@@ -20,7 +20,7 @@ namespace Docker.Testify
         public abstract int InternalPort { get; }
 
         public virtual string ImageTag => "latest";
-        public virtual TimeSpan TimeOut => TimeSpan.FromSeconds(60);
+        public virtual TimeSpan TimeOut => TimeSpan.FromSeconds(30);
         public virtual IList<string> EnvironmentVariables => new List<string>();
         public int ExternalPort { get; }
 
