@@ -13,8 +13,13 @@ namespace WorkflowCore.Tests.Elasticsearch
         public static string ConnectionString { get; set; }
         
         public override string ImageName => @"elasticsearch";
-        public override string ImageTag => "6.5.4";
+        public override string ImageTag => "7.5.1";
         public override int InternalPort => 9200;
+        public override TimeSpan TimeOut => TimeSpan.FromSeconds(30);
+        
+        public override IList<string> EnvironmentVariables => new List<string> {
+            $"discovery.type=single-node"
+        };
 
         public override void PublishConnectionInfo()
         {
