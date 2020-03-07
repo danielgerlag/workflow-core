@@ -40,14 +40,22 @@ namespace WorkflowCore.Sample08
                 }
 
                 //Thread.Sleep(500);
-                
-                Console.ReadLine();
+
+                var input = Console.ReadLine();
                 Console.WriteLine();
-                Console.WriteLine("Choosing " + item.Options.First().Key);
 
-                host.PublishUserAction(openItems.First().Key, @"domain\john", item.Options.First().Value).Wait();
+                string key = item.Key;
+                string value = item.Options.Single(x => x.Value == input).Value;
+
+                Console.WriteLine("Choosing key:" + key + " value:" + value);
+
+                host.PublishUserAction(key, @"domain\john", value).Wait();
             }
-
+            Thread.Sleep(1000);
+            Console.WriteLine("Open user actions left:" + host.GetOpenUserActions(workflowId).Count().ToString());
+            timer.Dispose();
+            timer = null;
+            Console.WriteLine("Workflow ended.");
             Console.ReadLine();
             host.Stop();
         }
@@ -82,6 +90,6 @@ namespace WorkflowCore.Sample08
             return serviceProvider;
         }
 
-        
+
     }
 }
