@@ -17,13 +17,15 @@ namespace WorkflowCore.Providers.AWS.Services
         private readonly ILogger _logger;
         private readonly IAmazonSQS _client;
         private readonly Dictionary<QueueType, string> _queues = new Dictionary<QueueType, string>();
+        private readonly string _queuesPrefix;
 
         public bool IsDequeueBlocking => true;
 
-        public SQSQueueProvider(AWSCredentials credentials, AmazonSQSConfig config, ILoggerFactory logFactory)
+        public SQSQueueProvider(AWSCredentials credentials, AmazonSQSConfig config, ILoggerFactory logFactory, string queuesPrefix)
         {
             _logger = logFactory.CreateLogger<SQSQueueProvider>();
             _client = new AmazonSQSClient(credentials, config);
+            _queuesPrefix = queuesPrefix;
         }
 
         public async Task QueueWork(string id, QueueType queue)
@@ -54,9 +56,9 @@ namespace WorkflowCore.Providers.AWS.Services
 
         public async Task Start()
         {
-            var workflowQueue = await _client.CreateQueueAsync(new CreateQueueRequest("workflowcore-workflows"));
-            var eventQueue = await _client.CreateQueueAsync(new CreateQueueRequest("workflowcore-events"));
-            var indexQueue = await _client.CreateQueueAsync(new CreateQueueRequest("workflowcore-index"));
+            var workflowQueue = await _client.CreateQueueAsync(new CreateQueueRequest($"{_queuesPrefix}-workflows"));
+            var eventQueue = await _client.CreateQueueAsync(new CreateQueueRequest($"{_queuesPrefix}-events"));
+            var indexQueue = await _client.CreateQueueAsync(new CreateQueueRequest($"{_queuesPrefix}-index"));
 
             _queues[QueueType.Workflow] = workflowQueue.QueueUrl;
             _queues[QueueType.Event] = eventQueue.QueueUrl;
