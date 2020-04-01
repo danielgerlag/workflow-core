@@ -20,7 +20,7 @@ public class HelloWorld : StepBody
 ```
 *The `StepBody` and `StepBodyAsync` class implementations are constructed by the workflow host which first tries to use IServiceProvider for dependency injection, if it can't construct it with this method, it will search for a parameterless constructor*
 
-### Then we define the workflow structure by composing a chain of steps.  The is done by implementing the IWorkflow interface
+### Then we define the workflow structure by composing a chain of steps.  This is done by implementing the IWorkflow interface
 
 ```C#
 public class HelloWorldWorkflow : IWorkflow
