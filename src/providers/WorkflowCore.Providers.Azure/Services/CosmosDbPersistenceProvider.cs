@@ -37,7 +37,7 @@ namespace WorkflowCore.Providers.Azure.Services
 
         public Task<string> CreateNewWorkflow(WorkflowInstance workflow)
         {
-            _container.
+            _container.CreateItemAsync()
         }
 
         public void EnsureStoreExists()
