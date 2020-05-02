@@ -86,7 +86,7 @@ namespace WorkflowCore.Services
                 Status = PointerStatus.Pending,
                 StepName = def.Steps.FindById(catchStepId).Name,
                 Scope = new List<string>(pointer.Scope),
-                CurrentException = exception
+                CurrentException = new SerializableException(exception)
             };
         }
 

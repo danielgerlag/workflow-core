@@ -29,7 +29,7 @@ namespace WorkflowCore.Services.ErrorHandlers
                 WorkflowInstanceId = workflow.Id,
                 WorkflowDefinitionId = workflow.WorkflowDefinitionId,
                 Version = workflow.Version,
-                Exception = exception
+                Exception = new SerializableException(exception)
             });
         }
     }

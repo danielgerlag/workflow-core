@@ -15,6 +15,6 @@ namespace WorkflowCore.Models
 
         public object Item { get; set; }
         
-        public Exception CurrentException { get; set; }
+        public SerializableException CurrentException { get; set; }
     }
 }

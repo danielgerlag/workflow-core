@@ -19,23 +19,16 @@ namespace WorkflowCore.Sample19
                     .Catch(new []{typeof(ApplicationException)}, ctx =>
                     {
                         Console.WriteLine(
-                            $"Caught an exception in inner catch: Type: '{ctx.CurrentException.GetType().Name}', Message: '{ctx.CurrentException.Message}'");
+                            $"Caught an exception in inner catch: Type: '{ctx.CurrentException.FullTypeName}', Message: '{ctx.CurrentException.Message}'");
                         return ExecutionResult.Next();
                     }))
                 .Catch(new []{typeof(Exception)}, ctx =>
                 {
                     Console.WriteLine(
-                        $"Caught an exception in outer catch: Type: '{ctx.CurrentException.GetType().Name}', Message: '{ctx.CurrentException.Message}'");
+                        $"Caught an exception in outer catch: Type: '{ctx.CurrentException.FullTypeName}', Message: '{ctx.CurrentException.Message}'");
                     return ExecutionResult.Next();
                 })
                 .Then<CustomMessage>(s => s.Input(msg => msg.Message, data => data.Message));
-        }
-
-        private ExecutionResult CatchFunction(IStepExecutionContext ctx)
-        {
-            Console.WriteLine(
-                $"Caught an exception: Type: '{ctx.CurrentException.GetType().Name}', Message: '{ctx.CurrentException.Message}'");
-            return ExecutionResult.Next();
         }
 
         public class Data

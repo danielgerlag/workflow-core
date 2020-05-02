@@ -15,6 +15,6 @@ namespace WorkflowCore.Interface
 
         WorkflowInstance Workflow { get; set; }  
         
-        Exception CurrentException { get; set; }
+        SerializableException CurrentException { get; set; }
     }
 }
