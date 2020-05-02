@@ -14,13 +14,28 @@ namespace WorkflowCore.Sample19
         {
             builder.StartWith(_ => ExecutionResult.Next())
                 .Output(data => data.Message, step => "Custom Message")
-                .Try(b => b.StartWith(_ => throw new ArgumentException("I am Exception1")))
-            .Catch(new[] {typeof(Exception)}, ctx =>
-            {
-                Console.WriteLine($"Caught an exception: Type: '{ctx.CurrentException.GetType().Name}', Message: '{ctx.CurrentException.Message}'");
-                return ExecutionResult.Next();
-            })
-            .Then<CustomMessage>(s => s.Input(msg => msg.Message, data => data.Message));
+                .Try(b => b.StartWith(_ => ExecutionResult.Next())
+                    .Try(b2 => b2.StartWith(_ => throw new Exception("I am Exception1")))
+                    .Catch(new []{typeof(ApplicationException)}, ctx =>
+                    {
+                        Console.WriteLine(
+                            $"Caught an exception in inner catch: Type: '{ctx.CurrentException.GetType().Name}', Message: '{ctx.CurrentException.Message}'");
+                        return ExecutionResult.Next();
+                    }))
+                .Catch(new []{typeof(Exception)}, ctx =>
+                {
+                    Console.WriteLine(
+                        $"Caught an exception in outer catch: Type: '{ctx.CurrentException.GetType().Name}', Message: '{ctx.CurrentException.Message}'");
+                    return ExecutionResult.Next();
+                })
+                .Then<CustomMessage>(s => s.Input(msg => msg.Message, data => data.Message));
+        }
+
+        private ExecutionResult CatchFunction(IStepExecutionContext ctx)
+        {
+            Console.WriteLine(
+                $"Caught an exception: Type: '{ctx.CurrentException.GetType().Name}', Message: '{ctx.CurrentException.Message}'");
+            return ExecutionResult.Next();
         }
 
         public class Data
