@@ -50,8 +50,29 @@ namespace WorkflowCore.Services.BackgroundTasks
 
         public virtual void Stop()
         {
+            // Oz, added null operator since the seem to be null on live server
+            /*
+[09:50:56 FTL] Host terminated unexpectedly <s:>
+System.AggregateException: One or more errors occurred. (Object reference not set to an instance of an object.)  ---> System.NullReferenceException: Object reference not set to an instance of an object.
+   at WorkflowCore.Services.BackgroundTasks.QueueConsumer.Stop() in E:\Code\Work\Azure\AviMall Platform\Permits\Supplier\Approval\workflow-core\src\WorkflowCore\Services\BackgroundTasks\QueueConsumer.cs:line 49
+   at WorkflowCore.Services.WorkflowHost.StopAsync(CancellationToken cancellationToken) in E:\Code\Work\Azure\AviMall Platform\Permits\Supplier\Approval\workflow-core\src\WorkflowCore\Services\WorkflowHost.cs:line 112
+   --- End of inner exception stack trace ---
+   at System.Threading.Tasks.Task.ThrowIfExceptional(Boolean includeTaskCanceledExceptions)
+   at System.Threading.Tasks.Task.Wait(Int32 millisecondsTimeout, CancellationToken cancellationToken)
+   at System.Threading.Tasks.Task.Wait()
+   at WorkflowCore.Services.WorkflowHost.Stop() in E:\Code\Work\Azure\AviMall Platform\Permits\Supplier\Approval\workflow-core\src\WorkflowCore\Services\WorkflowHost.cs:line 105
+   at WorkflowCore.Services.WorkflowHost.Dispose() in E:\Code\Work\Azure\AviMall Platform\Permits\Supplier\Approval\workflow-core\src\WorkflowCore\Services\WorkflowHost.cs:line 167
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.ServiceProviderEngineScope.DisposeAsync()
+--- End of stack trace from previous location where exception was thrown ---
+   at Microsoft.AspNetCore.Hosting.WebHost.DisposeServiceProviderAsync(IServiceProvider serviceProvider)
+   at Microsoft.AspNetCore.Hosting.WebHost.DisposeAsync()
+   at Microsoft.AspNetCore.Hosting.WebHostExtensions.RunAsync(IWebHost host, CancellationToken token, String startupMessage)
+   at Microsoft.AspNetCore.Hosting.WebHostExtensions.RunAsync(IWebHost host, CancellationToken token)
+   at Microsoft.AspNetCore.Hosting.WebHostExtensions.Run(IWebHost host)
+   at AviMall.Supplier.Web.Program.Main(String[] args) in E:\Code\Work\Azure\AviMall Platform\Permits\Supplier\AviMall.Supplier.Web\Program.cs:line 103
+     */
             _cancellationTokenSource?.Cancel();
-            DispatchTask.Wait();
+            DispatchTask?.Wait();
             DispatchTask = null;
         }
 
