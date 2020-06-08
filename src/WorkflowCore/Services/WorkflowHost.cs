@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Exceptions;
 using WorkflowCore.Models.LifeCycleEvents;
 
@@ -121,18 +122,16 @@ namespace WorkflowCore.Services
         }
 
         public void RegisterWorkflow<TWorkflow>()
-            where TWorkflow : IWorkflow, new()
+            where TWorkflow : IWorkflow
         {
-            TWorkflow wf = new TWorkflow();
-            Registry.RegisterWorkflow(wf);
+            _workflowController.RegisterWorkflow<TWorkflow>();
         }
 
         public void RegisterWorkflow<TWorkflow, TData>()
-            where TWorkflow : IWorkflow<TData>, new()
+            where TWorkflow : IWorkflow<TData>
             where TData : new()
         {
-            TWorkflow wf = new TWorkflow();
-            Registry.RegisterWorkflow<TData>(wf);
+            _workflowController.RegisterWorkflow<TWorkflow, TData>();
         }
 
         public Task<bool> SuspendWorkflow(string workflowId)

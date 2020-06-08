@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Exceptions;
 using WorkflowCore.Interface;
@@ -19,9 +20,10 @@ namespace WorkflowCore.Services
         private readonly IQueueProvider _queueProvider;
         private readonly IExecutionPointerFactory _pointerFactory;
         private readonly ILifeCycleEventHub _eventHub;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _logger;
 
-        public WorkflowController(IPersistenceProvider persistenceStore, IDistributedLockProvider lockProvider, IWorkflowRegistry registry, IQueueProvider queueProvider, IExecutionPointerFactory pointerFactory, ILifeCycleEventHub eventHub, ILoggerFactory loggerFactory)
+        public WorkflowController(IPersistenceProvider persistenceStore, IDistributedLockProvider lockProvider, IWorkflowRegistry registry, IQueueProvider queueProvider, IExecutionPointerFactory pointerFactory, ILifeCycleEventHub eventHub, ILoggerFactory loggerFactory, IServiceProvider serviceProvider)
         {
             _persistenceStore = persistenceStore;
             _lockProvider = lockProvider;
@@ -29,6 +31,7 @@ namespace WorkflowCore.Services
             _queueProvider = queueProvider;
             _pointerFactory = pointerFactory;
             _eventHub = eventHub;
+            _serviceProvider = serviceProvider;
             _logger = loggerFactory.CreateLogger<WorkflowController>();
         }
 
@@ -213,17 +216,17 @@ namespace WorkflowCore.Services
         }
 
         public void RegisterWorkflow<TWorkflow>()
-            where TWorkflow : IWorkflow, new()
+            where TWorkflow : IWorkflow
         {
-            TWorkflow wf = new TWorkflow();
+            TWorkflow wf = ActivatorUtilities.CreateInstance<TWorkflow>(_serviceProvider);
             _registry.RegisterWorkflow(wf);
         }
 
         public void RegisterWorkflow<TWorkflow, TData>()
-            where TWorkflow : IWorkflow<TData>, new()
+            where TWorkflow : IWorkflow<TData>
             where TData : new()
         {
-            TWorkflow wf = new TWorkflow();
+            TWorkflow wf = ActivatorUtilities.CreateInstance<TWorkflow>(_serviceProvider);
             _registry.RegisterWorkflow<TData>(wf);
         }
     }
