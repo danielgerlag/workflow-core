@@ -19,6 +19,10 @@ namespace WorkflowCore.Tests.PostgreSQL
         public override string ImageName => "postgres";
         public override int InternalPort => 5432;
 
+        private const string PostgresHostAuthMethod = "trust";
+        public override IList<string> EnvironmentVariables => new List<string> {
+            $"POSTGRES_HOST_AUTH_METHOD={PostgresHostAuthMethod}"
+        };
         public override void PublishConnectionInfo()
         {
             ConnectionString = $"Server=127.0.0.1;Port={ExternalPort};Database=workflow;User Id=postgres;";
