@@ -50,7 +50,7 @@ public class PassingDataWorkflow : IWorkflow<MyDataClass>
                 .Input(step => step.Message, data => "The answer is " + data.Value3.ToString())
             .Then(context =>
                 {
-                    Console.WriteLine("Workflow comeplete");
+                    Console.WriteLine("Workflow complete");
                     return ExecutionResult.Next();
                 });
     }
