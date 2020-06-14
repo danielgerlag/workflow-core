@@ -34,7 +34,7 @@ public class MyWorkflow : IWorkflow
 
 ## JSON / YAML Workflow Definitions
 
-Define your workflows in JSON or YAML
+Define your workflows in JSON or YAML, need to install WorkFlowCore.DSL
 
 ```json
 {
@@ -65,7 +65,7 @@ Steps:
   StepType: MyApp.GoodbyeWorld, MyApp
 ```
 
-### Sample use cases
+## Sample use cases
 
 * New user workflow
 ```c#
