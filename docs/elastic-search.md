@@ -21,7 +21,7 @@ dotnet add package WorkflowCore.Providers.Elasticsearch
 
 Use the `.UseElasticsearch` extension method on `IServiceCollection` when building your service provider
 
-```C#
+```
 using Nest;
 ...
 services.AddWorkflow(cfg =>
@@ -50,7 +50,7 @@ This will do a full text search on the following default fields
 
  In addition you can search data within your own custom data object if it implements `ISearchable`
 
- ```c#
+ ```
  using WorkflowCore.Interfaces;
  ...
  public class MyData : ISearchable
@@ -72,7 +72,7 @@ This will do a full text search on the following default fields
  ##### Examples
 
  Search all fields for "puppies"
- ```c#
+ ```
  searchIndex.Search("puppies", 0, 10);
  ```
 
@@ -96,7 +96,7 @@ The following filter types are available
  ##### Examples
 
  Filtering by reference
- ```c#
+ ```
  using WorkflowCore.Models.Search;
  ...
 
@@ -104,22 +104,22 @@ The following filter types are available
  ```
 
  Filtering by workflows started after a date
- ```c#
+ ```
  searchIndex.Search("", 0, 10, DateRangeFilter.After(x => x.CreateTime, startDate));
  ```
 
  Filtering by workflows completed within a period
- ```c#
+ ```
  searchIndex.Search("", 0, 10, DateRangeFilter.Between(x => x.CompleteTime, startDate, endDate));
  ```
 
  Filtering by workflows in a state
- ```c#
+ ```
  searchIndex.Search("", 0, 10, StatusFilter.Equals(WorkflowStatus.Complete));
  ```
 
  Filtering against your own custom data class
- ```c#
+ ```
 
  class MyData
  {
