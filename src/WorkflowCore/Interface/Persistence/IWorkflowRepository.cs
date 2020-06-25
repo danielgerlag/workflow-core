@@ -19,6 +19,7 @@ namespace WorkflowCore.Interface
         Task<WorkflowInstance> GetWorkflowInstance(string Id);
 
         Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids);
-
+        
+        Task<IEnumerable<WorkflowInstance>> GetAllWorkflowInstances();
     }
 }
