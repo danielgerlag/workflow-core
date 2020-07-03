@@ -20,7 +20,7 @@
     <FileVersion>3.1.6.0</FileVersion>
     <PackageReleaseNotes></PackageReleaseNotes>
     <PackageIconUrl>https://github.com/danielgerlag/workflow-core/raw/master/src/logo.png</PackageIconUrl>
-    <PackageVersion>3.1.5</PackageVersion>
+    <PackageVersion>3.1.6</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
