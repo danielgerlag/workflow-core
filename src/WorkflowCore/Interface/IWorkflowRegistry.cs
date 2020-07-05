@@ -1,4 +1,5 @@
-﻿using WorkflowCore.Models;
+﻿using System.Collections.Generic;
+using WorkflowCore.Models;
 
 namespace WorkflowCore.Interface
 {
@@ -10,5 +11,6 @@ namespace WorkflowCore.Interface
         WorkflowDefinition GetDefinition(string workflowId, int? version = null);
         bool IsRegistered(string workflowId, int version);
         void DeregisterWorkflow(string workflowId, int version);
+        IEnumerable<WorkflowDefinition> GetAllDefinitions();
     }
 }
