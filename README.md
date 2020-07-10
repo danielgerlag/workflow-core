@@ -160,6 +160,8 @@ These are also available as separate Nuget packages.
 
 * [Parallel ForEach](src/samples/WorkflowCore.Sample09)
 
+* [Sync ForEach](src/samples/WorkflowCore.Sample09s)
+
 * [While Loop](src/samples/WorkflowCore.Sample10)
 
 * [If Statement](src/samples/WorkflowCore.Sample11)
