@@ -26,24 +26,32 @@ namespace WorkflowCore.Primitives
                 }
             }
 
-            if (context.PersistenceData is IteratorPersistenceData persistanceData && persistanceData?.ChildrenActive == true)
+            if (context.PersistenceData is IteratorPersistenceData persistenceData && persistenceData?.ChildrenActive == true)
             {
                 if (context.Workflow.IsBranchComplete(context.ExecutionPointer.Id))
                 {
                     if (!RunParallel)
                     {
                         var values = Collection.Cast<object>();
-                        persistanceData.Index++;
-                        if (persistanceData.Index < values.Count())
+                        persistenceData.Index++;
+                        if (persistenceData.Index < values.Count())
                         {
-                            return ExecutionResult.Branch(new List<object>(new object[] { values.ElementAt(persistanceData.Index) }), persistanceData);
+                            return ExecutionResult.Branch(new List<object>(new object[] { values.ElementAt(persistenceData.Index) }), persistenceData);
                         }
                     }
 
                     return ExecutionResult.Next();
                 }
 
-                return ExecutionResult.Persist(persistanceData);
+                return ExecutionResult.Persist(persistenceData);
+            }
+
+            if (context.PersistenceData is ControlPersistenceData controlPersistenceData && controlPersistenceData?.ChildrenActive == true)
+            {
+                if (context.Workflow.IsBranchComplete(context.ExecutionPointer.Id))
+                {
+                    return ExecutionResult.Next();
+                }
             }
 
             return ExecutionResult.Persist(context.PersistenceData);
