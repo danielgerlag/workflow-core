@@ -84,5 +84,10 @@ namespace WorkflowCore.Services
             var definition = _registry.Find(x => x.Item1 == workflowId && x.Item2 == version);
             return (definition != null);
         }
+
+        public IEnumerable<WorkflowDefinition> GetAllDefinitions()
+        {
+            return _registry.Select(i => i.Item3);
+        }
     }
 }
