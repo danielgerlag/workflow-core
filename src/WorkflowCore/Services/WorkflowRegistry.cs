@@ -11,10 +11,12 @@ namespace WorkflowCore.Services
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly List<Tuple<string, int, WorkflowDefinition>> _registry = new List<Tuple<string, int, WorkflowDefinition>>();
+        private readonly IWorkflowDefinitionValidator _validator;
 
-        public WorkflowRegistry(IServiceProvider serviceProvider)
+        public WorkflowRegistry(IServiceProvider serviceProvider, IWorkflowDefinitionValidator validator)
         {
             _serviceProvider = serviceProvider;
+            _validator = validator;
         }
 
         public WorkflowDefinition GetDefinition(string workflowId, int? version = null)
@@ -52,6 +54,12 @@ namespace WorkflowCore.Services
             var builder = _serviceProvider.GetService<IWorkflowBuilder>().UseData<object>();            
             workflow.Build(builder);
             var def = builder.Build(workflow.Id, workflow.Version);
+            
+            if (!_validator.IsDefinitionValid(def))
+            {
+                throw new InvalidOperationException($"Workflow {workflow.Id} version {workflow.Version} is not valid");
+            }
+            
             _registry.Add(Tuple.Create(workflow.Id, workflow.Version, def));
         }
 
@@ -60,6 +68,11 @@ namespace WorkflowCore.Services
             if (_registry.Any(x => x.Item1 == definition.Id && x.Item2 == definition.Version))
             {
                 throw new InvalidOperationException($"Workflow {definition.Id} version {definition.Version} is already registered");
+            }
+            
+            if (!_validator.IsDefinitionValid(definition))
+            {
+                throw new InvalidOperationException($"Workflow {definition.Id} version {definition.Version} is not valid");
             }
 
             _registry.Add(Tuple.Create(definition.Id, definition.Version, definition));
@@ -76,6 +89,12 @@ namespace WorkflowCore.Services
             var builder = _serviceProvider.GetService<IWorkflowBuilder>().UseData<TData>();
             workflow.Build(builder);
             var def = builder.Build(workflow.Id, workflow.Version);
+
+            if (!_validator.IsDefinitionValid(def))
+            {
+                throw new InvalidOperationException($"Workflow {workflow.Id} version {workflow.Version} is not valid");
+            }
+            
             _registry.Add(Tuple.Create(workflow.Id, workflow.Version, def));
         }
 

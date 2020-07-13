@@ -1,30 +1,26 @@
 using FakeItEasy;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Services;
 using FluentAssertions;
 using Xunit;
-using WorkflowCore.Primitives;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace WorkflowCore.UnitTests.Services
 {
     public class WorkflowRegistryFixture
     {
         protected IServiceProvider ServiceProvider { get; }
+        protected IWorkflowDefinitionValidator Validator { get; }
         protected WorkflowRegistry Subject { get; }
         protected WorkflowDefinition Definition { get; }
 
         public WorkflowRegistryFixture()
         {
             ServiceProvider = A.Fake<IServiceProvider>();
-            Subject = new WorkflowRegistry(ServiceProvider);
+            Validator = A.Fake<IWorkflowDefinitionValidator>();
+            A.CallTo(() => Validator.IsDefinitionValid(A<WorkflowDefinition>.Ignored)).Returns(true);
+            Subject = new WorkflowRegistry(ServiceProvider, Validator);
 
             Definition = new WorkflowDefinition{
                 Id = "TestWorkflow",

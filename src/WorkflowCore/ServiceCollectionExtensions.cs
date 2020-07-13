@@ -47,6 +47,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<IWorkflowErrorHandler, RetryHandler>();
             services.AddTransient<IWorkflowErrorHandler, TerminateHandler>();
             services.AddTransient<IWorkflowErrorHandler, SuspendHandler>();
+            services.AddTransient<IWorkflowErrorHandler, CatchHandler>();
 
             services.AddSingleton<IWorkflowController, WorkflowController>();
             services.AddSingleton<IActivityController, ActivityController>();
@@ -58,6 +59,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<IDateTimeProvider, DateTimeProvider>();
             services.AddTransient<IExecutionResultProcessor, ExecutionResultProcessor>();
             services.AddTransient<IExecutionPointerFactory, ExecutionPointerFactory>();
+            services.AddTransient<IWorkflowDefinitionValidator, WorkflowDefinitionValidator>();
 
             services.AddTransient<IPooledObjectPolicy<IPersistenceProvider>, InjectedObjectPoolPolicy<IPersistenceProvider>>();
             services.AddTransient<IPooledObjectPolicy<IWorkflowExecutor>, InjectedObjectPoolPolicy<IWorkflowExecutor>>();

@@ -163,7 +163,8 @@ namespace WorkflowCore.Services
                     Step = step,
                     PersistenceData = pointer.PersistenceData,
                     ExecutionPointer = pointer,
-                    Item = pointer.ContextItem
+                    Item = pointer.ContextItem,
+                    CurrentException = pointer.CurrentException
                 };
 
                 foreach (var input in step.Inputs)

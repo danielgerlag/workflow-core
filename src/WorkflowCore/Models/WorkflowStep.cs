@@ -26,9 +26,11 @@ namespace WorkflowCore.Models
 
         public virtual WorkflowErrorHandling? ErrorBehavior { get; set; }
 
-        public virtual TimeSpan? RetryInterval { get; set; }
+        public virtual TimeSpan? RetryInterval { get; set; } 
 
         public virtual int? CompensationStepId { get; set; }
+        
+        public virtual Queue<KeyValuePair<Type, int>> CatchStepsQueue { get; set; } = new Queue<KeyValuePair<Type, int>>();
 
         public virtual bool ResumeChildrenAfterCompensation => true;
 
