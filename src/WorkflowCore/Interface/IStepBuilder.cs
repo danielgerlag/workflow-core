@@ -122,6 +122,17 @@ namespace WorkflowCore.Interface
         /// <returns></returns>
         IStepBuilder<TData, TStepBody> Output<TOutput>(Expression<Func<TData, TOutput>> dataProperty, Expression<Func<TStepBody, object>> value);
 
+
+        /// <summary>
+        /// Map properties on the workflow data object to properties on the step after the step executes
+        /// </summary>
+        /// <typeparam name="TOutput"></typeparam>
+        /// <param name="dataProperty">Property on the data object</param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        IStepBuilder<TData, TStepBody> Output<TOutput>(Expression<Func<TData, IStepExecutionContext, TOutput>> dataProperty, Expression<Func<TStepBody, object>> value);
+
+
         /// <summary>
         /// Manipulate properties on the data object after the step executes
         /// </summary>
@@ -199,6 +210,7 @@ namespace WorkflowCore.Interface
         /// <param name="condition">Resolves a condition to evaluate</param>
         /// <returns></returns>
         IContainerStepBuilder<TData, If, If> If(Expression<Func<TData, bool>> condition);
+        IContainerStepBuilder<TData, If, If> If(Expression<Func<TData, IStepExecutionContext, bool>> condition);
 
         /// <summary>
         /// Configure an outcome for this step, then wire it to a sequence

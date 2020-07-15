@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using WorkflowCore.Interface;
 
 namespace WorkflowCore.Models
@@ -44,8 +43,19 @@ namespace WorkflowCore.Models
             }
 
             var valueExpr = Expression.Convert(Expression.Constant(resolvedValue), targetExpr.ReturnType);
-            var assign = Expression.Lambda(Expression.Assign(targetExpr.Body, valueExpr), targetExpr.Parameters.Single());
-            assign.Compile().DynamicInvoke(targetObject);
+            var assign = Expression.Lambda(Expression.Assign(targetExpr.Body, valueExpr), targetExpr.Parameters);
+
+            switch (targetExpr.Parameters.Count)
+            {
+                case 1:
+                    assign.Compile().DynamicInvoke(targetObject);
+                    break;
+                case 2:
+                    assign.Compile().DynamicInvoke(targetObject, context);
+                    break;
+                default:
+                    throw new ArgumentException();
+            }
         }
 
         public void AssignInput(object data, IStepBody body, IStepExecutionContext context)
