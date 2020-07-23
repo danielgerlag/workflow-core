@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ConcurrentCollections;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -54,7 +55,7 @@ namespace WorkflowCore.Services.BackgroundTasks
         {
             var cancelToken = _cancellationTokenSource.Token;
             var activeTasks = new Dictionary<string, Task>();
-            var secondPasses = new HashSet<string>();
+            var secondPasses = new ConcurrentHashSet<string>();
 
             while (!cancelToken.IsCancellationRequested)
             {
@@ -83,7 +84,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                         continue;
                     }
 
-                    secondPasses.Remove(item);
+                    secondPasses.TryRemove(item);
 
                     var task = new Task(async (object data) =>
                     {
@@ -92,7 +93,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                             await ExecuteItem((string)data);
                             while (EnableSecondPasses && secondPasses.Contains(item))
                             {
-                                secondPasses.Remove(item);
+                                secondPasses.TryRemove(item);
                                 await ExecuteItem((string)data);
                             }
                         }
