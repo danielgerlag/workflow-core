@@ -20,9 +20,9 @@ namespace Microsoft.Extensions.DependencyInjection
             return options;
         }
 
-        public static WorkflowOptions UseRedisPersistence(this WorkflowOptions options, string connectionString, string prefix)
+        public static WorkflowOptions UseRedisPersistence(this WorkflowOptions options, string connectionString, string prefix, bool deleteComplete = false)
         {
-            options.UsePersistence(sp => new RedisPersistenceProvider(connectionString, prefix, sp.GetService<ILoggerFactory>()));
+            options.UsePersistence(sp => new RedisPersistenceProvider(connectionString, prefix, deleteComplete, sp.GetService<ILoggerFactory>()));
             return options;
         }
 
