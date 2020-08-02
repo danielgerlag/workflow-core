@@ -306,6 +306,25 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
+        public IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection, Expression<Func<TData, bool>> runParallel)
+        {
+            var newStep = new WorkflowStep<Foreach>();
+
+            Expression<Func<Foreach, IEnumerable>> inputExpr = (x => x.Collection);
+            newStep.Inputs.Add(new MemberMapParameter(collection, inputExpr));
+
+            Expression<Func<Foreach, bool>> pExpr = (x => x.RunParallel);
+            newStep.Inputs.Add(new MemberMapParameter(runParallel, pExpr));
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, Foreach>(WorkflowBuilder, newStep);
+
+            Step.Outcomes.Add(new ValueOutcome() { NextStep = newStep.Id });
+
+            return stepBuilder;
+        }
+
+
         public IContainerStepBuilder<TData, While, While> While(Expression<Func<TData, bool>> condition)
         {
             var newStep = new WorkflowStep<While>();

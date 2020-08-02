@@ -79,6 +79,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
             BsonClassMap.RegisterClassMap<ControlPersistenceData>(x => x.AutoMap());
             BsonClassMap.RegisterClassMap<SchedulePersistenceData>(x => x.AutoMap());
+            BsonClassMap.RegisterClassMap<IteratorPersistenceData>(x => x.AutoMap());
         }
 
         static bool indexesCreated = false;

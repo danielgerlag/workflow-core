@@ -187,6 +187,13 @@ namespace WorkflowCore.Interface
         IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection);
 
         /// <summary>
+        /// Execute a block of steps, once for each item in a collection in a RunParallel foreach
+        /// </summary>
+        /// <param name="collection">Resolves a collection for iterate over</param>
+        /// <returns></returns>
+        IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection, Expression<Func<TData, bool>> runParallel);
+
+        /// <summary>
         /// Repeat a block of steps until a condition becomes true
         /// </summary>
         /// <param name="condition">Resolves a condition to break out of the while loop</param>
