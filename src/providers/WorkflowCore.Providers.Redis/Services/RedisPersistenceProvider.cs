@@ -54,7 +54,7 @@ namespace WorkflowCore.Providers.Redis.Services
             else
             {
                 await _redis.SortedSetRemoveAsync($"{_prefix}.{WORKFLOW_SET}.{RUNNABLE_INDEX}", workflow.Id);
-                if (workflow.Status == WorkflowStatus.Complete)
+                if (_removeComplete && workflow.Status == WorkflowStatus.Complete)
                     await _redis.HashDeleteAsync($"{_prefix}.{WORKFLOW_SET}", workflow.Id);
             }
         }
