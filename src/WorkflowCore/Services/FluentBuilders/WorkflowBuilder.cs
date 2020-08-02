@@ -197,6 +197,11 @@ namespace WorkflowCore.Services
         {
             return Start().ForEach(collection);
         }
+        
+        public IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection, Expression<Func<TData, bool>> runParallel)
+        {
+            return Start().ForEach(collection, runParallel);
+        }
 
         public IContainerStepBuilder<TData, While, While> While(Expression<Func<TData, bool>> condition)
         {
