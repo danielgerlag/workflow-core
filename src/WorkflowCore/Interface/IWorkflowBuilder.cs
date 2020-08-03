@@ -20,7 +20,7 @@ namespace WorkflowCore.Interface
         void AttachBranch(IWorkflowBuilder branch);
     }
 
-    public interface IWorkflowBuilder<TData> : IWorkflowBuilder
+    public interface IWorkflowBuilder<TData> : IWorkflowBuilder, IWorkflowModifier<TData, InlineStepBody>
     {        
         IStepBuilder<TData, TStep> StartWith<TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null) where TStep : IStepBody;
 
