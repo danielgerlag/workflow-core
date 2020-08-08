@@ -16,7 +16,7 @@ namespace WorkflowCore.Models
         internal TimeSpan PollInterval;
         internal TimeSpan IdleTime;
         internal TimeSpan ErrorRetryInterval;
-        internal int MaxConcurrentWorkflows = Math.Max(Environment.ProcessorCount, 2);
+        internal int MaxConcurrentWorkflows = Math.Max(Environment.ProcessorCount, 4);
 
         public IServiceCollection Services { get; private set; }
 

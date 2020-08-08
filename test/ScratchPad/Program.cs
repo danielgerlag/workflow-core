@@ -26,15 +26,30 @@ namespace ScratchPad
             //loader.LoadDefinition(Properties.Resources.HelloWorld, Deserializers.Json);
             
             host.Start();
-            
-            host.StartWorkflow("Test01", 1, new WfData()
-            {
-                Value1 = "two",
-                Value2 = "data2"
-            });
 
-            
-            
+            var ids = new List<string>();
+            //for (var i = 0; i < 12000; i++)
+            //{
+            //    var wid = host.StartWorkflow("Test01", 1, new WfData() { Value1 = "two", Value2 = "data2" }).Result;
+            //    ids.Add(wid);
+            //}
+            //Console.WriteLine("started...");
+            //Thread.Sleep(5000);
+
+            host.PublishEvent("MyEvent", "Key", "one", DateTime.Now);
+
+            for (var i = 0; i < 12000; i++)
+            {
+                var wid = host.StartWorkflow("Test01", 1, new WfData() { Value1 = "two", Value2 = "data2" }).Result;
+                ids.Add(wid);
+            }
+
+            Console.WriteLine("started2...");
+            Thread.Sleep(5000);
+
+            host.PublishEvent("MyEvent", "Key", "one", DateTime.Now);
+
+
             Console.ReadLine();
             host.Stop();
         }
@@ -46,8 +61,11 @@ namespace ScratchPad
             services.AddLogging();
             //services.AddWorkflow();
             //services.AddWorkflow(x => x.UseMongoDB(@"mongodb://localhost:27017", "workflow"));
+            
             services.AddWorkflow(cfg =>
             {
+                cfg.UseSqlServer(@"Server=.;Database=WorkflowCore;Trusted_Connection=True;", true, true);
+                cfg.UseMaxConcurrentWorkflows(100);
                 //var ddbConfig = new AmazonDynamoDBConfig() { RegionEndpoint = RegionEndpoint.USWest2 };
                 //cfg.UseAwsDynamoPersistence(new EnvironmentVariablesAWSCredentials(), ddbConfig, "elastic");
                 //cfg.UseElasticsearch(new ConnectionSettings(new Uri("http://localhost:9200")), "workflows");
@@ -111,10 +129,12 @@ namespace ScratchPad
 
             builder
                 .StartWith<HelloWorld>()
+                .WaitFor("MyEvent", (data, context) => "Key", data => DateTime.Now)
+                    .Output(data => data.Value1, step => step.EventData)
                 .Then((context) =>
                 {
                     Console.WriteLine("------1");
-                    Task.Delay(TimeSpan.FromSeconds(20)).Wait();
+                    Task.Delay(TimeSpan.FromSeconds(5)).Wait();
                     Console.WriteLine("------2");
                     return ExecutionResult.Next();
                 })
