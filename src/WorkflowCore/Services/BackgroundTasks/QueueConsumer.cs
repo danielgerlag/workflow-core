@@ -61,7 +61,12 @@ namespace WorkflowCore.Services.BackgroundTasks
             {
                 try
                 {
-                    if (activeTasks.Count >= MaxConcurrentItems)
+                    var activeCount = 0;
+                    lock (activeTasks)
+                    {
+                        activeCount = activeTasks.Count;
+                    }
+                    if (activeCount >= MaxConcurrentItems)
                     {
                         await Task.Delay(Options.IdleTime);
                         continue;
@@ -75,14 +80,19 @@ namespace WorkflowCore.Services.BackgroundTasks
                             await Task.Delay(Options.IdleTime, cancelToken);
                         continue;
                     }
-                    
-                    if (activeTasks.ContainsKey(item))
+
+                    var hasTask = false;
+                    lock (activeTasks)
+                    {
+                        hasTask = activeTasks.ContainsKey(item);
+                    }
+                    if (hasTask)
                     {
                         secondPasses.Add(item);
                         if (!EnableSecondPasses)
                             await QueueProvider.QueueWork(item, Queue);
                         continue;
-                    }
+                    }                   
 
                     secondPasses.TryRemove(item);
 
@@ -121,7 +131,13 @@ namespace WorkflowCore.Services.BackgroundTasks
                 }
             }
 
-            foreach (var task in activeTasks.Values)
+            List<Task> toComplete;
+            lock (activeTasks)
+            {
+                toComplete = activeTasks.Values.ToList();
+            }
+            
+            foreach (var task in toComplete)
                 task.Wait();
         }
 
