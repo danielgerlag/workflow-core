@@ -11,13 +11,14 @@ namespace WorkflowCore.Services
         private readonly Timer _cycleTimer;
         private readonly ConcurrentDictionary<string, DateTime> _list;
         private readonly ILogger _logger;
-        private const int CYCLE_TIME = 600;
+        private const int CYCLE_TIME = 30;
+        private const int TTL = 5;
 
         public GreyList(ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<GreyList>();
             _list = new ConcurrentDictionary<string, DateTime>();
-            _cycleTimer = new Timer(new TimerCallback(Cycle), null, TimeSpan.FromSeconds(CYCLE_TIME), TimeSpan.FromSeconds(CYCLE_TIME));
+            _cycleTimer = new Timer(new TimerCallback(Cycle), null, TimeSpan.FromMinutes(CYCLE_TIME), TimeSpan.FromMinutes(CYCLE_TIME));
         }
 
         public void Add(string id)
@@ -30,7 +31,7 @@ namespace WorkflowCore.Services
             if (!_list.TryGetValue(id, out var start))
                 return false;
 
-            var result = start > (DateTime.Now.AddMinutes(-2));
+            var result = start > (DateTime.Now.AddMinutes(-1 * TTL));
 
             if (!result)
                 _list.TryRemove(id, out var _);
