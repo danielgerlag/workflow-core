@@ -14,14 +14,16 @@ namespace WorkflowCore.Services.BackgroundTasks
         private readonly IDateTimeProvider _datetimeProvider;
         private readonly IPersistenceProvider _persistenceStore;
         private readonly IWorkflowExecutor _executor;
+        private readonly IGreyList _greylist;
 
         protected override int MaxConcurrentItems => Options.MaxConcurrentWorkflows;
         protected override QueueType Queue => QueueType.Workflow;
 
-        public WorkflowConsumer(IPersistenceProvider persistenceProvider, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IWorkflowExecutor executor, IDateTimeProvider datetimeProvider, WorkflowOptions options)
+        public WorkflowConsumer(IPersistenceProvider persistenceProvider, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IWorkflowExecutor executor, IDateTimeProvider datetimeProvider, IGreyList greylist, WorkflowOptions options)
             : base(queueProvider, loggerFactory, options)
         {
             _persistenceStore = persistenceProvider;
+            _greylist = greylist;
             _executor = executor;
             _lockProvider = lockProvider;
             _datetimeProvider = datetimeProvider;
@@ -43,7 +45,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                 cancellationToken.ThrowIfCancellationRequested();
                 workflow = await _persistenceStore.GetWorkflowInstance(itemId);
                 if (workflow.Status == WorkflowStatus.Runnable)
-                {                        
+                {
                     try
                     {
                         result = await _executor.Execute(workflow);
@@ -52,6 +54,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     {
                         await _persistenceStore.PersistWorkflow(workflow);
                         await QueueProvider.QueueWork(itemId, QueueType.Index);
+                        _greylist.Remove($"wf:{itemId}");
                     }
                 }
             }
