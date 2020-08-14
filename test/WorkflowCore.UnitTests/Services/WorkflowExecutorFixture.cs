@@ -3,15 +3,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Services;
-using FluentAssertions;
 using Xunit;
-using WorkflowCore.Primitives;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace WorkflowCore.UnitTests.Services
 {
@@ -44,7 +39,7 @@ namespace WorkflowCore.UnitTests.Services
             Options = new WorkflowOptions(A.Fake<IServiceCollection>());
 
             var scope = A.Fake<IServiceScope>();
-            A.CallTo(() => ScopeProvider.CreateScope()).Returns(scope);
+            A.CallTo(() => ScopeProvider.CreateScope(A<IStepExecutionContext>._)).Returns(scope);
             A.CallTo(() => scope.ServiceProvider).Returns(ServiceProvider);
 
             A.CallTo(() => DateTimeProvider.Now).Returns(DateTime.Now);
