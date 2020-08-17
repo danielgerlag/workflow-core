@@ -221,6 +221,50 @@ Do:
 
 ```
 
+### Decide
+
+The `.Decide` can be implemented as follows
+
+```json
+{
+  "Id":"DecisionWorkflow",
+  "Version":1,
+  "Steps":[
+      {
+          "Id":"MyDefineStep",
+          "StepType":"WorkflowCore.Primitives.Decide, WorkflowCore",
+          "SelectNextStep":{
+            "do1":"<<expression to evaluate>>",
+            "do2":"<<expression to evaluate>>"
+          }
+      },
+      {
+          "Id":"do1",
+          "StepType":"MyApp.DoSomething1, MyApp"
+      },
+      {
+         "Id":"do2",
+         "StepType":"MyApp.DoSomething2, MyApp"
+      }
+  ]
+}
+```
+```yaml
+Id: DecisionWorkflow
+Version: 1
+Steps:
+- Id: MyDefineStep
+  StepType: WorkflowCore.Primitives.Decide, WorkflowCore
+  SelectNextStep:
+    do1: '<<expression to evaluate>>'
+    do2: '<<expression to evaluate>>'
+- Id: do1
+  StepType: MyApp.DoSomething1, MyApp
+- Id: do2
+  StepType: MyApp.DoSomething2, MyApp
+
+```
+
 ### While
 
 The `.While` can be implemented as follows
