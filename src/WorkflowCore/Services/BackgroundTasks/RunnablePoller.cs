@@ -54,7 +54,8 @@ namespace WorkflowCore.Services.BackgroundTasks
                     try
                     {
                         _logger.LogInformation("Polling for runnable workflows");                        
-                        var runnables = await _persistenceStore.GetRunnableInstances(DateTime.Now);
+                        var runnables = (await _persistenceStore.GetRunnableInstances(DateTime.Now)).ToArray();
+                        _logger.LogInformation($"Polled {runnables.Length} runnable workflows");
                         foreach (var item in runnables)
                         {
                             if (_greylist.Contains($"wf:{item}"))
@@ -85,8 +86,9 @@ namespace WorkflowCore.Services.BackgroundTasks
                     try
                     {
                         _logger.LogInformation("Polling for unprocessed events");                        
-                        var events = await _persistenceStore.GetRunnableEvents(DateTime.Now);
-                        foreach (var item in events.ToList())
+                        var events = (await _persistenceStore.GetRunnableEvents(DateTime.Now)).ToArray();
+                        _logger.LogInformation($"Polled {events.Length} unprocessed events");
+                        foreach (var item in events)
                         {
                             if (_greylist.Contains($"evt:{item}"))
                             {

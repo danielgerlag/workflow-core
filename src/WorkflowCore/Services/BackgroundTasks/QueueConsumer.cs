@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -54,21 +55,17 @@ namespace WorkflowCore.Services.BackgroundTasks
         private async void Execute()
         {
             var cancelToken = _cancellationTokenSource.Token;
-            var activeTasks = new Dictionary<string, Task>();
+            var activeTasks = new ConcurrentDictionary<string, Task>();
             var secondPasses = new ConcurrentHashSet<string>();
 
             while (!cancelToken.IsCancellationRequested)
             {
                 try
                 {
-                    var activeCount = 0;
-                    lock (activeTasks)
-                    {
-                        activeCount = activeTasks.Count;
-                    }
+                    var activeCount = activeTasks.Count;
                     if (activeCount >= MaxConcurrentItems)
                     {
-                        await Task.Delay(Options.IdleTime);
+                        await Task.Delay(Options.IdleTime, cancelToken);
                         continue;
                     }
 
@@ -81,11 +78,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                         continue;
                     }
 
-                    var hasTask = false;
-                    lock (activeTasks)
-                    {
-                        hasTask = activeTasks.ContainsKey(item);
-                    }
+                    var hasTask = activeTasks.ContainsKey(item);
                     if (hasTask)
                     {
                         secondPasses.Add(item);
@@ -109,17 +102,10 @@ namespace WorkflowCore.Services.BackgroundTasks
                         }
                         finally
                         {
-                            lock (activeTasks)
-                            {
-                                activeTasks.Remove((string)data);
-                            }
+                            activeTasks.TryRemove((string)data, out var removedTask);
                         }
                     }, item);
-                    lock (activeTasks)
-                    {
-                        activeTasks.Add(item, task);
-                    }
-                    
+                    activeTasks.TryAdd(item, task);
                     task.Start();
                 }
                 catch (OperationCanceledException)
@@ -131,14 +117,8 @@ namespace WorkflowCore.Services.BackgroundTasks
                 }
             }
 
-            List<Task> toComplete;
-            lock (activeTasks)
-            {
-                toComplete = activeTasks.Values.ToList();
-            }
-            
-            foreach (var task in toComplete)
-                task.Wait();
+            foreach (var task in activeTasks.Values)
+                task.Wait(cancelToken);
         }
 
         private async Task ExecuteItem(string itemId)
