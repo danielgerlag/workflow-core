@@ -12,6 +12,6 @@ namespace WorkflowCore.Interface
         /// Create a new service scope
         /// </summary>
         /// <returns></returns>
-        IServiceScope CreateScope();
+        IServiceScope CreateScope(IStepExecutionContext context);
     }
 }

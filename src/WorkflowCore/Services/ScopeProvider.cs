@@ -6,20 +6,20 @@ namespace WorkflowCore.Services
 {
     /// <summary>
     /// A concrete implementation for the IScopeProvider interface
-    /// Largely to get around the problems of unit testing an extension method (CreateScope())
+    /// Could be used for context-aware scope creation customization
     /// </summary>
     public class ScopeProvider : IScopeProvider
     {
-        private readonly IServiceProvider provider;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public ScopeProvider(IServiceProvider provider)
+        public ScopeProvider(IServiceScopeFactory serviceScopeFactory)
         {
-            this.provider = provider;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
-        public IServiceScope CreateScope()
+        public IServiceScope CreateScope(IStepExecutionContext context)
         {
-            return provider.CreateScope();
+            return _serviceScopeFactory.CreateScope();
         }
     }
 }

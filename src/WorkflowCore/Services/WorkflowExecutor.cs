@@ -137,7 +137,16 @@ namespace WorkflowCore.Services
 
         private async Task ExecuteStep(WorkflowInstance workflow, WorkflowStep step, ExecutionPointer pointer, WorkflowExecutorResult wfResult, WorkflowDefinition def)
         {
-            using (var scope = _scopeProvider.CreateScope())
+            IStepExecutionContext context = new StepExecutionContext()
+            {
+                Workflow = workflow,
+                Step = step,
+                PersistenceData = pointer.PersistenceData,
+                ExecutionPointer = pointer,
+                Item = pointer.ContextItem
+            };
+            
+            using (var scope = _scopeProvider.CreateScope(context))
             {
                 _logger.LogDebug("Starting step {0} on workflow {1}", step.Name, workflow.Id);
 
@@ -156,15 +165,6 @@ namespace WorkflowCore.Services
                     });
                     return;
                 }
-
-                IStepExecutionContext context = new StepExecutionContext()
-                {
-                    Workflow = workflow,
-                    Step = step,
-                    PersistenceData = pointer.PersistenceData,
-                    ExecutionPointer = pointer,
-                    Item = pointer.ContextItem
-                };
 
                 foreach (var input in step.Inputs)
                     input.AssignInput(workflow.Data, body, context);
