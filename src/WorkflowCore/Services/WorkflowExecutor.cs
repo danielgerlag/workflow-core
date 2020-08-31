@@ -41,7 +41,6 @@ namespace WorkflowCore.Services
         {
             var wfResult = new WorkflowExecutorResult();
 
-            var exePointers = new List<ExecutionPointer>(workflow.ExecutionPointers.Where(x => x.Active && (!x.SleepUntil.HasValue || x.SleepUntil < _datetimeProvider.UtcNow)));
             var def = _registry.GetDefinition(workflow.WorkflowDefinitionId, workflow.Version);
             if (def == null)
             {
@@ -51,49 +50,56 @@ namespace WorkflowCore.Services
             
             _cancellationProcessor.ProcessCancellations(workflow, def, wfResult);
 
-            foreach (var pointer in exePointers)
+            var exePointers = new List<ExecutionPointer>(workflow.ExecutionPointers.Where(x => x.Active && (!x.SleepUntil.HasValue || x.SleepUntil < _datetimeProvider.UtcNow)));
+            while (exePointers.Count > 0)
             {
-                if (!pointer.Active)
-                    continue;
-
-                var step = def.Steps.FindById(pointer.StepId);
-                if (step == null)
+                foreach (var pointer in exePointers)
                 {
-                    _logger.LogError("Unable to find step {0} in workflow definition", pointer.StepId);
-                    pointer.SleepUntil = _datetimeProvider.UtcNow.Add(_options.ErrorRetryInterval);
-                    wfResult.Errors.Add(new ExecutionError()
-                    {
-                        WorkflowId = workflow.Id,
-                        ExecutionPointerId = pointer.Id,
-                        ErrorTime = _datetimeProvider.UtcNow,
-                        Message = $"Unable to find step {pointer.StepId} in workflow definition"
-                    });
-                    continue;
-                }
-                
-                try
-                {
-                    if (!InitializeStep(workflow, step, wfResult, def, pointer)) 
+                    if (!pointer.Active)
                         continue;
 
-                    await ExecuteStep(workflow, step, pointer, wfResult, def);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Workflow {0} raised error on step {1} Message: {2}", workflow.Id, pointer.StepId, ex.Message);
-                    wfResult.Errors.Add(new ExecutionError()
+                    var step = def.Steps.FindById(pointer.StepId);
+                    if (step == null)
                     {
-                        WorkflowId = workflow.Id,
-                        ExecutionPointerId = pointer.Id,
-                        ErrorTime = _datetimeProvider.UtcNow,
-                        Message = ex.Message
-                    });
-                        
-                    _executionResultProcessor.HandleStepException(workflow, def, pointer, step, ex);
-                    Host.ReportStepError(workflow, step, ex);
+                        _logger.LogError("Unable to find step {0} in workflow definition", pointer.StepId);
+                        pointer.SleepUntil = _datetimeProvider.UtcNow.Add(_options.ErrorRetryInterval);
+                        wfResult.Errors.Add(new ExecutionError()
+                        {
+                            WorkflowId = workflow.Id,
+                            ExecutionPointerId = pointer.Id,
+                            ErrorTime = _datetimeProvider.UtcNow,
+                            Message = $"Unable to find step {pointer.StepId} in workflow definition"
+                        });
+                        continue;
+                    }
+
+                    try
+                    {
+                        if (!InitializeStep(workflow, step, wfResult, def, pointer))
+                            continue;
+
+                        await ExecuteStep(workflow, step, pointer, wfResult, def);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Workflow {0} raised error on step {1} Message: {2}", workflow.Id, pointer.StepId, ex.Message);
+                        wfResult.Errors.Add(new ExecutionError()
+                        {
+                            WorkflowId = workflow.Id,
+                            ExecutionPointerId = pointer.Id,
+                            ErrorTime = _datetimeProvider.UtcNow,
+                            Message = ex.Message
+                        });
+
+                        _executionResultProcessor.HandleStepException(workflow, def, pointer, step, ex);
+                        Host.ReportStepError(workflow, step, ex);
+                    }
+
+                    _cancellationProcessor.ProcessCancellations(workflow, def, wfResult);
                 }
-                _cancellationProcessor.ProcessCancellations(workflow, def, wfResult);
+                exePointers = new List<ExecutionPointer>(workflow.ExecutionPointers.Where(x => x.Active && (!x.SleepUntil.HasValue || x.SleepUntil < _datetimeProvider.UtcNow)));
             }
+
             ProcessAfterExecutionIteration(workflow, def, wfResult);
             DetermineNextExecutionTime(workflow);
 
