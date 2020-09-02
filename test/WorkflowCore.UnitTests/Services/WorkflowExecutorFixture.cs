@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using FakeItEasy.Core;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Services;
@@ -48,6 +49,9 @@ namespace WorkflowCore.UnitTests.Services
             //config logging
             var loggerFactory = new LoggerFactory();
             //loggerFactory.AddConsole(LogLevel.Debug);            
+
+            A.CallTo(() => ResultProcesser.ProcessExecutionResult(A<WorkflowInstance>.Ignored, A<WorkflowDefinition>.Ignored, A<ExecutionPointer>._, A<WorkflowStep>.Ignored, A<ExecutionResult>.Ignored, A<WorkflowExecutorResult>.Ignored))
+                .Invokes(callObject => ((ExecutionPointer) callObject.Arguments[2]).Active = false);
 
             Subject = new WorkflowExecutor(Registry, ServiceProvider, ScopeProvider, DateTimeProvider, ResultProcesser, EventHub, CancellationProcessor, Options, loggerFactory);
         }
@@ -291,7 +295,7 @@ namespace WorkflowCore.UnitTests.Services
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Persist(null));
             WorkflowStep step1 = BuildFakeStep(step1Body);
             Given1StepWorkflow(step1, "Workflow", 1);
-
+            
             var instance = new WorkflowInstance
             {
                 WorkflowDefinitionId = "Workflow",
@@ -301,7 +305,7 @@ namespace WorkflowCore.UnitTests.Services
                 Id = "001",
                 ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
                 {
-                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                    new ExecutionPointer() {Id = "1", Active = true, StepId = 0}
                 })
             };
 
