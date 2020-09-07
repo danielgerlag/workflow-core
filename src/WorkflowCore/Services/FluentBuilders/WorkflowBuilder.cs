@@ -65,6 +65,28 @@ namespace WorkflowCore.Services
             if (Branches.Contains(branch))
                 return;
 
+            var branchStart = LastStep + branch.LastStep + 1;
+
+            foreach (var step in branch.Steps)
+            {
+                var oldId = step.Id;
+                step.Id = oldId + branchStart;
+                foreach (var step2 in branch.Steps)
+                {
+                    foreach (var outcome in step2.Outcomes)
+                    {
+                        if (outcome.NextStep == oldId)
+                            outcome.NextStep = step.Id;
+                    }
+
+                    for (var i = 0; i < step2.Children.Count; i++)
+                    {
+                        if (step2.Children[i] == oldId)
+                            step2.Children[i] = step.Id;
+                    }
+                }
+            }
+
             foreach (var step in branch.Steps)
             {
                 var oldId = step.Id;
@@ -75,6 +97,12 @@ namespace WorkflowCore.Services
                     {
                         if (outcome.NextStep == oldId)
                             outcome.NextStep = step.Id;
+                    }
+
+                    for (var i = 0; i < step2.Children.Count; i++)
+                    {
+                        if (step2.Children[i] == oldId)
+                            step2.Children[i] = step.Id;
                     }
                 }
             }
