@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
@@ -12,32 +13,49 @@ namespace WorkflowCore.Providers.Azure.Services
     {
 
         private CosmosClient _client;
-        private Container _container;
+        private Database _db;
+        private Container _workflowContainer;
+        private Container _eventContainer;
+        private Container _subscriptionContainer;
 
         public CosmosDbPersistenceProvider()
         {
             //new CosmosClient()
-            //_client.GetContainer().
+            //_workflowContainer = _db.CreateContainerIfNotExistsAsync()
         }
 
-        public Task ClearSubscriptionToken(string eventSubscriptionId, string token)
+        public async Task ClearSubscriptionToken(string eventSubscriptionId, string token)
         {
-            throw new NotImplementedException();
+            var existing = await _subscriptionContainer.ReadItemAsync<EventSubscription>(eventSubscriptionId, PartitionKey.None);
+            
+            if (existing.Resource.ExternalToken != token)
+                throw new InvalidOperationException();
+            existing.Resource.ExternalToken = null;
+            existing.Resource.ExternalWorkerId = null;
+            existing.Resource.ExternalTokenExpiry = null;
+
+            await _subscriptionContainer.ReplaceItemAsync(existing.Resource, eventSubscriptionId);
         }
 
-        public Task<string> CreateEvent(Event newEvent)
+        public async Task<string> CreateEvent(Event newEvent)
         {
-            throw new NotImplementedException();
+            newEvent.Id = Guid.NewGuid().ToString();
+            var result = await _eventContainer.CreateItemAsync(newEvent);
+            return result.Resource.Id;
         }
 
-        public Task<string> CreateEventSubscription(EventSubscription subscription)
+        public async Task<string> CreateEventSubscription(EventSubscription subscription)
         {
-            throw new NotImplementedException();
+            subscription.Id = Guid.NewGuid().ToString();
+            var result = await _subscriptionContainer.CreateItemAsync(subscription);
+            return result.Resource.Id;
         }
 
-        public Task<string> CreateNewWorkflow(WorkflowInstance workflow)
+        public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
         {
-            _container.CreateItemAsync()
+            workflow.Id = Guid.NewGuid().ToString();
+            var result = await _workflowContainer.CreateItemAsync(workflow);
+            return result.Resource.Id;
         }
 
         public void EnsureStoreExists()
@@ -45,44 +63,68 @@ namespace WorkflowCore.Providers.Azure.Services
             throw new NotImplementedException();
         }
 
-        public Task<Event> GetEvent(string id)
+        public async Task<Event> GetEvent(string id)
         {
-            throw new NotImplementedException();
+            var resp = await _eventContainer.ReadItemAsync<Event>(id, PartitionKey.None);
+            return resp.Resource;
         }
 
         public Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf)
         {
-            throw new NotImplementedException();
+            var data = _eventContainer.GetItemLinqQueryable<Event>()
+                .Where(x => x.EventName == eventName && x.EventKey == eventKey)
+                .Where(x => x.EventTime >= asOf)
+                .Select(x => x.Id);
+            
+            return Task.FromResult(data.AsEnumerable());
         }
 
         public Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, DateTime asOf)
         {
-            throw new NotImplementedException();
+            var data = _subscriptionContainer.GetItemLinqQueryable<EventSubscription>()
+                .FirstOrDefault(x => x.ExternalToken == null &&  x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf);
+            
+            return Task.FromResult(data);
         }
 
         public Task<IEnumerable<string>> GetRunnableEvents(DateTime asAt)
         {
-            throw new NotImplementedException();
+            var data = _eventContainer.GetItemLinqQueryable<Event>()
+                .Where(x => !x.IsProcessed)
+                .Where(x => x.EventTime <= asAt.ToUniversalTime())
+                .Select(x => x.Id);
+            
+            return Task.FromResult(data.AsEnumerable());
         }
 
         public Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt)
         {
-            throw new NotImplementedException();
+            var now = asAt.ToUniversalTime().Ticks;
+
+            var data = _workflowContainer.GetItemLinqQueryable<WorkflowInstance>()
+                .Where(x => x.NextExecution.HasValue && (x.NextExecution <= now) && (x.Status == WorkflowStatus.Runnable))
+                .Select(x => x.Id);
+
+            return Task.FromResult(data.AsEnumerable());
         }
 
-        public Task<EventSubscription> GetSubscription(string eventSubscriptionId)
+        public async Task<EventSubscription> GetSubscription(string eventSubscriptionId)
         {
-            throw new NotImplementedException();
+            var resp = await _subscriptionContainer.ReadItemAsync<EventSubscription>(eventSubscriptionId, PartitionKey.None);
+            return resp.Resource;
         }
 
         public Task<IEnumerable<EventSubscription>> GetSubscriptions(string eventName, string eventKey, DateTime asOf)
         {
-            throw new NotImplementedException();
+            var data = _subscriptionContainer.GetItemLinqQueryable<EventSubscription>()
+                .Where(x => x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf);
+            return Task.FromResult(data.AsEnumerable());
         }
 
-        public Task<WorkflowInstance> GetWorkflowInstance(string Id)
+        public async Task<WorkflowInstance> GetWorkflowInstance(string Id)
         {
-            throw new NotImplementedException();
+            var result = await _workflowContainer.ReadItemAsync<WorkflowInstance>(Id, new PartitionKey(Id));
+            return result.Resource;
         }
 
         public Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take)
@@ -95,34 +137,46 @@ namespace WorkflowCore.Providers.Azure.Services
             throw new NotImplementedException();
         }
 
-        public Task MarkEventProcessed(string id)
+        public async Task MarkEventProcessed(string id)
         {
-            throw new NotImplementedException();
+            var evt = await _eventContainer.ReadItemAsync<Event>(id, PartitionKey.None);
+            evt.Resource.IsProcessed = true;
+            await _eventContainer.ReplaceItemAsync(evt.Resource, id);
         }
 
-        public Task MarkEventUnprocessed(string id)
+        public async Task MarkEventUnprocessed(string id)
         {
-            throw new NotImplementedException();
+            var evt = await _eventContainer.ReadItemAsync<Event>(id, PartitionKey.None);
+            evt.Resource.IsProcessed = false;
+            await _eventContainer.ReplaceItemAsync(evt.Resource, id);
         }
 
         public Task PersistErrors(IEnumerable<ExecutionError> errors)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
-        public Task PersistWorkflow(WorkflowInstance workflow)
+        public async Task PersistWorkflow(WorkflowInstance workflow)
         {
-            throw new NotImplementedException();
+            await _workflowContainer.UpsertItemAsync(workflow);
         }
 
-        public Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry)
+        public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry)
         {
-            throw new NotImplementedException();
+            var sub = await _subscriptionContainer.ReadItemAsync<EventSubscription>(eventSubscriptionId, PartitionKey.None);
+            var existingEntity = sub.Resource;
+            existingEntity.ExternalToken = token;
+            existingEntity.ExternalWorkerId = workerId;
+            existingEntity.ExternalTokenExpiry = expiry;
+            
+            await _subscriptionContainer.ReplaceItemAsync(existingEntity, eventSubscriptionId);
+
+            return true;
         }
 
-        public Task TerminateSubscription(string eventSubscriptionId)
+        public async Task TerminateSubscription(string eventSubscriptionId)
         {
-            throw new NotImplementedException();
+            await _subscriptionContainer.DeleteItemAsync<EventSubscription>(eventSubscriptionId, PartitionKey.None);
         }
     }
 }
