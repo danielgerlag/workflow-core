@@ -48,7 +48,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                 {
                     try
                     {
-                        result = await _executor.Execute(workflow);
+                        result = await _executor.Execute(workflow, cancellationToken);
                     }
                     finally
                     {

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
@@ -37,7 +38,7 @@ namespace WorkflowCore.Services
             _executionResultProcessor = executionResultProcessor;
         }
 
-        public async Task<WorkflowExecutorResult> Execute(WorkflowInstance workflow)
+        public async Task<WorkflowExecutorResult> Execute(WorkflowInstance workflow, CancellationToken cancellationToken = default)
         {
             var wfResult = new WorkflowExecutorResult();
 
@@ -76,7 +77,7 @@ namespace WorkflowCore.Services
                     if (!InitializeStep(workflow, step, wfResult, def, pointer)) 
                         continue;
 
-                    await ExecuteStep(workflow, step, pointer, wfResult, def);
+                    await ExecuteStep(workflow, step, pointer, wfResult, def, cancellationToken);
                 }
                 catch (Exception ex)
                 {
@@ -135,7 +136,7 @@ namespace WorkflowCore.Services
             return true;
         }
 
-        private async Task ExecuteStep(WorkflowInstance workflow, WorkflowStep step, ExecutionPointer pointer, WorkflowExecutorResult wfResult, WorkflowDefinition def)
+        private async Task ExecuteStep(WorkflowInstance workflow, WorkflowStep step, ExecutionPointer pointer, WorkflowExecutorResult wfResult, WorkflowDefinition def, CancellationToken cancellationToken = default)
         {
             IStepExecutionContext context = new StepExecutionContext()
             {
@@ -143,7 +144,8 @@ namespace WorkflowCore.Services
                 Step = step,
                 PersistenceData = pointer.PersistenceData,
                 ExecutionPointer = pointer,
-                Item = pointer.ContextItem
+                Item = pointer.ContextItem,
+                CancellationToken = cancellationToken
             };
             
             using (var scope = _scopeProvider.CreateScope(context))

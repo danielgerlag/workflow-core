@@ -1,4 +1,5 @@
-﻿using WorkflowCore.Models;
+﻿using System.Threading;
+using WorkflowCore.Models;
 
 namespace WorkflowCore.Interface
 {
@@ -12,6 +13,8 @@ namespace WorkflowCore.Interface
 
         WorkflowStep Step { get; set; }
 
-        WorkflowInstance Workflow { get; set; }        
+        WorkflowInstance Workflow { get; set; }
+
+        CancellationToken CancellationToken { get; set; }
     }
 }

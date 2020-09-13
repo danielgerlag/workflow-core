@@ -1,4 +1,5 @@
 ﻿using WorkflowCore.Interface;
+using System.Threading;
 
 namespace WorkflowCore.Models
 {
@@ -13,5 +14,7 @@ namespace WorkflowCore.Models
         public object PersistenceData { get; set; }
 
         public object Item { get; set; }
+
+        public CancellationToken CancellationToken { get; set; } = CancellationToken.None;
     }
 }
