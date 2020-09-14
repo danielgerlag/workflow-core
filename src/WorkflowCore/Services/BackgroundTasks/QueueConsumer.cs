@@ -141,11 +141,11 @@ namespace WorkflowCore.Services.BackgroundTasks
                 task.Wait();
         }
 
-        private async Task ExecuteItem(string itemId)
+        private Task ExecuteItem(string itemId)
         {
             try
             {
-                await ProcessItem(itemId, _cancellationTokenSource.Token);
+                ProcessItem(itemId, _cancellationTokenSource.Token).Wait();
             }
             catch (OperationCanceledException)
             {
@@ -155,6 +155,8 @@ namespace WorkflowCore.Services.BackgroundTasks
             {
                 Logger.LogError(default(EventId), ex, $"Error executing item {itemId} - {ex.Message}");
             }
+
+            return Task.CompletedTask;
         }
     }
 }
