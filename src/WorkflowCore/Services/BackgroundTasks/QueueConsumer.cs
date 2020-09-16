@@ -21,12 +21,17 @@ namespace WorkflowCore.Services.BackgroundTasks
         protected readonly WorkflowOptions Options;
         protected Task DispatchTask;        
         private CancellationTokenSource _cancellationTokenSource;
+        private Dictionary<string, EventWaitHandle> _activeTasks;
+        private ConcurrentHashSet<string> _secondPasses;
 
         protected QueueConsumer(IQueueProvider queueProvider, ILoggerFactory loggerFactory, WorkflowOptions options)
         {
             QueueProvider = queueProvider;
             Options = options;
             Logger = loggerFactory.CreateLogger(GetType());
+
+            _activeTasks = new Dictionary<string, EventWaitHandle>();
+            _secondPasses = new ConcurrentHashSet<string>();
         }
 
         protected abstract Task ProcessItem(string itemId, CancellationToken cancellationToken);
@@ -39,9 +44,8 @@ namespace WorkflowCore.Services.BackgroundTasks
             }
 
             _cancellationTokenSource = new CancellationTokenSource();
-                        
-            DispatchTask = new Task(Execute, TaskCreationOptions.LongRunning);
-            DispatchTask.Start();
+
+            DispatchTask = Task.Factory.StartNew(Execute, TaskCreationOptions.LongRunning);
         }
 
         public virtual void Stop()
@@ -51,20 +55,18 @@ namespace WorkflowCore.Services.BackgroundTasks
             DispatchTask = null;
         }
 
-        private async void Execute()
+        private async Task Execute()
         {
-            var cancelToken = _cancellationTokenSource.Token;
-            var activeTasks = new Dictionary<string, Task>();
-            var secondPasses = new ConcurrentHashSet<string>();
+            var cancelToken = _cancellationTokenSource.Token;            
 
             while (!cancelToken.IsCancellationRequested)
             {
                 try
                 {
                     var activeCount = 0;
-                    lock (activeTasks)
+                    lock (_activeTasks)
                     {
-                        activeCount = activeTasks.Count;
+                        activeCount = _activeTasks.Count;
                     }
                     if (activeCount >= MaxConcurrentItems)
                     {
@@ -82,45 +84,26 @@ namespace WorkflowCore.Services.BackgroundTasks
                     }
 
                     var hasTask = false;
-                    lock (activeTasks)
+                    lock (_activeTasks)
                     {
-                        hasTask = activeTasks.ContainsKey(item);
+                        hasTask = _activeTasks.ContainsKey(item);
                     }
                     if (hasTask)
                     {
-                        secondPasses.Add(item);
+                        _secondPasses.Add(item);
                         if (!EnableSecondPasses)
                             await QueueProvider.QueueWork(item, Queue);
                         continue;
                     }                   
 
-                    secondPasses.TryRemove(item);
+                    _secondPasses.TryRemove(item);
 
-                    var task = new Task(async (object data) =>
+                    var waitHandle = new ManualResetEvent(false);
+                    lock (_activeTasks)
                     {
-                        try
-                        {
-                            await ExecuteItem((string)data);
-                            while (EnableSecondPasses && secondPasses.Contains(item))
-                            {
-                                secondPasses.TryRemove(item);
-                                await ExecuteItem((string)data);
-                            }
-                        }
-                        finally
-                        {
-                            lock (activeTasks)
-                            {
-                                activeTasks.Remove((string)data);
-                            }
-                        }
-                    }, item);
-                    lock (activeTasks)
-                    {
-                        activeTasks.Add(item, task);
+                        _activeTasks.Add(item, waitHandle);
                     }
-                    
-                    task.Start();
+                    var task = ExecuteItem(item, waitHandle);
                 }
                 catch (OperationCanceledException)
                 {
@@ -131,21 +114,26 @@ namespace WorkflowCore.Services.BackgroundTasks
                 }
             }
 
-            List<Task> toComplete;
-            lock (activeTasks)
+            List<EventWaitHandle> toComplete;
+            lock (_activeTasks)
             {
-                toComplete = activeTasks.Values.ToList();
+                toComplete = _activeTasks.Values.ToList();
             }
-            
-            foreach (var task in toComplete)
-                task.Wait();
+
+            foreach (var handle in toComplete)
+                handle.WaitOne();
         }
 
-        private Task ExecuteItem(string itemId)
+        private async Task ExecuteItem(string itemId, EventWaitHandle waitHandle)
         {
             try
             {
-                ProcessItem(itemId, _cancellationTokenSource.Token).Wait();
+                await ProcessItem(itemId, _cancellationTokenSource.Token);
+                while (EnableSecondPasses && _secondPasses.Contains(itemId))
+                {
+                    _secondPasses.TryRemove(itemId);
+                    await ProcessItem(itemId, _cancellationTokenSource.Token);
+                }
             }
             catch (OperationCanceledException)
             {
@@ -155,8 +143,14 @@ namespace WorkflowCore.Services.BackgroundTasks
             {
                 Logger.LogError(default(EventId), ex, $"Error executing item {itemId} - {ex.Message}");
             }
-
-            return Task.CompletedTask;
+            finally
+            {
+                waitHandle.Set();
+                lock (_activeTasks)
+                {
+                    _activeTasks.Remove(itemId);
+                }
+            }
         }
     }
 }
