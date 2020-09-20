@@ -3,6 +3,7 @@
 * Provides [DLM](https://en.wikipedia.org/wiki/Distributed_lock_manager) support  on [Workflow Core](../../README.md) using Azure Blob Storage leases.
 * Provides Queueing support  on [Workflow Core](../../README.md) using Azure Storage queues.
 * Provides event hub support on [Workflow Core](../../README.md) backed by Azure Service Bus.
+* Provides persistence on [Workflow Core](../../README.md) backed by Azure Cosmos DB.
 
 This makes it possible to have a cluster of nodes processing your workflows.
 
@@ -30,5 +31,6 @@ services.AddWorkflow(options =>
 {
 	options.UseAzureSynchronization("azure storage connection string");
 	options.UseAzureServiceBusEventHub("service bus connection string", "topic name", "subscription name");
+	options.UseCosmosDbPersistence("connection string");
 });
 ```

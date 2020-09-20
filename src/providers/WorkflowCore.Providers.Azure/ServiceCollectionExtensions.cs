@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using WorkflowCore.Models;
+using WorkflowCore.Providers.Azure.Interface;
 using WorkflowCore.Providers.Azure.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -22,6 +23,13 @@ namespace Microsoft.Extensions.DependencyInjection
             options.UseEventHub(sp => new ServiceBusLifeCycleEventHub(
                 connectionString, topicName, subscriptionName, sp.GetService<ILoggerFactory>()));
 
+            return options;
+        }
+
+        public static WorkflowOptions UseCosmosDbPersistence(this WorkflowOptions options, string connectionString, string databaseId)
+        {
+            options.Services.AddTransient<ICosmosDbProvisioner>(sp => new CosmosDbProvisioner(connectionString, sp.GetService<ILoggerFactory>()));
+            options.UsePersistence(sp => new CosmosDbPersistenceProvider(connectionString, databaseId, sp.GetService<ICosmosDbProvisioner>()));
             return options;
         }
     }
