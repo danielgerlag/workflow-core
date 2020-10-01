@@ -138,6 +138,7 @@ namespace WorkflowCore.Services
 
         private async Task ExecuteStep(WorkflowInstance workflow, WorkflowStep step, ExecutionPointer pointer, WorkflowExecutorResult wfResult, WorkflowDefinition def, CancellationToken cancellationToken = default)
         {
+            pointer.ContextItem = pointer.ContextItem ?? workflow?.ExecutionPointers?.FirstOrDefault(x => x.Children.Contains(pointer.Id))?.ContextItem;
             IStepExecutionContext context = new StepExecutionContext()
             {
                 Workflow = workflow,
@@ -147,7 +148,7 @@ namespace WorkflowCore.Services
                 Item = pointer.ContextItem,
                 CancellationToken = cancellationToken
             };
-            
+
             using (var scope = _scopeProvider.CreateScope(context))
             {
                 _logger.LogDebug("Starting step {0} on workflow {1}", step.Name, workflow.Id);
