@@ -41,13 +41,15 @@ namespace Microsoft.Extensions.DependencyInjection
             if (rabbitMqConnectionFactory == null) throw new ArgumentNullException(nameof(rabbitMqConnectionFactory));
 
             options.Services.AddSingleton(rabbitMqConnectionFactory);
-            options.Services.TryAddTransient<IRabbitMqQueueNameProvider, DefaultRabbitMqQueueNameProvider>();
+            options.Services.TryAddSingleton<IRabbitMqQueueNameProvider, DefaultRabbitMqQueueNameProvider>();
             options.UseQueueProvider(RabbitMqQueueProviderFactory);
             
             return options;
         }
 
         private static IQueueProvider RabbitMqQueueProviderFactory(IServiceProvider sp)
-            => new RabbitMQProvider(sp);
+            => new RabbitMQProvider(sp,
+                sp.GetRequiredService<IRabbitMqQueueNameProvider>(),
+                sp.GetRequiredService<RabbitMqConnectionFactory>());
     }
 }

@@ -26,11 +26,13 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
 
         public bool IsDequeueBlocking => false;
 
-        public RabbitMQProvider(IServiceProvider serviceProvider)
+        public RabbitMQProvider(IServiceProvider serviceProvider,
+            IRabbitMqQueueNameProvider queueNameProvider,
+            RabbitMqConnectionFactory connectionFactory)
         {
             _serviceProvider = serviceProvider;
-            _queueNameProvider = _serviceProvider.GetRequiredService<IRabbitMqQueueNameProvider>();
-            _rabbitMqConnectionFactory = _serviceProvider.GetRequiredService<RabbitMqConnectionFactory>();
+            _queueNameProvider = queueNameProvider;
+            _rabbitMqConnectionFactory = connectionFactory;
         }
 
         public async Task QueueWork(string id, QueueType queue)
