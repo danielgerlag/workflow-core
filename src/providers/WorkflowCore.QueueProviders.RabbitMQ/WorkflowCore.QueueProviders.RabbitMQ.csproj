@@ -19,6 +19,7 @@
     <Description>Queue provider for Workflow-core using RabbitMQ</Description>
     <AssemblyVersion>2.0.0.0</AssemblyVersion>
     <FileVersion>2.0.0.0</FileVersion>
+    <PackageVersion>2.1.0</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>

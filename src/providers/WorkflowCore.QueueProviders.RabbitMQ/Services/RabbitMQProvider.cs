@@ -7,23 +7,32 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
+using WorkflowCore.QueueProviders.RabbitMQ.Interfaces;
 
 namespace WorkflowCore.QueueProviders.RabbitMQ.Services
 {
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public class RabbitMQProvider : IQueueProvider
     {
-        private readonly IConnectionFactory _connectionFactory;
+        private readonly IRabbitMqQueueNameProvider _queueNameProvider;
+        private readonly RabbitMqConnectionFactory _rabbitMqConnectionFactory;
+        private readonly IServiceProvider _serviceProvider;
+        
         private IConnection _connection = null;
         private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
 
         public bool IsDequeueBlocking => false;
 
-        public RabbitMQProvider(IConnectionFactory connectionFactory)
+        public RabbitMQProvider(IServiceProvider serviceProvider,
+            IRabbitMqQueueNameProvider queueNameProvider,
+            RabbitMqConnectionFactory connectionFactory)
         {
-            _connectionFactory = connectionFactory;
+            _serviceProvider = serviceProvider;
+            _queueNameProvider = queueNameProvider;
+            _rabbitMqConnectionFactory = connectionFactory;
         }
 
         public async Task QueueWork(string id, QueueType queue)
@@ -33,9 +42,9 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
 
             using (var channel = _connection.CreateModel())
             {
-                channel.QueueDeclare(queue: GetQueueName(queue), durable: true, exclusive: false, autoDelete: false, arguments: null);
+                channel.QueueDeclare(queue: _queueNameProvider.GetQueueName(queue), durable: true, exclusive: false, autoDelete: false, arguments: null);
                 var body = Encoding.UTF8.GetBytes(id);
-                channel.BasicPublish(exchange: "", routingKey: GetQueueName(queue), basicProperties: null, body: body);
+                channel.BasicPublish(exchange: "", routingKey: _queueNameProvider.GetQueueName(queue), basicProperties: null, body: body);
             }
         }
 
@@ -46,7 +55,7 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
 
             using (var channel = _connection.CreateModel())
             {
-                channel.QueueDeclare(queue: GetQueueName(queue),
+                channel.QueueDeclare(queue: _queueNameProvider.GetQueueName(queue),
                                      durable: true,
                                      exclusive: false,
                                      autoDelete: false,
@@ -54,7 +63,7 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
 
                 channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
 
-                var msg = channel.BasicGet(GetQueueName(queue), false);
+                var msg = channel.BasicGet(_queueNameProvider.GetQueueName(queue), false);
                 if (msg != null)
                 {
                     var data = Encoding.UTF8.GetString(msg.Body);
@@ -76,7 +85,7 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
 
         public async Task Start()
         {
-            _connection = _connectionFactory.CreateConnection("Workflow-Core");
+            _connection = _rabbitMqConnectionFactory(_serviceProvider, "Workflow-Core");
         }
 
         public async Task Stop()
@@ -88,20 +97,6 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
             }
         }
 
-        private string GetQueueName(QueueType queue)
-        {
-            switch (queue)
-            {
-                case QueueType.Workflow:
-                    return "wfc.workflow_queue";
-                case QueueType.Event:
-                    return "wfc.event_queue";
-                case QueueType.Index:
-                    return "wfc.index_queue";
-            }
-            return null;
-        }
-                
     }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }
