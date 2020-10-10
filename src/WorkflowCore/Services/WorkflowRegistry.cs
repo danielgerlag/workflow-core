@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +11,7 @@ namespace WorkflowCore.Services
     public class WorkflowRegistry : IWorkflowRegistry
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly List<Tuple<string, int, WorkflowDefinition>> _registry = new List<Tuple<string, int, WorkflowDefinition>>();
+        private readonly BlockingCollection<Tuple<string, int, WorkflowDefinition>> _registry = new BlockingCollection<Tuple<string, int, WorkflowDefinition>>();
 
         public WorkflowRegistry(IServiceProvider serviceProvider)
         {
@@ -35,10 +36,10 @@ namespace WorkflowCore.Services
 
         public void DeregisterWorkflow(string workflowId, int version)
         {
-            var definition = _registry.Find(x => x.Item1 == workflowId && x.Item2 == version);
+            var definition = _registry.FirstOrDefault(x => x.Item1 == workflowId && x.Item2 == version);
             if (definition != null)
             {
-                _registry.Remove(definition);
+                _registry.TryTake(out definition);
             }
         }
 
@@ -81,7 +82,7 @@ namespace WorkflowCore.Services
 
         public bool IsRegistered(string workflowId, int version)
         {
-            var definition = _registry.Find(x => x.Item1 == workflowId && x.Item2 == version);
+            var definition = _registry.FirstOrDefault(x => x.Item1 == workflowId && x.Item2 == version);
             return (definition != null);
         }
 
