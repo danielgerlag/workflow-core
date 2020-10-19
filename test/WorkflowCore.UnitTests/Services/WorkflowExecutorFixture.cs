@@ -3,6 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using FluentAssertions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Services;
@@ -22,6 +24,8 @@ namespace WorkflowCore.UnitTests.Services
         protected IServiceProvider ServiceProvider;
         protected IScopeProvider ScopeProvider;
         protected IDateTimeProvider DateTimeProvider;
+        protected IStepExecutor StepExecutor;
+        protected IWorkflowMiddlewareRunner MiddlewareRunner;
         protected WorkflowOptions Options;
 
         public WorkflowExecutorFixture()
@@ -35,6 +39,8 @@ namespace WorkflowCore.UnitTests.Services
             EventHub = A.Fake<ILifeCycleEventPublisher>();
             CancellationProcessor = A.Fake<ICancellationProcessor>();
             DateTimeProvider = A.Fake<IDateTimeProvider>();
+            MiddlewareRunner = A.Fake<IWorkflowMiddlewareRunner>();
+            StepExecutor = A.Fake<IStepExecutor>();
 
             Options = new WorkflowOptions(A.Fake<IServiceCollection>());
 
@@ -45,17 +51,26 @@ namespace WorkflowCore.UnitTests.Services
             A.CallTo(() => DateTimeProvider.Now).Returns(DateTime.Now);
             A.CallTo(() => DateTimeProvider.UtcNow).Returns(DateTime.UtcNow);
 
+            A.CallTo(() => MiddlewareRunner
+                    .RunPostMiddleware(A<WorkflowInstance>._, A<WorkflowDefinition>._))
+                .Returns(Task.CompletedTask);
+
+            A.CallTo(() => StepExecutor.ExecuteStep(A<IStepExecutionContext>._, A<IStepBody>._))
+                .ReturnsLazily(call =>
+                    call.Arguments[1].As<IStepBody>().RunAsync(
+                        call.Arguments[0].As<IStepExecutionContext>()));
+
             //config logging
             var loggerFactory = new LoggerFactory();
-            //loggerFactory.AddConsole(LogLevel.Debug);            
+            //loggerFactory.AddConsole(LogLevel.Debug);
 
-            Subject = new WorkflowExecutor(Registry, ServiceProvider, ScopeProvider, DateTimeProvider, ResultProcesser, EventHub, CancellationProcessor, Options, loggerFactory);
+            Subject = new WorkflowExecutor(Registry, ServiceProvider, ScopeProvider, DateTimeProvider, ResultProcesser, EventHub, CancellationProcessor, Options, MiddlewareRunner, StepExecutor, loggerFactory);
         }
 
         [Fact(DisplayName = "Should execute active step")]
         public void should_execute_active_step()
         {
-            //arrange            
+            //arrange
             var step1Body = A.Fake<IStepBody>();
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
             WorkflowStep step1 = BuildFakeStep(step1Body);
@@ -72,7 +87,7 @@ namespace WorkflowCore.UnitTests.Services
                 {
                     new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
                 })
-            };            
+            };
 
             //act
             Subject.Execute(instance);
@@ -85,7 +100,7 @@ namespace WorkflowCore.UnitTests.Services
         [Fact(DisplayName = "Should trigger step hooks")]
         public void should_trigger_step_hooks()
         {
-            //arrange            
+            //arrange
             var step1Body = A.Fake<IStepBody>();
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
             WorkflowStep step1 = BuildFakeStep(step1Body);
@@ -116,7 +131,7 @@ namespace WorkflowCore.UnitTests.Services
         [Fact(DisplayName = "Should not execute inactive step")]
         public void should_not_execute_inactive_step()
         {
-            //arrange            
+            //arrange
             var step1Body = A.Fake<IStepBody>();
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
             WorkflowStep step1 = BuildFakeStep(step1Body);
@@ -134,7 +149,7 @@ namespace WorkflowCore.UnitTests.Services
                     new ExecutionPointer() { Id = "1", Active = false, StepId = 0 }
                 })
             };
-            
+
             //act
             Subject.Execute(instance);
 
@@ -148,7 +163,7 @@ namespace WorkflowCore.UnitTests.Services
             //arrange
             var param = A.Fake<IStepParameter>();
 
-            var step1Body = A.Fake<IStepWithProperties>();            
+            var step1Body = A.Fake<IStepWithProperties>();
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
             WorkflowStep step1 = BuildFakeStep(step1Body, new List<IStepParameter>()
                 {
@@ -183,7 +198,7 @@ namespace WorkflowCore.UnitTests.Services
         [Fact(DisplayName = "Should map outputs")]
         public void should_map_outputs()
         {
-            //arrange            
+            //arrange
             var param = A.Fake<IStepParameter>();
 
             var step1Body = A.Fake<IStepWithProperties>();
@@ -212,7 +227,7 @@ namespace WorkflowCore.UnitTests.Services
                     new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
                 })
             };
-            
+
             //act
             Subject.Execute(instance);
 
@@ -221,12 +236,12 @@ namespace WorkflowCore.UnitTests.Services
                 .MustHaveHappened();
         }
 
-        
+
 
         [Fact(DisplayName = "Should handle step exception")]
         public void should_handle_step_exception()
         {
-            //arrange            
+            //arrange
             var step1Body = A.Fake<IStepBody>();
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Throws<Exception>();
             WorkflowStep step1 = BuildFakeStep(step1Body);
@@ -251,13 +266,13 @@ namespace WorkflowCore.UnitTests.Services
             //assert
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).MustHaveHappened();
             A.CallTo(() => ResultProcesser.HandleStepException(instance, A<WorkflowDefinition>.Ignored, A<ExecutionPointer>.Ignored, step1, A<Exception>.Ignored)).MustHaveHappened();
-            A.CallTo(() => ResultProcesser.ProcessExecutionResult(instance, A<WorkflowDefinition>.Ignored, A<ExecutionPointer>.Ignored, step1, A<ExecutionResult>.Ignored, A<WorkflowExecutorResult>.Ignored)).MustNotHaveHappened();            
+            A.CallTo(() => ResultProcesser.ProcessExecutionResult(instance, A<WorkflowDefinition>.Ignored, A<ExecutionPointer>.Ignored, step1, A<ExecutionResult>.Ignored, A<WorkflowExecutorResult>.Ignored)).MustNotHaveHappened();
         }
 
         [Fact(DisplayName = "Should process after execution iteration")]
         public void should_process_after_execution_iteration()
         {
-            //arrange            
+            //arrange
             var step1Body = A.Fake<IStepBody>();
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Persist(null));
             WorkflowStep step1 = BuildFakeStep(step1Body);
@@ -286,7 +301,7 @@ namespace WorkflowCore.UnitTests.Services
         [Fact(DisplayName = "Should process cancellations")]
         public void should_process_cancellations()
         {
-            //arrange            
+            //arrange
             var step1Body = A.Fake<IStepBody>();
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Persist(null));
             WorkflowStep step1 = BuildFakeStep(step1Body);

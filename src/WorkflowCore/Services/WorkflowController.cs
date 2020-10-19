@@ -21,9 +21,10 @@ namespace WorkflowCore.Services
         private readonly IExecutionPointerFactory _pointerFactory;
         private readonly ILifeCycleEventHub _eventHub;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IWorkflowMiddlewareRunner _middlewareRunner;
         private readonly ILogger _logger;
 
-        public WorkflowController(IPersistenceProvider persistenceStore, IDistributedLockProvider lockProvider, IWorkflowRegistry registry, IQueueProvider queueProvider, IExecutionPointerFactory pointerFactory, ILifeCycleEventHub eventHub, ILoggerFactory loggerFactory, IServiceProvider serviceProvider)
+        public WorkflowController(IPersistenceProvider persistenceStore, IDistributedLockProvider lockProvider, IWorkflowRegistry registry, IQueueProvider queueProvider, IExecutionPointerFactory pointerFactory, ILifeCycleEventHub eventHub, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowMiddlewareRunner middlewareRunner)
         {
             _persistenceStore = persistenceStore;
             _lockProvider = lockProvider;
@@ -32,6 +33,7 @@ namespace WorkflowCore.Services
             _pointerFactory = pointerFactory;
             _eventHub = eventHub;
             _serviceProvider = serviceProvider;
+            _middlewareRunner = middlewareRunner;
             _logger = loggerFactory.CreateLogger<WorkflowController>();
         }
 
@@ -45,7 +47,7 @@ namespace WorkflowCore.Services
             return StartWorkflow<object>(workflowId, version, data, reference);
         }
 
-        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null, string reference=null) 
+        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null, string reference=null)
             where TData : class, new()
         {
             return StartWorkflow<TData>(workflowId, null, data, reference);
@@ -82,6 +84,8 @@ namespace WorkflowCore.Services
             }
 
             wf.ExecutionPointers.Add(_pointerFactory.BuildGenesisPointer(def));
+
+            await _middlewareRunner.RunPreMiddleware(wf, def);
 
             string id = await _persistenceStore.CreateNewWorkflow(wf);
             await _queueProvider.QueueWork(id, QueueType.Workflow);

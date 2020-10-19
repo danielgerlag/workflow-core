@@ -9,6 +9,7 @@ nav:
     - Saga transactions: sagas.md
     - JSON / YAML Definitions: json-yaml.md
     - Persistence: persistence.md
+    - Middleware: workflow-middleware.md
     - Multi-node clusters: multi-node-clusters.md
     - ASP.NET Core: using-with-aspnet-core.md
     - Elasticsearch plugin: elastic-search.md
