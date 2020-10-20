@@ -68,8 +68,22 @@ namespace WorkflowCore.Services.DefinitionStorage
                 var nextStep = stack.Pop();
 
                 var stepType = FindType(nextStep.StepType);
-                var containerType = typeof(WorkflowStep<>).MakeGenericType(stepType);
-                var targetStep = (containerType.GetConstructor(new Type[] { }).Invoke(null) as WorkflowStep);
+
+                WorkflowStep targetStep;
+
+                Type containerType;
+                if (stepType.IsSubclassOf(typeof(StepBody)))
+                {
+                    containerType = typeof(WorkflowStep<>).MakeGenericType(stepType);
+
+                    targetStep = (containerType.GetConstructor(new Type[] { }).Invoke(null) as WorkflowStep);
+                }
+                else
+                {
+                    targetStep = stepType.GetConstructor(new Type[] { }).Invoke(null) as WorkflowStep;
+                    if (targetStep != null)
+                        stepType = targetStep.BodyType;
+                }
 
                 if (nextStep.Saga)
                 {
