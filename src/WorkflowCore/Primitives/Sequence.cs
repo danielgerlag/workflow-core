@@ -11,7 +11,7 @@ namespace WorkflowCore.Primitives
         {
             if (context.PersistenceData == null)
             {
-                return ExecutionResult.Branch(new List<object>() { null }, new ControlPersistenceData() { ChildrenActive = true });
+                return ExecutionResult.Branch(new List<object>() { context.Item }, new ControlPersistenceData() { ChildrenActive = true });
             }
 
             if ((context.PersistenceData is ControlPersistenceData) && ((context.PersistenceData as ControlPersistenceData).ChildrenActive))
