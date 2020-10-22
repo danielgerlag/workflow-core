@@ -12,7 +12,7 @@ namespace WorkflowCore.Primitives
         {
             if (context.PersistenceData == null)
             {
-                var result = ExecutionResult.Branch(new List<object>() { null }, new ControlPersistenceData() { ChildrenActive = true });
+                var result = ExecutionResult.Branch(new List<object>() { context.Item }, new ControlPersistenceData() { ChildrenActive = true });
                 result.OutcomeValue = GetPreviousOutcome(context);
                 return result;
             }

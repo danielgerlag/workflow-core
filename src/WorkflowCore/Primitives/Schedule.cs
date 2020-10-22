@@ -20,7 +20,7 @@ namespace WorkflowCore.Primitives
             {
                 if (!((SchedulePersistenceData)context.PersistenceData).Elapsed)
                 {
-                    return ExecutionResult.Branch(new List<object>() { null }, new SchedulePersistenceData() { Elapsed = true });
+                    return ExecutionResult.Branch(new List<object>() { context.Item }, new SchedulePersistenceData() { Elapsed = true });
                 }
                 
                 if (context.Workflow.IsBranchComplete(context.ExecutionPointer.Id))
