@@ -93,7 +93,7 @@ namespace WorkflowCore.Services.DefinitionStorage
 
                 AttachInputs(nextStep, dataType, stepType, targetStep);
                 AttachOutputs(nextStep, dataType, stepType, targetStep);
-                
+
                 if (nextStep.Do != null)
                 {
                     foreach (var branch in nextStep.Do)
@@ -242,7 +242,7 @@ namespace WorkflowCore.Services.DefinitionStorage
             var outcomeParameter = Expression.Parameter(typeof(object), "outcome");
 
             foreach (var nextStep in source.SelectNextStep)
-            {                
+            {
                 var sourceDelegate = DynamicExpressionParser.ParseLambda(new[] { dataParameter, outcomeParameter }, typeof(object), nextStep.Value).Compile();
                 Expression<Func<object, object, bool>> sourceExpr = (data, outcome) => System.Convert.ToBoolean(sourceDelegate.DynamicInvoke(data, outcome));
                 step.Outcomes.Add(new ExpressionOutcome<object>(sourceExpr)

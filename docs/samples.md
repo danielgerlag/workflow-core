@@ -33,3 +33,5 @@
 [Exposing a REST API](https://github.com/danielgerlag/workflow-core/tree/master/src/samples/WebApiSample)
 
 [Human(User) Workflow](https://github.com/danielgerlag/workflow-core/tree/master/src/samples/WorkflowCore.Sample08)
+
+[Workflow Middleware](https://github.com/danielgerlag/workflow-core/tree/master/src/samples/WorkflowCore.Sample19)

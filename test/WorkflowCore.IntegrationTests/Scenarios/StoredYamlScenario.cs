@@ -5,13 +5,14 @@ using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using Xunit;
 using FluentAssertions;
+using WorkflowCore.Services.DefinitionStorage;
 using WorkflowCore.Testing;
 using WorkflowCore.TestAssets.DataTypes;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
     public class StoredYamlScenario : YamlWorkflowTest
-    {   
+    {
         public StoredYamlScenario()
         {
             Setup();

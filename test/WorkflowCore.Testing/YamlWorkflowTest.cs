@@ -17,6 +17,7 @@ namespace WorkflowCore.Testing
         protected IWorkflowHost Host;
         protected IPersistenceProvider PersistenceProvider;
         protected IDefinitionLoader DefinitionLoader;
+        protected IWorkflowRegistry Registry;
         protected List<StepError> UnhandledStepErrors = new List<StepError>();
 
         protected virtual void Setup()
@@ -34,6 +35,7 @@ namespace WorkflowCore.Testing
 
             PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
             DefinitionLoader = serviceProvider.GetService<IDefinitionLoader>();
+            Registry = serviceProvider.GetService<IWorkflowRegistry>();
             Host = serviceProvider.GetService<IWorkflowHost>();
             Host.OnStepError += Host_OnStepError;
             Host.Start();
@@ -106,5 +108,4 @@ namespace WorkflowCore.Testing
             Host.Stop();
         }
     }
-    
 }

@@ -22,10 +22,12 @@ namespace WorkflowCore.Services
         private readonly ICancellationProcessor _cancellationProcessor;
         private readonly ILifeCycleEventPublisher _publisher;
         private readonly WorkflowOptions _options;
+        private readonly IStepExecutor _stepExecutor;
+        private readonly IWorkflowMiddlewareRunner _middlewareRunner;
 
         private IWorkflowHost Host => _serviceProvider.GetService<IWorkflowHost>();
 
-        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IScopeProvider scopeProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, ILifeCycleEventPublisher publisher, ICancellationProcessor cancellationProcessor, WorkflowOptions options, ILoggerFactory loggerFactory)
+        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IScopeProvider scopeProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, ILifeCycleEventPublisher publisher, ICancellationProcessor cancellationProcessor, WorkflowOptions options, IWorkflowMiddlewareRunner middlewareRunner, IStepExecutor stepExecutor, ILoggerFactory loggerFactory)
         {
             _serviceProvider = serviceProvider;
             _scopeProvider = scopeProvider;
@@ -36,6 +38,8 @@ namespace WorkflowCore.Services
             _options = options;
             _logger = loggerFactory.CreateLogger<WorkflowExecutor>();
             _executionResultProcessor = executionResultProcessor;
+            _middlewareRunner = middlewareRunner;
+            _stepExecutor = stepExecutor;
         }
 
         public async Task<WorkflowExecutorResult> Execute(WorkflowInstance workflow, CancellationToken cancellationToken = default)
@@ -49,7 +53,7 @@ namespace WorkflowCore.Services
                 _logger.LogError("Workflow {0} version {1} is not registered", workflow.WorkflowDefinitionId, workflow.Version);
                 return wfResult;
             }
-            
+
             _cancellationProcessor.ProcessCancellations(workflow, def, wfResult);
 
             foreach (var pointer in exePointers)
@@ -71,10 +75,10 @@ namespace WorkflowCore.Services
                     });
                     continue;
                 }
-                
+
                 try
                 {
-                    if (!InitializeStep(workflow, step, wfResult, def, pointer)) 
+                    if (!InitializeStep(workflow, step, wfResult, def, pointer))
                         continue;
 
                     await ExecuteStep(workflow, step, pointer, wfResult, def, cancellationToken);
@@ -89,14 +93,14 @@ namespace WorkflowCore.Services
                         ErrorTime = _datetimeProvider.UtcNow,
                         Message = ex.Message
                     });
-                        
+
                     _executionResultProcessor.HandleStepException(workflow, def, pointer, step, ex);
                     Host.ReportStepError(workflow, step, ex);
                 }
                 _cancellationProcessor.ProcessCancellations(workflow, def, wfResult);
             }
             ProcessAfterExecutionIteration(workflow, def, wfResult);
-            DetermineNextExecutionTime(workflow);
+            await DetermineNextExecutionTime(workflow, def);
 
             return wfResult;
         }
@@ -147,7 +151,7 @@ namespace WorkflowCore.Services
                 Item = pointer.ContextItem,
                 CancellationToken = cancellationToken
             };
-            
+
             using (var scope = _scopeProvider.CreateScope(context))
             {
                 _logger.LogDebug("Starting step {0} on workflow {1}", step.Name, workflow.Id);
@@ -181,7 +185,7 @@ namespace WorkflowCore.Services
                         return;
                 }
 
-                var result = await body.RunAsync(context);
+                var result = await _stepExecutor.ExecuteStep(context, body);
 
                 if (result.Proceed)
                 {
@@ -205,7 +209,7 @@ namespace WorkflowCore.Services
             }
         }
 
-        private void DetermineNextExecutionTime(WorkflowInstance workflow)
+        private async Task DetermineNextExecutionTime(WorkflowInstance workflow, WorkflowDefinition def)
         {
             //TODO: move to own class
             workflow.NextExecution = null;
@@ -229,9 +233,9 @@ namespace WorkflowCore.Services
             {
                 foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count > 0))
                 {
-                    if (!workflow.ExecutionPointers.FindByScope(pointer.Id).All(x => x.EndTime.HasValue)) 
+                    if (!workflow.ExecutionPointers.FindByScope(pointer.Id).All(x => x.EndTime.HasValue))
                         continue;
-                    
+
                     if (!pointer.SleepUntil.HasValue)
                     {
                         workflow.NextExecution = 0;
@@ -243,11 +247,14 @@ namespace WorkflowCore.Services
                 }
             }
 
-            if ((workflow.NextExecution != null) || (workflow.ExecutionPointers.Any(x => x.EndTime == null))) 
+            if ((workflow.NextExecution != null) || (workflow.ExecutionPointers.Any(x => x.EndTime == null)))
                 return;
-            
+
             workflow.Status = WorkflowStatus.Complete;
             workflow.CompleteTime = _datetimeProvider.UtcNow;
+
+            await _middlewareRunner.RunPostMiddleware(workflow, def);
+
             _publisher.PublishNotification(new WorkflowCompleted()
             {
                 EventTimeUtc = _datetimeProvider.UtcNow,
@@ -257,6 +264,5 @@ namespace WorkflowCore.Services
                 Version = workflow.Version
             });
         }
-        
     }
 }
