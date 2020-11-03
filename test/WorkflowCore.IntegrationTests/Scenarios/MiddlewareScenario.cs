@@ -136,6 +136,12 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             // Workflow should complete without errors
             status.Should().Be(WorkflowStatus.Complete);
             UnhandledStepErrors.Count.Should().Be(0);
+            
+            // Wait for post middleware to complete
+            while (_workflowMiddleware.Any(x => !x.HasCompleted))
+            {
+                await Task.Delay(500);
+            }
 
             // Each middleware should have run
             _workflowMiddleware.Should()
