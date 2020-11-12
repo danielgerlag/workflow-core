@@ -112,7 +112,7 @@ namespace WorkflowCore.UnitTests.Services
 
             // Assert
             action
-                .ShouldThrow<ApplicationException>()
+                .Should().Throw<ApplicationException>()
                 .WithMessage("Failed");
         }
 

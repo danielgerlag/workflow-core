@@ -64,7 +64,7 @@ namespace WorkflowCore.UnitTests
 
             var retrievedWorkflow = Subject.GetWorkflowInstance(workflowId).Result;
 
-            retrievedWorkflow.ShouldBeEquivalentTo(workflow);
+            retrievedWorkflow.Should().BeEquivalentTo(workflow);
             retrievedWorkflow.ExecutionPointers.FindById("1")
                 .Scope.Should().ContainInOrder(workflow.ExecutionPointers.FindById("1").Scope);
         }
@@ -134,20 +134,20 @@ namespace WorkflowCore.UnitTests
 
             var retrievedWorkflows = Subject.GetWorkflowInstances(new[] { workflowId01, workflowId02, workflowId03 }).Result;
 
-            retrievedWorkflows.Count().ShouldBeEquivalentTo(3);
+            retrievedWorkflows.Count().Should().Be(3);
 
             var retrievedWorkflow01 = retrievedWorkflows.Single(o => o.Id == workflowId01);
-            retrievedWorkflow01.ShouldBeEquivalentTo(workflow01);
+            retrievedWorkflow01.Should().BeEquivalentTo(workflow01);
             retrievedWorkflow01.ExecutionPointers.FindById("1")
                 .Scope.Should().ContainInOrder(workflow01.ExecutionPointers.FindById("1").Scope);
 
             var retrievedWorkflow02 = retrievedWorkflows.Single(o => o.Id == workflowId02);
-            retrievedWorkflow02.ShouldBeEquivalentTo(workflow02);
+            retrievedWorkflow02.Should().BeEquivalentTo(workflow02);
             retrievedWorkflow02.ExecutionPointers.FindById("1")
                 .Scope.Should().ContainInOrder(workflow02.ExecutionPointers.FindById("1").Scope);
 
             var retrievedWorkflow03 = retrievedWorkflows.Single(o => o.Id == workflowId03);
-            retrievedWorkflow03.ShouldBeEquivalentTo(workflow03);
+            retrievedWorkflow03.Should().BeEquivalentTo(workflow03);
             retrievedWorkflow03.ExecutionPointers.FindById("1")
                 .Scope.Should().ContainInOrder(workflow03.ExecutionPointers.FindById("1").Scope);
         }
@@ -183,7 +183,7 @@ namespace WorkflowCore.UnitTests
             Subject.PersistWorkflow(newWorkflow).Wait();
 
             var current = Subject.GetWorkflowInstance(workflowId).Result;
-            current.ShouldBeEquivalentTo(newWorkflow);
+            current.Should().BeEquivalentTo(newWorkflow);
         }
 
         [Fact]
@@ -224,7 +224,7 @@ namespace WorkflowCore.UnitTests
 
             Parallel.ForEach(actions, action =>
             {
-                action.ShouldNotThrow<InvalidOperationException>();
+                action.Should().NotThrow<InvalidOperationException>();
             });
         }
     }
