@@ -229,22 +229,19 @@ namespace WorkflowCore.Services
                 workflow.NextExecution = Math.Min(pointerSleep, workflow.NextExecution ?? pointerSleep);
             }
 
-            if (workflow.NextExecution == null)
+            foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count > 0))
             {
-                foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count > 0))
+                if (!workflow.ExecutionPointers.FindByScope(pointer.Id).All(x => x.EndTime.HasValue))
+                    continue;
+
+                if (!pointer.SleepUntil.HasValue)
                 {
-                    if (!workflow.ExecutionPointers.FindByScope(pointer.Id).All(x => x.EndTime.HasValue))
-                        continue;
-
-                    if (!pointer.SleepUntil.HasValue)
-                    {
-                        workflow.NextExecution = 0;
-                        return;
-                    }
-
-                    var pointerSleep = pointer.SleepUntil.Value.ToUniversalTime().Ticks;
-                    workflow.NextExecution = Math.Min(pointerSleep, workflow.NextExecution ?? pointerSleep);
+                    workflow.NextExecution = 0;
+                    return;
                 }
+
+                var pointerSleep = pointer.SleepUntil.Value.ToUniversalTime().Ticks;
+                workflow.NextExecution = Math.Min(pointerSleep, workflow.NextExecution ?? pointerSleep);
             }
 
             if ((workflow.NextExecution != null) || (workflow.ExecutionPointers.Any(x => x.EndTime == null)))
