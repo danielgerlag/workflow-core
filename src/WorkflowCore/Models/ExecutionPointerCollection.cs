@@ -97,6 +97,12 @@ namespace WorkflowCore.Models
             return _dictionary.Values.FirstOrDefault(x => match(x));
         }
 
+        public ICollection<ExecutionPointer> FindByStatus(PointerStatus status)
+        {
+            //TODO: track states in hash table
+            return _dictionary.Values.Where(x => x.Status == status).ToList();
+        }
+
         public int Count => _dictionary.Count;
         public bool IsReadOnly => false;
     }

@@ -63,11 +63,13 @@ namespace WorkflowCore.Services.ErrorHandlers
                 scopePointer.EndTime = _datetimeProvider.UtcNow;
                 scopePointer.Status = PointerStatus.Failed;
 
+                ExecutionPointer compensationPointer = null;
+
                 if (scopeStep.CompensationStepId.HasValue)
                 {
                     scopePointer.Status = PointerStatus.Compensated;
 
-                    var compensationPointer = _pointerFactory.BuildCompensationPointer(def, scopePointer, exceptionPointer, scopeStep.CompensationStepId.Value);
+                    compensationPointer = _pointerFactory.BuildCompensationPointer(def, scopePointer, exceptionPointer, scopeStep.CompensationStepId.Value);
                     workflow.ExecutionPointers.Add(compensationPointer);
 
                     if (resume)
@@ -89,8 +91,16 @@ namespace WorkflowCore.Services.ErrorHandlers
                         var siblingStep = def.Steps.FindById(siblingPointer.StepId);
                         if (siblingStep.CompensationStepId.HasValue)
                         {
-                            var compensationPointer = _pointerFactory.BuildCompensationPointer(def, siblingPointer, exceptionPointer, siblingStep.CompensationStepId.Value);
-                            workflow.ExecutionPointers.Add(compensationPointer);
+                            var nextCompensationPointer = _pointerFactory.BuildCompensationPointer(def, siblingPointer, exceptionPointer, siblingStep.CompensationStepId.Value);
+                            if (compensationPointer != null)
+                            {
+                                nextCompensationPointer.Active = false;
+                                nextCompensationPointer.Status = PointerStatus.PendingPredecessor;
+                                nextCompensationPointer.PredecessorId = compensationPointer.Id;
+                                compensationPointer = nextCompensationPointer;
+                            }
+                            workflow.ExecutionPointers.Add(nextCompensationPointer);
+
                             siblingPointer.Status = PointerStatus.Compensated;
                         }
                     }
