@@ -34,11 +34,11 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                                 Compensation1Fired = CompensationCounter;
                             })
                         .Then(context => ExecutionResult.Next())
-                            .CompensateWith(context =>
+                            .CompensateWithSequence(context => context.StartWith(c =>
                             {
                                 CompensationCounter++;
                                 Compensation2Fired = CompensationCounter;
-                            })
+                            }))
                         .Then(context => ExecutionResult.Next())
                             .CompensateWith(context =>
                             {

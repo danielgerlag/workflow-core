@@ -103,6 +103,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReleaseNotes", "ReleaseNote
 		ReleaseNotes\2.1.2.md = ReleaseNotes\2.1.2.md
 		ReleaseNotes\3.0.0.md = ReleaseNotes\3.0.0.md
 		ReleaseNotes\3.1.0.md = ReleaseNotes\3.1.0.md
+		ReleaseNotes\3.3.0.md = ReleaseNotes\3.3.0.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample14", "src\samples\WorkflowCore.Sample14\WorkflowCore.Sample14.csproj", "{6BC66637-B42A-4334-ADFB-DBEC9F29D293}"
@@ -145,9 +146,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample09s", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScratchPad", "test\ScratchPad\ScratchPad.csproj", "{51BB7DCD-01DD-453D-A1E7-17E5E3DBB14C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Tests.QueueProviders.RabbitMQ", "test\WorkflowCore.Tests.QueueProviders.RabbitMQ\WorkflowCore.Tests.QueueProviders.RabbitMQ.csproj", "{54DE20BA-EBA7-4BF0-9BD9-F03766849716}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Tests.QueueProviders.RabbitMQ", "test\WorkflowCore.Tests.QueueProviders.RabbitMQ\WorkflowCore.Tests.QueueProviders.RabbitMQ.csproj", "{54DE20BA-EBA7-4BF0-9BD9-F03766849716}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Sample19", "src\samples\WorkflowCore.Sample19\WorkflowCore.Sample19.csproj", "{1223ED47-3E5E-4960-B70D-DFAF550F6666}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample19", "src\samples\WorkflowCore.Sample19\WorkflowCore.Sample19.csproj", "{1223ED47-3E5E-4960-B70D-DFAF550F6666}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
