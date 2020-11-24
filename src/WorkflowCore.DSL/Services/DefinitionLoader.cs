@@ -72,7 +72,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                 WorkflowStep targetStep;
 
                 Type containerType;
-                if (stepType.IsSubclassOf(typeof(StepBody)))
+                if (stepType.GetInterfaces().Contains(typeof(IStepBody)))
                 {
                     containerType = typeof(WorkflowStep<>).MakeGenericType(stepType);
 
