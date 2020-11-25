@@ -21,7 +21,8 @@ namespace WorkflowCore.Persistence.MySQL
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-            optionsBuilder.UseMySql(_connectionString, _mysqlOptionsAction);
+            var serverVersion = ServerVersion.AutoDetect(_connectionString);
+            optionsBuilder.UseMySql(serverVersion,  _mysqlOptionsAction);
         }
 
         protected override void ConfigureSubscriptionStorage(EntityTypeBuilder<PersistedSubscription> builder)
