@@ -67,6 +67,16 @@ namespace WorkflowCore.Services
                     workflow.ExecutionPointers.Add(_pointerFactory.BuildNextPointer(def, pointer, outcomeTarget));
                 }
 
+                var pendingSubsequents = workflow.ExecutionPointers
+                    .FindByStatus(PointerStatus.PendingPredecessor)
+                    .Where(x => x.PredecessorId == pointer.Id);
+
+                foreach (var subsequent in pendingSubsequents)
+                {
+                    subsequent.Status = PointerStatus.Pending;
+                    subsequent.Active = true;
+                }
+
                 _eventPublisher.PublishNotification(new StepCompleted()
                 {
                     EventTimeUtc = _datetimeProvider.UtcNow,

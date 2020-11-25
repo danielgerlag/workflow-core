@@ -63,6 +63,7 @@ namespace WorkflowCore.Models
         WaitingForEvent = 5,
         Failed = 6,
         Compensated = 7,
-        Cancelled = 8
+        Cancelled = 8,
+        PendingPredecessor = 9
     }
 }
