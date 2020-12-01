@@ -51,10 +51,10 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IGreyList, GreyList>();
             services.AddSingleton<IWorkflowController, WorkflowController>();
             services.AddSingleton<IActivityController, ActivityController>();
-            services.AddSingleton<IStepExecutor, StepExecutor>();
-            services.AddSingleton<IWorkflowMiddlewareRunner, WorkflowMiddlewareRunner>();
-            services.AddSingleton<IWorkflowMiddlewareErrorHandler, DefaultWorkflowMiddlewareErrorHandler>();
             services.AddSingleton<IWorkflowHost, WorkflowHost>();
+            services.AddTransient<IStepExecutor, StepExecutor>();
+            services.AddTransient<IWorkflowMiddlewareErrorHandler, DefaultWorkflowMiddlewareErrorHandler>();
+            services.AddTransient<IWorkflowMiddlewareRunner, WorkflowMiddlewareRunner>();
             services.AddTransient<IScopeProvider, ScopeProvider>();
             services.AddTransient<IWorkflowExecutor, WorkflowExecutor>();
             services.AddTransient<ICancellationProcessor, CancellationProcessor>();

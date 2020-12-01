@@ -51,6 +51,14 @@ namespace WorkflowCore.UnitTests.Services
             A.CallTo(() => DateTimeProvider.Now).Returns(DateTime.Now);
             A.CallTo(() => DateTimeProvider.UtcNow).Returns(DateTime.UtcNow);
 
+            A
+                .CallTo(() => ServiceProvider.GetService(typeof(IWorkflowMiddlewareRunner)))
+                .Returns(MiddlewareRunner);
+
+            A
+                .CallTo(() => ServiceProvider.GetService(typeof(IStepExecutor)))
+                .Returns(StepExecutor);
+
             A.CallTo(() => MiddlewareRunner
                     .RunPostMiddleware(A<WorkflowInstance>._, A<WorkflowDefinition>._))
                 .Returns(Task.CompletedTask);
@@ -64,7 +72,7 @@ namespace WorkflowCore.UnitTests.Services
             var loggerFactory = new LoggerFactory();
             //loggerFactory.AddConsole(LogLevel.Debug);
 
-            Subject = new WorkflowExecutor(Registry, ServiceProvider, ScopeProvider, DateTimeProvider, ResultProcesser, EventHub, CancellationProcessor, Options, MiddlewareRunner, StepExecutor, loggerFactory);
+            Subject = new WorkflowExecutor(Registry, ServiceProvider, ScopeProvider, DateTimeProvider, ResultProcesser, EventHub, CancellationProcessor, Options, loggerFactory);
         }
 
         [Fact(DisplayName = "Should execute active step")]
