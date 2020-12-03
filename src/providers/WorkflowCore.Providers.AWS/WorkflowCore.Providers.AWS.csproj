@@ -11,16 +11,16 @@
     <PackageProjectUrl>https://github.com/danielgerlag/workflow-core</PackageProjectUrl>
     <RepositoryUrl>https://github.com/danielgerlag/workflow-core.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Version>3.0.2</Version>
-    <AssemblyVersion>3.0.2.0</AssemblyVersion>
-    <PackageVersion>3.0.2</PackageVersion>
+    <Version>3.0.3</Version>
+    <AssemblyVersion>3.0.3.0</AssemblyVersion>
+    <PackageVersion>3.0.3</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.104.7" />
     <PackageReference Include="AWSSDK.Kinesis" Version="3.3.100.112" />
     <PackageReference Include="AWSSDK.SQS" Version="3.3.102.44" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
   </ItemGroup>
 
