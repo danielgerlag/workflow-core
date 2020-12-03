@@ -34,6 +34,11 @@ namespace WorkflowCore.Models
             EventHubFactory = new Func<IServiceProvider, ILifeCycleEventHub>(sp => new SingleNodeEventHub(sp.GetService<ILoggerFactory>()));
         }
 
+        public bool DisableWorkflowConsumer { get; set; } = false;
+        public bool DisableEventConsumer { get; set; } = false;
+        public bool DisableIndexConsumer { get; set; } = false;
+        public bool DisableRunnablePoller { get; set; } = false;
+
         public void UsePersistence(Func<IServiceProvider, IPersistenceProvider> factory)
         {
             PersistanceFactory = factory;
