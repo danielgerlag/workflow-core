@@ -36,3 +36,9 @@ RetryInterval: '00:10:00'
 ## Global Error handling
 
 The WorkflowHost service also has a `.OnStepError` event which can be used to intercept exceptions from workflow steps on a more global level.
+
+## Custom Error Handlers 
+All `IWorkflowErrorHandler` are registered when `.AddWorkflow()` is called. 
+To create a custom error handler implement `IWorkflowErrorHandler` and add it as `Transient`.
+
+Each `IWorkflowErrorHandler` should specify `WorkflowErrorHandling` which suggests what type of errors it should handle.
