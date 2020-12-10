@@ -28,10 +28,10 @@ namespace WorkflowCore.Services
         
         public async Task<PendingActivity> GetPendingActivity(string activityName, string workerId, TimeSpan? timeout = null)
         {
-            var endTime = DateTime.UtcNow.Add(timeout ?? TimeSpan.Zero);
+            var endTime = _dateTimeProvider.UtcNow.Add(timeout ?? TimeSpan.Zero);
             var firstPass = true;
             EventSubscription subscription = null;
-            while ((subscription == null && DateTime.UtcNow < endTime) || firstPass)
+            while ((subscription == null && _dateTimeProvider.UtcNow < endTime) || firstPass)
             {
                 if (!firstPass)
                     await Task.Delay(100);
