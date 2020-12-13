@@ -2,11 +2,12 @@
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Threading.Tasks;
 using WorkflowCore.Interface;
 
 namespace WorkflowCore.Services
 {
-    public class GreyList : IGreyList, IDisposable
+    public class InMemoryQueueCache : IQueueCache, IDisposable
     {
         private readonly Timer _cycleTimer;
         private readonly ConcurrentDictionary<string, DateTime> _list;
@@ -14,29 +15,30 @@ namespace WorkflowCore.Services
         private const int CYCLE_TIME = 30;
         private const int TTL = 5;
 
-        public GreyList(ILoggerFactory loggerFactory)
+        public InMemoryQueueCache(ILoggerFactory loggerFactory)
         {
-            _logger = loggerFactory.CreateLogger<GreyList>();
+            _logger = loggerFactory.CreateLogger<InMemoryQueueCache>();
             _list = new ConcurrentDictionary<string, DateTime>();
             _cycleTimer = new Timer(new TimerCallback(Cycle), null, TimeSpan.FromMinutes(CYCLE_TIME), TimeSpan.FromMinutes(CYCLE_TIME));
         }
 
-        public void Add(string id)
+        public Task Add(string id)
         {
             _list.AddOrUpdate(id, DateTime.Now, (key, val) => DateTime.Now);
+            return Task.CompletedTask;
         }
 
-        public bool Contains(string id)
+        public Task<bool> Contains(string id)
         {
             if (!_list.TryGetValue(id, out var start))
-                return false;
+                return Task.FromResult(true);
 
             var result = start > (DateTime.Now.AddMinutes(-1 * TTL));
 
             if (!result)
                 _list.TryRemove(id, out var _);
 
-            return result;
+            return Task.FromResult(result);
         }
 
         private void Cycle(object target)
@@ -56,9 +58,10 @@ namespace WorkflowCore.Services
             _cycleTimer.Dispose();
         }
 
-        public void Remove(string id)
+        public Task Remove(string id)
         {
             _list.TryRemove(id, out var _);
+            return Task.CompletedTask;
         }
     }
 }

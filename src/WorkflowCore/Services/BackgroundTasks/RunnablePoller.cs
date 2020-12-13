@@ -13,14 +13,14 @@ namespace WorkflowCore.Services.BackgroundTasks
         private readonly IDistributedLockProvider _lockProvider;
         private readonly IQueueProvider _queueProvider;
         private readonly ILogger _logger;
-        private readonly IGreyList _greylist;
+        private readonly IQueueCache _queueCache;
         private readonly WorkflowOptions _options;
         private Timer _pollTimer;
 
-        public RunnablePoller(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IGreyList greylist, WorkflowOptions options)
+        public RunnablePoller(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IQueueCache queueCache, WorkflowOptions options)
         {
             _persistenceStore = persistenceStore;
-            _greylist = greylist;
+            _queueCache = queueCache;
             _queueProvider = queueProvider;            
             _logger = loggerFactory.CreateLogger<RunnablePoller>();
             _lockProvider = lockProvider;
@@ -57,13 +57,13 @@ namespace WorkflowCore.Services.BackgroundTasks
                         var runnables = await _persistenceStore.GetRunnableInstances(DateTime.Now);
                         foreach (var item in runnables)
                         {
-                            if (_greylist.Contains($"wf:{item}"))
+                            if (await _queueCache.Contains($"wf:{item}"))
                             {
-                                _logger.LogDebug($"Got greylisted workflow {item}");
+                                _logger.LogDebug($"Workflow already queued {item}");
                                 continue;
                             }
                             _logger.LogDebug("Got runnable instance {0}", item);
-                            _greylist.Add($"wf:{item}");
+                            await _queueCache.Add($"wf:{item}");
                             await _queueProvider.QueueWork(item, QueueType.Workflow);
                         }
                     }
@@ -88,14 +88,14 @@ namespace WorkflowCore.Services.BackgroundTasks
                         var events = await _persistenceStore.GetRunnableEvents(DateTime.Now);
                         foreach (var item in events.ToList())
                         {
-                            if (_greylist.Contains($"evt:{item}"))
+                            if (await _queueCache.Contains($"evt:{item}"))
                             {
-                                _logger.LogDebug($"Got greylisted event {item}");
-                                _greylist.Add($"evt:{item}");
+                                _logger.LogDebug($"Event already queued {item}");
+                                await _queueCache.Add($"evt:{item}"); // TODO: Is this right here ?
                                 continue;
                             }
                             _logger.LogDebug($"Got unprocessed event {item}");
-                            _greylist.Add($"evt:{item}");
+                            await _queueCache.Add($"evt:{item}");
                             await _queueProvider.QueueWork(item, QueueType.Event);
                         }
                     }
