@@ -57,13 +57,12 @@ namespace WorkflowCore.Services.BackgroundTasks
                         var runnables = await _persistenceStore.GetRunnableInstances(DateTime.Now);
                         foreach (var item in runnables)
                         {
-                            if (await _queueCache.Contains($"wf:{item}"))
+                            if (await _queueCache.ContainsOrAdd($"wf:{item}"))
                             {
                                 _logger.LogDebug($"Workflow already queued {item}");
                                 continue;
                             }
                             _logger.LogDebug("Got runnable instance {0}", item);
-                            await _queueCache.Add($"wf:{item}");
                             await _queueProvider.QueueWork(item, QueueType.Workflow);
                         }
                     }
@@ -91,11 +90,11 @@ namespace WorkflowCore.Services.BackgroundTasks
                             if (await _queueCache.Contains($"evt:{item}"))
                             {
                                 _logger.LogDebug($"Event already queued {item}");
-                                await _queueCache.Add($"evt:{item}"); // TODO: Is this right here ?
+                                await _queueCache.ContainsOrAdd($"evt:{item}"); // TODO: Is this right here ?
                                 continue;
                             }
                             _logger.LogDebug($"Got unprocessed event {item}");
-                            await _queueCache.Add($"evt:{item}");
+                            await _queueCache.ContainsOrAdd($"evt:{item}");
                             await _queueProvider.QueueWork(item, QueueType.Event);
                         }
                     }

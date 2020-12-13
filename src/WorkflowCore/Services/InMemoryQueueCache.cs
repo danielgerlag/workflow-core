@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
@@ -10,7 +10,8 @@ namespace WorkflowCore.Services
     public class InMemoryQueueCache : IQueueCache, IDisposable
     {
         private readonly Timer _cycleTimer;
-        private readonly ConcurrentDictionary<string, DateTime> _list;
+        private readonly Dictionary<string, DateTime> _items;
+        private readonly SemaphoreSlim _sync = new SemaphoreSlim(1, 1);
         private readonly ILogger _logger;
         private const int CYCLE_TIME = 30;
         private const int TTL = 5;
@@ -18,50 +19,72 @@ namespace WorkflowCore.Services
         public InMemoryQueueCache(ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<InMemoryQueueCache>();
-            _list = new ConcurrentDictionary<string, DateTime>();
-            _cycleTimer = new Timer(new TimerCallback(Cycle), null, TimeSpan.FromMinutes(CYCLE_TIME), TimeSpan.FromMinutes(CYCLE_TIME));
+            _items = new Dictionary<string, DateTime>();
+            _cycleTimer = new Timer(o => _ = Cycle(), null, TimeSpan.FromMinutes(CYCLE_TIME), TimeSpan.FromMinutes(CYCLE_TIME));
         }
 
-        public Task Add(string id)
+        public async Task<bool> ContainsOrAdd(string id)
         {
-            _list.AddOrUpdate(id, DateTime.Now, (key, val) => DateTime.Now);
-            return Task.CompletedTask;
-        }
+            await _sync.WaitAsync();
 
-        public Task<bool> Contains(string id)
-        {
-            if (!_list.TryGetValue(id, out var start))
-                return Task.FromResult(true);
-
-            var result = start > (DateTime.Now.AddMinutes(-1 * TTL));
-
-            if (!result)
-                _list.TryRemove(id, out var _);
-
-            return Task.FromResult(result);
-        }
-
-        private void Cycle(object target)
-        {
             try
             {
-                _list.Clear();
+                if (!_items.TryGetValue(id, out var start))
+                {
+                    _items[id] = DateTime.Now;
+                    return false;
+                }
+
+                var isValid = start > (DateTime.Now.AddMinutes(-1 * TTL));
+                if (!isValid)
+                {
+                    _items.Remove(id);
+                }
+
+                return isValid;
+            }
+            finally
+            {
+                _sync.Release();
+            }
+        }
+
+        private async Task Cycle()
+        {
+            await _sync.WaitAsync();
+
+            try
+            {
+                _items.Clear();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
+            }
+            finally
+            {
+                _sync.Release();
             }
         }
 
         public void Dispose()
         {
             _cycleTimer.Dispose();
+            _sync.Dispose();
         }
 
-        public Task Remove(string id)
+        public async Task Remove(string id)
         {
-            _list.TryRemove(id, out var _);
-            return Task.CompletedTask;
+            await _sync.WaitAsync();
+
+            try
+            {
+                _items.Remove(id);
+            }
+            finally
+            {
+                _sync.Release();
+            }
         }
     }
 }
