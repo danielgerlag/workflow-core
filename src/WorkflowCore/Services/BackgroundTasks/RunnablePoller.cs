@@ -57,13 +57,15 @@ namespace WorkflowCore.Services.BackgroundTasks
                         var runnables = await _persistenceStore.GetRunnableInstances(DateTime.Now);
                         foreach (var item in runnables)
                         {
-                            if (await _queueCache.ContainsOrAdd($"wf:{item}"))
+                            if (await _queueCache.Add($"wf:{item}"))
+                            {
+                                _logger.LogDebug("Got runnable instance {0}", item);
+                                await _queueProvider.QueueWork(item, QueueType.Workflow);
+                            }
+                            else
                             {
                                 _logger.LogDebug($"Workflow already queued {item}");
-                                continue;
                             }
-                            _logger.LogDebug("Got runnable instance {0}", item);
-                            await _queueProvider.QueueWork(item, QueueType.Workflow);
                         }
                     }
                     finally
@@ -87,13 +89,16 @@ namespace WorkflowCore.Services.BackgroundTasks
                         var events = await _persistenceStore.GetRunnableEvents(DateTime.Now);
                         foreach (var item in events.ToList())
                         {
-                            if (await _queueCache.ContainsOrAdd($"evt:{item}"))
+                            if (await _queueCache.Add($"evt:{item}"))
+                            {
+                                _logger.LogDebug($"Got unprocessed event {item}");
+                                await _queueProvider.QueueWork(item, QueueType.Event);
+                            }
+                            else
                             {
                                 _logger.LogDebug($"Event already queued {item}");
-                                continue;
                             }
-                            _logger.LogDebug($"Got unprocessed event {item}");
-                            await _queueProvider.QueueWork(item, QueueType.Event);
+                            
                         }
                     }
                     finally

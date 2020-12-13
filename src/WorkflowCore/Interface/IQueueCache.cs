@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using WorkflowCore.Models;
 
 namespace WorkflowCore.Interface
 {
@@ -6,10 +7,10 @@ namespace WorkflowCore.Interface
     {
         /// <summary>Adds the specified element to the cache.</summary>
         /// <param name="id"></param>
-        /// <returns>false if the element is added; true if the element is already present.</returns>
-        Task<bool> ContainsOrAdd(string id);
+        /// <returns>true if the element is added; false if the element is already present or expired.</returns>
+        Task<bool> Add(CacheItem id);
 
         /// <summary>Remove specified element from the cache.</summary>
-        Task Remove(string id);
+        Task Remove(CacheItem id);
     }
 }

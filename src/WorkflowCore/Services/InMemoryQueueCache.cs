@@ -1,47 +1,49 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
+using WorkflowCore.Models;
 
 namespace WorkflowCore.Services
 {
     public class InMemoryQueueCache : IQueueCache, IDisposable
     {
         private readonly Timer _cycleTimer;
-        private readonly Dictionary<string, DateTime> _items;
+        private readonly HashSet<CacheItem> _items;
         private readonly SemaphoreSlim _sync = new SemaphoreSlim(1, 1);
         private readonly ILogger _logger;
         private const int CYCLE_TIME = 30;
-        private const int TTL = 5;
 
         public InMemoryQueueCache(ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<InMemoryQueueCache>();
-            _items = new Dictionary<string, DateTime>();
+            _items = new HashSet<CacheItem>();
             _cycleTimer = new Timer(o => _ = Cycle(), null, TimeSpan.FromMinutes(CYCLE_TIME), TimeSpan.FromMinutes(CYCLE_TIME));
         }
 
-        public async Task<bool> ContainsOrAdd(string id)
+        public async Task<bool> Add(CacheItem id)
         {
             await _sync.WaitAsync();
 
             try
             {
-                if (!_items.TryGetValue(id, out var start))
+                if (!_items.Contains(id))
                 {
-                    _items[id] = DateTime.Now;
-                    return false;
+                    _items.Add(id);
+                    return true;
                 }
 
-                var isValid = start > (DateTime.Now.AddMinutes(-1 * TTL));
-                if (!isValid)
+                CacheItem item = _items.First(i => i == id);
+                var isExpired = item.IsExpired();
+                if (isExpired)
                 {
                     _items.Remove(id);
                 }
 
-                return isValid;
+                return isExpired;
             }
             finally
             {
@@ -73,7 +75,7 @@ namespace WorkflowCore.Services
             _sync.Dispose();
         }
 
-        public async Task Remove(string id)
+        public async Task Remove(CacheItem id)
         {
             await _sync.WaitAsync();
 

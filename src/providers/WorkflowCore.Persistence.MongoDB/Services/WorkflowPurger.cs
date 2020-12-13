@@ -6,19 +6,6 @@ using WorkflowCore.Interface;
 
 namespace WorkflowCore.Persistence.MongoDB.Services
 {
-    public class MongoQueueCache : IQueueCache
-    {
-        public Task<bool> ContainsOrAdd(string id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task Remove(string id)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
     public class WorkflowPurger : IWorkflowPurger
     {
         private readonly IMongoDatabase _database;
