@@ -87,14 +87,12 @@ namespace WorkflowCore.Services.BackgroundTasks
                         var events = await _persistenceStore.GetRunnableEvents(DateTime.Now);
                         foreach (var item in events.ToList())
                         {
-                            if (await _queueCache.Contains($"evt:{item}"))
+                            if (await _queueCache.ContainsOrAdd($"evt:{item}"))
                             {
                                 _logger.LogDebug($"Event already queued {item}");
-                                await _queueCache.ContainsOrAdd($"evt:{item}"); // TODO: Is this right here ?
                                 continue;
                             }
                             _logger.LogDebug($"Got unprocessed event {item}");
-                            await _queueCache.ContainsOrAdd($"evt:{item}");
                             await _queueProvider.QueueWork(item, QueueType.Event);
                         }
                     }
