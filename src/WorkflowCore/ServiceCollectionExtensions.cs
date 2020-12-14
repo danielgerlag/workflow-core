@@ -37,22 +37,22 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<WorkflowOptions>(options);
             services.AddSingleton<ILifeCycleEventPublisher, LifeCycleEventPublisher>();
 
-            if (!options.EnableWorkflows)
+            if (options.EnableWorkflows)
             {
                 services.AddTransient<IBackgroundTask, WorkflowConsumer>();
             }
 
-            if (!options.EnableEvents)
+            if (options.EnableEvents)
             {
                 services.AddTransient<IBackgroundTask, EventConsumer>();
             }
 
-            if (!options.EnableIndexes)
+            if (options.EnableIndexes)
             {
                 services.AddTransient<IBackgroundTask, IndexConsumer>();
             }
 
-            if (!options.EnablePolling)
+            if (options.EnablePolling)
             {
                 services.AddTransient<IBackgroundTask, RunnablePoller>();
             }
