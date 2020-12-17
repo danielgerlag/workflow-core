@@ -83,27 +83,45 @@ namespace WorkflowCore.Services.BackgroundTasks
                         continue;
                     }
 
-                    var hasTask = false;
-                    lock (_activeTasks)
-                    {
-                        hasTask = _activeTasks.ContainsKey(item);
-                    }
-                    if (hasTask)
-                    {
-                        _secondPasses.Add(item);
-                        if (!EnableSecondPasses)
-                            await QueueProvider.QueueWork(item, Queue);
-                        continue;
-                    }                   
-
-                    _secondPasses.TryRemove(item);
-
                     var waitHandle = new ManualResetEvent(false);
-                    lock (_activeTasks)
+
+                    var skipExecute = false;
+
+                    var retryCheck = true;
+                    while (retryCheck)
                     {
-                        _activeTasks.Add(item, waitHandle);
+                        var hasTask = false;
+                        lock (_activeTasks)
+                        {
+                            hasTask = _activeTasks.ContainsKey(item);
+                        }
+
+                        if (hasTask)
+                        {
+                            _secondPasses.Add(item);
+                            if (!EnableSecondPasses)
+                                await QueueProvider.QueueWork(item, Queue);
+
+                            skipExecute = true;
+                            break;
+                        }
+
+                        _secondPasses.TryRemove(item);
+
+                        lock (_activeTasks)
+                        {
+                            if (!_activeTasks.ContainsKey(item))
+                            {
+                                _activeTasks.Add(item, waitHandle);
+                                retryCheck = false;
+                            }
+                        }
                     }
-                    var task = ExecuteItem(item, waitHandle);
+
+                    if (!skipExecute)
+                    {
+                        var task = ExecuteItem(item, waitHandle);
+                    }
                 }
                 catch (OperationCanceledException)
                 {
