@@ -37,10 +37,26 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<WorkflowOptions>(options);
             services.AddSingleton<ILifeCycleEventPublisher, LifeCycleEventPublisher>();
 
-            services.AddTransient<IBackgroundTask, WorkflowConsumer>();
-            services.AddTransient<IBackgroundTask, EventConsumer>();
-            services.AddTransient<IBackgroundTask, IndexConsumer>();
-            services.AddTransient<IBackgroundTask, RunnablePoller>();
+            if (options.EnableWorkflows)
+            {
+                services.AddTransient<IBackgroundTask, WorkflowConsumer>();
+            }
+
+            if (options.EnableEvents)
+            {
+                services.AddTransient<IBackgroundTask, EventConsumer>();
+            }
+
+            if (options.EnableIndexes)
+            {
+                services.AddTransient<IBackgroundTask, IndexConsumer>();
+            }
+
+            if (options.EnablePolling)
+            {
+                services.AddTransient<IBackgroundTask, RunnablePoller>();
+            }
+
             services.AddTransient<IBackgroundTask>(sp => sp.GetService<ILifeCycleEventPublisher>());
 
             services.AddTransient<IWorkflowErrorHandler, CompensateHandler>();
@@ -51,10 +67,10 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IGreyList, GreyList>();
             services.AddSingleton<IWorkflowController, WorkflowController>();
             services.AddSingleton<IActivityController, ActivityController>();
-            services.AddSingleton<IStepExecutor, StepExecutor>();
-            services.AddSingleton<IWorkflowMiddlewareRunner, WorkflowMiddlewareRunner>();
-            services.AddSingleton<IWorkflowMiddlewareErrorHandler, DefaultWorkflowMiddlewareErrorHandler>();
             services.AddSingleton<IWorkflowHost, WorkflowHost>();
+            services.AddTransient<IStepExecutor, StepExecutor>();
+            services.AddTransient<IWorkflowMiddlewareErrorHandler, DefaultWorkflowMiddlewareErrorHandler>();
+            services.AddTransient<IWorkflowMiddlewareRunner, WorkflowMiddlewareRunner>();
             services.AddTransient<IScopeProvider, ScopeProvider>();
             services.AddTransient<IWorkflowExecutor, WorkflowExecutor>();
             services.AddTransient<ICancellationProcessor, CancellationProcessor>();

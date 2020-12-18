@@ -22,12 +22,10 @@ namespace WorkflowCore.Services
         private readonly ICancellationProcessor _cancellationProcessor;
         private readonly ILifeCycleEventPublisher _publisher;
         private readonly WorkflowOptions _options;
-        private readonly IStepExecutor _stepExecutor;
-        private readonly IWorkflowMiddlewareRunner _middlewareRunner;
 
         private IWorkflowHost Host => _serviceProvider.GetService<IWorkflowHost>();
 
-        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IScopeProvider scopeProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, ILifeCycleEventPublisher publisher, ICancellationProcessor cancellationProcessor, WorkflowOptions options, IWorkflowMiddlewareRunner middlewareRunner, IStepExecutor stepExecutor, ILoggerFactory loggerFactory)
+        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IScopeProvider scopeProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, ILifeCycleEventPublisher publisher, ICancellationProcessor cancellationProcessor, WorkflowOptions options, ILoggerFactory loggerFactory)
         {
             _serviceProvider = serviceProvider;
             _scopeProvider = scopeProvider;
@@ -38,8 +36,6 @@ namespace WorkflowCore.Services
             _options = options;
             _logger = loggerFactory.CreateLogger<WorkflowExecutor>();
             _executionResultProcessor = executionResultProcessor;
-            _middlewareRunner = middlewareRunner;
-            _stepExecutor = stepExecutor;
         }
 
         public async Task<WorkflowExecutorResult> Execute(WorkflowInstance workflow, CancellationToken cancellationToken = default)
@@ -157,6 +153,7 @@ namespace WorkflowCore.Services
                 _logger.LogDebug("Starting step {0} on workflow {1}", step.Name, workflow.Id);
 
                 IStepBody body = step.ConstructBody(scope.ServiceProvider);
+                var stepExecutor = scope.ServiceProvider.GetRequiredService<IStepExecutor>();
 
                 if (body == null)
                 {
@@ -185,7 +182,7 @@ namespace WorkflowCore.Services
                         return;
                 }
 
-                var result = await _stepExecutor.ExecuteStep(context, body);
+                var result = await stepExecutor.ExecuteStep(context, body);
 
                 if (result.Proceed)
                 {
@@ -229,22 +226,19 @@ namespace WorkflowCore.Services
                 workflow.NextExecution = Math.Min(pointerSleep, workflow.NextExecution ?? pointerSleep);
             }
 
-            if (workflow.NextExecution == null)
+            foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count > 0))
             {
-                foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count > 0))
+                if (!workflow.ExecutionPointers.FindByScope(pointer.Id).All(x => x.EndTime.HasValue))
+                    continue;
+
+                if (!pointer.SleepUntil.HasValue)
                 {
-                    if (!workflow.ExecutionPointers.FindByScope(pointer.Id).All(x => x.EndTime.HasValue))
-                        continue;
-
-                    if (!pointer.SleepUntil.HasValue)
-                    {
-                        workflow.NextExecution = 0;
-                        return;
-                    }
-
-                    var pointerSleep = pointer.SleepUntil.Value.ToUniversalTime().Ticks;
-                    workflow.NextExecution = Math.Min(pointerSleep, workflow.NextExecution ?? pointerSleep);
+                    workflow.NextExecution = 0;
+                    return;
                 }
+
+                var pointerSleep = pointer.SleepUntil.Value.ToUniversalTime().Ticks;
+                workflow.NextExecution = Math.Min(pointerSleep, workflow.NextExecution ?? pointerSleep);
             }
 
             if ((workflow.NextExecution != null) || (workflow.ExecutionPointers.Any(x => x.EndTime == null)))
@@ -253,7 +247,11 @@ namespace WorkflowCore.Services
             workflow.Status = WorkflowStatus.Complete;
             workflow.CompleteTime = _datetimeProvider.UtcNow;
 
-            await _middlewareRunner.RunPostMiddleware(workflow, def);
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var middlewareRunner = scope.ServiceProvider.GetRequiredService<IWorkflowMiddlewareRunner>();
+                await middlewareRunner.RunPostMiddleware(workflow, def);
+            }
 
             _publisher.PublishNotification(new WorkflowCompleted()
             {
