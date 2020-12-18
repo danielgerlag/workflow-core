@@ -12,7 +12,7 @@ namespace WorkflowCore.Services
     /// </summary>
     public class SingleNodeLockProvider : IDistributedLockProvider
     {   
-        private List<string> _locks = new List<string>();
+        private HashSet<string> _locks = new HashSet<string>();
      
         public async Task<bool> AcquireLock(string Id, CancellationToken cancellationToken)
         {
