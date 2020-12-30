@@ -30,6 +30,8 @@ namespace Docker.Testify
         protected readonly DockerClient docker;
     	protected string containerId;
 
+        private static object Lock = new object();
+
         protected DockerSetup()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -122,21 +124,24 @@ namespace Docker.Testify
 
         private int GetFreePort()
         {
-            const int startRange = 1000;
-            const int endRange = 10000;
-            var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
-            var tcpPorts = ipGlobalProperties.GetActiveTcpListeners();
-            var udpPorts = ipGlobalProperties.GetActiveUdpListeners();
+            lock (Lock)
+            {
+                const int startRange = 1000;
+                const int endRange = 10000;
+                var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+                var tcpPorts = ipGlobalProperties.GetActiveTcpListeners();
+                var udpPorts = ipGlobalProperties.GetActiveUdpListeners();
 
-            var result = startRange;
+                var result = startRange;
 
-            while (((tcpPorts.Any(x => x.Port == result)) || (udpPorts.Any(x => x.Port == result))) && result <= endRange)
-                result++;
+                while (((tcpPorts.Any(x => x.Port == result)) || (udpPorts.Any(x => x.Port == result))) && result <= endRange)
+                    result++;
 
-            if (result > endRange)
-                throw new PortsInUseException();
+                if (result > endRange)
+                    throw new PortsInUseException();
 
-            return result;
+                return result;
+            }
 	    }
     }
 }
