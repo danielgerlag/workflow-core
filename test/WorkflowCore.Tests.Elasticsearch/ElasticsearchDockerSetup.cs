@@ -43,7 +43,7 @@ namespace WorkflowCore.Tests.Elasticsearch
     }
 
     [CollectionDefinition("Elasticsearch collection")]
-    public class DynamoDbCollection : ICollectionFixture<ElasticsearchDockerSetup>
+    public class ElasticsearchCollection : ICollectionFixture<ElasticsearchDockerSetup>
     {
     }
 }

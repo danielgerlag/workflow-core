@@ -23,6 +23,7 @@ namespace WorkflowCore.IntegrationTests
 
             foreach (var item in BuildTestData())
                 Subject.IndexWorkflow(item).Wait();
+            System.Threading.Thread.Sleep(1000);
         }
 
         protected IEnumerable<WorkflowInstance> BuildTestData()
