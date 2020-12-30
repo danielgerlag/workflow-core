@@ -20,6 +20,7 @@ namespace WorkflowCore.Tests.DynamoDB
 
         public override string ImageName => @"amazon/dynamodb-local";
         public override int InternalPort => 8000;
+        public override TimeSpan TimeOut => TimeSpan.FromSeconds(120);
 
         public override void PublishConnectionInfo()
         {
