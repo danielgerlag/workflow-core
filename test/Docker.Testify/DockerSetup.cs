@@ -126,8 +126,8 @@ namespace Docker.Testify
         {
             lock (UsedPorts)
             {
-                const int startRange = 1000;
-                const int endRange = 10000;
+                const int startRange = 10002;
+                const int endRange = 15000;
                 var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
                 var tcpPorts = ipGlobalProperties.GetActiveTcpListeners();
                 var udpPorts = ipGlobalProperties.GetActiveUdpListeners();
