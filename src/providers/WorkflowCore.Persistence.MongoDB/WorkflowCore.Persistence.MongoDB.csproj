@@ -14,11 +14,11 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>3.0.2</Version>
+    <Version>3.0.3</Version>
     <Description>Provides support to persist workflows running on Workflow Core to a MongoDB database.</Description>
-    <AssemblyVersion>3.0.2.0</AssemblyVersion>
-    <FileVersion>3.0.2.0</FileVersion>
-    <PackageVersion>3.0.2</PackageVersion>
+    <AssemblyVersion>3.0.3.0</AssemblyVersion>
+    <FileVersion>3.0.3.0</FileVersion>
+    <PackageVersion>3.0.3</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
