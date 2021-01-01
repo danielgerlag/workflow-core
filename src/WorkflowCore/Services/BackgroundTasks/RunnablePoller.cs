@@ -15,15 +15,17 @@ namespace WorkflowCore.Services.BackgroundTasks
         private readonly ILogger _logger;
         private readonly IGreyList _greylist;
         private readonly WorkflowOptions _options;
+        private readonly IDateTimeProvider _dateTimeProvider;
         private Timer _pollTimer;
 
-        public RunnablePoller(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IGreyList greylist, WorkflowOptions options)
+        public RunnablePoller(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IGreyList greylist, IDateTimeProvider dateTimeProvider, WorkflowOptions options)
         {
             _persistenceStore = persistenceStore;
             _greylist = greylist;
             _queueProvider = queueProvider;            
             _logger = loggerFactory.CreateLogger<RunnablePoller>();
             _lockProvider = lockProvider;
+            _dateTimeProvider = dateTimeProvider;
             _options = options;
         }
 
@@ -54,7 +56,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     try
                     {
                         _logger.LogInformation("Polling for runnable workflows");                        
-                        var runnables = await _persistenceStore.GetRunnableInstances(DateTime.Now);
+                        var runnables = await _persistenceStore.GetRunnableInstances(_dateTimeProvider.Now);
                         foreach (var item in runnables)
                         {
                             if (_greylist.Contains($"wf:{item}"))
@@ -85,7 +87,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     try
                     {
                         _logger.LogInformation("Polling for unprocessed events");                        
-                        var events = await _persistenceStore.GetRunnableEvents(DateTime.Now);
+                        var events = await _persistenceStore.GetRunnableEvents(_dateTimeProvider.Now);
                         foreach (var item in events.ToList())
                         {
                             if (_greylist.Contains($"evt:{item}"))

@@ -62,7 +62,7 @@ namespace WorkflowCore.Providers.Redis.Services
         public async Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt)
         {
             var result = new List<string>();
-            var data = await _redis.SortedSetRangeByScoreAsync($"{_prefix}.{WORKFLOW_SET}.{RUNNABLE_INDEX}", -1, DateTime.UtcNow.Ticks);
+            var data = await _redis.SortedSetRangeByScoreAsync($"{_prefix}.{WORKFLOW_SET}.{RUNNABLE_INDEX}", -1, asAt.ToUniversalTime().Ticks);
 
             foreach (var item in data)
                 result.Add(item);

@@ -12,11 +12,13 @@ namespace WorkflowCore.Services
     {
         protected readonly ILogger _logger;
         private readonly IExecutionResultProcessor _executionResultProcessor;
+        private readonly IDateTimeProvider _dateTimeProvider;
 
-        public CancellationProcessor(IExecutionResultProcessor executionResultProcessor, ILoggerFactory logFactory)
+        public CancellationProcessor(IExecutionResultProcessor executionResultProcessor, ILoggerFactory logFactory, IDateTimeProvider dateTimeProvider)
         {
             _executionResultProcessor = executionResultProcessor;
             _logger = logFactory.CreateLogger<CancellationProcessor>();
+            _dateTimeProvider = dateTimeProvider;
         }
 
         public void ProcessCancellations(WorkflowInstance workflow, WorkflowDefinition workflowDef, WorkflowExecutorResult executionResult)
@@ -44,13 +46,13 @@ namespace WorkflowCore.Services
                             _executionResultProcessor.ProcessExecutionResult(workflow, workflowDef, ptr, step, ExecutionResult.Next(), executionResult);
                         }
 
-                        ptr.EndTime = DateTime.Now.ToUniversalTime();
+                        ptr.EndTime = _dateTimeProvider.UtcNow;
                         ptr.Active = false;
                         ptr.Status = PointerStatus.Cancelled;
 
                         foreach (var descendent in workflow.ExecutionPointers.FindByScope(ptr.Id).Where(x => x.Status != PointerStatus.Complete && x.Status != PointerStatus.Cancelled))
                         {
-                            descendent.EndTime = DateTime.Now.ToUniversalTime();
+                            descendent.EndTime = _dateTimeProvider.UtcNow;
                             descendent.Active = false;
                             descendent.Status = PointerStatus.Cancelled;
                         }
