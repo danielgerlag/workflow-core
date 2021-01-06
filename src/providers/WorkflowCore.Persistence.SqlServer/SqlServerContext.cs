@@ -28,37 +28,37 @@ namespace WorkflowCore.Persistence.SqlServer
         protected override void ConfigureSubscriptionStorage(EntityTypeBuilder<PersistedSubscription> builder)
         {
             builder.ToTable("Subscription", "wfc");
-            builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
+            builder.Property(x => x.PersistenceId).UseIdentityColumn();
         }
 
         protected override void ConfigureWorkflowStorage(EntityTypeBuilder<PersistedWorkflow> builder)
         {
             builder.ToTable("Workflow", "wfc");
-            builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
+            builder.Property(x => x.PersistenceId).UseIdentityColumn();
         }
         
         protected override void ConfigureExecutionPointerStorage(EntityTypeBuilder<PersistedExecutionPointer> builder)
         {
             builder.ToTable("ExecutionPointer", "wfc");
-            builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
+            builder.Property(x => x.PersistenceId).UseIdentityColumn();
         }
 
         protected override void ConfigureExecutionErrorStorage(EntityTypeBuilder<PersistedExecutionError> builder)
         {
             builder.ToTable("ExecutionError", "wfc");
-            builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
+            builder.Property(x => x.PersistenceId).UseIdentityColumn();
         }
 
         protected override void ConfigureExetensionAttributeStorage(EntityTypeBuilder<PersistedExtensionAttribute> builder)
         {
             builder.ToTable("ExtensionAttribute", "wfc");
-            builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
+            builder.Property(x => x.PersistenceId).UseIdentityColumn();
         }
 
         protected override void ConfigureEventStorage(EntityTypeBuilder<PersistedEvent> builder)
         {
             builder.ToTable("Event", "wfc");
-            builder.Property(x => x.PersistenceId).UseSqlServerIdentityColumn();
+            builder.Property(x => x.PersistenceId).UseIdentityColumn();
         }
     }
 }
