@@ -133,12 +133,9 @@ namespace WorkflowCore.LockProviders.SqlServer
             }
         }
 
-        public async Task Start()
-        {         
-        }
-
-        public async Task Stop()
-        {
-        }
+        public Task Start() => Task.CompletedTask;
+        
+        public Task Stop() => Task.CompletedTask;
+        
     }
 }

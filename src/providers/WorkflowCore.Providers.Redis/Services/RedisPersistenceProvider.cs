@@ -70,7 +70,7 @@ namespace WorkflowCore.Providers.Redis.Services
             return result;
         }
 
-        public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip,
+        public Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip,
             int take)
         {
             throw new NotImplementedException();

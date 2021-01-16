@@ -93,13 +93,15 @@ namespace WorkflowCore.Providers.Azure.Services
             _renewTimer = new Timer(RenewLeases, null, RenewInterval, RenewInterval);
         }
 
-        public async Task Stop()
+        public Task Stop()
         {
             if (_renewTimer == null)
-                return;
+                return Task.CompletedTask;
 
             _renewTimer.Dispose();
             _renewTimer = null;
+
+            return Task.CompletedTask;
         }
 
         private async void RenewLeases(object state)
