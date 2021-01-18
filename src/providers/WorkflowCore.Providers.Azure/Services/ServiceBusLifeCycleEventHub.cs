@@ -42,7 +42,8 @@ namespace WorkflowCore.Providers.Azure.Services
             var payload = JsonConvert.SerializeObject(evt, _serializerSettings);
             var message = new Message(Encoding.Default.GetBytes(payload))
             {
-                Label = evt.Reference
+                Label = evt.Reference,
+                SessionId = evt.WorkflowInstanceId
             };
 
             await _topicClient.SendAsync(message);
@@ -86,13 +87,13 @@ namespace WorkflowCore.Providers.Azure.Services
 
                 NotifySubscribers(evt);
 
-                await _subscriptionClient
+                await messageSession
                     .CompleteAsync(message.SystemProperties.LockToken)
                     .ConfigureAwait(false);
             }
             catch
             {
-                await _subscriptionClient
+                await messageSession
                     .AbandonAsync(message.SystemProperties.LockToken);
             }
         }
