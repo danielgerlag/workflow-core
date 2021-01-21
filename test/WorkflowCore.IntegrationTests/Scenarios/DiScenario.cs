@@ -87,6 +87,8 @@ namespace WorkflowCore.IntegrationTests.Scenarios
     {
         protected void ConfigureHost(IServiceProvider serviceProvider)
         {
+            Workflow = serviceProvider.GetService<DiWorkflow>();
+
             PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
             Host = serviceProvider.GetService<IWorkflowHost>();
             Host.RegisterWorkflow<DiWorkflow, DiData>();
