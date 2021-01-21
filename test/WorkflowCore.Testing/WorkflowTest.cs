@@ -24,6 +24,8 @@ namespace WorkflowCore.Testing
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
+            services.AddTransient<TWorkflow>();
+            
             ConfigureServices(services);
 
             var serviceProvider = services.BuildServiceProvider();
@@ -54,7 +56,6 @@ namespace WorkflowCore.Testing
         protected virtual void ConfigureServices(IServiceCollection services)
         {
             services.AddWorkflow();
-            services.AddTransient<TWorkflow>();
         }
 
         public string StartWorkflow(TData data)

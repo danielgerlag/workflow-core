@@ -113,6 +113,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             services.AddTransient<Dependency1>();
             services.AddTransient<Dependency2>();
             services.AddTransient<DiStep1>();
+            services.AddTransient<DiWorkflow>();
             services.AddLogging();
             ConfigureServices(services);
 
@@ -151,6 +152,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             services.AddScoped<Dependency2>();
             services.AddTransient<DiStep1>();
             services.AddLogging();
+            services.AddTransient<DiWorkflow>();
             ConfigureServices(services);
 
             var serviceProvider = services.BuildServiceProvider();
@@ -193,6 +195,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             builder.RegisterType<Dependency1>().InstancePerDependency();
             builder.RegisterType<Dependency2>().InstancePerDependency();
             builder.RegisterType<DiStep1>().InstancePerDependency();
+            builder.RegisterType<DiWorkflow>().InstancePerDependency();
             var container = builder.Build();
 
             var serviceProvider = new AutofacServiceProvider(container);
@@ -235,6 +238,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             builder.RegisterType<Dependency1>().InstancePerLifetimeScope();
             builder.RegisterType<Dependency2>().InstancePerLifetimeScope();
             builder.RegisterType<DiStep1>().InstancePerLifetimeScope();
+            builder.RegisterType<DiWorkflow>().InstancePerLifetimeScope();
             var container = builder.Build();
 
             var serviceProvider = new AutofacServiceProvider(container);
