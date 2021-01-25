@@ -32,7 +32,15 @@ namespace WorkflowCore.Services
             _dateTimeProvider = dateTimeProvider;
         }
 
-        public async Task<WorkflowInstance> RunWorkflowSync<TData>(string workflowId, int version, TData data, string reference, TimeSpan timeOut, bool persistSate = true)
+        public Task<WorkflowInstance> RunWorkflowSync<TData>(string workflowId, int version, TData data,
+            string reference, TimeSpan timeOut, bool persistSate = true)
+            where TData : new()
+        {
+            return RunWorkflowSync(workflowId, version, data, reference, new CancellationTokenSource(timeOut).Token,
+                persistSate);
+        }
+
+        public async Task<WorkflowInstance> RunWorkflowSync<TData>(string workflowId, int version, TData data, string reference, CancellationToken token, bool persistSate = true)
             where TData : new()
         {
             var def = _registry.GetDefinition(workflowId, version);
