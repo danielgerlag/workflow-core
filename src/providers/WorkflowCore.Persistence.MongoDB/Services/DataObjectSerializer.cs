@@ -77,7 +77,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                 if (subPath[0] == '[')
                 {
                     var index = Int32.Parse(subPath.Trim('[', ']'));
-                    if (value.GetType().IsSubclassOf(typeof(IList)) || value.GetType().IsArray)
+                    if ((value is IList) || value.GetType().IsArray)
                     {
                         IList list = (IList) value;
                         value = list[index];
