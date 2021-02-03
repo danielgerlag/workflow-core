@@ -16,6 +16,7 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <Description>Base package for Workflow-core peristence providers using entity framework</Description>
     <Configurations>Debug;Release;ReleaseDllOnly</Configurations>
+    <Configurations>Debug;Release;Debug Data ONLY</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

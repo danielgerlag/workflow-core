@@ -7,6 +7,7 @@
     <Company />
     <Product>WorkflowCore</Product>
     <Configurations>Debug;Release;ReleaseDllOnly</Configurations>
+    <Configurations>Debug;Release;Debug Data ONLY</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

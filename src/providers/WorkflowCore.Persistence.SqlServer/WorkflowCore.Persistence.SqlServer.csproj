@@ -17,6 +17,7 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <Description>Provides support to persist workflows running on Workflow Core to a SQL Server database.</Description>
     <Configurations>Debug;Release;ReleaseDllOnly</Configurations>
+    <Configurations>Debug;Release;Debug Data ONLY</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
