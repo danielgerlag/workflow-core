@@ -51,7 +51,7 @@ namespace WorkflowCore.Services
         public void Stop()
         {
             _outbox.CompleteAdding();
-            _dispatchTask.Wait();
+            _dispatchTask?.Wait();
             _dispatchTask = null;
         }
 
