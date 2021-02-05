@@ -265,7 +265,7 @@ namespace WorkflowCore.UnitTests.Services
                 A<WorkflowDelegate>._);
 
         private static Expression<Func<Task>> HandleMethodFor(IWorkflowMiddlewareErrorHandler errorHandler) =>
-            () => errorHandler.HandleAsync(A<Exception>._);
+            () => errorHandler.HandleAsync(A<WorkflowInstance>._, A<Exception>._);
 
         public interface IDefLevelErrorHandler : IWorkflowMiddlewareErrorHandler
         {

@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using WorkflowCore.Models;
 
 namespace WorkflowCore.Interface
 {
@@ -11,8 +12,9 @@ namespace WorkflowCore.Interface
         /// <summary>
         /// Asynchronously handle the given exception.
         /// </summary>
+        /// <param name="workflowInstance">Workflow instance where error happened</param>
         /// <param name="ex">The exception to handle</param>
         /// <returns>A task that completes when handling is done.</returns>
-        Task HandleAsync(Exception ex);
+        Task HandleAsync(WorkflowInstance workflowInstance, Exception ex);
     }
 }
