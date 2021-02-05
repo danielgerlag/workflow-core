@@ -29,6 +29,14 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             public int Value1 { get; set; }
             public int Value2 { get; set; }
             public int Value3 { get; set; }
+            public decimal Value4 { get; set; }
+            
+            public DataSubclass SubValue { get; set; }
+        }
+
+        public class DataSubclass
+        {
+            public decimal Value5 { get; set; }
         }
 
         public class DataIOWorkflow : IWorkflow<MyDataClass>
@@ -47,18 +55,20 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
         public DataIOScenario()
         {
-            Setup();
+            Setup(true);
         }
 
         [Fact]
         public void Scenario()
         {
-            var workflowId = StartWorkflow(new MyDataClass() { Value1 = 2, Value2 = 3 });
+            decimal v4 = 1.235465673450897890m;
+            var workflowId = StartWorkflow(new MyDataClass() {Value1 = 2, Value2 = 3, Value4 = v4, SubValue = new DataSubclass() {Value5 = v4}});
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
             GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
             UnhandledStepErrors.Count.Should().Be(0);
             GetData(workflowId).Value3.Should().Be(5);
+            GetData(workflowId).Value4.Should().Be(v4);
         }
     }
 }
