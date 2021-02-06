@@ -32,7 +32,15 @@ namespace WorkflowCore.Services
             _dateTimeProvider = dateTimeProvider;
         }
 
-        public async Task<WorkflowInstance> RunWorkflowSync<TData>(string workflowId, int version, TData data, string reference, TimeSpan timeOut, bool persistSate = true)
+        public Task<WorkflowInstance> RunWorkflowSync<TData>(string workflowId, int version, TData data,
+            string reference, TimeSpan timeOut, bool persistSate = true)
+            where TData : new()
+        {
+            return RunWorkflowSync(workflowId, version, data, reference, new CancellationTokenSource(timeOut).Token,
+                persistSate);
+        }
+
+        public async Task<WorkflowInstance> RunWorkflowSync<TData>(string workflowId, int version, TData data, string reference, CancellationToken token, bool persistSate = true)
             where TData : new()
         {
             var def = _registry.GetDefinition(workflowId, version);
@@ -63,8 +71,6 @@ namespace WorkflowCore.Services
 
             wf.ExecutionPointers.Add(_pointerFactory.BuildGenesisPointer(def));
 
-            var stopWatch = new Stopwatch();
-
             var id = Guid.NewGuid().ToString();
 
             if (persistSate)
@@ -81,8 +87,7 @@ namespace WorkflowCore.Services
 
             try
             {
-                stopWatch.Start();
-                while ((wf.Status == WorkflowStatus.Runnable) && (timeOut.TotalMilliseconds > stopWatch.ElapsedMilliseconds))
+                while ((wf.Status == WorkflowStatus.Runnable) && !token.IsCancellationRequested)
                 {
                     await _executor.Execute(wf);
                     if (persistSate)
@@ -91,7 +96,6 @@ namespace WorkflowCore.Services
             }
             finally
             {
-                stopWatch.Stop();
                 await _lockService.ReleaseLock(id);
             }
 
