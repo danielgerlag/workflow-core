@@ -18,8 +18,9 @@ namespace WorkflowCore.Services
         private readonly IPersistenceProvider _persistenceStore;
         private readonly IExecutionPointerFactory _pointerFactory;
         private readonly IQueueProvider _queueService;
+        private readonly IDateTimeProvider _dateTimeProvider;
 
-        public SyncWorkflowRunner(IWorkflowHost host, IWorkflowExecutor executor, IDistributedLockProvider lockService, IWorkflowRegistry registry, IPersistenceProvider persistenceStore, IExecutionPointerFactory pointerFactory, IQueueProvider queueService)
+        public SyncWorkflowRunner(IWorkflowHost host, IWorkflowExecutor executor, IDistributedLockProvider lockService, IWorkflowRegistry registry, IPersistenceProvider persistenceStore, IExecutionPointerFactory pointerFactory, IQueueProvider queueService, IDateTimeProvider dateTimeProvider)
         {
             _host = host;
             _executor = executor;
@@ -28,6 +29,7 @@ namespace WorkflowCore.Services
             _persistenceStore = persistenceStore;
             _pointerFactory = pointerFactory;
             _queueService = queueService;
+            _dateTimeProvider = dateTimeProvider;
         }
 
         public async Task<WorkflowInstance> RunWorkflowSync<TData>(string workflowId, int version, TData data, string reference, TimeSpan timeOut, bool persistSate = true)
@@ -46,7 +48,7 @@ namespace WorkflowCore.Services
                 Data = data,
                 Description = def.Description,
                 NextExecution = 0,
-                CreateTime = DateTime.Now.ToUniversalTime(),
+                CreateTime = _dateTimeProvider.UtcNow,
                 Status = WorkflowStatus.Suspended,
                 Reference = reference
             };

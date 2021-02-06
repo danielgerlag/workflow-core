@@ -16,14 +16,12 @@ namespace WorkflowCore.Providers.Azure.Services
         private readonly ITopicClient _topicClient;
         private readonly ILogger _logger;
         private readonly ISubscriptionClient _subscriptionClient;
-        private readonly ICollection<Action<LifeCycleEvent>> _subscribers =
-            new HashSet<Action<LifeCycleEvent>>();
-        private readonly JsonSerializerSettings _serializerSettings =
-            new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.All,
-                ReferenceLoopHandling = ReferenceLoopHandling.Error,
-            };
+        private readonly ICollection<Action<LifeCycleEvent>> _subscribers = new HashSet<Action<LifeCycleEvent>>();
+        private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.All,
+            ReferenceLoopHandling = ReferenceLoopHandling.Error,
+        };
 
         public ServiceBusLifeCycleEventHub(
             string connectionString,
@@ -31,8 +29,7 @@ namespace WorkflowCore.Providers.Azure.Services
             string subscriptionName,
             ILoggerFactory logFactory)
         {
-            _subscriptionClient = new SubscriptionClient(
-                connectionString, topicName, subscriptionName);
+            _subscriptionClient = new SubscriptionClient(connectionString, topicName, subscriptionName);
             _topicClient = new TopicClient(connectionString, topicName);
             _logger = logFactory.CreateLogger(GetType());
         }
@@ -55,14 +52,12 @@ namespace WorkflowCore.Providers.Azure.Services
 
         public Task Start()
         {
-            var sessionHandlerOptions = new SessionHandlerOptions(ExceptionHandler)
+            var messageHandlerOptions = new MessageHandlerOptions(ExceptionHandler)
             {
-                MaxConcurrentSessions = 1,
                 AutoComplete = false
             };
 
-            _subscriptionClient.RegisterSessionHandler(
-                MessageHandler, sessionHandlerOptions);
+            _subscriptionClient.RegisterMessageHandler(MessageHandler, messageHandlerOptions);
 
             return Task.CompletedTask;
         }
@@ -73,10 +68,7 @@ namespace WorkflowCore.Providers.Azure.Services
             await _subscriptionClient.CloseAsync();
         }
 
-        private async Task MessageHandler(
-            IMessageSession messageSession,
-            Message message,
-            CancellationToken cancellationToken)
+        private async Task MessageHandler(Message message, CancellationToken cancellationToken)
         {
             try
             {
@@ -92,15 +84,13 @@ namespace WorkflowCore.Providers.Azure.Services
             }
             catch
             {
-                await _subscriptionClient
-                    .AbandonAsync(message.SystemProperties.LockToken);
+                await _subscriptionClient.AbandonAsync(message.SystemProperties.LockToken);
             }
         }
 
         private Task ExceptionHandler(ExceptionReceivedEventArgs arg)
         {
-            _logger.LogWarning(
-                default, arg.Exception, "Error on receiving events");
+            _logger.LogWarning(default, arg.Exception, "Error on receiving events");
 
             return Task.CompletedTask;
         }

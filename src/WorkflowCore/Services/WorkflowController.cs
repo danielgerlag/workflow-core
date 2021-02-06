@@ -22,8 +22,9 @@ namespace WorkflowCore.Services
         private readonly ILifeCycleEventHub _eventHub;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _logger;
+        private readonly IDateTimeProvider _dateTimeProvider;
 
-        public WorkflowController(IPersistenceProvider persistenceStore, IDistributedLockProvider lockProvider, IWorkflowRegistry registry, IQueueProvider queueProvider, IExecutionPointerFactory pointerFactory, ILifeCycleEventHub eventHub, ILoggerFactory loggerFactory, IServiceProvider serviceProvider)
+        public WorkflowController(IPersistenceProvider persistenceStore, IDistributedLockProvider lockProvider, IWorkflowRegistry registry, IQueueProvider queueProvider, IExecutionPointerFactory pointerFactory, ILifeCycleEventHub eventHub, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IDateTimeProvider dateTimeProvider)
         {
             _persistenceStore = persistenceStore;
             _lockProvider = lockProvider;
@@ -33,6 +34,7 @@ namespace WorkflowCore.Services
             _eventHub = eventHub;
             _serviceProvider = serviceProvider;
             _logger = loggerFactory.CreateLogger<WorkflowController>();
+            _dateTimeProvider = dateTimeProvider;
         }
 
         public Task<string> StartWorkflow(string workflowId, object data = null, string reference=null)
@@ -68,7 +70,7 @@ namespace WorkflowCore.Services
                 Data = data,
                 Description = def.Description,
                 NextExecution = 0,
-                CreateTime = DateTime.Now.ToUniversalTime(),
+                CreateTime = _dateTimeProvider.UtcNow,
                 Status = WorkflowStatus.Runnable,
                 Reference = reference
             };
@@ -94,7 +96,7 @@ namespace WorkflowCore.Services
             await _queueProvider.QueueWork(id, QueueType.Index);
             await _eventHub.PublishNotification(new WorkflowStarted()
             {
-                EventTimeUtc = DateTime.UtcNow,
+                EventTimeUtc = _dateTimeProvider.UtcNow,
                 Reference = reference,
                 WorkflowInstanceId = id,
                 WorkflowDefinitionId = def.Id,
@@ -111,7 +113,7 @@ namespace WorkflowCore.Services
             if (effectiveDate.HasValue)
                 evt.EventTime = effectiveDate.Value.ToUniversalTime();
             else
-                evt.EventTime = DateTime.Now.ToUniversalTime();
+                evt.EventTime = _dateTimeProvider.UtcNow;
 
             evt.EventData = eventData;
             evt.EventKey = eventKey;
@@ -137,7 +139,7 @@ namespace WorkflowCore.Services
                     await _queueProvider.QueueWork(workflowId, QueueType.Index);
                     await _eventHub.PublishNotification(new WorkflowSuspended()
                     {
-                        EventTimeUtc = DateTime.UtcNow,
+                        EventTimeUtc = _dateTimeProvider.UtcNow,
                         Reference = wf.Reference,
                         WorkflowInstanceId = wf.Id,
                         WorkflowDefinitionId = wf.WorkflowDefinitionId,
@@ -173,7 +175,7 @@ namespace WorkflowCore.Services
                     await _queueProvider.QueueWork(workflowId, QueueType.Index);
                     await _eventHub.PublishNotification(new WorkflowResumed()
                     {
-                        EventTimeUtc = DateTime.UtcNow,
+                        EventTimeUtc = _dateTimeProvider.UtcNow,
                         Reference = wf.Reference,
                         WorkflowInstanceId = wf.Id,
                         WorkflowDefinitionId = wf.WorkflowDefinitionId,
@@ -207,7 +209,7 @@ namespace WorkflowCore.Services
                 await _queueProvider.QueueWork(workflowId, QueueType.Index);
                 await _eventHub.PublishNotification(new WorkflowTerminated()
                 {
-                    EventTimeUtc = DateTime.UtcNow,
+                    EventTimeUtc = _dateTimeProvider.UtcNow,
                     Reference = wf.Reference,
                     WorkflowInstanceId = wf.Id,
                     WorkflowDefinitionId = wf.WorkflowDefinitionId,

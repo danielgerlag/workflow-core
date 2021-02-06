@@ -14,11 +14,11 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>3.1.0</Version>
+    <Version>3.1.1</Version>
     <Description>Base package for Workflow-core peristence providers using entity framework</Description>
-    <AssemblyVersion>3.1.0.0</AssemblyVersion>
-    <FileVersion>3.1.0.0</FileVersion>
-    <PackageVersion>3.1.0</PackageVersion>
+    <AssemblyVersion>3.1.1.0</AssemblyVersion>
+    <FileVersion>3.1.1.0</FileVersion>
+    <PackageVersion>3.1.1</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>

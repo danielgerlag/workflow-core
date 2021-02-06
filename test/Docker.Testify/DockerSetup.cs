@@ -20,7 +20,7 @@ namespace Docker.Testify
         public abstract int InternalPort { get; }
 
         public virtual string ImageTag => "latest";
-        public virtual TimeSpan TimeOut => TimeSpan.FromSeconds(30);
+        public virtual TimeSpan TimeOut => TimeSpan.FromSeconds(60);
         public virtual IList<string> EnvironmentVariables => new List<string>();
         public int ExternalPort { get; }
 
@@ -29,6 +29,8 @@ namespace Docker.Testify
 
         protected readonly DockerClient docker;
     	protected string containerId;
+
+        private static HashSet<int> UsedPorts = new HashSet<int>();
 
         protected DockerSetup()
         {
@@ -122,21 +124,26 @@ namespace Docker.Testify
 
         private int GetFreePort()
         {
-            const int startRange = 1000;
-            const int endRange = 10000;
-            var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
-            var tcpPorts = ipGlobalProperties.GetActiveTcpListeners();
-            var udpPorts = ipGlobalProperties.GetActiveUdpListeners();
+            lock (UsedPorts)
+            {
+                const int startRange = 10002;
+                const int endRange = 15000;
+                var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+                var tcpPorts = ipGlobalProperties.GetActiveTcpListeners();
+                var udpPorts = ipGlobalProperties.GetActiveUdpListeners();
 
-            var result = startRange;
+                var result = startRange;
 
-            while (((tcpPorts.Any(x => x.Port == result)) || (udpPorts.Any(x => x.Port == result))) && result <= endRange)
-                result++;
+                while (((tcpPorts.Any(x => x.Port == result)) || (udpPorts.Any(x => x.Port == result))) && result <= endRange && !UsedPorts.Contains(result))
+                    result++;
 
-            if (result > endRange)
-                throw new PortsInUseException();
+                if (result > endRange)
+                    throw new PortsInUseException();
+                
+                UsedPorts.Add(result);
 
-            return result;
+                return result;
+            }
 	    }
     }
 }

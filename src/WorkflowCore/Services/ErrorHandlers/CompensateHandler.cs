@@ -29,7 +29,8 @@ namespace WorkflowCore.Services.ErrorHandlers
         {
             var scope = new Stack<string>(exceptionPointer.Scope.Reverse());
             scope.Push(exceptionPointer.Id);
-            
+            ExecutionPointer compensationPointer = null;
+
             while (scope.Any())
             {
                 var pointerId = scope.Pop();
@@ -63,13 +64,18 @@ namespace WorkflowCore.Services.ErrorHandlers
                 scopePointer.EndTime = _datetimeProvider.UtcNow;
                 scopePointer.Status = PointerStatus.Failed;
 
-                ExecutionPointer compensationPointer = null;
-
                 if (scopeStep.CompensationStepId.HasValue)
                 {
                     scopePointer.Status = PointerStatus.Compensated;
 
-                    compensationPointer = _pointerFactory.BuildCompensationPointer(def, scopePointer, exceptionPointer, scopeStep.CompensationStepId.Value);
+                    var nextCompensationPointer = _pointerFactory.BuildCompensationPointer(def, scopePointer, exceptionPointer, scopeStep.CompensationStepId.Value);
+                    if (compensationPointer != null)
+                    {
+                        nextCompensationPointer.Active = false;
+                        nextCompensationPointer.Status = PointerStatus.PendingPredecessor;
+                        nextCompensationPointer.PredecessorId = compensationPointer.Id;                        
+                    }
+                    compensationPointer = nextCompensationPointer;
                     workflow.ExecutionPointers.Add(compensationPointer);
 
                     if (resume)

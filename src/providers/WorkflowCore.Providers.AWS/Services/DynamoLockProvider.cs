@@ -23,14 +23,16 @@ namespace WorkflowCore.Providers.AWS.Services
         private Task _heartbeatTask;
         private CancellationTokenSource _cancellationTokenSource;
         private readonly AutoResetEvent _mutex = new AutoResetEvent(true);
+        private readonly IDateTimeProvider _dateTimeProvider;
 
-        public DynamoLockProvider(AWSCredentials credentials, AmazonDynamoDBConfig config, string tableName, ILoggerFactory logFactory)
+        public DynamoLockProvider(AWSCredentials credentials, AmazonDynamoDBConfig config, string tableName, ILoggerFactory logFactory, IDateTimeProvider dateTimeProvider)
         {
             _logger = logFactory.CreateLogger<DynamoLockProvider>();
             _client = new AmazonDynamoDBClient(credentials, config);
             _localLocks = new List<string>();
             _tableName = tableName;
             _nodeId = Guid.NewGuid().ToString();
+            _dateTimeProvider = dateTimeProvider;
         }
 
         public async Task<bool> AcquireLock(string Id, CancellationToken cancellationToken)
@@ -46,7 +48,7 @@ namespace WorkflowCore.Providers.AWS.Services
                         { "lock_owner", new AttributeValue(_nodeId) },
                         { "expires", new AttributeValue()
                             {
-                                N = Convert.ToString(new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds() + _ttl)
+                                N = Convert.ToString(new DateTimeOffset(_dateTimeProvider.UtcNow).ToUnixTimeMilliseconds() + _ttl)
                             }
                         }
                     },
@@ -55,7 +57,7 @@ namespace WorkflowCore.Providers.AWS.Services
                     {
                         { ":expired", new AttributeValue()
                             {
-                                N = Convert.ToString(new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds() + _jitter)
+                                N = Convert.ToString(new DateTimeOffset(_dateTimeProvider.UtcNow).ToUnixTimeMilliseconds() + _jitter)
                             }
                         }
                     }
@@ -154,7 +156,7 @@ namespace WorkflowCore.Providers.AWS.Services
                                         { "lock_owner", new AttributeValue(_nodeId) },
                                         { "expires", new AttributeValue()
                                             {
-                                                N = Convert.ToString(new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds() + _ttl)
+                                                N = Convert.ToString(new DateTimeOffset(_dateTimeProvider.UtcNow).ToUnixTimeMilliseconds() + _ttl)
                                             }
                                         }
                                     },

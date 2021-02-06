@@ -15,15 +15,17 @@ namespace WorkflowCore.Services.BackgroundTasks
         private readonly ILogger _logger;
         private readonly IQueueCache _queueCache;
         private readonly WorkflowOptions _options;
+        private readonly IDateTimeProvider _dateTimeProvider;
         private Timer _pollTimer;
 
-        public RunnablePoller(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IQueueCache queueCache, WorkflowOptions options)
+        public RunnablePoller(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IQueueCache queueCache, IDateTimeProvider dateTimeProvider, WorkflowOptions options)
         {
             _persistenceStore = persistenceStore;
             _queueCache = queueCache;
             _queueProvider = queueProvider;            
             _logger = loggerFactory.CreateLogger<RunnablePoller>();
             _lockProvider = lockProvider;
+            _dateTimeProvider = dateTimeProvider;
             _options = options;
         }
 
@@ -54,7 +56,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     try
                     {
                         _logger.LogInformation("Polling for runnable workflows");                        
-                        var runnables = await _persistenceStore.GetRunnableInstances(DateTime.Now);
+                        var runnables = await _persistenceStore.GetRunnableInstances(_dateTimeProvider.Now);
                         foreach (var item in runnables)
                         {
                             if (await _queueCache.Add($"wf:{item}"))
@@ -86,7 +88,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     try
                     {
                         _logger.LogInformation("Polling for unprocessed events");                        
-                        var events = await _persistenceStore.GetRunnableEvents(DateTime.Now);
+                        var events = await _persistenceStore.GetRunnableEvents(_dateTimeProvider.Now);
                         foreach (var item in events.ToList())
                         {
                             if (await _queueCache.Add($"evt:{item}"))
