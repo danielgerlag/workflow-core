@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,18 +11,21 @@ using WorkflowCore.Models;
 namespace WorkflowCore.Testing
 {
     public abstract class WorkflowTest<TWorkflow, TData> : IDisposable
-        where TWorkflow : IWorkflow<TData>, new()
+        where TWorkflow : class, IWorkflow<TData>
         where TData : class, new()
     {
         protected IWorkflowHost Host;
         protected IPersistenceProvider PersistenceProvider;
         protected List<StepError> UnhandledStepErrors = new List<StepError>();
+        protected TWorkflow Workflow;
 
         protected virtual void Setup()
         {
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             services.AddLogging();
+            services.AddTransient<TWorkflow>();
+            
             ConfigureServices(services);
 
             var serviceProvider = services.BuildServiceProvider();
@@ -32,6 +33,8 @@ namespace WorkflowCore.Testing
             //config logging
             var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             //loggerFactory.AddConsole(LogLevel.Debug);
+
+            Workflow = serviceProvider.GetService<TWorkflow>();
 
             PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
             Host = serviceProvider.GetService<IWorkflowHost>();
@@ -57,15 +60,13 @@ namespace WorkflowCore.Testing
 
         public string StartWorkflow(TData data)
         {
-            var def = new TWorkflow();
-            var workflowId = Host.StartWorkflow<TData>(def.Id, data).Result;
+            var workflowId = Host.StartWorkflow<TData>(Workflow.Id, data).Result;
             return workflowId;
         }
 
         public async Task<string> StartWorkflowAsync(TData data)
         {
-            var def = new TWorkflow();
-            var workflowId = await Host.StartWorkflow(def.Id, data);
+            var workflowId = await Host.StartWorkflow(Workflow.Id, data);
             return workflowId;
         }
 
