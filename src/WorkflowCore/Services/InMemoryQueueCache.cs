@@ -15,13 +15,13 @@ namespace WorkflowCore.Services
         private readonly HashSet<CacheItem> _items;
         private readonly SemaphoreSlim _sync = new SemaphoreSlim(1, 1);
         private readonly ILogger _logger;
-        private const int CYCLE_TIME = 30;
 
         public InMemoryQueueCache(ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<InMemoryQueueCache>();
             _items = new HashSet<CacheItem>();
-            _cycleTimer = new Timer(o => _ = Cycle(), null, TimeSpan.FromMinutes(CYCLE_TIME), TimeSpan.FromMinutes(CYCLE_TIME));
+            var cyclePeriod = TimeSpan.FromMinutes(30);
+            _cycleTimer = new Timer(o => _ = Cycle(), default, cyclePeriod, cyclePeriod);
         }
 
         public async Task<bool> Add(CacheItem id)
