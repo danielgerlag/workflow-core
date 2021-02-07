@@ -43,7 +43,7 @@ namespace WorkflowCore.Services
             var wfResult = new WorkflowExecutorResult();
 
             var exePointers = new List<ExecutionPointer>(workflow.ExecutionPointers.Where(x => x.Active && (!x.SleepUntil.HasValue || x.SleepUntil < _datetimeProvider.UtcNow)));
-            var def = _registry.GetDefinition(workflow.WorkflowDefinitionId, workflow.Version);
+            var def = await _registry.GetDefinitionAsync(workflow.WorkflowDefinitionId, workflow.Version);
             if (def == null)
             {
                 _logger.LogError("Workflow {0} version {1} is not registered", workflow.WorkflowDefinitionId, workflow.Version);

@@ -57,7 +57,7 @@ namespace WorkflowCore.Services
             where TData : class, new()
         {
 
-            var def = _registry.GetDefinition(workflowId, version);
+            var def = await _registry.GetDefinitionAsync(workflowId, version);
             if (def == null)
             {
                 throw new WorkflowNotRegisteredException(workflowId, version);

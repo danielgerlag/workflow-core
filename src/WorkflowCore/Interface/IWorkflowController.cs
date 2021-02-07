@@ -14,6 +14,7 @@ namespace WorkflowCore.Interface
 
         Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null);
         void RegisterWorkflow<TWorkflow>() where TWorkflow : IWorkflow;
+
         void RegisterWorkflow<TWorkflow, TData>() where TWorkflow : IWorkflow<TData> where TData : new();
 
         /// <summary>

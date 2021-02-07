@@ -14,6 +14,7 @@ using WorkflowCore.Primitives;
 using WorkflowCore.Models.DefinitionStorage;
 using WorkflowCore.Models.DefinitionStorage.v1;
 using WorkflowCore.Exceptions;
+using System.Threading.Tasks;
 
 namespace WorkflowCore.Services.DefinitionStorage
 {
@@ -31,6 +32,14 @@ namespace WorkflowCore.Services.DefinitionStorage
             var sourceObj = deserializer(source);
             var def = Convert(sourceObj);
             _registry.RegisterWorkflow(def);
+            return def;
+        }
+
+        public async Task<WorkflowDefinition> LoadDefinitionAsync(string source, Func<string, DefinitionSourceV1> deserializer)
+        {
+            var sourceObj = deserializer(source);
+            var def = Convert(sourceObj);
+            await _registry.RegisterWorkflowAsync(def);
             return def;
         }
 
