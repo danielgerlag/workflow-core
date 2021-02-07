@@ -24,9 +24,11 @@ namespace WorkflowCore.Services
             _cycleTimer = new Timer(o => _ = Cycle(), default, cyclePeriod, cyclePeriod);
         }
 
-        public async Task<bool> Add(CacheItem id)
+        public async Task<bool> AddOrUpdateAsync(
+            CacheItem id, 
+            CancellationToken cancellationToken)
         {
-            await _sync.WaitAsync();
+            await _sync.WaitAsync(cancellationToken);
 
             try
             {
@@ -41,9 +43,27 @@ namespace WorkflowCore.Services
                 if (isExpired)
                 {
                     _items.Remove(id);
+                    _items.Add(id);
+                    return true;
                 }
 
-                return isExpired;
+                return false;
+            }
+            finally
+            {
+                _sync.Release();
+            }
+        }
+
+        public async Task RemoveAsync(
+            CacheItem id, 
+            CancellationToken cancellationToken)
+        {
+            await _sync.WaitAsync(cancellationToken);
+
+            try
+            {
+                _items.Remove(id);
             }
             finally
             {
@@ -73,20 +93,6 @@ namespace WorkflowCore.Services
         {
             _cycleTimer.Dispose();
             _sync.Dispose();
-        }
-
-        public async Task Remove(CacheItem id)
-        {
-            await _sync.WaitAsync();
-
-            try
-            {
-                _items.Remove(id);
-            }
-            finally
-            {
-                _sync.Release();
-            }
         }
     }
 }

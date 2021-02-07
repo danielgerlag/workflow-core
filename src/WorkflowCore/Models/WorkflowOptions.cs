@@ -9,6 +9,7 @@ namespace WorkflowCore.Models
     public class WorkflowOptions
     {
         internal Func<IServiceProvider, IPersistenceProvider> PersistanceFactory;
+        internal Func<IServiceProvider, IQueueCache> QueueCacheFactory;
         internal Func<IServiceProvider, IQueueProvider> QueueFactory;
         internal Func<IServiceProvider, IDistributedLockProvider> LockFactory;
         internal Func<IServiceProvider, ILifeCycleEventHub> EventHubFactory;
@@ -27,11 +28,15 @@ namespace WorkflowCore.Models
             IdleTime = TimeSpan.FromMilliseconds(100);
             ErrorRetryInterval = TimeSpan.FromSeconds(60);
 
-            QueueFactory = new Func<IServiceProvider, IQueueProvider>(sp => new SingleNodeQueueProvider());
-            LockFactory = new Func<IServiceProvider, IDistributedLockProvider>(sp => new SingleNodeLockProvider());
-            PersistanceFactory = new Func<IServiceProvider, IPersistenceProvider>(sp => new TransientMemoryPersistenceProvider(sp.GetService<ISingletonMemoryProvider>()));
-            SearchIndexFactory = new Func<IServiceProvider, ISearchIndex>(sp => new NullSearchIndex());
-            EventHubFactory = new Func<IServiceProvider, ILifeCycleEventHub>(sp => new SingleNodeEventHub(sp.GetService<ILoggerFactory>()));
+            QueueCacheFactory = serviceProvider => new InMemoryQueueCache(
+                serviceProvider.GetService<ILoggerFactory>());
+            QueueFactory = serviceProvider => new SingleNodeQueueProvider();
+            LockFactory = serviceProvider => new SingleNodeLockProvider();
+            PersistanceFactory = serviceProvider => new TransientMemoryPersistenceProvider(
+                serviceProvider.GetService<ISingletonMemoryProvider>());
+            SearchIndexFactory = serviceProvider => new NullSearchIndex();
+            EventHubFactory = serviceProvider => new SingleNodeEventHub(
+                serviceProvider.GetService<ILoggerFactory>());
         }
 
         public bool EnableWorkflows { get; set; } = true;
@@ -47,6 +52,11 @@ namespace WorkflowCore.Models
         public void UseDistributedLockManager(Func<IServiceProvider, IDistributedLockProvider> factory)
         {
             LockFactory = factory;
+        }
+
+        public void UseQueueCacheProvider(Func<IServiceProvider, IQueueCache> factory)
+        {
+            QueueCacheFactory = factory;
         }
 
         public void UseQueueProvider(Func<IServiceProvider, IQueueProvider> factory)

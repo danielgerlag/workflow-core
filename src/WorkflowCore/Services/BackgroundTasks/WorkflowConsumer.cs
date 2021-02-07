@@ -54,7 +54,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     {
                         await _persistenceStore.PersistWorkflow(workflow);
                         await QueueProvider.QueueWork(itemId, QueueType.Index);
-                        await _queueCache.Remove($"wf:{itemId}");
+                        await _queueCache.RemoveAsync($"wf:{itemId}", cancellationToken);
                     }
                 }
             }

@@ -22,7 +22,7 @@ namespace WorkflowCore.Models
 
         public bool IsExpired()
         {
-            return Timestamp > (DateTime.Now.AddMinutes(-1 * TTL));
+            return Timestamp > (DateTime.UtcNow.AddMinutes(-1 * TTL));
         }
 
         public bool Equals(CacheItem other)

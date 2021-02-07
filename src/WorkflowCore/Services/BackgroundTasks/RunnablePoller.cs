@@ -59,7 +59,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                         var runnables = await _persistenceStore.GetRunnableInstances(_dateTimeProvider.Now);
                         foreach (var item in runnables)
                         {
-                            if (await _queueCache.Add($"wf:{item}"))
+                            if (await _queueCache.AddOrUpdateAsync($"wf:{item}", default))
                             {
                                 _logger.LogDebug("Got runnable instance {0}", item);
                                 await _queueProvider.QueueWork(item, QueueType.Workflow);
@@ -91,7 +91,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                         var events = await _persistenceStore.GetRunnableEvents(_dateTimeProvider.Now);
                         foreach (var item in events.ToList())
                         {
-                            if (await _queueCache.Add($"evt:{item}"))
+                            if (await _queueCache.AddOrUpdateAsync($"evt:{item}", default))
                             {
                                 _logger.LogDebug($"Got unprocessed event {item}");
                                 await _queueProvider.QueueWork(item, QueueType.Event);
