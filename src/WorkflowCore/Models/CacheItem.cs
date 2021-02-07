@@ -4,12 +4,12 @@ namespace WorkflowCore.Models
 {
     public readonly struct CacheItem : IEquatable<CacheItem>
     {
-        private const int TTL = 5;
+        public static TimeSpan Lifetime = TimeSpan.FromMinutes(5);
 
-        private CacheItem(string id)
+        internal CacheItem(string id, DateTime timestamp)
         {
             Id = id;
-            Timestamp = DateTime.UtcNow;
+            Timestamp = timestamp;
         }
 
         public string Id { get; }
@@ -17,12 +17,12 @@ namespace WorkflowCore.Models
 
         public static implicit operator CacheItem(string id)
         {
-            return new CacheItem(id);
+            return new CacheItem(id, DateTime.UtcNow);
         }
 
         public bool IsExpired()
         {
-            return Timestamp > (DateTime.UtcNow.AddMinutes(-1 * TTL));
+            return Timestamp > DateTime.UtcNow - Lifetime;
         }
 
         public bool Equals(CacheItem other)

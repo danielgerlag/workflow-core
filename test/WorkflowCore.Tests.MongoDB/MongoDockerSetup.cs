@@ -1,15 +1,10 @@
-﻿using Docker.DotNet;
-using Docker.DotNet.Models;
-using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
-using Docker.Testify;
+﻿using Docker.Testify;
 using MongoDB.Driver;
+using Squadron;
 using Xunit;
 
 namespace WorkflowCore.Tests.MongoDB
-{    
+{
     public class MongoDockerSetup : DockerSetup
     {
         public static string ConnectionString { get; set; }
@@ -43,4 +38,13 @@ namespace WorkflowCore.Tests.MongoDB
     {        
     }
 
+    internal class CollectionDefinitionNames
+    {
+        public const string Squadron = "Squadron.MongoDB";
+    }
+
+    [CollectionDefinition(CollectionDefinitionNames.Squadron)]
+    public class MongoResourceFixture : ICollectionFixture<MongoResource>
+    {
+    }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -9,13 +10,22 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 {
     public class MongoQueueCache : IQueueCache
     {
-        internal const string CollectionName = "wfc.queueCache";
+        internal static string CollectionName = "wfc.queueCache";
         private readonly IMongoCollection<CacheItem> _cacheItems;
 
         public MongoQueueCache(IMongoDatabase database)
         {
             _cacheItems = database.GetCollection<CacheItem>(CollectionName);
             CreateIndexes(this);
+        }
+
+        static MongoQueueCache()
+        {
+            BsonClassMap.RegisterClassMap<CacheItem>(x =>
+            {
+                x.MapIdProperty(y => y.Id);
+                x.MapProperty(y => y.Timestamp);
+            });
         }
 
         private static bool _indexesCreated = false;
@@ -27,9 +37,8 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                     Builders<CacheItem>.IndexKeys.Ascending(x => x.Timestamp),
                     new CreateIndexOptions
                     {
-                        Background = true, 
                         Name = "idx_timestamp_ttl", 
-                        ExpireAfter = TimeSpan.FromMinutes(5)
+                        ExpireAfter = CacheItem.Lifetime
                     }));
 
                 _indexesCreated = true;
