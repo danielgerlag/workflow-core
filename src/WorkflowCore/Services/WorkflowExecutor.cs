@@ -222,6 +222,7 @@ namespace WorkflowCore.Services
                 if (!pointer.SleepUntil.HasValue)
                 {
                     workflow.NextExecution = 0;
+                    await RunPostMiddleware(workflow, def);
                     return;
                 }
 
@@ -237,6 +238,7 @@ namespace WorkflowCore.Services
                 if (!pointer.SleepUntil.HasValue)
                 {
                     workflow.NextExecution = 0;
+                    await RunPostMiddleware(workflow, def);
                     return;
                 }
 
