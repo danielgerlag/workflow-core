@@ -212,7 +212,10 @@ namespace WorkflowCore.Services
             workflow.NextExecution = null;
 
             if (workflow.Status == WorkflowStatus.Complete)
+            {
+                await RunPostMiddleware(workflow, def);
                 return;
+            }
 
             foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count == 0))
             {
@@ -242,18 +245,17 @@ namespace WorkflowCore.Services
             }
 
             if ((workflow.NextExecution != null) || (workflow.ExecutionPointers.Any(x => x.EndTime == null)))
+            {
+                await RunPostMiddleware(workflow, def);
                 return;
+            }
 
             workflow.Status = WorkflowStatus.Complete;
             workflow.CompleteTime = _datetimeProvider.UtcNow;
 
-            using (var scope = _serviceProvider.CreateScope())
-            {
-                var middlewareRunner = scope.ServiceProvider.GetRequiredService<IWorkflowMiddlewareRunner>();
-                await middlewareRunner.RunPostMiddleware(workflow, def);
-            }
+            await RunPostMiddleware(workflow, def);
 
-            _publisher.PublishNotification(new WorkflowCompleted()
+            _publisher.PublishNotification(new WorkflowCompleted
             {
                 EventTimeUtc = _datetimeProvider.UtcNow,
                 Reference = workflow.Reference,
@@ -261,6 +263,15 @@ namespace WorkflowCore.Services
                 WorkflowDefinitionId = workflow.WorkflowDefinitionId,
                 Version = workflow.Version
             });
+        }
+
+        private Task RunPostMiddleware(WorkflowInstance workflow, WorkflowDefinition def)
+        {
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var middlewareRunner = scope.ServiceProvider.GetRequiredService<IWorkflowMiddlewareRunner>();
+                return middlewareRunner.RunPostMiddleware(workflow, def);
+            }
         }
     }
 }
