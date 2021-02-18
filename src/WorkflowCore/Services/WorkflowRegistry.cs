@@ -23,7 +23,6 @@ namespace WorkflowCore.Services
             if (version.HasValue)
             {
                 var entry = _registry.FirstOrDefault(x => x.Item1 == workflowId && x.Item2 == version.Value);
-                // TODO: What in the heck does Item3 mean?
                 return entry?.Item3;
             }
             else
