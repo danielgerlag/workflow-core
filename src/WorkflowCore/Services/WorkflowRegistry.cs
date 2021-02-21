@@ -11,7 +11,7 @@ namespace WorkflowCore.Services
     public class WorkflowRegistry : IWorkflowRegistry
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly BlockingCollection<(string, int, WorkflowDefinition)> _registry = new BlockingCollection<(string, int, WorkflowDefinition)>();
+        private readonly BlockingCollection<(string workfloId, int version, WorkflowDefinition definition)> _registry = new BlockingCollection<(string, int, WorkflowDefinition)>();
 
         public WorkflowRegistry(IServiceProvider serviceProvider)
         {
