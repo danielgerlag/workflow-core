@@ -9,5 +9,6 @@ namespace WorkflowCore.Interface
     {
         WorkflowDefinition LoadDefinition(string source, Func<string, DefinitionSourceV1> deserializer);
         Task<WorkflowDefinition> LoadDefinitionAsync(string source, Func<string, DefinitionSourceV1> deserializer);
+        WorkflowDefinition LoadDefinition(DefinitionSourceV1 definitionSourceV1);
     }
 }

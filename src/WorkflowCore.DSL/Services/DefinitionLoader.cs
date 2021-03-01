@@ -34,13 +34,20 @@ namespace WorkflowCore.Services.DefinitionStorage
             _registry.RegisterWorkflow(def);
             return def;
         }
+        public WorkflowDefinition LoadDefinition(DefinitionSourceV1 definitionSourceV1)
+        {           
+            var def = Convert(definitionSourceV1);
+            _registry.RegisterWorkflow(def);
+            return def;
+        }
 
         public async Task<WorkflowDefinition> LoadDefinitionAsync(string source, Func<string, DefinitionSourceV1> deserializer)
         {
+            
             var sourceObj = deserializer(source);
             var def = Convert(sourceObj);
             await _registry.RegisterWorkflowAsync(def);
-            return def;
+            return  def;
         }
 
         private WorkflowDefinition Convert(DefinitionSourceV1 source)
