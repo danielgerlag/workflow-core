@@ -107,6 +107,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             if (!await _lockProvider.AcquireLock(sub.WorkflowId, cancellationToken))
             {
                 Logger.LogInformation("Workflow locked {0}", sub.WorkflowId);
+                await QueueProvider.QueueWork(evt.Id, QueueType.Event);
                 return false;
             }
             
