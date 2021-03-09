@@ -469,5 +469,44 @@ namespace WorkflowCore.Providers.AWS.Services
             
             await _client.UpdateItemAsync(request);
         }
+
+        public async Task<IEnumerable<string>> GetRunnableInstances(DateTime createTime, DateTime asAt)
+        {
+            var result = new List<string>();
+            var now = asAt.ToUniversalTime().Ticks;
+
+            var request = new QueryRequest()
+            {
+                TableName = $"{_tablePrefix}-{WORKFLOW_TABLE}",
+                IndexName = "ix_runnable",
+                ProjectionExpression = "id",
+                KeyConditionExpression = "runnable = :r and next_execution <= :effective_date",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    {
+                        ":r", new AttributeValue()
+                        {
+                            N = 1.ToString()
+                        }
+                    },
+                    {
+                        ":effective_date", new AttributeValue()
+                        {
+                            N = Convert.ToString(now)
+                        }
+                    }
+                },
+                ScanIndexForward = true
+            };
+
+            var response = await _client.QueryAsync(request);
+
+            foreach (var item in response.Items)
+            {
+                result.Add(item["id"].S);
+            }
+
+            return result;
+        }
     }
 }

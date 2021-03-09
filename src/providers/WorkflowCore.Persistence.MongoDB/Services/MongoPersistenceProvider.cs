@@ -288,5 +288,15 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             if (errors.Any())
                 await ExecutionErrors.InsertManyAsync(errors);
         }
+
+        public async Task<IEnumerable<string>> GetRunnableInstances(DateTime createTime, DateTime asAt)
+        {
+            var now = asAt.ToUniversalTime().Ticks;
+            var query = WorkflowInstances
+                .Find(x => x.NextExecution.HasValue && (x.NextExecution <= now) && (x.Status == WorkflowStatus.Runnable)&&x.CreateTime>= createTime)
+                .Project(x => x.Id);
+
+            return await query.ToListAsync();
+        }
     }
 }

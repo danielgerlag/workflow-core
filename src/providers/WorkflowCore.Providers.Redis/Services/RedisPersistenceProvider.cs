@@ -231,5 +231,16 @@ namespace WorkflowCore.Providers.Redis.Services
         public void EnsureStoreExists()
         {
         }
+
+        public async Task<IEnumerable<string>> GetRunnableInstances(DateTime createTime, DateTime asAt)
+        {
+            var result = new List<string>();
+            var data = await _redis.SortedSetRangeByScoreAsync($"{_prefix}.{WORKFLOW_SET}.{RUNNABLE_INDEX}", -1, asAt.ToUniversalTime().Ticks);
+
+            foreach (var item in data)
+                result.Add(item);
+
+            return result;
+        }
     }
 }

@@ -146,8 +146,8 @@ namespace WorkflowCore.Services
         {
             lock (_subscriptions)
             {
-                var result =  _subscriptions
-                    .FirstOrDefault(x => x.ExternalToken == null &&  x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf);
+                var result = _subscriptions
+                    .FirstOrDefault(x => x.ExternalToken == null && x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf);
                 return Task.FromResult(result);
             }
         }
@@ -160,7 +160,7 @@ namespace WorkflowCore.Services
                 sub.ExternalToken = token;
                 sub.ExternalWorkerId = workerId;
                 sub.ExternalTokenExpiry = expiry;
-                
+
                 return Task.FromResult(true);
             }
         }
@@ -253,6 +253,15 @@ namespace WorkflowCore.Services
             lock (errors)
             {
                 _errors.AddRange(errors);
+            }
+        }
+
+        public async Task<IEnumerable<string>> GetRunnableInstances(DateTime createTime, DateTime asAt)
+        {
+            lock (_instances)
+            {
+                var now = asAt.ToUniversalTime().Ticks;
+                return _instances.Where(x => x.NextExecution.HasValue && x.NextExecution <= now && x.CreateTime >= createTime).Select(x => x.Id).ToList();
             }
         }
     }

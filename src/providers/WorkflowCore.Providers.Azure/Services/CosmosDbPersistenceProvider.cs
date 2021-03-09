@@ -38,7 +38,7 @@ namespace WorkflowCore.Providers.Azure.Services
         public async Task ClearSubscriptionToken(string eventSubscriptionId, string token)
         {
             var existing = await _subscriptionContainer.Value.ReadItemAsync<PersistedSubscription>(eventSubscriptionId, new PartitionKey(eventSubscriptionId));
-            
+
             if (existing.Resource.ExternalToken != token)
                 throw new InvalidOperationException();
             existing.Resource.ExternalToken = null;
@@ -86,15 +86,15 @@ namespace WorkflowCore.Providers.Azure.Services
                 .Where(x => x.EventName == eventName && x.EventKey == eventKey)
                 .Where(x => x.EventTime >= asOf)
                 .Select(x => x.id);
-            
+
             return Task.FromResult(data.AsEnumerable());
         }
 
         public Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, DateTime asOf)
         {
             var data = _subscriptionContainer.Value.GetItemLinqQueryable<PersistedSubscription>(true)
-                .FirstOrDefault(x => x.ExternalToken == null &&  x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf);
-            
+                .FirstOrDefault(x => x.ExternalToken == null && x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf);
+
             return Task.FromResult(PersistedSubscription.ToInstance(data));
         }
 
@@ -104,7 +104,7 @@ namespace WorkflowCore.Providers.Azure.Services
                 .Where(x => !x.IsProcessed)
                 .Where(x => x.EventTime <= asAt.ToUniversalTime())
                 .Select(x => x.id);
-            
+
             return Task.FromResult(data.AsEnumerable());
         }
 
@@ -114,6 +114,17 @@ namespace WorkflowCore.Providers.Azure.Services
 
             var data = _workflowContainer.Value.GetItemLinqQueryable<PersistedWorkflow>(true)
                 .Where(x => x.NextExecution.HasValue && (x.NextExecution <= now) && (x.Status == WorkflowStatus.Runnable))
+                .Select(x => x.id);
+
+            return Task.FromResult(data.AsEnumerable());
+        }
+
+        public Task<IEnumerable<string>> GetRunnableInstances(DateTime createTime, DateTime asAt)
+        {
+            var now = asAt.ToUniversalTime().Ticks;
+
+            var data = _workflowContainer.Value.GetItemLinqQueryable<PersistedWorkflow>(true)
+                .Where(x => x.NextExecution.HasValue && (x.NextExecution <= now) && (x.Status == WorkflowStatus.Runnable) && x.CreateTime >= createTime)
                 .Select(x => x.id);
 
             return Task.FromResult(data.AsEnumerable());
@@ -181,7 +192,7 @@ namespace WorkflowCore.Providers.Azure.Services
             existingEntity.ExternalToken = token;
             existingEntity.ExternalWorkerId = workerId;
             existingEntity.ExternalTokenExpiry = expiry;
-            
+
             await _subscriptionContainer.Value.ReplaceItemAsync(existingEntity, eventSubscriptionId);
 
             return true;

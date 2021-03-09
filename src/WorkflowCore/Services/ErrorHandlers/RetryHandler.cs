@@ -22,7 +22,16 @@ namespace WorkflowCore.Services.ErrorHandlers
         public void Handle(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, Exception exception, Queue<ExecutionPointer> bubbleUpQueue)
         {
             pointer.RetryCount++;
-            pointer.SleepUntil = _datetimeProvider.UtcNow.Add(step.RetryInterval ?? def.DefaultErrorRetryInterval ?? _options.ErrorRetryInterval);
+            pointer.Status = PointerStatus.Failed;
+            if (_options.MaxRetryTimes <= pointer.RetryCount)
+            {
+                workflow.Status = WorkflowStatus.Terminated;                
+                pointer.SleepUntil = null;
+            }
+            else
+            {
+                pointer.SleepUntil = _datetimeProvider.UtcNow.Add(step.RetryInterval ?? def.DefaultErrorRetryInterval ?? _options.ErrorRetryInterval);
+            }
             step.PrimeForRetry(pointer);
         }
     }
