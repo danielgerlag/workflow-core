@@ -37,23 +37,23 @@ namespace WorkflowCore.Services
             _dateTimeProvider = dateTimeProvider;
         }
 
-        public Task<string> StartWorkflow(string workflowId, object data = null, string reference=null)
+        public Task<string> StartWorkflow(string workflowId, object data = null, string reference = null)
         {
             return StartWorkflow(workflowId, null, data, reference);
         }
 
-        public Task<string> StartWorkflow(string workflowId, int? version, object data = null, string reference=null)
+        public Task<string> StartWorkflow(string workflowId, int? version, object data = null, string reference = null)
         {
             return StartWorkflow<object>(workflowId, version, data, reference);
         }
 
-        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null, string reference=null)
+        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null, string reference = null)
             where TData : class, new()
         {
             return StartWorkflow<TData>(workflowId, null, data, reference);
         }
 
-        public async Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference=null)
+        public async Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference = null)
             where TData : class, new()
         {
 
@@ -63,6 +63,60 @@ namespace WorkflowCore.Services
                 throw new WorkflowNotRegisteredException(workflowId, version);
             }
 
+            var wf = new WorkflowInstance
+            {
+                WorkflowDefinitionId = workflowId,
+                Version = def.Version,
+                Data = data,
+                Description = def.Description,
+                NextExecution = 0,
+                CreateTime = _dateTimeProvider.UtcNow,
+                Status = WorkflowStatus.Runnable,
+                Reference = reference
+            };
+
+            if ((def.DataType != null) && (data == null))
+            {
+                if (typeof(TData) == def.DataType)
+                    wf.Data = new TData();
+                else
+                    wf.Data = def.DataType.GetConstructor(new Type[0]).Invoke(new object[0]);
+            }
+
+            wf.ExecutionPointers.Add(_pointerFactory.BuildGenesisPointer(def));
+
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var middlewareRunner = scope.ServiceProvider.GetRequiredService<IWorkflowMiddlewareRunner>();
+                await middlewareRunner.RunPreMiddleware(wf, def);
+            }
+
+            string id = await _persistenceStore.CreateNewWorkflow(wf);
+            await _queueProvider.QueueWork(id, QueueType.Workflow);
+            await _queueProvider.QueueWork(id, QueueType.Index);
+            await _eventHub.PublishNotification(new WorkflowStarted()
+            {
+                EventTimeUtc = _dateTimeProvider.UtcNow,
+                Reference = reference,
+                WorkflowInstanceId = id,
+                WorkflowDefinitionId = def.Id,
+                Version = def.Version
+            });
+            return id;
+        }
+
+        /// <summary>
+        /// 只是为了方便单元测试
+        /// </summary>
+        /// <typeparam name="TData"></typeparam>
+        /// <param name="workflowId"></param>
+        /// <param name="version"></param>
+        /// <param name="data"></param>
+        /// <param name="reference"></param>
+        /// <returns></returns>
+        public async Task<string> StartWorkflowForTest<TData>(string workflowId, WorkflowDefinition def, TData data = null, string reference = null)
+         where TData : class, new()
+        {
             var wf = new WorkflowInstance
             {
                 WorkflowDefinitionId = workflowId,
