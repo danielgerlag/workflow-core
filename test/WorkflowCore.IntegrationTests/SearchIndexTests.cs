@@ -30,7 +30,7 @@ namespace WorkflowCore.IntegrationTests
         {
             var result = new List<WorkflowInstance>();
 
-            result.Add(new WorkflowInstance()
+            result.Add(new WorkflowInstance
             {
                 Id = "1",
                 CreateTime = new DateTime(2010, 1, 1),
@@ -38,25 +38,25 @@ namespace WorkflowCore.IntegrationTests
                 Reference = "ref1"
             });
 
-            result.Add(new WorkflowInstance()
+            result.Add(new WorkflowInstance
             {
                 Id = "2",
                 CreateTime = new DateTime(2020, 1, 1),
                 Status = WorkflowStatus.Runnable,
                 Reference = "ref2",
-                Data = new DataObject()
+                Data = new DataObject
                 {
                     Value3 = 7
                 }
             });
 
-            result.Add(new WorkflowInstance()
+            result.Add(new WorkflowInstance
             {
                 Id = "3",
                 CreateTime = new DateTime(2010, 1, 1),
                 Status = WorkflowStatus.Complete,
                 Reference = "ref3",
-                Data = new DataObject()
+                Data = new DataObject
                 {
                     Value3 = 5,
                     Value1 = "quick fox",
@@ -64,13 +64,13 @@ namespace WorkflowCore.IntegrationTests
                 }
             });
 
-            result.Add(new WorkflowInstance()
+            result.Add(new WorkflowInstance
             {
                 Id = "4",
                 CreateTime = new DateTime(2010, 1, 1),
                 Status = WorkflowStatus.Complete,
                 Reference = "ref4",
-                Data = new AltDataObject()
+                Data = new AltDataObject
                 {
                     Value1 = 9,
                     Value2 = new DateTime(2000, 1, 1)
@@ -165,7 +165,7 @@ namespace WorkflowCore.IntegrationTests
 
             public IEnumerable<string> GetSearchTokens()
             {
-                return new List<string>()
+                return new List<string>
                 {
                     Value1,
                     Value2

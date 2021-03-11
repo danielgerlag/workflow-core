@@ -62,7 +62,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         public void Scenario()
         {
             decimal v4 = 1.235465673450897890m;
-            var workflowId = StartWorkflow(new MyDataClass() {Value1 = 2, Value2 = 3, Value4 = v4, SubValue = new DataSubclass() {Value5 = v4}});
+            var workflowId = StartWorkflow(new MyDataClass {Value1 = 2, Value2 = 3, Value4 = v4, SubValue = new DataSubclass {Value5 = v4}});
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
             GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);

@@ -44,7 +44,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                         Step1Ticker++;
                         return ExecutionResult.Next();
                     })
-                    .ForEach(x => new List<int>() { 2, 2, 3 })
+                    .ForEach(x => new List<int> { 2, 2, 3 })
                         .Do(x => x.StartWith<DoSomething>())                    
                     .Then(context =>
                     {

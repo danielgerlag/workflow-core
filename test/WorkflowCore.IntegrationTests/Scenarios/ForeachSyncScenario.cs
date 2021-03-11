@@ -34,7 +34,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             {
                 builder
                     .StartWith(_ => ExecutionResult.Next())
-                    .ForEach(x => new List<int>() { 10, 2, 3 }, _ => false)
+                    .ForEach(x => new List<int> { 10, 2, 3 }, _ => false)
                         .Do(x => x
                             .StartWith<Delay>()
                                 .Input(step => step.Period, (_, context) => TimeSpan.FromSeconds((int)context.Item))

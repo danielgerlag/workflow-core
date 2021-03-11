@@ -15,7 +15,7 @@ namespace WorkflowCore.Sample09
         {
             builder
                 .StartWith<SayHello>()
-                .ForEach(data => new List<int>() { 1, 2, 3, 4 })
+                .ForEach(data => new List<int> { 1, 2, 3, 4 })
                     .Do(x => x
                         .StartWith<DisplayContext>()
                             .Input(step => step.Item, (data, context) => context.Item)

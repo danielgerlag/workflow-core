@@ -21,7 +21,7 @@ namespace WorkflowCore.TestSample01
         [Test]
         public void NUnit_workflow_test_sample()
         {
-            var workflowId = StartWorkflow(new MyDataClass() { Value1 = 2, Value2 = 3 });
+            var workflowId = StartWorkflow(new MyDataClass { Value1 = 2, Value2 = 3 });
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
             GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);

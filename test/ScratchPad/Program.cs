@@ -40,7 +40,7 @@ namespace ScratchPad
 
             for (var i = 0; i < 12000; i++)
             {
-                var wid = host.StartWorkflow("Test01", 1, new WfData() { Value1 = "two", Value2 = "data2" }).Result;
+                var wid = host.StartWorkflow("Test01", 1, new WfData { Value1 = "two", Value2 = "data2" }).Result;
                 ids.Add(wid);
             }
 

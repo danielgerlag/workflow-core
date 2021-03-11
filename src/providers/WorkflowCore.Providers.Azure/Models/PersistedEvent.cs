@@ -19,11 +19,11 @@ namespace WorkflowCore.Providers.Azure.Models
 
         public bool IsProcessed { get; set; }
 
-        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
+        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
 
         public static PersistedEvent FromInstance(Event instance)
         {
-            return new PersistedEvent()
+            return new PersistedEvent
             {
                 id = instance.Id,
                 EventKey = instance.EventKey,
@@ -36,7 +36,7 @@ namespace WorkflowCore.Providers.Azure.Models
 
         public static Event ToInstance(PersistedEvent instance)
         {
-            return new Event()
+            return new Event
             {
                 Id = instance.id,
                 EventKey = instance.EventKey,

@@ -62,7 +62,7 @@ namespace WorkflowCore.Services
                 {
                     _logger.LogError("Unable to find step {0} in workflow definition", pointer.StepId);
                     pointer.SleepUntil = _datetimeProvider.UtcNow.Add(_options.ErrorRetryInterval);
-                    wfResult.Errors.Add(new ExecutionError()
+                    wfResult.Errors.Add(new ExecutionError
                     {
                         WorkflowId = workflow.Id,
                         ExecutionPointerId = pointer.Id,
@@ -82,7 +82,7 @@ namespace WorkflowCore.Services
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Workflow {0} raised error on step {1} Message: {2}", workflow.Id, pointer.StepId, ex.Message);
-                    wfResult.Errors.Add(new ExecutionError()
+                    wfResult.Errors.Add(new ExecutionError
                     {
                         WorkflowId = workflow.Id,
                         ExecutionPointerId = pointer.Id,
@@ -116,7 +116,7 @@ namespace WorkflowCore.Services
             if (pointer.Status != PointerStatus.Running)
             {
                 pointer.Status = PointerStatus.Running;
-                _publisher.PublishNotification(new StepStarted()
+                _publisher.PublishNotification(new StepStarted
                 {
                     EventTimeUtc = _datetimeProvider.UtcNow,
                     Reference = workflow.Reference,
@@ -138,7 +138,7 @@ namespace WorkflowCore.Services
 
         private async Task ExecuteStep(WorkflowInstance workflow, WorkflowStep step, ExecutionPointer pointer, WorkflowExecutorResult wfResult, WorkflowDefinition def, CancellationToken cancellationToken = default)
         {
-            IStepExecutionContext context = new StepExecutionContext()
+            IStepExecutionContext context = new StepExecutionContext
             {
                 Workflow = workflow,
                 Step = step,
@@ -159,7 +159,7 @@ namespace WorkflowCore.Services
                 {
                     _logger.LogError("Unable to construct step body {0}", step.BodyType.ToString());
                     pointer.SleepUntil = _datetimeProvider.UtcNow.Add(_options.ErrorRetryInterval);
-                    wfResult.Errors.Add(new ExecutionError()
+                    wfResult.Errors.Add(new ExecutionError
                     {
                         WorkflowId = workflow.Id,
                         ExecutionPointerId = pointer.Id,
@@ -253,7 +253,7 @@ namespace WorkflowCore.Services
                 await middlewareRunner.RunPostMiddleware(workflow, def);
             }
 
-            _publisher.PublishNotification(new WorkflowCompleted()
+            _publisher.PublishNotification(new WorkflowCompleted
             {
                 EventTimeUtc = _datetimeProvider.UtcNow,
                 Reference = workflow.Reference,

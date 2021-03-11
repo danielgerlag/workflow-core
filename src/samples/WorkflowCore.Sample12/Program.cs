@@ -17,7 +17,7 @@ namespace WorkflowCore.Sample12
             host.Start();
 
             Console.WriteLine("Starting workflow...");
-            host.StartWorkflow("outcome-sample", new MyData() { Value = 2 });
+            host.StartWorkflow("outcome-sample", new MyData { Value = 2 });
 
 
             Console.ReadLine();

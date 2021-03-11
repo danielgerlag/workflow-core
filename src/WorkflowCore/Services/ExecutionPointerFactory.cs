@@ -24,7 +24,7 @@ namespace WorkflowCore.Services
         public ExecutionPointer BuildNextPointer(WorkflowDefinition def, ExecutionPointer pointer, IStepOutcome outcomeTarget)
         {
             var nextId = GenerateId();
-            return new ExecutionPointer()
+            return new ExecutionPointer
             {
                 Id = nextId,
                 PredecessorId = pointer.Id,
@@ -44,7 +44,7 @@ namespace WorkflowCore.Services
             childScope.Insert(0, pointer.Id);
             pointer.Children.Add(childPointerId);
 
-            return new ExecutionPointer()
+            return new ExecutionPointer
             {
                 Id = childPointerId,
                 PredecessorId = pointer.Id,
@@ -60,7 +60,7 @@ namespace WorkflowCore.Services
         public ExecutionPointer BuildCompensationPointer(WorkflowDefinition def, ExecutionPointer pointer, ExecutionPointer exceptionPointer, int compensationStepId)
         {
             var nextId = GenerateId();
-            return new ExecutionPointer()
+            return new ExecutionPointer
             {
                 Id = nextId,
                 PredecessorId = exceptionPointer.Id,

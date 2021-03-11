@@ -94,7 +94,7 @@ namespace WorkflowCore.Services
             string id = await _persistenceStore.CreateNewWorkflow(wf);
             await _queueProvider.QueueWork(id, QueueType.Workflow);
             await _queueProvider.QueueWork(id, QueueType.Index);
-            await _eventHub.PublishNotification(new WorkflowStarted()
+            await _eventHub.PublishNotification(new WorkflowStarted
             {
                 EventTimeUtc = _dateTimeProvider.UtcNow,
                 Reference = reference,
@@ -137,7 +137,7 @@ namespace WorkflowCore.Services
                     wf.Status = WorkflowStatus.Suspended;
                     await _persistenceStore.PersistWorkflow(wf);
                     await _queueProvider.QueueWork(workflowId, QueueType.Index);
-                    await _eventHub.PublishNotification(new WorkflowSuspended()
+                    await _eventHub.PublishNotification(new WorkflowSuspended
                     {
                         EventTimeUtc = _dateTimeProvider.UtcNow,
                         Reference = wf.Reference,
@@ -173,7 +173,7 @@ namespace WorkflowCore.Services
                     await _persistenceStore.PersistWorkflow(wf);
                     requeue = true;
                     await _queueProvider.QueueWork(workflowId, QueueType.Index);
-                    await _eventHub.PublishNotification(new WorkflowResumed()
+                    await _eventHub.PublishNotification(new WorkflowResumed
                     {
                         EventTimeUtc = _dateTimeProvider.UtcNow,
                         Reference = wf.Reference,
@@ -207,7 +207,7 @@ namespace WorkflowCore.Services
                 wf.Status = WorkflowStatus.Terminated;
                 await _persistenceStore.PersistWorkflow(wf);
                 await _queueProvider.QueueWork(workflowId, QueueType.Index);
-                await _eventHub.PublishNotification(new WorkflowTerminated()
+                await _eventHub.PublishNotification(new WorkflowTerminated
                 {
                     EventTimeUtc = _dateTimeProvider.UtcNow,
                     Reference = wf.Reference,

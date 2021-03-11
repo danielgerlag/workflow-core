@@ -42,7 +42,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         public void Scenario()
         {
             var eventKey = Guid.NewGuid().ToString();
-            var workflowId = StartWorkflow(new MyDataClass() { StrValue1 = eventKey, StrValue2 = eventKey });
+            var workflowId = StartWorkflow(new MyDataClass { StrValue1 = eventKey, StrValue2 = eventKey });
             WaitForEventSubscription("MyEvent", eventKey, TimeSpan.FromSeconds(30));
             Host.PublishEvent("MyEvent", eventKey, "Pass1");
             WaitForEventSubscription("MyEvent2", eventKey, TimeSpan.FromSeconds(30));

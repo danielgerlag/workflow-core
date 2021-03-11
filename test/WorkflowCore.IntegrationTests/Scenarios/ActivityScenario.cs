@@ -51,13 +51,13 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         [Fact]
         public void Scenario()
         {
-            var workflowId = StartWorkflow(new MyDataClass() { ActivityInput = new ActivityInput() { Value1 = "a", Value2 = 1 } });
+            var workflowId = StartWorkflow(new MyDataClass { ActivityInput = new ActivityInput { Value1 = "a", Value2 = 1 } });
             var activity = Host.GetPendingActivity("act-1", "worker1", TimeSpan.FromSeconds(30)).Result;
 
             if (activity != null)
             {
                 var actInput = (ActivityInput)activity.Parameters;
-                Host.SubmitActivitySuccess(activity.Token, new ActivityOutput() 
+                Host.SubmitActivitySuccess(activity.Token, new ActivityOutput
                 { 
                     Value1 = actInput.Value1 + "1",
                     Value2 = actInput.Value2 + 1

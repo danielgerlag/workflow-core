@@ -18,7 +18,7 @@ namespace WorkflowCore.Providers.Redis.Services
         private IConnectionMultiplexer _multiplexer;
         private IDatabase _redis;
 
-        private readonly Dictionary<QueueType, string> _queues = new Dictionary<QueueType, string>()
+        private readonly Dictionary<QueueType, string> _queues = new Dictionary<QueueType, string>
         {
             [QueueType.Workflow] = "workflows",
             [QueueType.Event] = "events",

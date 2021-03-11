@@ -36,7 +36,7 @@ namespace WorkflowCore.Providers.AWS.Services
         {
             workflow.Id = Guid.NewGuid().ToString();
 
-            var req = new PutItemRequest()
+            var req = new PutItemRequest
             {
                 TableName = $"{_tablePrefix}-{WORKFLOW_TABLE}",
                 Item = workflow.ToDynamoMap(),
@@ -50,7 +50,7 @@ namespace WorkflowCore.Providers.AWS.Services
 
         public async Task PersistWorkflow(WorkflowInstance workflow)
         {
-            var request = new PutItemRequest()
+            var request = new PutItemRequest
             {
                 TableName = $"{_tablePrefix}-{WORKFLOW_TABLE}",
                 Item = workflow.ToDynamoMap()
@@ -64,7 +64,7 @@ namespace WorkflowCore.Providers.AWS.Services
             var result = new List<string>();
             var now = asAt.ToUniversalTime().Ticks;
 
-            var request = new QueryRequest()
+            var request = new QueryRequest
             {
                 TableName = $"{_tablePrefix}-{WORKFLOW_TABLE}",
                 IndexName = "ix_runnable",
@@ -73,13 +73,13 @@ namespace WorkflowCore.Providers.AWS.Services
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
                     {
-                        ":r", new AttributeValue()
+                        ":r", new AttributeValue
                         {
                             N = 1.ToString()
                         }
                     },
                     {
-                        ":effective_date", new AttributeValue()
+                        ":effective_date", new AttributeValue
                         {
                             N = Convert.ToString(now)
                         }
@@ -105,7 +105,7 @@ namespace WorkflowCore.Providers.AWS.Services
 
         public async Task<WorkflowInstance> GetWorkflowInstance(string Id)
         {
-            var req = new GetItemRequest()
+            var req = new GetItemRequest
             {
                 TableName = $"{_tablePrefix}-{WORKFLOW_TABLE}",
                 Key = new Dictionary<string, AttributeValue>
@@ -125,10 +125,10 @@ namespace WorkflowCore.Providers.AWS.Services
                 return new List<WorkflowInstance>();
             }
 
-            var keys = new KeysAndAttributes() { Keys = new List<Dictionary<string, AttributeValue>>() };
+            var keys = new KeysAndAttributes { Keys = new List<Dictionary<string, AttributeValue>>() };
             foreach (var id in ids)
             {
-                var key = new Dictionary<string, AttributeValue>()
+                var key = new Dictionary<string, AttributeValue>
                 {
                     {
                         "id", new AttributeValue { S = id }
@@ -139,7 +139,7 @@ namespace WorkflowCore.Providers.AWS.Services
 
             var request = new BatchGetItemRequest
             {
-                RequestItems = new Dictionary<string, KeysAndAttributes>()
+                RequestItems = new Dictionary<string, KeysAndAttributes>
                 {
                     {
                         $"{_tablePrefix}-{WORKFLOW_TABLE}", keys
@@ -165,7 +165,7 @@ namespace WorkflowCore.Providers.AWS.Services
         {
             subscription.Id = Guid.NewGuid().ToString();
 
-            var req = new PutItemRequest()
+            var req = new PutItemRequest
             {
                 TableName = $"{_tablePrefix}-{SUBCRIPTION_TABLE}",
                 Item = subscription.ToDynamoMap(),
@@ -182,7 +182,7 @@ namespace WorkflowCore.Providers.AWS.Services
             var result = new List<EventSubscription>();
             var asOfTicks = asOf.ToUniversalTime().Ticks;
 
-            var request = new QueryRequest()
+            var request = new QueryRequest
             {
                 TableName = $"{_tablePrefix}-{SUBCRIPTION_TABLE}",
                 IndexName = "ix_slug",
@@ -194,7 +194,7 @@ namespace WorkflowCore.Providers.AWS.Services
                         ":slug", new AttributeValue($"{eventName}:{eventKey}")
                     },
                     {
-                        ":as_of", new AttributeValue()
+                        ":as_of", new AttributeValue
                         {
                             N = Convert.ToString(asOfTicks)
                         }
@@ -215,7 +215,7 @@ namespace WorkflowCore.Providers.AWS.Services
 
         public async Task TerminateSubscription(string eventSubscriptionId)
         {
-            var request = new DeleteItemRequest()
+            var request = new DeleteItemRequest
             {
                 TableName = $"{_tablePrefix}-{SUBCRIPTION_TABLE}",
                 Key = new Dictionary<string, AttributeValue>
@@ -230,7 +230,7 @@ namespace WorkflowCore.Providers.AWS.Services
         {
             newEvent.Id = Guid.NewGuid().ToString();
 
-            var req = new PutItemRequest()
+            var req = new PutItemRequest
             {
                 TableName = $"{_tablePrefix}-{EVENT_TABLE}",
                 Item = newEvent.ToDynamoMap(),
@@ -244,7 +244,7 @@ namespace WorkflowCore.Providers.AWS.Services
 
         public async Task<Event> GetEvent(string id)
         {
-            var req = new GetItemRequest()
+            var req = new GetItemRequest
             {
                 TableName = $"{_tablePrefix}-{EVENT_TABLE}",
                 Key = new Dictionary<string, AttributeValue>
@@ -262,7 +262,7 @@ namespace WorkflowCore.Providers.AWS.Services
             var result = new List<string>();
             var now = asAt.ToUniversalTime().Ticks;
 
-            var request = new QueryRequest()
+            var request = new QueryRequest
             {
                 TableName = $"{_tablePrefix}-{EVENT_TABLE}",
                 IndexName = "ix_not_processed",
@@ -270,9 +270,9 @@ namespace WorkflowCore.Providers.AWS.Services
                 KeyConditionExpression = "not_processed = :n and event_time <= :effectiveDate",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
-                    { ":n" , new AttributeValue() { N = 1.ToString() } },
+                    { ":n" , new AttributeValue { N = 1.ToString() } },
                     {
-                        ":effectiveDate", new AttributeValue()
+                        ":effectiveDate", new AttributeValue
                         {
                             N = Convert.ToString(now)
                         }
@@ -296,7 +296,7 @@ namespace WorkflowCore.Providers.AWS.Services
             var result = new List<string>();
             var asOfTicks = asOf.ToUniversalTime().Ticks;
 
-            var request = new QueryRequest()
+            var request = new QueryRequest
             {
                 TableName = $"{_tablePrefix}-{EVENT_TABLE}",
                 IndexName = "ix_slug",
@@ -308,7 +308,7 @@ namespace WorkflowCore.Providers.AWS.Services
                         ":slug", new AttributeValue($"{eventName}:{eventKey}")
                     },
                     {
-                        ":effective_date", new AttributeValue()
+                        ":effective_date", new AttributeValue
                         {
                             N = Convert.ToString(asOfTicks)
                         }
@@ -329,7 +329,7 @@ namespace WorkflowCore.Providers.AWS.Services
 
         public async Task MarkEventProcessed(string id)
         {
-            var request = new UpdateItemRequest()
+            var request = new UpdateItemRequest
             {
                 TableName = $"{_tablePrefix}-{EVENT_TABLE}",
                 Key = new Dictionary<string, AttributeValue>
@@ -343,7 +343,7 @@ namespace WorkflowCore.Providers.AWS.Services
 
         public async Task MarkEventUnprocessed(string id)
         {
-            var request = new UpdateItemRequest()
+            var request = new UpdateItemRequest
             {
                 TableName = $"{_tablePrefix}-{EVENT_TABLE}",
                 Key = new Dictionary<string, AttributeValue>
@@ -351,9 +351,9 @@ namespace WorkflowCore.Providers.AWS.Services
                     { "id", new AttributeValue(id) }
                 },
                 UpdateExpression = "ADD not_processed = :n",
-                ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
-                    { ":n" , new AttributeValue() { N = 1.ToString() } }
+                    { ":n" , new AttributeValue { N = 1.ToString() } }
                 }
             };
             await _client.UpdateItemAsync(request);
@@ -372,7 +372,7 @@ namespace WorkflowCore.Providers.AWS.Services
 
         public async Task<EventSubscription> GetSubscription(string eventSubscriptionId)
         {
-            var req = new GetItemRequest()
+            var req = new GetItemRequest
             {
                 TableName = $"{_tablePrefix}-{SUBCRIPTION_TABLE}",
                 Key = new Dictionary<string, AttributeValue>
@@ -390,7 +390,7 @@ namespace WorkflowCore.Providers.AWS.Services
             var result = new List<EventSubscription>();
             var asOfTicks = asOf.ToUniversalTime().Ticks;
 
-            var request = new QueryRequest()
+            var request = new QueryRequest
             {
                 TableName = $"{_tablePrefix}-{SUBCRIPTION_TABLE}",
                 IndexName = "ix_slug",
@@ -404,7 +404,7 @@ namespace WorkflowCore.Providers.AWS.Services
                         ":slug", new AttributeValue($"{eventName}:{eventKey}")
                     },
                     {
-                        ":as_of", new AttributeValue()
+                        ":as_of", new AttributeValue
                         {
                             N = Convert.ToString(asOfTicks)
                         }
@@ -423,7 +423,7 @@ namespace WorkflowCore.Providers.AWS.Services
 
         public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry)
         {
-            var request = new UpdateItemRequest()
+            var request = new UpdateItemRequest
             {
                 TableName = $"{_tablePrefix}-{SUBCRIPTION_TABLE}",
                 Key = new Dictionary<string, AttributeValue>
@@ -432,11 +432,11 @@ namespace WorkflowCore.Providers.AWS.Services
                 },
                 UpdateExpression = "SET external_token = :external_token, external_worker_id = :external_worker_id, external_token_expiry = :external_token_expiry",
                 ConditionExpression = "attribute_not_exists(external_token)",
-                ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
-                    { ":external_token" , new AttributeValue() { S = token } },
-                    { ":external_worker_id" , new AttributeValue() { S = workerId } },
-                    { ":external_token_expiry" , new AttributeValue() { N = expiry.Ticks.ToString() } }
+                    { ":external_token" , new AttributeValue { S = token } },
+                    { ":external_worker_id" , new AttributeValue { S = workerId } },
+                    { ":external_token_expiry" , new AttributeValue { N = expiry.Ticks.ToString() } }
                 }
             };
             try
@@ -452,7 +452,7 @@ namespace WorkflowCore.Providers.AWS.Services
 
         public async Task ClearSubscriptionToken(string eventSubscriptionId, string token)
         {
-            var request = new UpdateItemRequest()
+            var request = new UpdateItemRequest
             {
                 TableName = $"{_tablePrefix}-{SUBCRIPTION_TABLE}",
                 Key = new Dictionary<string, AttributeValue>
@@ -461,9 +461,9 @@ namespace WorkflowCore.Providers.AWS.Services
                 },
                 UpdateExpression = "REMOVE external_token, external_worker_id, external_token_expiry",
                 ConditionExpression = "external_token = :external_token",
-                ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
-                    { ":external_token" , new AttributeValue() { S = token } },
+                    { ":external_token" , new AttributeValue { S = token } },
                 }
             };
             

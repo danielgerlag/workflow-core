@@ -69,7 +69,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         [Fact]
         public void Scenario()
         {
-            var workflowId = StartWorkflow(new MyDataClass() { Counter = 0 });
+            var workflowId = StartWorkflow(new MyDataClass { Counter = 0 });
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
                         
             Step1Ticker.Should().Be(1);

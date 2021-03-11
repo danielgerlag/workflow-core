@@ -20,7 +20,7 @@ namespace WorkflowCore.Sample18
 
             Console.WriteLine("Starting workflow...");
 
-            var workflowId = host.StartWorkflow("activity-sample", new MyData() { Request = "Spend $1,000,000" }).Result;
+            var workflowId = host.StartWorkflow("activity-sample", new MyData { Request = "Spend $1,000,000" }).Result;
 
             var approval = host.GetPendingActivity("get-approval", "worker1", TimeSpan.FromMinutes(1)).Result;
 

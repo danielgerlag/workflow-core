@@ -60,7 +60,7 @@ namespace Docker.Testify
 
             await PullImage(ImageName, ImageTag);	        
 
-            var container = await docker.Containers.CreateContainerAsync(new CreateContainerParameters()
+            var container = await docker.Containers.CreateContainerAsync(new CreateContainerParameters
             {
                 Image = $"{ImageName}:{ImageTag}",
                 Name = $"{ContainerPrefix}-{Guid.NewGuid()}",
@@ -113,13 +113,13 @@ namespace Docker.Testify
                 return;
 
             Debug.WriteLine($"Pulling docker image {name}:{tag}");
-            await docker.Images.CreateImageAsync(new ImagesCreateParameters() { FromImage = name, Tag = tag }, null, new Progress<JSONMessage>());
+            await docker.Images.CreateImageAsync(new ImagesCreateParameters { FromImage = name, Tag = tag }, null, new Progress<JSONMessage>());
         }
 
         public void Dispose()
     	{
     	    docker.Containers.KillContainerAsync(containerId, new ContainerKillParameters()).Wait();
-    	    docker.Containers.RemoveContainerAsync(containerId, new ContainerRemoveParameters() { Force = true }).Wait();
+    	    docker.Containers.RemoveContainerAsync(containerId, new ContainerRemoveParameters { Force = true }).Wait();
     	}
 
         private int GetFreePort()

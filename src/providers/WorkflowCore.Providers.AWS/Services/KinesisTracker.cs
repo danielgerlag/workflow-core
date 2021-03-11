@@ -31,7 +31,7 @@ namespace WorkflowCore.Providers.AWS.Services
             if (!_tableConfirmed)
                 await EnsureTable();
 
-            var response = await _client.GetItemAsync(new GetItemRequest()
+            var response = await _client.GetItemAsync(new GetItemRequest
             {
                 TableName = _tableName,
                 Key = new Dictionary<string, AttributeValue>
@@ -51,7 +51,7 @@ namespace WorkflowCore.Providers.AWS.Services
             if (!_tableConfirmed)
                 await EnsureTable();
 
-            var response = await _client.GetItemAsync(new GetItemRequest()
+            var response = await _client.GetItemAsync(new GetItemRequest
             {
                 TableName = _tableName,
                 Key = new Dictionary<string, AttributeValue>
@@ -71,7 +71,7 @@ namespace WorkflowCore.Providers.AWS.Services
             if (!_tableConfirmed)
                 await EnsureTable();
 
-            await _client.UpdateItemAsync(new UpdateItemRequest()
+            await _client.UpdateItemAsync(new UpdateItemRequest
             {
                 TableName = _tableName,
                 Key = new Dictionary<string, AttributeValue>
@@ -79,7 +79,7 @@ namespace WorkflowCore.Providers.AWS.Services
                     {"id", new AttributeValue(FormatId(app, stream, shard))}
                 },
                 UpdateExpression = "SET next_iterator = :n",
-                ExpressionAttributeValues = new Dictionary<string, AttributeValue>()
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
                     { ":n" , new AttributeValue(iterator) }
                 }
@@ -91,7 +91,7 @@ namespace WorkflowCore.Providers.AWS.Services
             if (!_tableConfirmed)
                 await EnsureTable();
 
-            await _client.PutItemAsync(new PutItemRequest()
+            await _client.PutItemAsync(new PutItemRequest
             {
                 TableName = _tableName,
                 Item = new Dictionary<string, AttributeValue>
@@ -118,12 +118,12 @@ namespace WorkflowCore.Providers.AWS.Services
 
         private async Task CreateTable()
         {
-            var createRequest = new CreateTableRequest(_tableName, new List<KeySchemaElement>()
+            var createRequest = new CreateTableRequest(_tableName, new List<KeySchemaElement>
             {
                 new KeySchemaElement("id", KeyType.HASH)
             })
             {
-                AttributeDefinitions = new List<AttributeDefinition>()
+                AttributeDefinitions = new List<AttributeDefinition>
                 {
                     new AttributeDefinition("id", ScalarAttributeType.S)
                 },

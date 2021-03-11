@@ -33,10 +33,10 @@ namespace WorkflowCore.Providers.AWS.Services
 
         private async Task CreateWorkflowTable()
         {
-            var runnableIndex = new GlobalSecondaryIndex()
+            var runnableIndex = new GlobalSecondaryIndex
             {
                 IndexName = "ix_runnable",
-                KeySchema = new List<KeySchemaElement>()
+                KeySchema = new List<KeySchemaElement>
                 {
                     {
                         new KeySchemaElement
@@ -53,33 +53,33 @@ namespace WorkflowCore.Providers.AWS.Services
                         }
                     }
                 },
-                Projection = new Projection()
+                Projection = new Projection
                 {
                     ProjectionType = ProjectionType.KEYS_ONLY
                 },
-                ProvisionedThroughput = new ProvisionedThroughput()
+                ProvisionedThroughput = new ProvisionedThroughput
                 {
                     ReadCapacityUnits = 1,
                     WriteCapacityUnits = 1
                 }
             };
 
-            var createRequest = new CreateTableRequest($"{_tablePrefix}-{DynamoPersistenceProvider.WORKFLOW_TABLE}", new List<KeySchemaElement>()
+            var createRequest = new CreateTableRequest($"{_tablePrefix}-{DynamoPersistenceProvider.WORKFLOW_TABLE}", new List<KeySchemaElement>
             {
                 new KeySchemaElement("id", KeyType.HASH)
             })
             {
-                AttributeDefinitions = new List<AttributeDefinition>()
+                AttributeDefinitions = new List<AttributeDefinition>
                 {
                     new AttributeDefinition("id", ScalarAttributeType.S),
                     new AttributeDefinition("runnable", ScalarAttributeType.N),
                     new AttributeDefinition("next_execution", ScalarAttributeType.N),
                 },
-                GlobalSecondaryIndexes = new List<GlobalSecondaryIndex>()
+                GlobalSecondaryIndexes = new List<GlobalSecondaryIndex>
                 {
                     runnableIndex
                 },
-                ProvisionedThroughput = new ProvisionedThroughput()
+                ProvisionedThroughput = new ProvisionedThroughput
                 {
                     ReadCapacityUnits = 1,
                     WriteCapacityUnits = 1
@@ -91,10 +91,10 @@ namespace WorkflowCore.Providers.AWS.Services
 
         private async Task CreateSubscriptionTable()
         {
-            var slugIndex = new GlobalSecondaryIndex()
+            var slugIndex = new GlobalSecondaryIndex
             {
                 IndexName = "ix_slug",
-                KeySchema = new List<KeySchemaElement>()
+                KeySchema = new List<KeySchemaElement>
                 {
                     {
                         new KeySchemaElement
@@ -111,33 +111,33 @@ namespace WorkflowCore.Providers.AWS.Services
                         }
                     }
                 },
-                Projection = new Projection()
+                Projection = new Projection
                 {
                     ProjectionType = ProjectionType.ALL
                 },
-                ProvisionedThroughput = new ProvisionedThroughput()
+                ProvisionedThroughput = new ProvisionedThroughput
                 {
                     ReadCapacityUnits = 1,
                     WriteCapacityUnits = 1
                 }
             };
             
-            var createRequest = new CreateTableRequest($"{_tablePrefix}-{DynamoPersistenceProvider.SUBCRIPTION_TABLE}", new List<KeySchemaElement>()
+            var createRequest = new CreateTableRequest($"{_tablePrefix}-{DynamoPersistenceProvider.SUBCRIPTION_TABLE}", new List<KeySchemaElement>
             {
                 new KeySchemaElement("id", KeyType.HASH)
             })
             {
-                AttributeDefinitions = new List<AttributeDefinition>()
+                AttributeDefinitions = new List<AttributeDefinition>
                 {
                     new AttributeDefinition("id", ScalarAttributeType.S),
                     new AttributeDefinition("event_slug", ScalarAttributeType.S),
                     new AttributeDefinition("subscribe_as_of", ScalarAttributeType.N)
                 },
-                GlobalSecondaryIndexes = new List<GlobalSecondaryIndex>()
+                GlobalSecondaryIndexes = new List<GlobalSecondaryIndex>
                 {
                     slugIndex
                 },
-                ProvisionedThroughput = new ProvisionedThroughput()
+                ProvisionedThroughput = new ProvisionedThroughput
                 {
                     ReadCapacityUnits = 1,
                     WriteCapacityUnits = 1
@@ -149,10 +149,10 @@ namespace WorkflowCore.Providers.AWS.Services
 
         private async Task CreateEventTable()
         {
-            var slugIndex = new GlobalSecondaryIndex()
+            var slugIndex = new GlobalSecondaryIndex
             {
                 IndexName = "ix_slug",
-                KeySchema = new List<KeySchemaElement>()
+                KeySchema = new List<KeySchemaElement>
                 {
                     {
                         new KeySchemaElement
@@ -169,21 +169,21 @@ namespace WorkflowCore.Providers.AWS.Services
                         }
                     }
                 },
-                Projection = new Projection()
+                Projection = new Projection
                 {
                     ProjectionType = ProjectionType.KEYS_ONLY
                 },
-                ProvisionedThroughput = new ProvisionedThroughput()
+                ProvisionedThroughput = new ProvisionedThroughput
                 {
                     ReadCapacityUnits = 1,
                     WriteCapacityUnits = 1
                 }
             };
 
-            var processedIndex = new GlobalSecondaryIndex()
+            var processedIndex = new GlobalSecondaryIndex
             {
                 IndexName = "ix_not_processed",
-                KeySchema = new List<KeySchemaElement>()
+                KeySchema = new List<KeySchemaElement>
                 {
                     {
                         new KeySchemaElement
@@ -200,35 +200,35 @@ namespace WorkflowCore.Providers.AWS.Services
                         }
                     }
                 },
-                Projection = new Projection()
+                Projection = new Projection
                 {
                     ProjectionType = ProjectionType.KEYS_ONLY
                 },
-                ProvisionedThroughput = new ProvisionedThroughput()
+                ProvisionedThroughput = new ProvisionedThroughput
                 {
                     ReadCapacityUnits = 1,
                     WriteCapacityUnits = 1
                 }
             };
 
-            var createRequest = new CreateTableRequest($"{_tablePrefix}-{DynamoPersistenceProvider.EVENT_TABLE}", new List<KeySchemaElement>()
+            var createRequest = new CreateTableRequest($"{_tablePrefix}-{DynamoPersistenceProvider.EVENT_TABLE}", new List<KeySchemaElement>
             {
                 new KeySchemaElement("id", KeyType.HASH)
             })
             {
-                AttributeDefinitions = new List<AttributeDefinition>()
+                AttributeDefinitions = new List<AttributeDefinition>
                 {
                     new AttributeDefinition("id", ScalarAttributeType.S),
                     new AttributeDefinition("not_processed", ScalarAttributeType.N),
                     new AttributeDefinition("event_slug", ScalarAttributeType.S),
                     new AttributeDefinition("event_time", ScalarAttributeType.N)
                 },
-                GlobalSecondaryIndexes = new List<GlobalSecondaryIndex>()
+                GlobalSecondaryIndexes = new List<GlobalSecondaryIndex>
                 {
                     slugIndex,
                     processedIndex
                 },
-                ProvisionedThroughput = new ProvisionedThroughput()
+                ProvisionedThroughput = new ProvisionedThroughput
                 {
                     ReadCapacityUnits = 1,
                     WriteCapacityUnits = 1

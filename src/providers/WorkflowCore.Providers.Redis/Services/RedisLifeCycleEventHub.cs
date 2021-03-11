@@ -16,7 +16,7 @@ namespace WorkflowCore.Providers.Redis.Services
         private readonly string _connectionString;
         private readonly string _channel;
         private ICollection<Action<LifeCycleEvent>> _subscribers = new HashSet<Action<LifeCycleEvent>>();
-        private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
+        private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
         private IConnectionMultiplexer _multiplexer;
         private ISubscriber _subscriber;
 

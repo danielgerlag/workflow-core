@@ -15,7 +15,7 @@ namespace WorkflowCore.Interface
     {
         public static async Task PublishUserAction(this IWorkflowHost host, string actionKey, string user, object value)
         {
-            UserAction data = new UserAction()
+            UserAction data = new UserAction
             {
                 User = user,
                 OutcomeValue = value

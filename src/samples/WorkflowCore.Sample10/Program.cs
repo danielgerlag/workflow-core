@@ -17,7 +17,7 @@ namespace WorkflowCore.Sample10
             host.Start();
 
             Console.WriteLine("Starting workflow...");
-            string workflowId = host.StartWorkflow("While", new MyData() { Counter = 0 }).Result;
+            string workflowId = host.StartWorkflow("While", new MyData { Counter = 0 }).Result;
 
 
             Console.ReadLine();

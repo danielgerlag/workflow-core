@@ -13,14 +13,14 @@ namespace WorkflowCore.Primitives
         {
             if (context.PersistenceData == null)
             {
-                return ExecutionResult.Sleep(Interval, new SchedulePersistenceData() { Elapsed = false });
+                return ExecutionResult.Sleep(Interval, new SchedulePersistenceData { Elapsed = false });
             }
             
             if (context.PersistenceData is SchedulePersistenceData)
             {
                 if (!((SchedulePersistenceData)context.PersistenceData).Elapsed)
                 {
-                    return ExecutionResult.Branch(new List<object>() { context.Item }, new SchedulePersistenceData() { Elapsed = true });
+                    return ExecutionResult.Branch(new List<object> { context.Item }, new SchedulePersistenceData { Elapsed = true });
                 }
                 
                 if (context.Workflow.IsBranchComplete(context.ExecutionPointer.Id))

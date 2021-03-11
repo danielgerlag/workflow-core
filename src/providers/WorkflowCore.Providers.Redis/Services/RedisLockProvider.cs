@@ -70,7 +70,7 @@ namespace WorkflowCore.Providers.Redis.Services
         public async Task Start()
         {
             _multiplexer = await ConnectionMultiplexer.ConnectAsync(_connectionString);           
-            _redlockFactory = RedLockFactory.Create(new List<RedLockMultiplexer>() { new RedLockMultiplexer(_multiplexer) });
+            _redlockFactory = RedLockFactory.Create(new List<RedLockMultiplexer> { new RedLockMultiplexer(_multiplexer) });
         }
 
         public async Task Stop()

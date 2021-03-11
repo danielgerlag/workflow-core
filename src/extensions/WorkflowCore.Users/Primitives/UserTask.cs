@@ -50,7 +50,7 @@ namespace WorkflowCore.Users.Primitives
             
             if (context.PersistenceData == null)
             {
-                var result = ExecutionResult.Branch(new List<object>() { context.Item }, new ControlPersistenceData() { ChildrenActive = true });
+                var result = ExecutionResult.Branch(new List<object> { context.Item }, new ControlPersistenceData { ChildrenActive = true });
                 result.OutcomeValue = action.OutcomeValue;
                 return result;
             }
@@ -74,7 +74,7 @@ namespace WorkflowCore.Users.Primitives
         {
             foreach (var esc in _escalations)
             {
-                context.Workflow.ExecutionPointers.Add(new ExecutionPointer()
+                context.Workflow.ExecutionPointers.Add(new ExecutionPointer
                 {
                     Active = true,
                     Id = Guid.NewGuid().ToString(),

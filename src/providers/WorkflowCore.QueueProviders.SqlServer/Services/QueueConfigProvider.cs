@@ -17,7 +17,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
     /// </summary>    
     public class QueueConfigProvider : IQueueConfigProvider
     {
-        private readonly Dictionary<QueueType, QueueConfig> _queues = new Dictionary<QueueType, QueueConfig>()
+        private readonly Dictionary<QueueType, QueueConfig> _queues = new Dictionary<QueueType, QueueConfig>
         {
             [QueueType.Workflow] = new QueueConfig("workflow"),
             [QueueType.Event] = new QueueConfig("event"),
