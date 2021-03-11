@@ -4,7 +4,6 @@ using Amazon.Runtime;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using WorkflowCore.Providers.AWS.Interface;
 

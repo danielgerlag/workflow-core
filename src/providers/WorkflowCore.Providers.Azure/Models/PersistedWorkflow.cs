@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using WorkflowCore.Models;
 
 namespace WorkflowCore.Providers.Azure.Models

@@ -1,8 +1,6 @@
 ﻿#region using
 
 using System;
-using Microsoft.Extensions.DependencyInjection;
-
 using WorkflowCore.Models;
 using WorkflowCore.QueueProviders.SqlServer;
 using WorkflowCore.QueueProviders.SqlServer.Interfaces;

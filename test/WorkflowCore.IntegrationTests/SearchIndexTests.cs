@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using FluentAssertions;
-using FluentAssertions.Collections;
-using FluentAssertions.Equivalency;
-using FluentAssertions.Common;
 using Xunit;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;

@@ -1,8 +1,6 @@
 ﻿using FluentAssertions;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using WorkflowCore.Models;
 using WorkflowCore.Testing;
 using WorkflowCore.TestSample01.Workflow;
