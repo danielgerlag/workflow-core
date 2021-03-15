@@ -11,7 +11,7 @@ namespace WorkflowCore.Services
     public class WorkflowRegistry : IWorkflowRegistry
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly BlockingCollection<Tuple<string, int, WorkflowDefinition>> _registry = new BlockingCollection<Tuple<string, int, WorkflowDefinition>>();
+        private readonly BlockingCollection<(string workflowId, int version, WorkflowDefinition definition)> _registry = new BlockingCollection<(string, int, WorkflowDefinition)>();
 
         public WorkflowRegistry(IServiceProvider serviceProvider)
         {
@@ -20,24 +20,24 @@ namespace WorkflowCore.Services
 
         public WorkflowDefinition GetDefinition(string workflowId, int? version = null)
         {
+            (string workflowId, int version, WorkflowDefinition definition) workflowEntry;
             if (version.HasValue)
             {
-                var entry = _registry.FirstOrDefault(x => x.Item1 == workflowId && x.Item2 == version.Value);
-                // TODO: What in the heck does Item3 mean?
-                return entry?.Item3;
+                workflowEntry = _registry.FirstOrDefault(x => x.workflowId == workflowId && x.version == version.Value);
             }
             else
             {
-                var entry = _registry.Where(x => x.Item1 == workflowId).OrderByDescending(x => x.Item2)
-                                     .FirstOrDefault();
-                return entry?.Item3;
+                workflowEntry = _registry.Where(x => x.workflowId == workflowId).OrderByDescending(x => x.version)
+                    .FirstOrDefault();
             }
+
+            return workflowEntry != default ? workflowEntry.definition : default;
         }
 
         public void DeregisterWorkflow(string workflowId, int version)
         {
-            var definition = _registry.FirstOrDefault(x => x.Item1 == workflowId && x.Item2 == version);
-            if (definition != null)
+            var definition = _registry.FirstOrDefault(x => x.workflowId == workflowId && x.version == version);
+            if (definition != default)
             {
                 _registry.TryTake(out definition);
             }
@@ -45,31 +45,31 @@ namespace WorkflowCore.Services
 
         public void RegisterWorkflow(IWorkflow workflow)
         {
-            if (_registry.Any(x => x.Item1 == workflow.Id && x.Item2 == workflow.Version))
+            if (_registry.Any(x => x.workflowId == workflow.Id && x.version == workflow.Version))
             {
                 throw new InvalidOperationException($"Workflow {workflow.Id} version {workflow.Version} is already registered");
             }
 
-            var builder = _serviceProvider.GetService<IWorkflowBuilder>().UseData<object>();            
+            var builder = _serviceProvider.GetService<IWorkflowBuilder>().UseData<object>();
             workflow.Build(builder);
             var def = builder.Build(workflow.Id, workflow.Version);
-            _registry.Add(Tuple.Create(workflow.Id, workflow.Version, def));
+            _registry.Add((workflow.Id, workflow.Version, def));
         }
 
         public void RegisterWorkflow(WorkflowDefinition definition)
         {
-            if (_registry.Any(x => x.Item1 == definition.Id && x.Item2 == definition.Version))
+            if (_registry.Any(x => x.workflowId == definition.Id && x.version == definition.Version))
             {
                 throw new InvalidOperationException($"Workflow {definition.Id} version {definition.Version} is already registered");
             }
 
-            _registry.Add(Tuple.Create(definition.Id, definition.Version, definition));
+            _registry.Add((definition.Id, definition.Version, definition));
         }
 
         public void RegisterWorkflow<TData>(IWorkflow<TData> workflow)
             where TData : new()
         {
-            if (_registry.Any(x => x.Item1 == workflow.Id && x.Item2 == workflow.Version))
+            if (_registry.Any(x => x.workflowId == workflow.Id && x.version == workflow.Version))
             {
                 throw new InvalidOperationException($"Workflow {workflow.Id} version {workflow.Version} is already registered");
             }
@@ -77,18 +77,18 @@ namespace WorkflowCore.Services
             var builder = _serviceProvider.GetService<IWorkflowBuilder>().UseData<TData>();
             workflow.Build(builder);
             var def = builder.Build(workflow.Id, workflow.Version);
-            _registry.Add(Tuple.Create(workflow.Id, workflow.Version, def));
+            _registry.Add((workflow.Id, workflow.Version, def));
         }
 
         public bool IsRegistered(string workflowId, int version)
         {
-            var definition = _registry.FirstOrDefault(x => x.Item1 == workflowId && x.Item2 == version);
-            return (definition != null);
+            var definition = _registry.FirstOrDefault(x => x.workflowId == workflowId && x.version == version);
+            return definition != default;
         }
 
         public IEnumerable<WorkflowDefinition> GetAllDefinitions()
         {
-            return _registry.Select(i => i.Item3);
+            return _registry.Select(i => i.definition);
         }
     }
 }
