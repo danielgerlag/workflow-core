@@ -184,5 +184,10 @@ namespace WorkflowCore.Services
         {
             return _activityController.SubmitActivityFailure(token, result);
         }
+
+        public Task<string> StartWorkflowForTest<TData>(string workflowId, WorkflowDefinition def, TData data = null, string reference = null) where TData : class, new()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

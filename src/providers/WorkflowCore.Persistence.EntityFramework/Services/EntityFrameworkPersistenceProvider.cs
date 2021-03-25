@@ -358,7 +358,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .Where(x => x.SubscriptionId == uid)
                     .AsTracking()
                     .FirstAsync();
-                
+
                 if (existingEntity.ExternalToken != token)
                     throw new InvalidOperationException();
 
@@ -366,6 +366,20 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 existingEntity.ExternalWorkerId = null;
                 existingEntity.ExternalTokenExpiry = null;
                 await db.SaveChangesAsync();
+            }
+        }
+
+        public async Task<IEnumerable<string>> GetRunnableInstances(DateTime createTime, DateTime asAt)
+        {
+            using (var db = ConstructDbContext())
+            {
+                var now = asAt.ToUniversalTime().Ticks;
+                var raw = await db.Set<PersistedWorkflow>()
+                    .Where(x => x.NextExecution.HasValue && (x.NextExecution <= now) && (x.Status == WorkflowStatus.Runnable) && x.CreateTime >= createTime)
+                    .Select(x => x.InstanceId)
+                    .ToListAsync();
+
+                return raw.Select(s => s.ToString()).ToList();
             }
         }
     }

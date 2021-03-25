@@ -13,6 +13,8 @@ namespace WorkflowCore.Interface
 
         Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt);
 
+        Task<IEnumerable<string>> GetRunnableInstances(DateTime createTime, DateTime asAt);
+
         [Obsolete]
         Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take);
 

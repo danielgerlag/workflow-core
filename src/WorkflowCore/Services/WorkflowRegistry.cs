@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -89,6 +90,42 @@ namespace WorkflowCore.Services
         public IEnumerable<WorkflowDefinition> GetAllDefinitions()
         {
             return _registry.Select(i => i.definition);
+        }
+
+        public Task RegisterWorkflowAsync(IWorkflow workflow)
+        {
+            RegisterWorkflow(workflow);
+            return Task.CompletedTask;
+        }
+
+        public Task RegisterWorkflowAsync(WorkflowDefinition definition)
+        {
+            RegisterWorkflow(definition);
+            return Task.CompletedTask;
+        }
+
+        public Task RegisterWorkflowAsync<TData>(IWorkflow<TData> workflow) where TData : new()
+        {
+            RegisterWorkflow(workflow);
+            return Task.CompletedTask;
+        }
+
+        public Task<WorkflowDefinition> GetDefinitionAsync(string workflowId, int? version = null)
+        {
+            var definition = GetDefinition(workflowId, version);
+            return Task.FromResult(definition);
+        }
+
+        public Task<bool> IsRegisteredAsync(string workflowId, int version)
+        {
+            var isRegistered = IsRegistered(workflowId, version);
+            return Task.FromResult(isRegistered);
+        }
+
+        public Task DeregisterWorkflowAsync(string workflowId, int version)
+        {
+            DeregisterWorkflow(workflowId, version);
+            return Task.CompletedTask;
         }
     }
 }
