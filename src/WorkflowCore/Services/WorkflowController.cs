@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Exceptions;
@@ -47,10 +47,10 @@ namespace WorkflowCore.Services
             return StartWorkflow<object>(workflowId, version, data, reference);
         }
 
-        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null, string reference=null)
+        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null, string reference = null)
             where TData : class, new()
         {
-            return StartWorkflow<TData>(workflowId, null, data, reference);
+            return StartWorkflow(workflowId, null, data, reference);
         }
 
         public async Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference=null)
@@ -204,7 +204,10 @@ namespace WorkflowCore.Services
             try
             {
                 var wf = await _persistenceStore.GetWorkflowInstance(workflowId);
+
                 wf.Status = WorkflowStatus.Terminated;
+                wf.CompleteTime = _dateTimeProvider.UtcNow;
+
                 await _persistenceStore.PersistWorkflow(wf);
                 await _queueProvider.QueueWork(workflowId, QueueType.Index);
                 await _eventHub.PublishNotification(new WorkflowTerminated()
@@ -226,7 +229,7 @@ namespace WorkflowCore.Services
         public void RegisterWorkflow<TWorkflow>()
             where TWorkflow : IWorkflow
         {
-            TWorkflow wf = ActivatorUtilities.CreateInstance<TWorkflow>(_serviceProvider);
+            var wf = ActivatorUtilities.CreateInstance<TWorkflow>(_serviceProvider);
             _registry.RegisterWorkflow(wf);
         }
 
@@ -234,8 +237,8 @@ namespace WorkflowCore.Services
             where TWorkflow : IWorkflow<TData>
             where TData : new()
         {
-            TWorkflow wf = ActivatorUtilities.CreateInstance<TWorkflow>(_serviceProvider);
-            _registry.RegisterWorkflow<TData>(wf);
+            var wf = ActivatorUtilities.CreateInstance<TWorkflow>(_serviceProvider);
+            _registry.RegisterWorkflow(wf);
         }
     }
 }
