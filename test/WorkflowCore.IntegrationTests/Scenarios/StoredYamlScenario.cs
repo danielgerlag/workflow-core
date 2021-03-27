@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using Xunit;
 using FluentAssertions;
-using WorkflowCore.Services.DefinitionStorage;
 using WorkflowCore.Testing;
 using WorkflowCore.TestAssets.DataTypes;
 
@@ -21,7 +17,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         [Fact(DisplayName = "Execute workflow from stored YAML definition")]
         public void should_execute_yaml_workflow()
         {
-            var workflowId = StartWorkflow(TestAssets.Utils.GetTestDefinitionYaml(), new CounterBoard() { Flag1 = true, Flag2 = true });
+            var workflowId = StartWorkflow(TestAssets.Utils.GetTestDefinitionYaml(), new CounterBoard { Flag1 = true, Flag2 = true });
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
             var data = GetData<CounterBoard>(workflowId);

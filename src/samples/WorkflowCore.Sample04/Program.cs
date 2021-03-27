@@ -1,18 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
 using StackExchange.Redis;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Amazon;
-using Amazon.Runtime;
 using WorkflowCore.Interface;
-using WorkflowCore.Persistence.MongoDB.Services;
-using WorkflowCore.Services;
-using Amazon.DynamoDBv2;
-using Amazon.SQS;
 
 namespace WorkflowCore.Sample04
 {

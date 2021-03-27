@@ -18,11 +18,11 @@ namespace WorkflowCore.Primitives
                 var values = Collection.Cast<object>();
                 if (RunParallel)
                 {
-                    return ExecutionResult.Branch(new List<object>(values), new IteratorPersistenceData() { ChildrenActive = true });
+                    return ExecutionResult.Branch(new List<object>(values), new IteratorPersistenceData { ChildrenActive = true });
                 }
                 else
                 {
-                    return ExecutionResult.Branch(new List<object>(new object[] { values.ElementAt(0) }), new IteratorPersistenceData() { ChildrenActive = true });
+                    return ExecutionResult.Branch(new List<object>(new object[] { values.ElementAt(0) }), new IteratorPersistenceData { ChildrenActive = true });
                 }
             }
 

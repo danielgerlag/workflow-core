@@ -1,11 +1,6 @@
-﻿using Docker.DotNet;
-using Docker.DotNet.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
 using Docker.Testify;
 using Xunit;
 

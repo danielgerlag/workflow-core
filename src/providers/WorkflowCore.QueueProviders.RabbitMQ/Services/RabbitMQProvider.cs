@@ -1,15 +1,12 @@
 ﻿using Newtonsoft.Json;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
-using WorkflowCore.Models;
 using WorkflowCore.QueueProviders.RabbitMQ.Interfaces;
 
 namespace WorkflowCore.QueueProviders.RabbitMQ.Services
@@ -22,7 +19,7 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
         private readonly IServiceProvider _serviceProvider;
         
         private IConnection _connection = null;
-        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
+        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
 
         public bool IsDequeueBlocking => false;
 

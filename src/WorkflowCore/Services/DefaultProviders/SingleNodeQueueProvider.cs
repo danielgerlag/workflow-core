@@ -14,7 +14,7 @@ namespace WorkflowCore.Services
     public class SingleNodeQueueProvider : IQueueProvider
     {
         
-        private readonly Dictionary<QueueType, BlockingCollection<string>> _queues = new Dictionary<QueueType, BlockingCollection<string>>()
+        private readonly Dictionary<QueueType, BlockingCollection<string>> _queues = new Dictionary<QueueType, BlockingCollection<string>>
         {
             [QueueType.Workflow] = new BlockingCollection<string>(),
             [QueueType.Event] = new BlockingCollection<string>(),

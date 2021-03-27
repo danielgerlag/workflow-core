@@ -1,5 +1,4 @@
 using System;
-using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -47,7 +46,7 @@ namespace WorkflowCore.Services
             try
             {
                 var token = Token.Create(subscription.Id, subscription.EventKey);
-                var result = new PendingActivity()
+                var result = new PendingActivity
                 {
                     Token = token.Encode(),
                     ActivityName = subscription.EventKey,
@@ -75,7 +74,7 @@ namespace WorkflowCore.Services
 
         public async Task SubmitActivitySuccess(string token, object result)
         {
-            await SubmitActivityResult(token, new ActivityResult()
+            await SubmitActivityResult(token, new ActivityResult
             {
                 Data = result,
                 Status = ActivityResult.StatusType.Success
@@ -84,7 +83,7 @@ namespace WorkflowCore.Services
 
         public async Task SubmitActivityFailure(string token, object result)
         {
-            await SubmitActivityResult(token, new ActivityResult()
+            await SubmitActivityResult(token, new ActivityResult
             {
                 Data = result,
                 Status = ActivityResult.StatusType.Fail
@@ -120,7 +119,7 @@ namespace WorkflowCore.Services
 
             public static Token Create(string subscriptionId, string activityName)
             {
-                return new Token()
+                return new Token
                 {
                     SubscriptionId = subscriptionId,
                     ActivityName = activityName,

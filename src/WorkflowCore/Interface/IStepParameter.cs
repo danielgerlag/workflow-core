@@ -1,7 +1,4 @@
-﻿using WorkflowCore.Interface;
-using WorkflowCore.Models;
-
-namespace WorkflowCore.Interface
+﻿namespace WorkflowCore.Interface
 {
     public interface IStepParameter
     {

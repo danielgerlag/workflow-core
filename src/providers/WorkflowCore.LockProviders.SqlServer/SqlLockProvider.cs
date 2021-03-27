@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using System.Data;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
 using System.Threading;
 
 namespace WorkflowCore.LockProviders.SqlServer
