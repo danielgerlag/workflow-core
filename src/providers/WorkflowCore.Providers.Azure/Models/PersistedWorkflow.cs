@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using WorkflowCore.Models;
 
 namespace WorkflowCore.Providers.Azure.Models
@@ -29,11 +28,11 @@ namespace WorkflowCore.Providers.Azure.Models
 
         public DateTime? CompleteTime { get; set; }
 
-        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
+        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
 
         public static PersistedWorkflow FromInstance(WorkflowInstance instance)
         {
-            var result = new PersistedWorkflow()
+            var result = new PersistedWorkflow
             {
                 id = instance.Id,
                 CompleteTime = instance.CompleteTime,
@@ -53,7 +52,7 @@ namespace WorkflowCore.Providers.Azure.Models
 
         public static WorkflowInstance ToInstance(PersistedWorkflow instance)
         {
-            var result = new WorkflowInstance()
+            var result = new WorkflowInstance
             {
                 Id = instance.id,
                 CompleteTime = instance.CompleteTime,

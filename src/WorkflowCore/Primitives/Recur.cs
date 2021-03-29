@@ -18,10 +18,10 @@ namespace WorkflowCore.Primitives
                 return ExecutionResult.Next();
             }
 
-            return new ExecutionResult()
+            return new ExecutionResult
             {
                 Proceed = false,
-                BranchValues = new List<object>() { null },
+                BranchValues = new List<object> { null },
                 SleepFor = Interval
             };
         }

@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using Xunit;
 using FluentAssertions;
-using FluentAssertions.Collections;
-using WorkflowCore.Users.Models;
 using System.Linq;
 using WorkflowCore.Testing;
 

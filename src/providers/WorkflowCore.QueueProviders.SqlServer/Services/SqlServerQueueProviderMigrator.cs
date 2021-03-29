@@ -3,7 +3,6 @@
 using System;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.QueueProviders.SqlServer.Interfaces;

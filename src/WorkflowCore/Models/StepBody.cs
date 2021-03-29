@@ -15,7 +15,7 @@ namespace WorkflowCore.Models
 
         protected ExecutionResult OutcomeResult(object value)
         {
-            return new ExecutionResult()
+            return new ExecutionResult
             {
                 Proceed = true,
                 OutcomeValue = value
@@ -24,7 +24,7 @@ namespace WorkflowCore.Models
 
         protected ExecutionResult PersistResult(object persistenceData)
         {
-            return new ExecutionResult()
+            return new ExecutionResult
             {
                 Proceed = false,
                 PersistenceData = persistenceData
@@ -33,7 +33,7 @@ namespace WorkflowCore.Models
 
         protected ExecutionResult SleepResult(object persistenceData, TimeSpan sleep)
         {
-            return new ExecutionResult()
+            return new ExecutionResult
             {
                 Proceed = false,
                 PersistenceData = persistenceData,

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -18,7 +17,7 @@ namespace WorkflowCore.Providers.Redis.Services
         private IConnectionMultiplexer _multiplexer;
         private IDatabase _redis;
 
-        private readonly Dictionary<QueueType, string> _queues = new Dictionary<QueueType, string>()
+        private readonly Dictionary<QueueType, string> _queues = new Dictionary<QueueType, string>
         {
             [QueueType.Workflow] = "workflows",
             [QueueType.Event] = "events",

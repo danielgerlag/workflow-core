@@ -1,8 +1,4 @@
-﻿using Docker.DotNet;
-using Docker.DotNet.Models;
-using System;
-using System.Collections.Generic;
-using System.Net;
+﻿using System;
 using Docker.Testify;
 using StackExchange.Redis;
 using Xunit;

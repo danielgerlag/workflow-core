@@ -38,14 +38,14 @@ namespace WorkflowCore.Providers.AWS.Services
 
         public async Task Subscribe(string appName, string stream, Action<Record> action)
         {
-            var shards = await _client.ListShardsAsync(new ListShardsRequest()
+            var shards = await _client.ListShardsAsync(new ListShardsRequest
             {
                 StreamName = stream
             });
 
             foreach (var shard in shards.Shards)
             {
-                _subscribers.Add(new ShardSubscription()
+                _subscribers.Add(new ShardSubscription
                 {
                     AppName = appName,
                     Stream = stream,
@@ -117,7 +117,7 @@ namespace WorkflowCore.Providers.AWS.Services
 
             if (iterator == null)
             {
-                var iterResp = await _client.GetShardIteratorAsync(new GetShardIteratorRequest()
+                var iterResp = await _client.GetShardIteratorAsync(new GetShardIteratorRequest
                 {
                     ShardId = sub.Shard.ShardId,
                     StreamName = sub.Stream,
@@ -129,7 +129,7 @@ namespace WorkflowCore.Providers.AWS.Services
 
             try
             {
-                var result = await _client.GetRecordsAsync(new GetRecordsRequest()
+                var result = await _client.GetRecordsAsync(new GetRecordsRequest
                 {
                     ShardIterator = iterator,
                     Limit = _batchSize
@@ -140,7 +140,7 @@ namespace WorkflowCore.Providers.AWS.Services
             catch (ExpiredIteratorException)
             {
                 var lastSequence = await _tracker.GetNextLastSequenceNumber(sub.AppName, sub.Stream, sub.Shard.ShardId);
-                var iterResp = await _client.GetShardIteratorAsync(new GetShardIteratorRequest()
+                var iterResp = await _client.GetShardIteratorAsync(new GetShardIteratorRequest
                 {
                     ShardId = sub.Shard.ShardId,
                     StreamName = sub.Stream,
@@ -149,7 +149,7 @@ namespace WorkflowCore.Providers.AWS.Services
                 });
                 iterator = iterResp.ShardIterator;
 
-                var result = await _client.GetRecordsAsync(new GetRecordsRequest()
+                var result = await _client.GetRecordsAsync(new GetRecordsRequest
                 {
                     ShardIterator = iterator,
                     Limit = _batchSize

@@ -1,7 +1,6 @@
 ﻿#region using
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using WorkflowCore.Interface;
@@ -17,7 +16,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
     /// </summary>    
     public class QueueConfigProvider : IQueueConfigProvider
     {
-        private readonly Dictionary<QueueType, QueueConfig> _queues = new Dictionary<QueueType, QueueConfig>()
+        private readonly Dictionary<QueueType, QueueConfig> _queues = new Dictionary<QueueType, QueueConfig>
         {
             [QueueType.Workflow] = new QueueConfig("workflow"),
             [QueueType.Event] = new QueueConfig("event"),

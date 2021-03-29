@@ -139,7 +139,7 @@ namespace WorkflowCore.Services
 
         private async Task ExecuteStep(WorkflowInstance workflow, WorkflowStep step, ExecutionPointer pointer, WorkflowExecutorResult wfResult, WorkflowDefinition def, CancellationToken cancellationToken = default)
         {
-            IStepExecutionContext context = new StepExecutionContext()
+            IStepExecutionContext context = new StepExecutionContext
             {
                 Workflow = workflow,
                 Step = step,
