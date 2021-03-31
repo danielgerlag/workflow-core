@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using WorkflowCore.Interface;
@@ -17,6 +18,7 @@ namespace WorkflowCore.Providers.Azure.Services
         public const string WorkflowContainerName = "workflows";
         public const string EventContainerName = "events";
         public const string SubscriptionContainerName = "subscriptions";
+        public const int MaxRetry = 3;
 
         private ICosmosDbProvisioner _provisioner;
         private string _dbId;
@@ -171,7 +173,24 @@ namespace WorkflowCore.Providers.Azure.Services
 
         public async Task PersistWorkflow(WorkflowInstance workflow)
         {
-            await _workflowContainer.Value.UpsertItemAsync(PersistedWorkflow.FromInstance(workflow));
+            int retryCount = 0;
+            while (retryCount++ <= MaxRetry)
+            {
+                try
+                {
+                    await _workflowContainer.Value.UpsertItemAsync(PersistedWorkflow.FromInstance(workflow));
+                }
+                catch (CosmosException e)
+                {
+                    double? milliseconds = e.RetryAfter?.TotalMilliseconds;
+                    if (milliseconds != null)
+                    {
+                        Thread.Sleep((int)milliseconds);
+                    }
+                    continue;
+                }
+                break;
+            }
         }
 
         public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry)
