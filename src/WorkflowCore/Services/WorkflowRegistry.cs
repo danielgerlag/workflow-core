@@ -10,8 +10,9 @@ namespace WorkflowCore.Services
 {
     public class WorkflowRegistry : IWorkflowRegistry
     {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly BlockingCollection<(string workflowId, int version, WorkflowDefinition definition)> _registry = new BlockingCollection<(string, int, WorkflowDefinition)>();
+        private readonly IServiceProvider _serviceProvider;        
+        private readonly ConcurrentDictionary<string, WorkflowDefinition> _registry = new ConcurrentDictionary<string, WorkflowDefinition>();
+        private readonly ConcurrentDictionary<string, WorkflowDefinition> _lastestVersion = new ConcurrentDictionary<string, WorkflowDefinition>();
 
         public WorkflowRegistry(IServiceProvider serviceProvider)
         {
@@ -20,75 +21,85 @@ namespace WorkflowCore.Services
 
         public WorkflowDefinition GetDefinition(string workflowId, int? version = null)
         {
-            (string workflowId, int version, WorkflowDefinition definition) workflowEntry;
             if (version.HasValue)
             {
-                workflowEntry = _registry.FirstOrDefault(x => x.workflowId == workflowId && x.version == version.Value);
+                if (!_registry.ContainsKey($"{workflowId}-{version}"))
+                    return default;
+                return _registry[$"{workflowId}-{version}"];
             }
             else
             {
-                workflowEntry = _registry.Where(x => x.workflowId == workflowId).OrderByDescending(x => x.version)
-                    .FirstOrDefault();
+                if (!_lastestVersion.ContainsKey(workflowId))
+                    return default;
+                return _lastestVersion[workflowId];
             }
-
-            return workflowEntry != default ? workflowEntry.definition : default;
         }
 
         public void DeregisterWorkflow(string workflowId, int version)
         {
-            var definition = _registry.FirstOrDefault(x => x.workflowId == workflowId && x.version == version);
-            if (definition != default)
+            if (!_registry.ContainsKey($"{workflowId}-{version}"))
+                return;
+
+            lock (_registry)
             {
-                _registry.TryTake(out definition);
+                _registry.TryRemove($"{workflowId}-{version}", out var _);
+                if (_lastestVersion[workflowId].Version == version)
+                {
+                    _lastestVersion.TryRemove(workflowId, out var _);
+
+                    var latest = _registry.Values.Where(x => x.Id == workflowId).OrderByDescending(x => x.Version).FirstOrDefault();
+                    if (latest != default)
+                        _lastestVersion[workflowId] = latest;
+                }
             }
         }
 
         public void RegisterWorkflow(IWorkflow workflow)
         {
-            if (_registry.Any(x => x.workflowId == workflow.Id && x.version == workflow.Version))
-            {
-                throw new InvalidOperationException($"Workflow {workflow.Id} version {workflow.Version} is already registered");
-            }
-
             var builder = _serviceProvider.GetService<IWorkflowBuilder>().UseData<object>();
             workflow.Build(builder);
             var def = builder.Build(workflow.Id, workflow.Version);
-            _registry.Add((workflow.Id, workflow.Version, def));
+            RegisterWorkflow(def);
         }
 
         public void RegisterWorkflow(WorkflowDefinition definition)
         {
-            if (_registry.Any(x => x.workflowId == definition.Id && x.version == definition.Version))
+            if (_registry.ContainsKey($"{definition.Id}-{definition.Version}"))
             {
                 throw new InvalidOperationException($"Workflow {definition.Id} version {definition.Version} is already registered");
             }
 
-            _registry.Add((definition.Id, definition.Version, definition));
+            lock (_registry)
+            {
+                _registry[$"{definition.Id}-{definition.Version}"] = definition;
+                if (!_lastestVersion.ContainsKey(definition.Id))
+                {
+                    _lastestVersion[definition.Id] = definition;
+                    return;
+                }
+
+                if (_lastestVersion[definition.Id].Version <= definition.Version)
+                    _lastestVersion[definition.Id] = definition;
+            }
         }
 
         public void RegisterWorkflow<TData>(IWorkflow<TData> workflow)
             where TData : new()
         {
-            if (_registry.Any(x => x.workflowId == workflow.Id && x.version == workflow.Version))
-            {
-                throw new InvalidOperationException($"Workflow {workflow.Id} version {workflow.Version} is already registered");
-            }
-
             var builder = _serviceProvider.GetService<IWorkflowBuilder>().UseData<TData>();
             workflow.Build(builder);
             var def = builder.Build(workflow.Id, workflow.Version);
-            _registry.Add((workflow.Id, workflow.Version, def));
+            RegisterWorkflow(def);
         }
 
         public bool IsRegistered(string workflowId, int version)
         {
-            var definition = _registry.FirstOrDefault(x => x.workflowId == workflowId && x.version == version);
-            return definition != default;
+            return _registry.ContainsKey($"{workflowId}-{version}");
         }
 
         public IEnumerable<WorkflowDefinition> GetAllDefinitions()
         {
-            return _registry.Select(i => i.definition);
+            return _registry.Values;
         }
     }
 }
