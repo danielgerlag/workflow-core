@@ -11,9 +11,9 @@ namespace WorkflowCore.TestSample01
     public class NUnitTest : WorkflowTest<MyWorkflow, MyDataClass>
     {
         [SetUp]
-        protected override void Setup(bool registerClassMap = false)
+        protected void Setup()
         {
-            base.Setup(registerClassMap);
+            base.Setup(false);
         }
 
         [Test]
