@@ -1,14 +1,6 @@
----
-name: New Fuctionality
-about: Adding new functionality to enable more use cases
-title: ''
-labels: ''
-assignees: ''
-
----
 
 **Describe the change**
-A clear and concise description of what the change is.
+A clear and concise description of what the change is. Any PR submitted without a description of the change will not be reviewed.
 
 **Describe your implementation or design**
 How did you go about implementating the change?
