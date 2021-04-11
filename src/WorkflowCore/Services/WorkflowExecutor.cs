@@ -1,9 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -164,7 +165,7 @@ namespace WorkflowCore.Services
                         WorkflowId = workflow.Id,
                         ExecutionPointerId = pointer.Id,
                         ErrorTime = _datetimeProvider.UtcNow,
-                        Message = $"Unable to construct step body {step.BodyType.ToString()}"
+                        Message = $"Unable to construct step body {step.BodyType}"
                     });
                     return;
                 }

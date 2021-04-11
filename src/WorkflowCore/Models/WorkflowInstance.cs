@@ -35,11 +35,11 @@ namespace WorkflowCore.Models
         }
     }
 
-    public enum WorkflowStatus 
+    public enum WorkflowStatus
     { 
-        Runnable = 0, 
-        Suspended = 1, 
-        Complete = 2, 
-        Terminated = 3 
+        Runnable = 0,
+        Suspended = 1,
+        Complete = 2,
+        Terminated = 3,
     }
 }
