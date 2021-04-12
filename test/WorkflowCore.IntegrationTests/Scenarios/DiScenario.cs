@@ -7,7 +7,6 @@ using WorkflowCore.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Autofac.Extensions.DependencyInjection;
 using Autofac;
-using System.Diagnostics;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {

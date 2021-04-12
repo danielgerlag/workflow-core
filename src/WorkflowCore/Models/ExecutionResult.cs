@@ -35,7 +35,7 @@ namespace WorkflowCore.Models
 
         public static ExecutionResult Outcome(object value)
         {
-            return new ExecutionResult()
+            return new ExecutionResult
             {
                 Proceed = true,
                 OutcomeValue = value
@@ -44,7 +44,7 @@ namespace WorkflowCore.Models
 
         public static ExecutionResult Next()
         {
-            return new ExecutionResult()
+            return new ExecutionResult
             {
                 Proceed = true,
                 OutcomeValue = null
@@ -53,7 +53,7 @@ namespace WorkflowCore.Models
 
         public static ExecutionResult Persist(object persistenceData)
         {
-            return new ExecutionResult()
+            return new ExecutionResult
             {
                 Proceed = false,
                 PersistenceData = persistenceData
@@ -62,7 +62,7 @@ namespace WorkflowCore.Models
 
         public static ExecutionResult Branch(List<object> branches, object persistenceData)
         {
-            return new ExecutionResult()
+            return new ExecutionResult
             {
                 Proceed = false,
                 PersistenceData = persistenceData,
@@ -72,7 +72,7 @@ namespace WorkflowCore.Models
 
         public static ExecutionResult Sleep(TimeSpan duration, object persistenceData)
         {
-            return new ExecutionResult()
+            return new ExecutionResult
             {
                 Proceed = false,
                 SleepFor = duration,
@@ -82,7 +82,7 @@ namespace WorkflowCore.Models
 
         public static ExecutionResult WaitForEvent(string eventName, string eventKey, DateTime effectiveDate)
         {
-            return new ExecutionResult()
+            return new ExecutionResult
             {
                 Proceed = false,
                 EventName = eventName,
@@ -93,7 +93,7 @@ namespace WorkflowCore.Models
         
         public static ExecutionResult WaitForActivity(string activityName, object subscriptionData, DateTime effectiveDate)
         {
-            return new ExecutionResult()
+            return new ExecutionResult
             {
                 Proceed = false,
                 EventName = Event.EventTypeActivity,

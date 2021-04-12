@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver.Linq;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -44,7 +45,8 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                 x.MapProperty(y => y.WorkflowDefinitionId);
                 x.MapProperty(y => y.Version);
                 x.MapProperty(y => y.NextExecution);
-                x.MapProperty(y => y.Status);
+                x.MapProperty(y => y.Status)
+                    .SetSerializer(new EnumSerializer<WorkflowStatus>(BsonType.String));
                 x.MapProperty(y => y.CreateTime);
                 x.MapProperty(y => y.CompleteTime);
                 x.MapProperty(y => y.ExecutionPointers);

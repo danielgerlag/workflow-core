@@ -1,16 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
-using WorkflowCore.Models;
-using System.Text;
-using Amazon;
-using Amazon.DynamoDBv2;
-using Amazon.Runtime;
 using Nest;
 using WorkflowCore.Models.Search;
 
@@ -30,10 +21,10 @@ namespace ScratchPad
             host.RegisterWorkflow<WorkflowCore.Sample04.EventSampleWorkflow, WorkflowCore.Sample04.MyDataClass>();
 
             host.Start();
-            var data1 = new WorkflowCore.Sample03.MyDataClass() { Value1 = 2, Value2 = 3 };
+            var data1 = new WorkflowCore.Sample03.MyDataClass { Value1 = 2, Value2 = 3 };
             host.StartWorkflow("PassingDataWorkflow", data1, "quick dog").Wait();
 
-            var data2 = new WorkflowCore.Sample04.MyDataClass() { Value1 = "test" };
+            var data2 = new WorkflowCore.Sample04.MyDataClass { Value1 = "test" };
             host.StartWorkflow("EventSampleWorkflow", data2, "alt1 boom").Wait();
 
 

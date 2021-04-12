@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using WorkflowCore.Interface;
 
 namespace WorkflowCore.IntegrationTests.Scenarios

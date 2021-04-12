@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.IntegrationTests.Scenarios;
-using WorkflowCore.Tests.MySQL;
 using Xunit;
 
 namespace WorkflowCore.Tests.MySQL.Scenarios
