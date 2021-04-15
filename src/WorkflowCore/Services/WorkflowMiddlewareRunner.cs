@@ -33,33 +33,46 @@ namespace WorkflowCore.Services
         }
 
         /// <inheritdoc cref="IWorkflowMiddlewareRunner.RunPostMiddleware"/>
-        public async Task RunPostMiddleware(WorkflowInstance workflow, WorkflowDefinition def)
+        public Task RunPostMiddleware(WorkflowInstance workflow, WorkflowDefinition def)
         {
-            var postMiddleware = _middleware
-                .Where(m => m.Phase == WorkflowMiddlewarePhase.PostWorkflow);
-            try
-            {
-                await RunWorkflowMiddleware(workflow, postMiddleware);
-            }
-            catch (Exception exception)
-            {
-                await HandleWorkflowMiddlewareError(def.OnPostMiddlewareError, exception);
-            }
+            return RunWorkflowMiddlewareWithErrorHandling(
+                workflow,
+                WorkflowMiddlewarePhase.PostWorkflow,
+                def.OnPostMiddlewareError);
         }
 
         /// <inheritdoc cref="IWorkflowMiddlewareRunner.RunExecuteMiddleware"/>
-        public async Task RunExecuteMiddleware(WorkflowInstance workflow, WorkflowDefinition def)
+        public Task RunExecuteMiddleware(WorkflowInstance workflow, WorkflowDefinition def)
         {
-            var executeMiddleware = _middleware
-                .Where(m => m.Phase == WorkflowMiddlewarePhase.ExecuteWorkflow);
+            return RunWorkflowMiddlewareWithErrorHandling(
+                workflow, 
+                WorkflowMiddlewarePhase.ExecuteWorkflow,
+                def.OnExecuteMiddlewareError);
+        }
+
+        public async Task RunWorkflowMiddlewareWithErrorHandling(
+            WorkflowInstance workflow, 
+            WorkflowMiddlewarePhase phase,
+            Type middlewareErrorType)
+        {
+            var middleware = _middleware.Where(m => m.Phase == phase);
 
             try
             {
-                await RunWorkflowMiddleware(workflow, executeMiddleware);
+                await RunWorkflowMiddleware(workflow, middleware);
             }
             catch (Exception exception)
             {
-                await HandleWorkflowMiddlewareError(def.OnExecuteMiddlewareError, exception);
+                var errorHandlerType = middlewareErrorType ?? typeof(IWorkflowMiddlewareErrorHandler);
+
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var typeInstance = scope.ServiceProvider.GetService(errorHandlerType);
+                    if (typeInstance is IWorkflowMiddlewareErrorHandler handler)
+                    {
+                        await handler.HandleAsync(exception);
+                    }
+                }
             }
         }
 
@@ -72,20 +85,6 @@ namespace WorkflowCore.Services
                 .Aggregate(NoopWorkflowDelegate,
                     (previous, middleware) =>
                         () => middleware.HandleAsync(workflow, previous))();
-        }
-
-        private async Task HandleWorkflowMiddlewareError(Type middlewareErrorType, Exception exception)
-        {
-            var errorHandlerType = middlewareErrorType ?? typeof(IWorkflowMiddlewareErrorHandler);
-
-            using (var scope = _serviceProvider.CreateScope())
-            {
-                var typeInstance = scope.ServiceProvider.GetService(errorHandlerType);
-                if (typeInstance is IWorkflowMiddlewareErrorHandler handler)
-                {
-                    await handler.HandleAsync(exception);
-                }
-            }
         }
     }
 }
