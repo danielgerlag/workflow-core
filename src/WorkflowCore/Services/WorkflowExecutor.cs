@@ -96,12 +96,12 @@ namespace WorkflowCore.Services
                 _cancellationProcessor.ProcessCancellations(workflow, def, wfResult);
             }
             ProcessAfterExecutionIteration(workflow, def, wfResult);
-            DetermineNextExecutionTime(workflow, def);
+            await DetermineNextExecutionTime(workflow, def);
 
             using (var scope = _serviceProvider.CreateScope())
             {
                 var middlewareRunner = scope.ServiceProvider.GetRequiredService<IWorkflowMiddlewareRunner>();
-                await middlewareRunner.RunPostMiddleware(workflow, def);
+                await middlewareRunner.RunExecuteMiddleware(workflow, def);
             }
 
             return wfResult;
@@ -212,7 +212,7 @@ namespace WorkflowCore.Services
             }
         }
 
-        private void DetermineNextExecutionTime(WorkflowInstance workflow, WorkflowDefinition def)
+        private async Task DetermineNextExecutionTime(WorkflowInstance workflow, WorkflowDefinition def)
         {
             //TODO: move to own class
             workflow.NextExecution = null;
@@ -256,6 +256,12 @@ namespace WorkflowCore.Services
 
             workflow.Status = WorkflowStatus.Complete;
             workflow.CompleteTime = _datetimeProvider.UtcNow;
+
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var middlewareRunner = scope.ServiceProvider.GetRequiredService<IWorkflowMiddlewareRunner>();
+                await middlewareRunner.RunPostMiddleware(workflow, def);
+            }
 
             _publisher.PublishNotification(new WorkflowCompleted
             {

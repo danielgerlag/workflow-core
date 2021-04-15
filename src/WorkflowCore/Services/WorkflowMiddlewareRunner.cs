@@ -8,7 +8,7 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services
 {
-    /// <inheritdoc />
+    /// <inheritdoc cref="IWorkflowMiddlewareRunner" />
     public class WorkflowMiddlewareRunner : IWorkflowMiddlewareRunner
     {
         private static readonly WorkflowDelegate NoopWorkflowDelegate = () => Task.CompletedTask;
@@ -17,23 +17,13 @@ namespace WorkflowCore.Services
 
         public WorkflowMiddlewareRunner(
             IEnumerable<IWorkflowMiddleware> middleware,
-            IServiceProvider serviceProvider
-        )
+            IServiceProvider serviceProvider)
         {
             _middleware = middleware;
             _serviceProvider = serviceProvider;
         }
 
-
-        /// <summary>
-        /// Runs workflow-level middleware that is set to run at the
-        /// <see cref="WorkflowMiddlewarePhase.PreWorkflow"/> phase. Middleware will be run in the
-        /// order in which they were registered with DI with middleware declared earlier starting earlier and
-        /// completing later.
-        /// </summary>
-        /// <param name="workflow">The <see cref="WorkflowInstance"/> to run for.</param>
-        /// <param name="def">The <see cref="WorkflowDefinition"/> definition.</param>
-        /// <returns>A task that will complete when all middleware has run.</returns>
+        /// <inheritdoc cref="IWorkflowMiddlewareRunner.RunPreMiddleware"/>
         public async Task RunPreMiddleware(WorkflowInstance workflow, WorkflowDefinition def)
         {
             var preMiddleware = _middleware
@@ -43,15 +33,7 @@ namespace WorkflowCore.Services
             await RunWorkflowMiddleware(workflow, preMiddleware);
         }
 
-        /// <summary>
-        /// Runs workflow-level middleware that is set to run at the
-        /// <see cref="WorkflowMiddlewarePhase.PostWorkflow"/> phase. Middleware will be run in the
-        /// order in which they were registered with DI with middleware declared earlier starting earlier and
-        /// completing later.
-        /// </summary>
-        /// <param name="workflow">The <see cref="WorkflowInstance"/> to run for.</param>
-        /// <param name="def">The <see cref="WorkflowDefinition"/> definition.</param>
-        /// <returns>A task that will complete when all middleware has run.</returns>
+        /// <inheritdoc cref="IWorkflowMiddlewareRunner.RunPostMiddleware"/>
         public async Task RunPostMiddleware(WorkflowInstance workflow, WorkflowDefinition def)
         {
             var postMiddleware = _middleware
@@ -77,10 +59,15 @@ namespace WorkflowCore.Services
             }
         }
 
+        /// <inheritdoc cref="IWorkflowMiddlewareRunner.RunExecuteMiddleware"/>
+        public Task RunExecuteMiddleware(WorkflowInstance workflow, WorkflowDefinition def)
+        {
+            throw new NotImplementedException();
+        }
+
         private static async Task RunWorkflowMiddleware(
             WorkflowInstance workflow,
-            IEnumerable<IWorkflowMiddleware> middlewareCollection
-        )
+            IEnumerable<IWorkflowMiddleware> middlewareCollection)
         {
             // Build the middleware chain
             var middlewareChain = middlewareCollection
