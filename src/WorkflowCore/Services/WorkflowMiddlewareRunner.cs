@@ -43,11 +43,7 @@ namespace WorkflowCore.Services
             }
             catch (Exception exception)
             {
-                // TODO: 
-                // OnPostMiddlewareError should be IWorkflowMiddlewareErrorHandler
-                // because we don't know to run other error handler type
-                var errorHandlerType = def.OnPostMiddlewareError ?? typeof(IWorkflowMiddlewareErrorHandler);
-                await HandleWorkflowMiddlewareError(exception);
+                await HandleWorkflowMiddlewareError(def.OnPostMiddlewareError, exception);
             }
         }
 
@@ -63,19 +59,7 @@ namespace WorkflowCore.Services
             }
             catch (Exception exception)
             {
-                await HandleWorkflowMiddlewareError(exception);
-            }
-        }
-
-        private async Task HandleWorkflowMiddlewareError(Exception exception)
-        {
-            using (var scope = _serviceProvider.CreateScope())
-            {
-                var handler = scope.ServiceProvider.GetService<IWorkflowMiddlewareErrorHandler>();
-                if (handler != null)
-                {
-                    await handler.HandleAsync(exception);
-                }
+                await HandleWorkflowMiddlewareError(def.OnExecuteMiddlewareError, exception);
             }
         }
 
@@ -88,6 +72,20 @@ namespace WorkflowCore.Services
                 .Aggregate(NoopWorkflowDelegate,
                     (previous, middleware) =>
                         () => middleware.HandleAsync(workflow, previous))();
+        }
+
+        private async Task HandleWorkflowMiddlewareError(Type middlewareErrorType, Exception exception)
+        {
+            var errorHandlerType = middlewareErrorType ?? typeof(IWorkflowMiddlewareErrorHandler);
+
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var typeInstance = scope.ServiceProvider.GetService(errorHandlerType);
+                if (typeInstance is IWorkflowMiddlewareErrorHandler handler)
+                {
+                    await handler.HandleAsync(exception);
+                }
+            }
         }
     }
 }
