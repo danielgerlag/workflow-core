@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using Xunit;
 using FluentAssertions;
-using WorkflowCore.Services.DefinitionStorage;
 using WorkflowCore.Testing;
 using WorkflowCore.TestAssets.DataTypes;
 
@@ -21,7 +17,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         [Fact(DisplayName = "Execute branch 1")]
         public void should_execute_branch1()
         {
-            var workflowId = StartWorkflow(TestAssets.Utils.GetTestDefinitionJson(), new CounterBoard() { Flag1 = true, Flag2 = true, Flag3 = true });
+            var workflowId = StartWorkflow(TestAssets.Utils.GetTestDefinitionJson(), new CounterBoard { Flag1 = true, Flag2 = true, Flag3 = true });
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
             var data = GetData<CounterBoard>(workflowId);
@@ -40,7 +36,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         [Fact(DisplayName = "Execute branch 2")]
         public void should_execute_branch2()
         {
-            var workflowId = StartWorkflow(TestAssets.Utils.GetTestDefinitionJson(), new CounterBoard() { Flag1 = true, Flag2 = true, Flag3 = false });
+            var workflowId = StartWorkflow(TestAssets.Utils.GetTestDefinitionJson(), new CounterBoard { Flag1 = true, Flag2 = true, Flag3 = false });
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
             var data = GetData<CounterBoard>(workflowId);

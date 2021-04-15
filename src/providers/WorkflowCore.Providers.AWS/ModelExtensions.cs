@@ -1,18 +1,15 @@
 ﻿using Amazon.DynamoDBv2.Model;
-using Amazon.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Bson;
 using WorkflowCore.Models;
 
 namespace WorkflowCore.Providers.AWS
 {
     internal static class ModelExtensions
     {
-        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
+        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
 
         public static Dictionary<string, AttributeValue> ToDynamoMap(this WorkflowInstance source)
         {
@@ -21,10 +18,10 @@ namespace WorkflowCore.Providers.AWS
             result["id"] = new AttributeValue(source.Id);
             result["workflow_definition_id"] = new AttributeValue(source.WorkflowDefinitionId);
             result["version"] = new AttributeValue(source.Version.ToString());
-            result["next_execution"] = new AttributeValue() { N = (source.NextExecution ?? 0).ToString() };
-            result["create_time"] = new AttributeValue() { N = source.CreateTime.Ticks.ToString() };
+            result["next_execution"] = new AttributeValue { N = (source.NextExecution ?? 0).ToString() };
+            result["create_time"] = new AttributeValue { N = source.CreateTime.Ticks.ToString() };
             result["data"] = new AttributeValue(JsonConvert.SerializeObject(source.Data, SerializerSettings));
-            result["workflow_status"] = new AttributeValue() { N = Convert.ToInt32(source.Status).ToString() };
+            result["workflow_status"] = new AttributeValue { N = Convert.ToInt32(source.Status).ToString() };
 
             if (!string.IsNullOrEmpty(source.Description))
                 result["description"] = new AttributeValue(source.Description);
@@ -33,7 +30,7 @@ namespace WorkflowCore.Providers.AWS
                 result["reference"] = new AttributeValue(source.Reference);
 
             if (source.CompleteTime.HasValue)
-                result["complete_time"] = new AttributeValue() { N = source.CompleteTime.Value.Ticks.ToString() };
+                result["complete_time"] = new AttributeValue { N = source.CompleteTime.Value.Ticks.ToString() };
             
             var pointers = new List<AttributeValue>();
             foreach (var pointer in source.ExecutionPointers)
@@ -41,17 +38,17 @@ namespace WorkflowCore.Providers.AWS
                 pointers.Add(new AttributeValue(JsonConvert.SerializeObject(pointer, SerializerSettings)));
             }
 
-            result["pointers"] = new AttributeValue() { L = pointers };
+            result["pointers"] = new AttributeValue { L = pointers };
 
             if (source.Status == WorkflowStatus.Runnable)
-                result["runnable"] = new AttributeValue() { N = 1.ToString() };
+                result["runnable"] = new AttributeValue { N = 1.ToString() };
 
             return result;
         }
 
         public static WorkflowInstance ToWorkflowInstance(this Dictionary<string, AttributeValue> source)
         {
-            var result = new WorkflowInstance()
+            var result = new WorkflowInstance
             {
                 Id = source["id"].S,
                 WorkflowDefinitionId = source["workflow_definition_id"].S,
@@ -90,7 +87,7 @@ namespace WorkflowCore.Providers.AWS
                 ["workflow_id"] = new AttributeValue(source.WorkflowId),
                 ["execution_pointer_id"] = new AttributeValue(source.ExecutionPointerId),
                 ["step_id"] = new AttributeValue(source.StepId.ToString()),
-                ["subscribe_as_of"] = new AttributeValue() { N = source.SubscribeAsOf.Ticks.ToString() },
+                ["subscribe_as_of"] = new AttributeValue { N = source.SubscribeAsOf.Ticks.ToString() },
                 ["subscription_data"] = new AttributeValue(JsonConvert.SerializeObject(source.SubscriptionData, SerializerSettings)),
                 ["event_slug"] = new AttributeValue($"{source.EventName}:{source.EventKey}")
             };
@@ -101,14 +98,14 @@ namespace WorkflowCore.Providers.AWS
                 result["external_worker_id"] = new AttributeValue(source.ExternalWorkerId);
 
             if (source.ExternalTokenExpiry.HasValue)
-                result["external_token_expiry"] = new AttributeValue() { N = source.ExternalTokenExpiry.Value.Ticks.ToString()};
+                result["external_token_expiry"] = new AttributeValue { N = source.ExternalTokenExpiry.Value.Ticks.ToString()};
 
             return result;
         }
 
         public static EventSubscription ToEventSubscription(this Dictionary<string, AttributeValue> source)
         {
-            var result =  new EventSubscription()
+            var result =  new EventSubscription
             {
                 Id = source["id"].S,
                 EventName = source["event_name"].S,
@@ -140,19 +137,19 @@ namespace WorkflowCore.Providers.AWS
                 ["event_name"] = new AttributeValue(source.EventName),
                 ["event_key"] = new AttributeValue(source.EventKey),
                 ["event_data"] = new AttributeValue(JsonConvert.SerializeObject(source.EventData, SerializerSettings)),
-                ["event_time"] = new AttributeValue() { N = source.EventTime.Ticks.ToString() },
+                ["event_time"] = new AttributeValue { N = source.EventTime.Ticks.ToString() },
                 ["event_slug"] = new AttributeValue($"{source.EventName}:{source.EventKey}")
             };
 
             if (!source.IsProcessed)
-                result["not_processed"] = new AttributeValue() { N = 1.ToString() };
+                result["not_processed"] = new AttributeValue { N = 1.ToString() };
 
             return result;
         }
 
         public static Event ToEvent(this Dictionary<string, AttributeValue> source)
         {
-            var result = new Event()
+            var result = new Event
             {
                 Id = source["id"].S,
                 EventName = source["event_name"].S,

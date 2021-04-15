@@ -91,9 +91,9 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>
                 {
-                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                    new ExecutionPointer { Id = "1", Active = true, StepId = 0 }
                 })
             };
 
@@ -121,9 +121,9 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>
                 {
-                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                    new ExecutionPointer { Id = "1", Active = true, StepId = 0 }
                 })
             };
 
@@ -152,9 +152,9 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>
                 {
-                    new ExecutionPointer() { Id = "1", Active = false, StepId = 0 }
+                    new ExecutionPointer { Id = "1", Active = false, StepId = 0 }
                 })
             };
 
@@ -173,7 +173,7 @@ namespace WorkflowCore.UnitTests.Services
 
             var step1Body = A.Fake<IStepWithProperties>();
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
-            WorkflowStep step1 = BuildFakeStep(step1Body, new List<IStepParameter>()
+            WorkflowStep step1 = BuildFakeStep(step1Body, new List<IStepParameter>
                 {
                     param
                 }
@@ -188,10 +188,10 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                Data = new DataClass() { Value1 = 5 },
-                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
+                Data = new DataClass { Value1 = 5 },
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>
                 {
-                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                    new ExecutionPointer { Id = "1", Active = true, StepId = 0 }
                 })
             };
 
@@ -212,7 +212,7 @@ namespace WorkflowCore.UnitTests.Services
             var step1Body = A.Fake<IStepWithProperties>();
             A.CallTo(() => step1Body.Property1).Returns(7);
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
-            WorkflowStep step1 = BuildFakeStep(step1Body, new List<IStepParameter>(), new List<IStepParameter>()
+            WorkflowStep step1 = BuildFakeStep(step1Body, new List<IStepParameter>(), new List<IStepParameter>
                 {
                     param
                 }
@@ -220,7 +220,7 @@ namespace WorkflowCore.UnitTests.Services
 
             Given1StepWorkflow(step1, "Workflow", 1);
 
-            var data = new DataClass() { Value1 = 5 };
+            var data = new DataClass { Value1 = 5 };
 
             var instance = new WorkflowInstance
             {
@@ -230,9 +230,9 @@ namespace WorkflowCore.UnitTests.Services
                 NextExecution = 0,
                 Id = "001",
                 Data = data,
-                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>
                 {
-                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                    new ExecutionPointer { Id = "1", Active = true, StepId = 0 }
                 })
             };
 
@@ -262,9 +262,9 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>
                 {
-                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                    new ExecutionPointer { Id = "1", Active = true, StepId = 0 }
                 })
             };
 
@@ -293,9 +293,9 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>
                 {
-                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                    new ExecutionPointer { Id = "1", Active = true, StepId = 0 }
                 })
             };
 
@@ -322,9 +322,9 @@ namespace WorkflowCore.UnitTests.Services
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
                 Id = "001",
-                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>()
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>
                 {
-                    new ExecutionPointer() { Id = "1", Active = true, StepId = 0 }
+                    new ExecutionPointer { Id = "1", Active = true, StepId = 0 }
                 })
             };
 
@@ -338,12 +338,12 @@ namespace WorkflowCore.UnitTests.Services
 
         private void Given1StepWorkflow(WorkflowStep step1, string id, int version)
         {
-            A.CallTo(() => Registry.GetDefinition(id, version)).Returns(new WorkflowDefinition()
+            A.CallTo(() => Registry.GetDefinition(id, version)).Returns(new WorkflowDefinition
             {
                 Id = id,
                 Version = version,
                 DataType = typeof(object),
-                Steps = new WorkflowStepCollection()
+                Steps = new WorkflowStepCollection
                 {
                     step1
                 }

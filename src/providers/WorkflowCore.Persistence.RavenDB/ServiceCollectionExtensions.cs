@@ -1,9 +1,5 @@
-﻿using Raven.Client.Documents.Operations;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
 using WorkflowCore.Models;
-using Raven.Client;
 using Raven.Client.Documents;
 using System.Security.Cryptography.X509Certificates;
 using WorkflowCore.Persistence.RavenDB.Services;

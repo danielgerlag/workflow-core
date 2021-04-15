@@ -1,17 +1,14 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 using Newtonsoft.Json.Linq;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Primitives;
-using WorkflowCore.Models.DefinitionStorage;
 using WorkflowCore.Models.DefinitionStorage.v1;
 using WorkflowCore.Exceptions;
 
@@ -250,7 +247,7 @@ namespace WorkflowCore.Services.DefinitionStorage
         private void AttachOutcomes(StepSourceV1 source, Type dataType, WorkflowStep step)
         {
             if (!string.IsNullOrEmpty(source.NextStepId))
-                step.Outcomes.Add(new ValueOutcome() { ExternalNextStepId = $"{source.NextStepId}" });
+                step.Outcomes.Add(new ValueOutcome { ExternalNextStepId = $"{source.NextStepId}" });
 
             var dataParameter = Expression.Parameter(dataType, "data");
             var outcomeParameter = Expression.Parameter(typeof(object), "outcome");

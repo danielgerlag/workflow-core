@@ -1,8 +1,6 @@
 ﻿#region using
 
 using System;
-using Microsoft.Extensions.DependencyInjection;
-
 using WorkflowCore.Models;
 using WorkflowCore.QueueProviders.SqlServer;
 using WorkflowCore.QueueProviders.SqlServer.Interfaces;
@@ -26,7 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
             options.Services.AddTransient<ISqlCommandExecutor, SqlCommandExecutor>();
             options.Services.AddTransient<ISqlServerQueueProviderMigrator>(sp => new SqlServerQueueProviderMigrator(connectionString, sp.GetService<IQueueConfigProvider>(), sp.GetService<ISqlCommandExecutor>()));
 
-            var sqlOptions = new SqlServerQueueProviderOptions()
+            var sqlOptions = new SqlServerQueueProviderOptions
             {
                 ConnectionString = connectionString,
                 CanCreateDb = canCreateDb,
