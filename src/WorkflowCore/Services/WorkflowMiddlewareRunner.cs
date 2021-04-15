@@ -82,9 +82,9 @@ namespace WorkflowCore.Services
         {
             return middlewareCollection
                 .Reverse()
-                .Aggregate(NoopWorkflowDelegate,
-                    (previous, middleware) =>
-                        () => middleware.HandleAsync(workflow, previous))();
+                .Aggregate(
+                    NoopWorkflowDelegate,
+                    (previous, middleware) => () => middleware.HandleAsync(workflow, previous))();
         }
     }
 }
