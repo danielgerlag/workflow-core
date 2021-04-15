@@ -274,7 +274,7 @@ namespace WorkflowCore.UnitTests.Services
             Middleware.AddRange(new[] { middleware1, middleware2, middleware3 });
 
             // Act
-            await Runner.RunPostMiddleware(Workflow, Definition);
+            await Runner.RunExecuteMiddleware(Workflow, Definition);
 
             // Assert
             A
@@ -288,8 +288,8 @@ namespace WorkflowCore.UnitTests.Services
                     .MustHaveHappenedOnceExactly());
         }
 
-        [Fact(DisplayName = "RunExecuteMiddleware should run middleware in ExecuteWorkflow and PostWorkflow phase")]
-        public async Task RunExecuteMiddleware_should_run_middleware_in_ExecuteWorkflow_and_PostWorkflow_phase()
+        [Fact(DisplayName = "RunExecuteMiddleware should only run middleware in ExecuteWorkflow phase")]
+        public async Task RunExecuteMiddleware_should_only_run_middleware_in_ExecuteWorkflow_phase()
         {
             // Arrange
             var executeMiddleware = BuildWorkflowMiddleware(WorkflowMiddlewarePhase.ExecuteWorkflow, 1);
@@ -298,18 +298,15 @@ namespace WorkflowCore.UnitTests.Services
             Middleware.AddRange(new[] { preMiddleware, postMiddleware, executeMiddleware });
 
             // Act
-            // TODO: add same test when workflow not completed
             await Runner.RunExecuteMiddleware(Workflow, Definition);
 
             // Assert
             A
                 .CallTo(HandleMethodFor(executeMiddleware))
-                .MustHaveHappenedOnceExactly()
-                .Then(A
-                    .CallTo(HandleMethodFor(postMiddleware))
-                    .MustHaveHappenedOnceExactly());
+                .MustHaveHappenedOnceExactly();
 
             A.CallTo(HandleMethodFor(preMiddleware)).MustNotHaveHappened();
+            A.CallTo(HandleMethodFor(postMiddleware)).MustNotHaveHappened();
         }
 
         [Fact(DisplayName = "RunExecuteMiddleware should call top level error handler when middleware throws")]
