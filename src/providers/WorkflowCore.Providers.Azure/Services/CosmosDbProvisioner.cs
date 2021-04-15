@@ -9,16 +9,16 @@ namespace WorkflowCore.Providers.Azure.Services
     public class CosmosDbProvisioner : ICosmosDbProvisioner
     {
 
-        private CosmosClient _client;
+        private ICosmosDbClient _client;
 
-        public CosmosDbProvisioner(string connectionString, ILoggerFactory loggerFactory)
+        public CosmosDbProvisioner(ICosmosDbClient client, ILoggerFactory loggerFactory)
         {
-            _client = new CosmosClient(connectionString);
+            _client = client;
         }
 
         public async Task Provision(string dbId)
         {
-            var dbResp = await _client.CreateDatabaseIfNotExistsAsync(dbId);
+            var dbResp = await _client.GetCosmosClient().CreateDatabaseIfNotExistsAsync(dbId);
             var wfIndexPolicy = new IndexingPolicy();
             wfIndexPolicy.IncludedPaths.Add(new IncludedPath { Path = @"/*" });
             wfIndexPolicy.ExcludedPaths.Add(new ExcludedPath { Path = @"/ExecutionPointers/?" });

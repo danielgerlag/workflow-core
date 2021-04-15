@@ -19,19 +19,19 @@ namespace WorkflowCore.Providers.Azure.Services
 
         private ICosmosDbProvisioner _provisioner;
         private string _dbId;
-        private CosmosClient _client;
+        private ICosmosDbClient _client;
         private Lazy<Container> _workflowContainer;
         private Lazy<Container> _eventContainer;
         private Lazy<Container> _subscriptionContainer;
 
-        public CosmosDbPersistenceProvider(string connectionString, string dbId, ICosmosDbProvisioner provisioner)
+        public CosmosDbPersistenceProvider(ICosmosDbClient client, string dbId, ICosmosDbProvisioner provisioner)
         {
             _provisioner = provisioner;
             _dbId = dbId;
-            _client = new CosmosClient(connectionString);
-            _workflowContainer = new Lazy<Container>(() => _client.GetDatabase(_dbId).GetContainer(WorkflowContainerName));
-            _eventContainer = new Lazy<Container>(() => _client.GetDatabase(_dbId).GetContainer(EventContainerName));
-            _subscriptionContainer = new Lazy<Container>(() => _client.GetDatabase(_dbId).GetContainer(SubscriptionContainerName));
+            _client = client;
+            _workflowContainer = new Lazy<Container>(() => _client.GetCosmosClient().GetDatabase(_dbId).GetContainer(WorkflowContainerName));
+            _eventContainer = new Lazy<Container>(() => _client.GetCosmosClient().GetDatabase(_dbId).GetContainer(EventContainerName));
+            _subscriptionContainer = new Lazy<Container>(() => _client.GetCosmosClient().GetDatabase(_dbId).GetContainer(SubscriptionContainerName));
         }
 
         public async Task ClearSubscriptionToken(string eventSubscriptionId, string token)
@@ -70,7 +70,7 @@ namespace WorkflowCore.Providers.Azure.Services
 
         public void EnsureStoreExists()
         {
-            _provisioner.Provision(_dbId).Wait();
+            _provisioner.Provision(_dbId).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         public async Task<Event> GetEvent(string id)
