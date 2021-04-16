@@ -8,7 +8,7 @@ namespace WorkflowCore.Providers.Azure.Services
     {
         private bool isDisposed = false;
 
-        public CosmosClient _client;
+        private CosmosClient _client;
 
         public CosmosDbClient(string connectionString)
         {
