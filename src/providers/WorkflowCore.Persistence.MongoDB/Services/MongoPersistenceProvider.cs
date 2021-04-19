@@ -122,9 +122,17 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         private IMongoCollection<ExecutionError> ExecutionErrors => _database.GetCollection<ExecutionError>("wfc.execution_errors");
 
-        public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
+        public async Task<string> CreateNewWorkflow(WorkflowInstance workflow, ITransaction transaction = null)
         {
-            await WorkflowInstances.InsertOneAsync(workflow);
+            if (transaction?.Session is IClientSessionHandle clientSessionHandle)
+            {
+                await WorkflowInstances.InsertOneAsync(clientSessionHandle, workflow);
+            }
+            else
+            {
+                await WorkflowInstances.InsertOneAsync(workflow);
+            }
+
             return workflow.Id;
         }
 

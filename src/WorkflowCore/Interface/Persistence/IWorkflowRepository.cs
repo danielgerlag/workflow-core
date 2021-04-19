@@ -7,7 +7,7 @@ namespace WorkflowCore.Interface
 {
     public interface IWorkflowRepository
     {
-        Task<string> CreateNewWorkflow(WorkflowInstance workflow);
+        Task<string> CreateNewWorkflow(WorkflowInstance workflow, ITransaction transaction = null);
 
         Task PersistWorkflow(WorkflowInstance workflow);
 

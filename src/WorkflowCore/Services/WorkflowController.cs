@@ -53,7 +53,7 @@ namespace WorkflowCore.Services
             return StartWorkflow(workflowId, null, data, reference);
         }
 
-        public async Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference=null)
+        public async Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference=null, ITransaction transaction = null)
             where TData : class, new()
         {
 
@@ -91,7 +91,7 @@ namespace WorkflowCore.Services
                 await middlewareRunner.RunPreMiddleware(wf, def);
             }
 
-            string id = await _persistenceStore.CreateNewWorkflow(wf);
+            string id = await _persistenceStore.CreateNewWorkflow(wf, transaction);
             await _queueProvider.QueueWork(id, QueueType.Workflow);
             await _queueProvider.QueueWork(id, QueueType.Index);
             await _eventHub.PublishNotification(new WorkflowStarted
