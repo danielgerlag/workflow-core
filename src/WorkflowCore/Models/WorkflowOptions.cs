@@ -27,13 +27,11 @@ namespace WorkflowCore.Models
             IdleTime = TimeSpan.FromMilliseconds(100);
             ErrorRetryInterval = TimeSpan.FromSeconds(60);
 
-            QueueFactory = serviceProvider => new SingleNodeQueueProvider();
-            LockFactory = serviceProvider => new SingleNodeLockProvider();
-            PersistanceFactory = serviceProvider => new TransientMemoryPersistenceProvider(
-                serviceProvider.GetService<ISingletonMemoryProvider>());
-            SearchIndexFactory = serviceProvider => new NullSearchIndex();
-            EventHubFactory = serviceProvider => new SingleNodeEventHub(
-                serviceProvider.GetService<ILoggerFactory>());
+            QueueFactory = _ => new SingleNodeQueueProvider();
+            LockFactory = _ => new SingleNodeLockProvider();
+            PersistanceFactory = sp => new TransientMemoryPersistenceProvider(sp.GetService<ISingletonMemoryProvider>());
+            SearchIndexFactory = _ => new NullSearchIndex();
+            EventHubFactory = sp => new SingleNodeEventHub(sp.GetService<ILoggerFactory>());
         }
 
         public bool EnableWorkflows { get; set; } = true;
