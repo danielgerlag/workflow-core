@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -16,11 +17,11 @@ namespace WorkflowCore.Services.BackgroundTasks
         private readonly IEventRepository _eventRepository;
         private readonly IDistributedLockProvider _lockProvider;
         private readonly IDateTimeProvider _datetimeProvider;
-        private readonly IQueueCache _queueCache;
+        private readonly IDistributedCache _queueCache;
         protected override int MaxConcurrentItems => 2;
         protected override QueueType Queue => QueueType.Event;
 
-        public EventConsumer(IWorkflowRepository workflowRepository, ISubscriptionRepository subscriptionRepository, IEventRepository eventRepository, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, WorkflowOptions options, IDateTimeProvider datetimeProvider, IQueueCache queueCache)
+        public EventConsumer(IWorkflowRepository workflowRepository, ISubscriptionRepository subscriptionRepository, IEventRepository eventRepository, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, WorkflowOptions options, IDateTimeProvider datetimeProvider, IDistributedCache queueCache)
             : base(queueProvider, loggerFactory, options)
         {
             _workflowRepository = workflowRepository;
@@ -45,7 +46,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                 var evt = await _eventRepository.GetEvent(itemId);
                 if (evt.IsProcessed)
                 {
-                    await _queueCache.AddOrUpdateAsync($"evt:{evt.Id}", cancellationToken);
+                    await _queueCache.TrySetAsync($"evt:{evt.Id}");
                     return;
                 }
                 if (evt.EventTime <= _datetimeProvider.UtcNow)

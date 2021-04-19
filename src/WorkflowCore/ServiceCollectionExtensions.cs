@@ -24,7 +24,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<IWorkflowRepository>(options.PersistanceFactory);
             services.AddTransient<ISubscriptionRepository>(options.PersistanceFactory);
             services.AddTransient<IEventRepository>(options.PersistanceFactory);
-            services.AddSingleton<IQueueCache>(options.QueueCacheFactory);
             services.AddSingleton<IQueueProvider>(options.QueueFactory);
             services.AddSingleton<IDistributedLockProvider>(options.LockFactory);
             services.AddSingleton<ILifeCycleEventHub>(options.EventHubFactory);
