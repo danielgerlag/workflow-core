@@ -9,9 +9,9 @@ namespace WorkflowCore.Providers.Azure.Services
     public class CosmosDbProvisioner : ICosmosDbProvisioner
     {
 
-        private ICosmosDbClient _client;
+        private ICosmosClientFactory _client;
 
-        public CosmosDbProvisioner(ICosmosDbClient client, ILoggerFactory loggerFactory)
+        public CosmosDbProvisioner(ICosmosClientFactory client, ILoggerFactory loggerFactory)
         {
             _client = client;
         }

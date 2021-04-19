@@ -2,7 +2,7 @@
 
 namespace WorkflowCore.Providers.Azure.Interface
 {
-    public interface ICosmosDbClient
+    public interface ICosmosClientFactory
     {
         CosmosClient GetCosmosClient();
     }

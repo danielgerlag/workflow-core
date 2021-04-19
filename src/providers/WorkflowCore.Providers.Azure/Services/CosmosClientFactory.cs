@@ -4,13 +4,13 @@ using WorkflowCore.Providers.Azure.Interface;
 
 namespace WorkflowCore.Providers.Azure.Services
 {
-    public class CosmosDbClient : ICosmosDbClient, IDisposable
+    public class CosmosClientFactory : ICosmosClientFactory, IDisposable
     {
         private bool isDisposed = false;
 
         private CosmosClient _client;
 
-        public CosmosDbClient(string connectionString)
+        public CosmosClientFactory(string connectionString)
         {
             _client = new CosmosClient(connectionString);
         }
