@@ -99,6 +99,12 @@ namespace WorkflowCore.Services
             ProcessAfterExecutionIteration(workflow, def, wfResult);
             await DetermineNextExecutionTime(workflow, def);
 
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var middlewareRunner = scope.ServiceProvider.GetRequiredService<IWorkflowMiddlewareRunner>();
+                await middlewareRunner.RunExecuteMiddleware(workflow, def);
+            }
+
             return wfResult;
         }
 
@@ -213,7 +219,9 @@ namespace WorkflowCore.Services
             workflow.NextExecution = null;
 
             if (workflow.Status == WorkflowStatus.Complete)
+            {
                 return;
+            }
 
             foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count == 0))
             {
@@ -243,7 +251,9 @@ namespace WorkflowCore.Services
             }
 
             if ((workflow.NextExecution != null) || (workflow.ExecutionPointers.Any(x => x.EndTime == null)))
+            {
                 return;
+            }
 
             workflow.Status = WorkflowStatus.Complete;
             workflow.CompleteTime = _datetimeProvider.UtcNow;

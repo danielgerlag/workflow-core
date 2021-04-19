@@ -44,8 +44,14 @@ namespace WorkflowCore.UnitTests.Services
 
             Options = new WorkflowOptions(A.Fake<IServiceCollection>());
 
+            var stepExecutionScope = A.Fake<IServiceScope>();
+            A.CallTo(() => ScopeProvider.CreateScope(A<IStepExecutionContext>._)).Returns(stepExecutionScope);
+            A.CallTo(() => stepExecutionScope.ServiceProvider).Returns(ServiceProvider);
+
             var scope = A.Fake<IServiceScope>();
-            A.CallTo(() => ScopeProvider.CreateScope(A<IStepExecutionContext>._)).Returns(scope);
+            var scopeFactory = A.Fake<IServiceScopeFactory>();
+            A.CallTo(() => ServiceProvider.GetService(typeof(IServiceScopeFactory))).Returns(scopeFactory);
+            A.CallTo(() => scopeFactory.CreateScope()).Returns(scope);
             A.CallTo(() => scope.ServiceProvider).Returns(ServiceProvider);
 
             A.CallTo(() => DateTimeProvider.Now).Returns(DateTime.Now);
@@ -61,6 +67,10 @@ namespace WorkflowCore.UnitTests.Services
 
             A.CallTo(() => MiddlewareRunner
                     .RunPostMiddleware(A<WorkflowInstance>._, A<WorkflowDefinition>._))
+                .Returns(Task.CompletedTask);
+
+            A.CallTo(() => MiddlewareRunner
+                    .RunExecuteMiddleware(A<WorkflowInstance>._, A<WorkflowDefinition>._))
                 .Returns(Task.CompletedTask);
 
             A.CallTo(() => StepExecutor.ExecuteStep(A<IStepExecutionContext>._, A<IStepBody>._))
@@ -103,6 +113,64 @@ namespace WorkflowCore.UnitTests.Services
             //assert
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).MustHaveHappened();
             A.CallTo(() => ResultProcesser.ProcessExecutionResult(instance, A<WorkflowDefinition>.Ignored, A<ExecutionPointer>.Ignored, step1, A<ExecutionResult>.Ignored, A<WorkflowExecutorResult>.Ignored)).MustHaveHappened();
+        }
+
+        [Fact(DisplayName = "Should call execute middleware when not completed")]
+        public void should_call_execute_middleware_when_not_completed()
+        {
+            //arrange
+            var step1Body = A.Fake<IStepBody>();
+            A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
+            WorkflowStep step1 = BuildFakeStep(step1Body);
+            Given1StepWorkflow(step1, "Workflow", 1);
+
+            var instance = new WorkflowInstance
+            {
+                WorkflowDefinitionId = "Workflow",
+                Version = 1,
+                Status = WorkflowStatus.Runnable,
+                NextExecution = 0,
+                Id = "001",
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>
+                {
+                    new ExecutionPointer { Id = "1", Active = true, StepId = 0 }
+                })
+            };
+
+            //act
+            Subject.Execute(instance);
+
+            //assert
+            A.CallTo(() => MiddlewareRunner.RunExecuteMiddleware(instance, A<WorkflowDefinition>.Ignored)).MustHaveHappened();
+        }
+
+        [Fact(DisplayName = "Should not call post middleware when not completed")]
+        public void should_not_call_post_middleware_when_not_completed()
+        {
+            //arrange
+            var step1Body = A.Fake<IStepBody>();
+            A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
+            WorkflowStep step1 = BuildFakeStep(step1Body);
+            Given1StepWorkflow(step1, "Workflow", 1);
+
+            var instance = new WorkflowInstance
+            {
+                WorkflowDefinitionId = "Workflow",
+                Version = 1,
+                Status = WorkflowStatus.Runnable,
+                NextExecution = 0,
+                Id = "001",
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>
+                {
+                    new ExecutionPointer { Id = "1", Active = true, StepId = 0 }
+                })
+            };
+
+            //act
+            Subject.Execute(instance);
+
+            //assert
+            A.CallTo(() => MiddlewareRunner.RunPostMiddleware(instance, A<WorkflowDefinition>.Ignored)).MustNotHaveHappened();
         }
 
         [Fact(DisplayName = "Should trigger step hooks")]

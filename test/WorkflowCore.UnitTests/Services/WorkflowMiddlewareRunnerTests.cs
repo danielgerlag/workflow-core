@@ -238,6 +238,117 @@ namespace WorkflowCore.UnitTests.Services
                 .MustHaveHappenedOnceExactly();
         }
 
+        [Fact(DisplayName = "RunExecuteMiddleware should run nothing when no middleware")]
+        public void RunExecuteMiddleware_should_run_nothing_when_no_middleware()
+        {
+            // Act
+            Func<Task> action = async () => await Runner.RunExecuteMiddleware(Workflow, Definition);
+
+            // Assert
+            action.ShouldNotThrow();
+        }
+
+        [Fact(DisplayName = "RunExecuteMiddleware should run middleware when one middleware")]
+        public async Task RunExecuteMiddleware_should_run_middleware_when_one_middleware()
+        {
+            // Arrange
+            var middleware = BuildWorkflowMiddleware(WorkflowMiddlewarePhase.ExecuteWorkflow);
+            Middleware.Add(middleware);
+
+            // Act
+            await Runner.RunExecuteMiddleware(Workflow, Definition);
+
+            // Assert
+            A
+                .CallTo(HandleMethodFor(middleware))
+                .MustHaveHappenedOnceExactly();
+        }
+
+        [Fact(DisplayName = "RunExecuteMiddleware should run all middleware when multiple middleware")]
+        public async Task RunExecuteMiddleware_should_run_all_middleware_when_multiple_middleware()
+        {
+            // Arrange
+            var middleware1 = BuildWorkflowMiddleware(WorkflowMiddlewarePhase.ExecuteWorkflow, 1);
+            var middleware2 = BuildWorkflowMiddleware(WorkflowMiddlewarePhase.ExecuteWorkflow, 2);
+            var middleware3 = BuildWorkflowMiddleware(WorkflowMiddlewarePhase.ExecuteWorkflow, 3);
+            Middleware.AddRange(new[] { middleware1, middleware2, middleware3 });
+
+            // Act
+            await Runner.RunExecuteMiddleware(Workflow, Definition);
+
+            // Assert
+            A
+                .CallTo(HandleMethodFor(middleware3))
+                .MustHaveHappenedOnceExactly()
+                .Then(A
+                    .CallTo(HandleMethodFor(middleware2))
+                    .MustHaveHappenedOnceExactly())
+                .Then(A
+                    .CallTo(HandleMethodFor(middleware1))
+                    .MustHaveHappenedOnceExactly());
+        }
+
+        [Fact(DisplayName = "RunExecuteMiddleware should only run middleware in ExecuteWorkflow phase")]
+        public async Task RunExecuteMiddleware_should_only_run_middleware_in_ExecuteWorkflow_phase()
+        {
+            // Arrange
+            var executeMiddleware = BuildWorkflowMiddleware(WorkflowMiddlewarePhase.ExecuteWorkflow, 1);
+            var postMiddleware = BuildWorkflowMiddleware(WorkflowMiddlewarePhase.PostWorkflow, 2);
+            var preMiddleware = BuildWorkflowMiddleware(WorkflowMiddlewarePhase.PreWorkflow, 3);
+            Middleware.AddRange(new[] { preMiddleware, postMiddleware, executeMiddleware });
+
+            // Act
+            await Runner.RunExecuteMiddleware(Workflow, Definition);
+
+            // Assert
+            A
+                .CallTo(HandleMethodFor(executeMiddleware))
+                .MustHaveHappenedOnceExactly();
+
+            A.CallTo(HandleMethodFor(preMiddleware)).MustNotHaveHappened();
+            A.CallTo(HandleMethodFor(postMiddleware)).MustNotHaveHappened();
+        }
+
+        [Fact(DisplayName = "RunExecuteMiddleware should call top level error handler when middleware throws")]
+        public async Task RunExecuteMiddleware_should_call_top_level_error_handler_when_middleware_throws()
+        {
+            // Arrange
+            var middleware = BuildWorkflowMiddleware(WorkflowMiddlewarePhase.ExecuteWorkflow, 1);
+            A.CallTo(HandleMethodFor(middleware)).ThrowsAsync(new ApplicationException("Something went wrong"));
+            Middleware.AddRange(new[] { middleware });
+
+            // Act
+            await Runner.RunExecuteMiddleware(Workflow, Definition);
+
+            // Assert
+            A
+                .CallTo(HandleMethodFor(TopLevelErrorHandler))
+                .MustHaveHappenedOnceExactly();
+        }
+
+        [Fact(DisplayName =
+            "RunExecuteMiddleware should call error handler on workflow def when middleware throws and def has handler defined")]
+        public async Task
+            RunExecuteMiddleware_should_call_error_handler_on_workflow_def_when_middleware_throws_and_def_has_handler()
+        {
+            // Arrange
+            var middleware = BuildWorkflowMiddleware(WorkflowMiddlewarePhase.ExecuteWorkflow, 1);
+            A.CallTo(HandleMethodFor(middleware)).ThrowsAsync(new ApplicationException("Something went wrong"));
+            Middleware.AddRange(new[] { middleware });
+            Definition.OnExecuteMiddlewareError = typeof(IDefLevelErrorHandler);
+
+            // Act
+            await Runner.RunExecuteMiddleware(Workflow, Definition);
+
+            // Assert
+            A
+                .CallTo(HandleMethodFor(TopLevelErrorHandler))
+                .MustNotHaveHappened();
+            A
+                .CallTo(HandleMethodFor(DefLevelErrorHandler))
+                .MustHaveHappenedOnceExactly();
+        }
+
         #region Helpers
 
         private IWorkflowMiddleware BuildWorkflowMiddleware(
