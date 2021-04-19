@@ -62,13 +62,13 @@ namespace WorkflowCore.Services.BackgroundTasks
                         {
                             if (await _greylist.ContainsAsync($"wf:{item}"))
                             {
-                                _logger.LogDebug($"Workflow already queued {item}");
+                                _logger.LogDebug($"Got greylisted workflow {item}");
                                 continue;
                             }
 
                             _logger.LogDebug("Got runnable instance {0}", item);
-                            await _queueProvider.QueueWork(item, QueueType.Workflow);
                             await _greylist.SetAsync($"wf:{item}");
+                            await _queueProvider.QueueWork(item, QueueType.Workflow);
                         }
                     }
                     finally
@@ -99,6 +99,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                             }
 
                             _logger.LogDebug($"Got unprocessed event {item}");
+                            await _greylist.SetAsync($"evt:{item}");
                             await _queueProvider.QueueWork(item, QueueType.Event);
                         }
                     }
