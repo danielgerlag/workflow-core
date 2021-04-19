@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using Microsoft.Extensions.Logging.Console;
 using WorkflowCore.Interface;
 using WorkflowCore.Sample19.Middleware;
 using WorkflowCore.Sample19.Steps;

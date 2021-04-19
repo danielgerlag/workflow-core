@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -7,8 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
-using System.Text;
-using WorkflowCore.Services.DefinitionStorage;
 
 namespace ScratchPad
 {
@@ -40,7 +37,7 @@ namespace ScratchPad
 
             for (var i = 0; i < 12000; i++)
             {
-                var wid = host.StartWorkflow("Test01", 1, new WfData() { Value1 = "two", Value2 = "data2" }).Result;
+                var wid = host.StartWorkflow("Test01", 1, new WfData { Value1 = "two", Value2 = "data2" }).Result;
                 ids.Add(wid);
             }
 

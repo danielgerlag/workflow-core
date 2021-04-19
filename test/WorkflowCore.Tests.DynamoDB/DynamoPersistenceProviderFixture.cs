@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Amazon.DynamoDBv2;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;

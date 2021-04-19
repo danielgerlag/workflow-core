@@ -17,7 +17,7 @@ namespace WorkflowCore.UnitTests
         [Fact]
         public void CreateNewWorkflow_should_generate_id()
         {
-            var workflow = new WorkflowInstance()
+            var workflow = new WorkflowInstance
             {
                 Data = new { Value1 = 7 },
                 Description = "My Description",
@@ -26,7 +26,7 @@ namespace WorkflowCore.UnitTests
                 Version = 1,
                 WorkflowDefinitionId = "My Workflow"
             };
-            workflow.ExecutionPointers.Add(new ExecutionPointer()
+            workflow.ExecutionPointers.Add(new ExecutionPointer
             {
                 Id = Guid.NewGuid().ToString(),
                 Active = true,
@@ -42,9 +42,9 @@ namespace WorkflowCore.UnitTests
         [Fact]
         public void GetWorkflowInstance_should_retrieve_workflow()
         {
-            var workflow = new WorkflowInstance()
+            var workflow = new WorkflowInstance
             {
-                Data = new TestData() { Value1 = 7 },
+                Data = new TestData { Value1 = 7 },
                 Description = "My Description",
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
@@ -52,13 +52,13 @@ namespace WorkflowCore.UnitTests
                 WorkflowDefinitionId = "My Workflow",
                 Reference = "My Reference"
             };
-            workflow.ExecutionPointers.Add(new ExecutionPointer()
+            workflow.ExecutionPointers.Add(new ExecutionPointer
             {
                 Id = "1",
                 Active = true,
                 StepId = 0,
                 SleepUntil = new DateTime(2000, 1, 1).ToUniversalTime(),
-                Scope = new List<string>() { "4", "3", "2", "1" }
+                Scope = new List<string> { "4", "3", "2", "1" }
             });
             var workflowId = Subject.CreateNewWorkflow(workflow).Result;
 
@@ -72,9 +72,9 @@ namespace WorkflowCore.UnitTests
         [Fact]
         public void GetWorkflowInstances_should_retrieve_workflows()
         {
-            var workflow01 = new WorkflowInstance()
+            var workflow01 = new WorkflowInstance
             {
-                Data = new TestData() { Value1 = 7 },
+                Data = new TestData { Value1 = 7 },
                 Description = "My Description",
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
@@ -82,19 +82,19 @@ namespace WorkflowCore.UnitTests
                 WorkflowDefinitionId = "My Workflow",
                 Reference = "My Reference"
             };
-            workflow01.ExecutionPointers.Add(new ExecutionPointer()
+            workflow01.ExecutionPointers.Add(new ExecutionPointer
             {
                 Id = "1",
                 Active = true,
                 StepId = 0,
                 SleepUntil = new DateTime(2000, 1, 1).ToUniversalTime(),
-                Scope = new List<string>() { "4", "3", "2", "1" }
+                Scope = new List<string> { "4", "3", "2", "1" }
             });
             var workflowId01 = Subject.CreateNewWorkflow(workflow01).Result;
 
-            var workflow02 = new WorkflowInstance()
+            var workflow02 = new WorkflowInstance
             {
-                Data = new TestData() { Value1 = 7 },
+                Data = new TestData { Value1 = 7 },
                 Description = "My Description",
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
@@ -102,19 +102,19 @@ namespace WorkflowCore.UnitTests
                 WorkflowDefinitionId = "My Workflow",
                 Reference = "My Reference"
             };
-            workflow02.ExecutionPointers.Add(new ExecutionPointer()
+            workflow02.ExecutionPointers.Add(new ExecutionPointer
             {
                 Id = "1",
                 Active = true,
                 StepId = 0,
                 SleepUntil = new DateTime(2000, 1, 1).ToUniversalTime(),
-                Scope = new List<string>() { "4", "3", "2", "1" }
+                Scope = new List<string> { "4", "3", "2", "1" }
             });
             var workflowId02 = Subject.CreateNewWorkflow(workflow02).Result;
 
-            var workflow03 = new WorkflowInstance()
+            var workflow03 = new WorkflowInstance
             {
-                Data = new TestData() { Value1 = 7 },
+                Data = new TestData { Value1 = 7 },
                 Description = "My Description",
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
@@ -122,13 +122,13 @@ namespace WorkflowCore.UnitTests
                 WorkflowDefinitionId = "My Workflow",
                 Reference = "My Reference"
             };
-            workflow03.ExecutionPointers.Add(new ExecutionPointer()
+            workflow03.ExecutionPointers.Add(new ExecutionPointer
             {
                 Id = "1",
                 Active = true,
                 StepId = 0,
                 SleepUntil = new DateTime(2000, 1, 1).ToUniversalTime(),
-                Scope = new List<string>() { "4", "3", "2", "1" }
+                Scope = new List<string> { "4", "3", "2", "1" }
             });
             var workflowId03 = Subject.CreateNewWorkflow(workflow03).Result;
 
@@ -155,9 +155,9 @@ namespace WorkflowCore.UnitTests
         [Fact]
         public void PersistWorkflow()
         {
-            var oldWorkflow = new WorkflowInstance()
+            var oldWorkflow = new WorkflowInstance
             {
-                Data = new TestData() { Value1 = 7 },
+                Data = new TestData { Value1 = 7 },
                 Description = "My Description",
                 Status = WorkflowStatus.Runnable,
                 NextExecution = 0,
@@ -166,19 +166,19 @@ namespace WorkflowCore.UnitTests
                 CreateTime = new DateTime(2000, 1, 1).ToUniversalTime(),
                 Reference = "My Reference"
             };
-            oldWorkflow.ExecutionPointers.Add(new ExecutionPointer()
+            oldWorkflow.ExecutionPointers.Add(new ExecutionPointer
             {
                 Id = Guid.NewGuid().ToString(),
                 Active = true,
                 StepId = 0,
-                Scope = new List<string>() { "1", "2", "3", "4" }
+                Scope = new List<string> { "1", "2", "3", "4" }
             });
             var workflowId = Subject.CreateNewWorkflow(oldWorkflow).Result;
             var newWorkflow = Utils.DeepCopy(oldWorkflow);
             newWorkflow.Data = oldWorkflow.Data;
             newWorkflow.Reference = oldWorkflow.Reference;
             newWorkflow.NextExecution = 7;
-            newWorkflow.ExecutionPointers.Add(new ExecutionPointer() { Id = Guid.NewGuid().ToString(), Active = true, StepId = 1 });
+            newWorkflow.ExecutionPointers.Add(new ExecutionPointer { Id = Guid.NewGuid().ToString(), Active = true, StepId = 1 });
 
             Subject.PersistWorkflow(newWorkflow).Wait();
 
@@ -197,9 +197,9 @@ namespace WorkflowCore.UnitTests
             {
                 actions.Add(() =>
                 {
-                    var oldWorkflow = new WorkflowInstance()
+                    var oldWorkflow = new WorkflowInstance
                     {
-                        Data = new TestData() { Value1 = 7 },
+                        Data = new TestData { Value1 = 7 },
                         Description = "My Description",
                         Status = WorkflowStatus.Runnable,
                         NextExecution = 0,
@@ -207,7 +207,7 @@ namespace WorkflowCore.UnitTests
                         WorkflowDefinitionId = "My Workflow",
                         CreateTime = new DateTime(2000, 1, 1).ToUniversalTime()
                     };
-                    oldWorkflow.ExecutionPointers.Add(new ExecutionPointer()
+                    oldWorkflow.ExecutionPointers.Add(new ExecutionPointer
                     {
                         Id = Guid.NewGuid().ToString(),
                         Active = true,
@@ -216,7 +216,7 @@ namespace WorkflowCore.UnitTests
                     var workflowId = subject.CreateNewWorkflow(oldWorkflow).Result;
                     var newWorkflow = Utils.DeepCopy(oldWorkflow);
                     newWorkflow.NextExecution = 7;
-                    newWorkflow.ExecutionPointers.Add(new ExecutionPointer() { Id = Guid.NewGuid().ToString(), Active = true, StepId = 1 });
+                    newWorkflow.ExecutionPointers.Add(new ExecutionPointer { Id = Guid.NewGuid().ToString(), Active = true, StepId = 1 });
 
                     subject.PersistWorkflow(newWorkflow).Wait(); // It will throw an exception if the persistence provider occurred resource competition.
                 });

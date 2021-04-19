@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using WorkflowCore.Models;
 using WorkflowCore.Persistence.EntityFramework.Models;
 
@@ -10,7 +9,7 @@ namespace WorkflowCore.Persistence.EntityFramework
 {
     internal static class ExtensionMethods
     {
-        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
+        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
 
         internal static PersistedWorkflow ToPersistable(this WorkflowInstance instance, PersistedWorkflow persistable = null)
         {

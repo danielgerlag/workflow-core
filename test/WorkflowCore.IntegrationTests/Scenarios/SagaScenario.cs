@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using Xunit;
@@ -75,7 +73,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         [Fact]
         public void NoExceptionScenario()
         {            
-            var workflowId = StartWorkflow(new MyDataClass() { ThrowException = false });            
+            var workflowId = StartWorkflow(new MyDataClass { ThrowException = false });            
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
             GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
@@ -95,7 +93,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         [Fact]
         public void ExceptionScenario()
         {
-            var workflowId = StartWorkflow(new MyDataClass() { ThrowException = true });
+            var workflowId = StartWorkflow(new MyDataClass { ThrowException = true });
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
             GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);

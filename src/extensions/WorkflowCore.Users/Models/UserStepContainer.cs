@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
@@ -39,7 +38,7 @@ namespace WorkflowCore.Users.Models
                 executionPointer.EventName = "UserAction";
                 executionPointer.Active = false;
 
-                executorResult.Subscriptions.Add(new EventSubscription()
+                executorResult.Subscriptions.Add(new EventSubscription
                 {
                     WorkflowId = workflow.Id,
                     StepId = executionPointer.StepId,

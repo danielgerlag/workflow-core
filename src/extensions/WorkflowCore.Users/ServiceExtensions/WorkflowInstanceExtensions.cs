@@ -14,7 +14,7 @@ namespace WorkflowCore.Models
             var pointers = workflow.ExecutionPointers.Where(x => !x.EventPublished && x.EventName == UserTask.EventName).ToList();
             foreach (var pointer in pointers)
             {
-                var item = new OpenUserAction()
+                var item = new OpenUserAction
                 {
                     Key = pointer.EventKey,
                     Prompt = Convert.ToString(pointer.ExtensionAttributes[UserTask.ExtPrompt]),

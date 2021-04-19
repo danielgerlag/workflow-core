@@ -16,7 +16,12 @@ namespace WorkflowCore.Interface
         /// <summary>
         /// The middleware should run after a workflow completes.
         /// </summary>
-        PostWorkflow
+        PostWorkflow,
+
+        /// <summary>
+        /// The middleware should run after each workflow execution.
+        /// </summary>
+        ExecuteWorkflow
     }
 
     /// <summary>

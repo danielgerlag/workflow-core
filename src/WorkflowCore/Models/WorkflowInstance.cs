@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace WorkflowCore.Models
@@ -36,11 +35,11 @@ namespace WorkflowCore.Models
         }
     }
 
-    public enum WorkflowStatus 
+    public enum WorkflowStatus
     { 
-        Runnable = 0, 
-        Suspended = 1, 
-        Complete = 2, 
-        Terminated = 3 
+        Runnable = 0,
+        Suspended = 1,
+        Complete = 2,
+        Terminated = 3,
     }
 }

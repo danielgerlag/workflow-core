@@ -1,7 +1,5 @@
 ﻿using Raven.Client.Documents.Indexes;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using WorkflowCore.Models;
 
 namespace WorkflowCore.Persistence.RavenDB.Services

@@ -60,7 +60,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                             await _eventRepository.MarkEventProcessed(itemId);
                             return;
                         }
-                        subs = new List<EventSubscription>() { activity };
+                        subs = new List<EventSubscription> { activity };
                     }
                     else
                     {
