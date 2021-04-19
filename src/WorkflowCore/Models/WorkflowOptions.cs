@@ -79,5 +79,4 @@ namespace WorkflowCore.Models
             MaxConcurrentWorkflows = maxConcurrentWorkflows;
         }
     }
-        
 }

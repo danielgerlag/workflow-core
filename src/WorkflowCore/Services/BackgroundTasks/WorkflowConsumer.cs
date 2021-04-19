@@ -14,12 +14,12 @@ namespace WorkflowCore.Services.BackgroundTasks
         private readonly IDateTimeProvider _datetimeProvider;
         private readonly IPersistenceProvider _persistenceStore;
         private readonly IWorkflowExecutor _executor;
-        private readonly IGreyList _greylist;
+        private readonly IDistributedCache _greylist;
 
         protected override int MaxConcurrentItems => Options.MaxConcurrentWorkflows;
         protected override QueueType Queue => QueueType.Workflow;
 
-        public WorkflowConsumer(IPersistenceProvider persistenceProvider, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IWorkflowExecutor executor, IDateTimeProvider datetimeProvider, IGreyList greylist, WorkflowOptions options)
+        public WorkflowConsumer(IPersistenceProvider persistenceProvider, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IWorkflowExecutor executor, IDateTimeProvider datetimeProvider, IDistributedCache greylist, WorkflowOptions options)
             : base(queueProvider, loggerFactory, options)
         {
             _persistenceStore = persistenceProvider;

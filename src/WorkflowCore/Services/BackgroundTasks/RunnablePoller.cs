@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -13,12 +14,12 @@ namespace WorkflowCore.Services.BackgroundTasks
         private readonly IDistributedLockProvider _lockProvider;
         private readonly IQueueProvider _queueProvider;
         private readonly ILogger _logger;
-        private readonly IGreyList _greylist;
+        private readonly IDistributedCache _greylist;
         private readonly WorkflowOptions _options;
         private readonly IDateTimeProvider _dateTimeProvider;
         private Timer _pollTimer;
 
-        public RunnablePoller(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IGreyList greylist, IDateTimeProvider dateTimeProvider, WorkflowOptions options)
+        public RunnablePoller(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IDistributedCache greylist, IDateTimeProvider dateTimeProvider, WorkflowOptions options)
         {
             _persistenceStore = persistenceStore;
             _greylist = greylist;
