@@ -46,7 +46,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                 var evt = await _eventRepository.GetEvent(itemId);
                 if (evt.IsProcessed)
                 {
-                    await _greylist.TrySetAsync($"evt:{evt.Id}");
+                    await _greylist.SetAsync($"evt:{evt.Id}");
                     return;
                 }
                 if (evt.EventTime <= _datetimeProvider.UtcNow)

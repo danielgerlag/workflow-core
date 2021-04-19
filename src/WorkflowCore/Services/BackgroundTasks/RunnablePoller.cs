@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
@@ -61,16 +60,15 @@ namespace WorkflowCore.Services.BackgroundTasks
                         var runnables = await _persistenceStore.GetRunnableInstances(_dateTimeProvider.Now);
                         foreach (var item in runnables)
                         {
-                            if (await _greylist.TryGetAsync($"wf:{item}"))
+                            if (await _greylist.ContainsAsync($"wf:{item}"))
                             {
                                 _logger.LogDebug($"Workflow already queued {item}");
+                                continue;
                             }
-                            else
-                            {
-                                _logger.LogDebug("Got runnable instance {0}", item);
-                                await _queueProvider.QueueWork(item, QueueType.Workflow);
-                                await _greylist.TrySetAsync($"wf:{item}");
-                            }
+
+                            _logger.LogDebug("Got runnable instance {0}", item);
+                            await _queueProvider.QueueWork(item, QueueType.Workflow);
+                            await _greylist.SetAsync($"wf:{item}");
                         }
                     }
                     finally
@@ -94,15 +92,14 @@ namespace WorkflowCore.Services.BackgroundTasks
                         var events = await _persistenceStore.GetRunnableEvents(_dateTimeProvider.Now);
                         foreach (var item in events.ToList())
                         {
-                            if (await _greylist.TryGetAsync($"evt:{item}"))
+                            if (await _greylist.ContainsAsync($"evt:{item}"))
                             {
                                 _logger.LogDebug($"Event already queued {item}");
+                                continue;
                             }
-                            else
-                            {
-                                _logger.LogDebug($"Got unprocessed event {item}");
-                                await _queueProvider.QueueWork(item, QueueType.Event);
-                            }
+
+                            _logger.LogDebug($"Got unprocessed event {item}");
+                            await _queueProvider.QueueWork(item, QueueType.Event);
                         }
                     }
                     finally
@@ -115,26 +112,6 @@ namespace WorkflowCore.Services.BackgroundTasks
             {
                 _logger.LogError(ex, ex.Message);
             }
-        }
-    }
-
-    public static class DistributedCacheExtensions
-    {
-        private static readonly byte[] _value = new byte[0];
-        private static readonly TimeSpan _lifetime = TimeSpan.FromMinutes(5);
-
-        public static async Task<bool> TryGetAsync(this IDistributedCache cache, string key)
-        {
-            return await cache.GetAsync(key) != null;
-        }
-
-        public static async Task TrySetAsync(this IDistributedCache cache, string key)
-        {
-            await cache.SetAsync(key, _value,
-                new DistributedCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = _lifetime
-                });
         }
     }
 }
