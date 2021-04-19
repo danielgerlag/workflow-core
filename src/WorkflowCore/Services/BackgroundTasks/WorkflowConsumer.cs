@@ -14,16 +14,16 @@ namespace WorkflowCore.Services.BackgroundTasks
         private readonly IDateTimeProvider _datetimeProvider;
         private readonly IPersistenceProvider _persistenceStore;
         private readonly IWorkflowExecutor _executor;
-        private readonly IDistributedCache _queueCache;
+        private readonly IDistributedCache _greylist;
 
         protected override int MaxConcurrentItems => Options.MaxConcurrentWorkflows;
         protected override QueueType Queue => QueueType.Workflow;
 
-        public WorkflowConsumer(IPersistenceProvider persistenceProvider, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IWorkflowExecutor executor, IDateTimeProvider datetimeProvider, IDistributedCache queueCache, WorkflowOptions options)
+        public WorkflowConsumer(IPersistenceProvider persistenceProvider, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IWorkflowExecutor executor, IDateTimeProvider datetimeProvider, IDistributedCache greylist, WorkflowOptions options)
             : base(queueProvider, loggerFactory, options)
         {
             _persistenceStore = persistenceProvider;
-            _queueCache = queueCache;
+            _greylist = greylist;
             _executor = executor;
             _lockProvider = lockProvider;
             _datetimeProvider = datetimeProvider;
@@ -54,7 +54,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     {
                         await _persistenceStore.PersistWorkflow(workflow);
                         await QueueProvider.QueueWork(itemId, QueueType.Index);
-                        await _queueCache.RemoveAsync($"wf:{itemId}", cancellationToken);
+                        await _greylist.RemoveAsync($"wf:{itemId}", cancellationToken);
                     }
                 }
             }
