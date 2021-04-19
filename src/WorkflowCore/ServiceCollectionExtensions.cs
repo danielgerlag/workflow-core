@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Microsoft.Extensions.Caching.Distributed;
 using WorkflowCore.Interface;
 using WorkflowCore.Services;
 using WorkflowCore.Models;
@@ -60,6 +61,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<IWorkflowErrorHandler, TerminateHandler>();
             services.AddTransient<IWorkflowErrorHandler, SuspendHandler>();
 
+            services.AddDistributedMemoryCache();
+            services.AddSingleton<IGreyList>(sp => (IGreyList)sp.GetRequiredService<IDistributedCache>());
             services.AddSingleton<IWorkflowController, WorkflowController>();
             services.AddSingleton<IActivityController, ActivityController>();
             services.AddSingleton<IWorkflowHost, WorkflowHost>();

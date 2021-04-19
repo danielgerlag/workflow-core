@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -67,7 +66,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                             }
 
                             _logger.LogDebug("Got runnable instance {0}", item);
-                            await _greylist.SetAsync($"wf:{item}");
+                            await _greylist.AddAsync($"wf:{item}");
                             await _queueProvider.QueueWork(item, QueueType.Workflow);
                         }
                     }
@@ -99,7 +98,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                             }
 
                             _logger.LogDebug($"Got unprocessed event {item}");
-                            await _greylist.SetAsync($"evt:{item}");
+                            await _greylist.AddAsync($"evt:{item}");
                             await _queueProvider.QueueWork(item, QueueType.Event);
                         }
                     }

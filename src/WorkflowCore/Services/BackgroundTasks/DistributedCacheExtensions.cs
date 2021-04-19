@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -15,7 +14,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             return await cache.GetAsync(key) != null;
         }
 
-        public static async Task SetAsync(this IDistributedCache cache, string key)
+        public static async Task AddAsync(this IDistributedCache cache, string key)
         {
             await cache.SetAsync(key, _value,
                 new DistributedCacheEntryOptions

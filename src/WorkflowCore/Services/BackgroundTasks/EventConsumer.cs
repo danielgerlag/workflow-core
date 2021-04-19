@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -46,7 +45,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                 var evt = await _eventRepository.GetEvent(itemId);
                 if (evt.IsProcessed)
                 {
-                    await _greylist.SetAsync($"evt:{evt.Id}");
+                    await _greylist.AddAsync($"evt:{evt.Id}");
                     return;
                 }
                 if (evt.EventTime <= _datetimeProvider.UtcNow)
