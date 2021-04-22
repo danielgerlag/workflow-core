@@ -9,16 +9,16 @@ namespace WorkflowCore.Providers.Azure.Services
     public class CosmosDbProvisioner : ICosmosDbProvisioner
     {
 
-        private ICosmosClientFactory _client;
+        private ICosmosClientFactory _clientFactory;
 
-        public CosmosDbProvisioner(ICosmosClientFactory client, ILoggerFactory loggerFactory)
+        public CosmosDbProvisioner(ICosmosClientFactory clientFactory, ILoggerFactory loggerFactory)
         {
-            _client = client;
+            _clientFactory = clientFactory;
         }
 
         public async Task Provision(string dbId)
         {
-            var dbResp = await _client.GetCosmosClient().CreateDatabaseIfNotExistsAsync(dbId);
+            var dbResp = await _clientFactory.GetCosmosClient().CreateDatabaseIfNotExistsAsync(dbId);
             var wfIndexPolicy = new IndexingPolicy();
             wfIndexPolicy.IncludedPaths.Add(new IncludedPath { Path = @"/*" });
             wfIndexPolicy.ExcludedPaths.Add(new ExcludedPath { Path = @"/ExecutionPointers/?" });
@@ -32,6 +32,5 @@ namespace WorkflowCore.Providers.Azure.Services
                 dbResp.Database.CreateContainerIfNotExistsAsync(new ContainerProperties(CosmosDbPersistenceProvider.SubscriptionContainerName, @"/id"))
             );
         }
-
     }
 }
