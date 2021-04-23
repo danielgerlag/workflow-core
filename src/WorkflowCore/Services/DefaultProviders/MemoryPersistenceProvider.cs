@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -24,7 +25,7 @@ namespace WorkflowCore.Services
         private readonly List<Event> _events = new List<Event>();
         private readonly List<ExecutionError> _errors = new List<ExecutionError>();
 
-        public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
+        public async Task<string> CreateNewWorkflow(WorkflowInstance workflow, CancellationToken _ = default)
         {
             lock (_instances)
             {
@@ -34,7 +35,7 @@ namespace WorkflowCore.Services
             }
         }
 
-        public async Task PersistWorkflow(WorkflowInstance workflow)
+        public async Task PersistWorkflow(WorkflowInstance workflow, CancellationToken _ = default)
         {
             lock (_instances)
             {
@@ -44,7 +45,7 @@ namespace WorkflowCore.Services
             }
         }
 
-        public async Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt)
+        public async Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt, CancellationToken _ = default)
         {
             lock (_instances)
             {
@@ -53,7 +54,7 @@ namespace WorkflowCore.Services
             }
         }
 
-        public async Task<WorkflowInstance> GetWorkflowInstance(string Id)
+        public async Task<WorkflowInstance> GetWorkflowInstance(string Id, CancellationToken _ = default)
         {
             lock (_instances)
             {
@@ -61,7 +62,7 @@ namespace WorkflowCore.Services
             }
         }
 
-        public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids)
+        public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids, CancellationToken _ = default)
         {
             if (ids == null)
             {
@@ -105,7 +106,7 @@ namespace WorkflowCore.Services
         }
 
 
-        public async Task<string> CreateEventSubscription(EventSubscription subscription)
+        public async Task<string> CreateEventSubscription(EventSubscription subscription, CancellationToken _ = default)
         {
             lock (_subscriptions)
             {
@@ -115,7 +116,7 @@ namespace WorkflowCore.Services
             }
         }
 
-        public async Task<IEnumerable<EventSubscription>> GetSubscriptions(string eventName, string eventKey, DateTime asOf)
+        public async Task<IEnumerable<EventSubscription>> GetSubscriptions(string eventName, string eventKey, DateTime asOf, CancellationToken _ = default)
         {
             lock (_subscriptions)
             {
@@ -124,7 +125,7 @@ namespace WorkflowCore.Services
             }
         }
 
-        public async Task TerminateSubscription(string eventSubscriptionId)
+        public async Task TerminateSubscription(string eventSubscriptionId, CancellationToken _ = default)
         {
             lock (_subscriptions)
             {
@@ -133,7 +134,7 @@ namespace WorkflowCore.Services
             }
         }
 
-        public Task<EventSubscription> GetSubscription(string eventSubscriptionId)
+        public Task<EventSubscription> GetSubscription(string eventSubscriptionId, CancellationToken _ = default)
         {
             lock (_subscriptions)
             {
@@ -142,7 +143,7 @@ namespace WorkflowCore.Services
             }
         }
 
-        public Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, DateTime asOf)
+        public Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, DateTime asOf, CancellationToken _ = default)
         {
             lock (_subscriptions)
             {
@@ -152,7 +153,7 @@ namespace WorkflowCore.Services
             }
         }
 
-        public Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry)
+        public Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry, CancellationToken _ = default)
         {
             lock (_subscriptions)
             {
@@ -165,7 +166,7 @@ namespace WorkflowCore.Services
             }
         }
 
-        public Task ClearSubscriptionToken(string eventSubscriptionId, string token)
+        public Task ClearSubscriptionToken(string eventSubscriptionId, string token, CancellationToken _ = default)
         {
             lock (_subscriptions)
             {
@@ -184,7 +185,7 @@ namespace WorkflowCore.Services
         {
         }
 
-        public async Task<string> CreateEvent(Event newEvent)
+        public async Task<string> CreateEvent(Event newEvent, CancellationToken _ = default)
         {
             lock (_events)
             {
@@ -194,7 +195,7 @@ namespace WorkflowCore.Services
             }
         }
 
-        public async Task MarkEventProcessed(string id)
+        public async Task MarkEventProcessed(string id, CancellationToken _ = default)
         {
             lock (_events)
             {
@@ -204,7 +205,7 @@ namespace WorkflowCore.Services
             }
         }
 
-        public async Task<IEnumerable<string>> GetRunnableEvents(DateTime asAt)
+        public async Task<IEnumerable<string>> GetRunnableEvents(DateTime asAt, CancellationToken _ = default)
         {
             lock (_events)
             {
@@ -216,7 +217,7 @@ namespace WorkflowCore.Services
             }
         }
 
-        public async Task<Event> GetEvent(string id)
+        public async Task<Event> GetEvent(string id, CancellationToken _ = default)
         {
             lock (_events)
             {
@@ -224,7 +225,7 @@ namespace WorkflowCore.Services
             }
         }
 
-        public async Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf)
+        public async Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf, CancellationToken _ = default)
         {
             lock (_events)
             {
@@ -236,7 +237,7 @@ namespace WorkflowCore.Services
             }
         }
 
-        public async Task MarkEventUnprocessed(string id)
+        public async Task MarkEventUnprocessed(string id, CancellationToken _ = default)
         {
             lock (_events)
             {
@@ -248,7 +249,7 @@ namespace WorkflowCore.Services
             }
         }
 
-        public async Task PersistErrors(IEnumerable<ExecutionError> errors)
+        public async Task PersistErrors(IEnumerable<ExecutionError> errors, CancellationToken _ = default)
         {
             lock (errors)
             {

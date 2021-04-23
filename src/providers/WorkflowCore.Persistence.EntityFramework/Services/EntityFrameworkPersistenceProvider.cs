@@ -2,15 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
 using WorkflowCore.Persistence.EntityFramework.Models;
 using WorkflowCore.Models;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WorkflowCore.Persistence.EntityFramework.Interfaces;
+using System.Threading;
 
 namespace WorkflowCore.Persistence.EntityFramework.Services
 {
@@ -27,31 +24,31 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             _canMigrateDB = canMigrateDB;
         }
 
-        public async Task<string> CreateEventSubscription(EventSubscription subscription)
+        public async Task<string> CreateEventSubscription(EventSubscription subscription, CancellationToken cancellationToken = default)
         {
             using (var db = ConstructDbContext())
             {
                 subscription.Id = Guid.NewGuid().ToString();
                 var persistable = subscription.ToPersistable();
                 var result = db.Set<PersistedSubscription>().Add(persistable);
-                await db.SaveChangesAsync();
+                await db.SaveChangesAsync(cancellationToken);
                 return subscription.Id;
             }
         }
 
-        public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
+        public async Task<string> CreateNewWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken = default)
         {
             using (var db = ConstructDbContext())
             {
                 workflow.Id = Guid.NewGuid().ToString();
                 var persistable = workflow.ToPersistable();
                 var result = db.Set<PersistedWorkflow>().Add(persistable);
-                await db.SaveChangesAsync();
+                await db.SaveChangesAsync(cancellationToken);
                 return workflow.Id;
             }
         }
 
-        public async Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt)
+        public async Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt, CancellationToken cancellationToken = default)
         {
             using (var db = ConstructDbContext())
             {
@@ -59,7 +56,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 var raw = await db.Set<PersistedWorkflow>()
                     .Where(x => x.NextExecution.HasValue && (x.NextExecution <= now) && (x.Status == WorkflowStatus.Runnable))
                     .Select(x => x.InstanceId)
-                    .ToListAsync();
+                    .ToListAsync(cancellationToken);
 
                 return raw.Select(s => s.ToString()).ToList();
             }
@@ -97,7 +94,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             }
         }
 
-        public async Task<WorkflowInstance> GetWorkflowInstance(string Id)
+        public async Task<WorkflowInstance> GetWorkflowInstance(string Id, CancellationToken cancellationToken = default)
         {
             using (var db = ConstructDbContext())
             {
@@ -106,7 +103,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .Include(wf => wf.ExecutionPointers)
                     .ThenInclude(ep => ep.ExtensionAttributes)
                     .Include(wf => wf.ExecutionPointers)
-                    .FirstAsync(x => x.InstanceId == uid);
+                    .FirstAsync(x => x.InstanceId == uid, cancellationToken);
 
                 if (raw == null)
                     return null;
@@ -115,7 +112,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             }
         }
 
-        public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids)
+        public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids, CancellationToken cancellationToken = default)
         {
             if (ids == null)
             {
@@ -131,11 +128,11 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .Include(wf => wf.ExecutionPointers)
                     .Where(x => uids.Contains(x.InstanceId));
 
-                return (await raw.ToListAsync()).Select(i => i.ToWorkflowInstance());
+                return (await raw.ToListAsync(cancellationToken)).Select(i => i.ToWorkflowInstance());
             }
         }
 
-        public async Task PersistWorkflow(WorkflowInstance workflow)
+        public async Task PersistWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken = default)
         {
             using (var db = ConstructDbContext())
             {
@@ -146,21 +143,21 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .ThenInclude(ep => ep.ExtensionAttributes)
                     .Include(wf => wf.ExecutionPointers)
                     .AsTracking()
-                    .FirstAsync();
+                    .FirstAsync(cancellationToken);
 
                 var persistable = workflow.ToPersistable(existingEntity);
-                await db.SaveChangesAsync();
+                await db.SaveChangesAsync(cancellationToken);
             }
         }
 
-        public async Task TerminateSubscription(string eventSubscriptionId)
+        public async Task TerminateSubscription(string eventSubscriptionId, CancellationToken cancellationToken = default)
         {
             using (var db = ConstructDbContext())
             {
                 var uid = new Guid(eventSubscriptionId);
-                var existing = await db.Set<PersistedSubscription>().FirstAsync(x => x.SubscriptionId == uid);
+                var existing = await db.Set<PersistedSubscription>().FirstAsync(x => x.SubscriptionId == uid, cancellationToken);
                 db.Set<PersistedSubscription>().Remove(existing);
-                await db.SaveChangesAsync();
+                await db.SaveChangesAsync(cancellationToken);
             }
         }
 
@@ -182,38 +179,38 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             }
         }
 
-        public async Task<IEnumerable<EventSubscription>> GetSubscriptions(string eventName, string eventKey, DateTime asOf)
+        public async Task<IEnumerable<EventSubscription>> GetSubscriptions(string eventName, string eventKey, DateTime asOf, CancellationToken cancellationToken = default)
         {
             using (var db = ConstructDbContext())
             {
                 asOf = asOf.ToUniversalTime();
                 var raw = await db.Set<PersistedSubscription>()
                     .Where(x => x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf)
-                    .ToListAsync();
+                    .ToListAsync(cancellationToken);
 
                 return raw.Select(item => item.ToEventSubscription()).ToList();
             }
         }
 
-        public async Task<string> CreateEvent(Event newEvent)
+        public async Task<string> CreateEvent(Event newEvent, CancellationToken cancellationToken = default)
         {
             using (var db = ConstructDbContext())
             {
                 newEvent.Id = Guid.NewGuid().ToString();
                 var persistable = newEvent.ToPersistable();
                 var result = db.Set<PersistedEvent>().Add(persistable);
-                await db.SaveChangesAsync();
+                await db.SaveChangesAsync(cancellationToken);
                 return newEvent.Id;
             }
         }
 
-        public async Task<Event> GetEvent(string id)
+        public async Task<Event> GetEvent(string id, CancellationToken cancellationToken = default)
         {
             using (var db = ConstructDbContext())
             {
                 Guid uid = new Guid(id);
                 var raw = await db.Set<PersistedEvent>()
-                    .FirstAsync(x => x.EventId == uid);
+                    .FirstAsync(x => x.EventId == uid, cancellationToken);
 
                 if (raw == null)
                     return null;
@@ -222,7 +219,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             }
         }
 
-        public async Task<IEnumerable<string>> GetRunnableEvents(DateTime asAt)
+        public async Task<IEnumerable<string>> GetRunnableEvents(DateTime asAt, CancellationToken cancellationToken = default)
         {
             var now = asAt.ToUniversalTime();
             using (var db = ConstructDbContext())
@@ -232,13 +229,13 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .Where(x => !x.IsProcessed)
                     .Where(x => x.EventTime <= now)
                     .Select(x => x.EventId)
-                    .ToListAsync();
+                    .ToListAsync(cancellationToken);
 
                 return raw.Select(s => s.ToString()).ToList();
             }
         }
 
-        public async Task MarkEventProcessed(string id)
+        public async Task MarkEventProcessed(string id, CancellationToken cancellationToken = default)
         {
             using (var db = ConstructDbContext())
             {
@@ -246,14 +243,14 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 var existingEntity = await db.Set<PersistedEvent>()
                     .Where(x => x.EventId == uid)
                     .AsTracking()
-                    .FirstAsync();
+                    .FirstAsync(cancellationToken);
 
                 existingEntity.IsProcessed = true;
-                await db.SaveChangesAsync();
+                await db.SaveChangesAsync(cancellationToken);
             }
         }
 
-        public async Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf)
+        public async Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf, CancellationToken cancellationToken)
         {
             using (var db = ConstructDbContext())
             {
@@ -261,7 +258,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .Where(x => x.EventName == eventName && x.EventKey == eventKey)
                     .Where(x => x.EventTime >= asOf)
                     .Select(x => x.EventId)
-                    .ToListAsync();
+                    .ToListAsync(cancellationToken);
 
                 var result = new List<string>();
 
@@ -272,7 +269,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             }
         }
 
-        public async Task MarkEventUnprocessed(string id)
+        public async Task MarkEventUnprocessed(string id, CancellationToken cancellationToken = default)
         {
             using (var db = ConstructDbContext())
             {
@@ -280,14 +277,14 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 var existingEntity = await db.Set<PersistedEvent>()
                     .Where(x => x.EventId == uid)
                     .AsTracking()
-                    .FirstAsync();
+                    .FirstAsync(cancellationToken);
 
                 existingEntity.IsProcessed = false;
-                await db.SaveChangesAsync();
+                await db.SaveChangesAsync(cancellationToken);
             }
         }
 
-        public async Task PersistErrors(IEnumerable<ExecutionError> errors)
+        public async Task PersistErrors(IEnumerable<ExecutionError> errors, CancellationToken cancellationToken = default)
         {
             using (var db = ConstructDbContext())
             {
@@ -298,7 +295,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     {
                         db.Set<PersistedExecutionError>().Add(error.ToPersistable());
                     }
-                    await db.SaveChangesAsync();
+                    await db.SaveChangesAsync(cancellationToken);
 
                 }
             }
@@ -309,28 +306,28 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             return _contextFactory.Build();
         }
 
-        public async Task<EventSubscription> GetSubscription(string eventSubscriptionId)
+        public async Task<EventSubscription> GetSubscription(string eventSubscriptionId, CancellationToken cancellationToken = default)
         {
             using (var db = ConstructDbContext())
             {
                 var uid = new Guid(eventSubscriptionId);
-                var raw = await db.Set<PersistedSubscription>().FirstOrDefaultAsync(x => x.SubscriptionId == uid);
+                var raw = await db.Set<PersistedSubscription>().FirstOrDefaultAsync(x => x.SubscriptionId == uid, cancellationToken);
 
                 return raw?.ToEventSubscription();
             }
         }
 
-        public async Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, DateTime asOf)
+        public async Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, DateTime asOf, CancellationToken cancellationToken = default)
         {
             using (var db = ConstructDbContext())
             {
-                var raw = await db.Set<PersistedSubscription>().FirstOrDefaultAsync(x => x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf && x.ExternalToken == null);
+                var raw = await db.Set<PersistedSubscription>().FirstOrDefaultAsync(x => x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf && x.ExternalToken == null, cancellationToken);
 
                 return raw?.ToEventSubscription();
             }
         }
 
-        public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry)
+        public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry, CancellationToken cancellationToken = default)
         {
             using (var db = ConstructDbContext())
             {
@@ -338,18 +335,18 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 var existingEntity = await db.Set<PersistedSubscription>()
                     .Where(x => x.SubscriptionId == uid)
                     .AsTracking()
-                    .FirstAsync();
+                    .FirstAsync(cancellationToken);
 
                 existingEntity.ExternalToken = token;
                 existingEntity.ExternalWorkerId = workerId;
                 existingEntity.ExternalTokenExpiry = expiry;
-                await db.SaveChangesAsync();
+                await db.SaveChangesAsync(cancellationToken);
 
                 return true;
             }
         }
 
-        public async Task ClearSubscriptionToken(string eventSubscriptionId, string token)
+        public async Task ClearSubscriptionToken(string eventSubscriptionId, string token, CancellationToken cancellationToken = default)
         {
             using (var db = ConstructDbContext())
             {
@@ -357,7 +354,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 var existingEntity = await db.Set<PersistedSubscription>()
                     .Where(x => x.SubscriptionId == uid)
                     .AsTracking()
-                    .FirstAsync();
+                    .FirstAsync(cancellationToken);
                 
                 if (existingEntity.ExternalToken != token)
                     throw new InvalidOperationException();
@@ -365,7 +362,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 existingEntity.ExternalToken = null;
                 existingEntity.ExternalWorkerId = null;
                 existingEntity.ExternalTokenExpiry = null;
-                await db.SaveChangesAsync();
+                await db.SaveChangesAsync(cancellationToken);
             }
         }
     }
