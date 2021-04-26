@@ -2,7 +2,6 @@ site_name: Workflow Core
 nav:
     - Home: index.md
     - Getting started: getting-started.md
-    - Overview: architecture.md
     - External events: external-events.md
     - Activity workers: activities.md
     - Error handling: error-handling.md

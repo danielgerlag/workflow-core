@@ -87,7 +87,7 @@ Each running workflow is persisted to the chosen persistence provider between ea
 
 ## Host
 
-The workflow host is the service responsible for executing workflows.  It does this by polling the persistence provider for workflow instances that are ready to run, executes them and then passes them back to the persistence provider to by stored for the next time they are run.  It is also responsible for publishing events to any workflows that may be waiting on one.
+The workflow host is the service responsible for executing workflows.  It does this by polling the persistence provider for workflow instances that are ready to run, executes them and then passes them back to the persistence provider to be stored for the next time they are run.  It is also responsible for publishing events to any workflows that may be waiting on one.
 
 ### Setup
 
@@ -113,6 +113,16 @@ host.StartWorkflow("HelloWorld", 1, null);
 Console.ReadLine();
 host.Stop();
 ```
+
+## Registry
+
+The workflow host keeps workflow definitions in the registry when they are registered.  When starting a workflow, the workflow host creates a new instance for the desired workflow definition.
+
+
+## Persistence
+
+The persistence provider persists the state of a workflow instance with execution pointers.  They are created when visiting a step while executing a workflow and hold information about their outcome.
+
 
 ## Passing data between steps
 
