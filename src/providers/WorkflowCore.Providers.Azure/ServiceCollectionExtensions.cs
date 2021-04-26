@@ -28,8 +28,9 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static WorkflowOptions UseCosmosDbPersistence(this WorkflowOptions options, string connectionString, string databaseId)
         {
-            options.Services.AddTransient<ICosmosDbProvisioner>(sp => new CosmosDbProvisioner(connectionString, sp.GetService<ILoggerFactory>()));
-            options.UsePersistence(sp => new CosmosDbPersistenceProvider(connectionString, databaseId, sp.GetService<ICosmosDbProvisioner>()));
+            options.Services.AddSingleton<ICosmosClientFactory>(sp => new CosmosClientFactory(connectionString));
+            options.Services.AddTransient<ICosmosDbProvisioner>(sp => new CosmosDbProvisioner(sp.GetService<ICosmosClientFactory>(), sp.GetService<ILoggerFactory>()));
+            options.UsePersistence(sp => new CosmosDbPersistenceProvider(sp.GetService<ICosmosClientFactory>(), databaseId, sp.GetService<ICosmosDbProvisioner>()));
             return options;
         }
     }
