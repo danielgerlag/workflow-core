@@ -5,7 +5,6 @@
     <Description>Distributed lock provider for Workflow-core using SQL Server</Description>
     <PackageProjectUrl>https://github.com/danielgerlag/workflow-core</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/danielgerlag/workflow-core/blob/master/LICENSE.md</PackageLicenseUrl>
-    <Version>2.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
