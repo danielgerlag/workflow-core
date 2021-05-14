@@ -34,6 +34,6 @@ namespace WorkflowCore.Interface
         /// <param name="workflowId"></param>
         /// <returns></returns>
         Task<bool> TerminateWorkflow(string workflowId);
-
+        Task<bool> RetryWorkflow(string workflowId);
     }
 }
