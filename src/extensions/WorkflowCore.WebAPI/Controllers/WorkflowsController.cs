@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using WorkflowCore.Models;
 
 namespace WorkflowCore.WebAPI.Controllers
@@ -43,10 +43,10 @@ namespace WorkflowCore.WebAPI.Controllers
         }
 
         [HttpPost("{id}")]
-        [HttpPost("{id}/{version}")]        
-        public async Task<IActionResult> Post(string id, int? version, string reference, [FromBody]JObject data)
+        [HttpPost("{id}/{version}")]
+        public async Task<IActionResult> Post(string id, int? version, string reference, [FromBody] JObject data)
         {
-            string workflowId = null;            
+            string workflowId = null;
             var def = _registry.GetDefinition(id, version);
             if (def == null)
                 return BadRequest(String.Format("Workflow defintion {0} for version {1} not found", id, version));
@@ -60,7 +60,7 @@ namespace WorkflowCore.WebAPI.Controllers
             {
                 workflowId = await _workflowHost.StartWorkflow(id, version, null, reference);
             }
-            
+
             return Ok(workflowId);
         }
 

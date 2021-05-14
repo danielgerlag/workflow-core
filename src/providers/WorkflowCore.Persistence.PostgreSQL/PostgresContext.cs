@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WorkflowCore.Persistence.EntityFramework.Models;
 using WorkflowCore.Persistence.EntityFramework.Services;
@@ -12,9 +10,9 @@ namespace WorkflowCore.Persistence.PostgreSQL
         private readonly string _connectionString;
         private readonly string _schemaName;
 
-        public PostgresContext(string connectionString,string schemaName)
-            :base()
-        {   
+        public PostgresContext(string connectionString, string schemaName)
+            : base()
+        {
             _connectionString = connectionString;
             _schemaName = schemaName;
         }
@@ -36,7 +34,7 @@ namespace WorkflowCore.Persistence.PostgreSQL
             builder.ToTable("Workflow", _schemaName);
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
-                
+
         protected override void ConfigureExecutionPointerStorage(EntityTypeBuilder<PersistedExecutionPointer> builder)
         {
             builder.ToTable("ExecutionPointer", _schemaName);

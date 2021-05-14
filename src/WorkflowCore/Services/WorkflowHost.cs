@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Models.LifeCycleEvents;
@@ -49,24 +48,24 @@ namespace WorkflowCore.Services
             _lifeCycleEventHub = lifeCycleEventHub;
             _lifeCycleEventHub.Subscribe(HandleLifeCycleEvent);
         }
-        
-        public Task<string> StartWorkflow(string workflowId, object data = null, string reference=null)
+
+        public Task<string> StartWorkflow(string workflowId, object data = null, string reference = null)
         {
             return _workflowController.StartWorkflow(workflowId, data, reference);
         }
 
-        public Task<string> StartWorkflow(string workflowId, int? version, object data = null, string reference=null)
+        public Task<string> StartWorkflow(string workflowId, int? version, object data = null, string reference = null)
         {
             return _workflowController.StartWorkflow<object>(workflowId, version, data, reference);
         }
 
-        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null, string reference=null)
+        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null, string reference = null)
             where TData : class, new()
         {
             return _workflowController.StartWorkflow<TData>(workflowId, null, data, reference);
         }
-        
-        public Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference=null)
+
+        public Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference = null)
             where TData : class, new()
         {
             return _workflowController.StartWorkflow(workflowId, version, data, reference);
@@ -81,7 +80,7 @@ namespace WorkflowCore.Services
         {
             StartAsync(CancellationToken.None).Wait();
         }
-        
+
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             _shutdown = false;
@@ -90,7 +89,7 @@ namespace WorkflowCore.Services
             await LockProvider.Start();
             await _lifeCycleEventHub.Start();
             await _searchIndex.Start();
-            
+
             Logger.LogInformation("Starting background tasks");
 
             foreach (var task in _backgroundTasks)
@@ -101,7 +100,7 @@ namespace WorkflowCore.Services
         {
             StopAsync(CancellationToken.None).Wait();
         }
-        
+
         public async Task StopAsync(CancellationToken cancellationToken)
         {
             _shutdown = true;

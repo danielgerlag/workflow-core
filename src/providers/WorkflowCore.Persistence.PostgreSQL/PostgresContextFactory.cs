@@ -1,5 +1,4 @@
-﻿using System;
-using WorkflowCore.Persistence.EntityFramework.Interfaces;
+﻿using WorkflowCore.Persistence.EntityFramework.Interfaces;
 using WorkflowCore.Persistence.EntityFramework.Services;
 
 namespace WorkflowCore.Persistence.PostgreSQL
@@ -17,7 +16,7 @@ namespace WorkflowCore.Persistence.PostgreSQL
 
         public WorkflowDbContext Build()
         {
-            return new PostgresContext(_connectionString,_schemaName);
+            return new PostgresContext(_connectionString, _schemaName);
         }
     }
 }

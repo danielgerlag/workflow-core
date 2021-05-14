@@ -1,9 +1,8 @@
+using Newtonsoft.Json;
 using System;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using WorkflowCore.Exceptions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -24,7 +23,7 @@ namespace WorkflowCore.Services
             _lockProvider = lockProvider;
             _workflowController = workflowController;
         }
-        
+
         public async Task<PendingActivity> GetPendingActivity(string activityName, string workerId, TimeSpan? timeout = null)
         {
             var endTime = _dateTimeProvider.UtcNow.Add(timeout ?? TimeSpan.Zero);
@@ -42,7 +41,7 @@ namespace WorkflowCore.Services
             }
             if (subscription == null)
                 return null;
-            
+
             try
             {
                 var token = Token.Create(subscription.Id, subscription.EventKey);
@@ -99,7 +98,7 @@ namespace WorkflowCore.Services
 
             if (sub.ExternalToken != token)
                 throw new NotFoundException("Token mismatch");
-            
+
             result.SubscriptionId = sub.Id;
 
             await _workflowController.PublishEvent(sub.EventName, sub.EventKey, result);

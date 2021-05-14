@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 using WorkflowCore.Models;
 
 namespace WorkflowCore.Persistence.EntityFramework.Models
-{    
+{
     public class PersistedExecutionPointer
     {
         [Key]
@@ -44,7 +43,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Models
 
         [MaxLength(100)]
         public string StepName { get; set; }
-                
+
         public List<PersistedExtensionAttribute> ExtensionAttributes { get; set; } = new List<PersistedExtensionAttribute>();
 
         public int RetryCount { get; set; }

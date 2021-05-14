@@ -145,8 +145,8 @@ namespace WorkflowCore.Services
         {
             lock (_subscriptions)
             {
-                var result =  _subscriptions
-                    .FirstOrDefault(x => x.ExternalToken == null &&  x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf);
+                var result = _subscriptions
+                    .FirstOrDefault(x => x.ExternalToken == null && x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf);
                 return Task.FromResult(result);
             }
         }
@@ -159,7 +159,7 @@ namespace WorkflowCore.Services
                 sub.ExternalToken = token;
                 sub.ExternalWorkerId = workerId;
                 sub.ExternalTokenExpiry = expiry;
-                
+
                 return Task.FromResult(true);
             }
         }

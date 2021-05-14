@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
-using WorkflowCore.Persistence.EntityFramework.Models;
 using WorkflowCore.Models;
 using WorkflowCore.Persistence.EntityFramework.Interfaces;
+using WorkflowCore.Persistence.EntityFramework.Models;
 
 namespace WorkflowCore.Persistence.EntityFramework.Services
 {
@@ -354,7 +354,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .Where(x => x.SubscriptionId == uid)
                     .AsTracking()
                     .FirstAsync();
-                
+
                 if (existingEntity.ExternalToken != token)
                     throw new InvalidOperationException();
 

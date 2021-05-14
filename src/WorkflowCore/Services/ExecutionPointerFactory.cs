@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
@@ -33,7 +32,7 @@ namespace WorkflowCore.Services
                 Status = PointerStatus.Pending,
                 StepName = def.Steps.FindById(outcomeTarget.NextStep).Name,
                 Scope = new List<string>(pointer.Scope)
-            };            
+            };
         }
 
         public ExecutionPointer BuildChildPointer(WorkflowDefinition def, ExecutionPointer pointer, int childDefinitionId, object branch)
@@ -53,7 +52,7 @@ namespace WorkflowCore.Services
                 Status = PointerStatus.Pending,
                 StepName = def.Steps.FindById(childDefinitionId).Name,
                 Scope = new List<string>(childScope)
-            };            
+            };
         }
 
         public ExecutionPointer BuildCompensationPointer(WorkflowDefinition def, ExecutionPointer pointer, ExecutionPointer exceptionPointer, int compensationStepId)

@@ -1,10 +1,8 @@
-﻿using System;
-using System.Linq;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using WorkflowCore.Exceptions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -37,12 +35,12 @@ namespace WorkflowCore.Services
             _dateTimeProvider = dateTimeProvider;
         }
 
-        public Task<string> StartWorkflow(string workflowId, object data = null, string reference=null)
+        public Task<string> StartWorkflow(string workflowId, object data = null, string reference = null)
         {
             return StartWorkflow(workflowId, null, data, reference);
         }
 
-        public Task<string> StartWorkflow(string workflowId, int? version, object data = null, string reference=null)
+        public Task<string> StartWorkflow(string workflowId, int? version, object data = null, string reference = null)
         {
             return StartWorkflow<object>(workflowId, version, data, reference);
         }
@@ -53,7 +51,7 @@ namespace WorkflowCore.Services
             return StartWorkflow(workflowId, null, data, reference);
         }
 
-        public async Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference=null)
+        public async Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference = null)
             where TData : class, new()
         {
 
