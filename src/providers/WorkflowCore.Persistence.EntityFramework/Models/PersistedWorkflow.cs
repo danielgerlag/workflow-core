@@ -1,10 +1,9 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using WorkflowCore.Models;
 
 namespace WorkflowCore.Persistence.EntityFramework.Models
-{    
+{
     public class PersistedWorkflow
     {
         [Key]
