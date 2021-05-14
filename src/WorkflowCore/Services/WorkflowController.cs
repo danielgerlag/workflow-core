@@ -37,12 +37,12 @@ namespace WorkflowCore.Services
             _dateTimeProvider = dateTimeProvider;
         }
 
-        public Task<string> StartWorkflow(string workflowId, object data = null, string reference=null)
+        public Task<string> StartWorkflow(string workflowId, object data = null, string reference = null)
         {
             return StartWorkflow(workflowId, null, data, reference);
         }
 
-        public Task<string> StartWorkflow(string workflowId, int? version, object data = null, string reference=null)
+        public Task<string> StartWorkflow(string workflowId, int? version, object data = null, string reference = null)
         {
             return StartWorkflow<object>(workflowId, version, data, reference);
         }
@@ -53,7 +53,7 @@ namespace WorkflowCore.Services
             return StartWorkflow(workflowId, null, data, reference);
         }
 
-        public async Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference=null)
+        public async Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference = null)
             where TData : class, new()
         {
 
@@ -170,6 +170,50 @@ namespace WorkflowCore.Services
                 if (wf.Status == WorkflowStatus.Suspended)
                 {
                     wf.Status = WorkflowStatus.Runnable;
+                    await _persistenceStore.PersistWorkflow(wf);
+                    requeue = true;
+                    await _queueProvider.QueueWork(workflowId, QueueType.Index);
+                    await _eventHub.PublishNotification(new WorkflowResumed
+                    {
+                        EventTimeUtc = _dateTimeProvider.UtcNow,
+                        Reference = wf.Reference,
+                        WorkflowInstanceId = wf.Id,
+                        WorkflowDefinitionId = wf.WorkflowDefinitionId,
+                        Version = wf.Version
+                    });
+                    return true;
+                }
+
+                return false;
+            }
+            finally
+            {
+                await _lockProvider.ReleaseLock(workflowId);
+                if (requeue)
+                    await _queueProvider.QueueWork(workflowId, QueueType.Workflow);
+            }
+        }
+
+        public async Task<bool> RetryWorkflow(string workflowId)
+        {
+            if (!await _lockProvider.AcquireLock(workflowId, new CancellationToken()))
+            {
+                return false;
+            }
+
+            bool requeue = false;
+            try
+            {
+                var wf = await _persistenceStore.GetWorkflowInstance(workflowId);
+                if (wf.Status == WorkflowStatus.Terminated)
+                {
+                    wf.Status = WorkflowStatus.Runnable;
+                    var failedPointers = wf.ExecutionPointers.FindByStatus(PointerStatus.Failed);
+                    foreach (var failedPointer in failedPointers)
+                    {
+                        wf.ExecutionPointers.Remove(failedPointer);
+                    }
+
                     await _persistenceStore.PersistWorkflow(wf);
                     requeue = true;
                     await _queueProvider.QueueWork(workflowId, QueueType.Index);
