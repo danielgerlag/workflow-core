@@ -68,16 +68,20 @@ namespace WorkflowCore.Services.BackgroundTasks
                     }
 
                     var toQueue = new HashSet<string>();
-                    var complete = true;
 
-                    foreach (var sub in subs.ToList())
-                        complete = complete && await SeedSubscription(evt, sub, toQueue, cancellationToken);
+                    if (subs.Any())
+                    {
+                        var complete = true;
 
-                    if (complete)
-                        await _eventRepository.MarkEventProcessed(itemId);
+                        foreach (var sub in subs.ToList())
+                            complete = complete && await SeedSubscription(evt, sub, toQueue, cancellationToken);
 
-                    foreach (var eventId in toQueue)
-                        await QueueProvider.QueueWork(eventId, QueueType.Event);
+                        if (complete)
+                            await _eventRepository.MarkEventProcessed(itemId);
+
+                        foreach (var eventId in toQueue)
+                            await QueueProvider.QueueWork(eventId, QueueType.Event);
+                    }
                 }
             }
             finally
