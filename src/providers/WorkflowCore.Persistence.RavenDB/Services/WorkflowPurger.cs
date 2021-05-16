@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
-using Raven.Client;
 using System.Threading.Tasks;
 using Raven.Client.Documents;
 using System.Linq;
-using Raven.Client.Extensions;
 using Raven.Client.Documents.Operations;
 using Raven.Client.Documents.Queries;
 

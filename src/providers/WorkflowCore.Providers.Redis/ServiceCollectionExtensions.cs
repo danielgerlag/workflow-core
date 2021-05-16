@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
-using StackExchange.Redis;
 using WorkflowCore.Models;
 using WorkflowCore.Providers.Redis.Services;
 

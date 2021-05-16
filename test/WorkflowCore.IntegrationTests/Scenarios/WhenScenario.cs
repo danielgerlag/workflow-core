@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using Xunit;
@@ -71,7 +69,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         [Fact]
         public void Scenario()
         {
-            var workflowId = StartWorkflow(new MyDataClass() { Counter = 2 });
+            var workflowId = StartWorkflow(new MyDataClass { Counter = 2 });
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
             Case1Ticker.Should().Be(0);

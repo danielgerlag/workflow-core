@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Linq.Expressions;
 using WorkflowCore.Models;
-using WorkflowCore.Primitives;
 
 namespace WorkflowCore.Interface
 {

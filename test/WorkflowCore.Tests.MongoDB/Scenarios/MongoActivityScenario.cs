@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson.Serialization;
 using WorkflowCore.IntegrationTests.Scenarios;

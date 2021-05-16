@@ -39,7 +39,7 @@ namespace WorkflowCore.Providers.Elasticsearch.Models
 
         public WorkflowSearchResult ToSearchResult()
         {
-            var result = new WorkflowSearchResult()
+            var result = new WorkflowSearchResult
             {
                 Id = Id,
                 CompleteTime = CompleteTime,
@@ -88,7 +88,7 @@ namespace WorkflowCore.Providers.Elasticsearch.Models
             {
                 if (ep.Status == PointerStatus.Sleeping)
                 {
-                    result.SleepingSteps.Add(new StepInfo()
+                    result.SleepingSteps.Add(new StepInfo
                     {
                         StepId = ep.StepId,
                         Name = ep.StepName
@@ -97,7 +97,7 @@ namespace WorkflowCore.Providers.Elasticsearch.Models
 
                 if (ep.Status == PointerStatus.WaitingForEvent)
                 {
-                    result.WaitingSteps.Add(new StepInfo()
+                    result.WaitingSteps.Add(new StepInfo
                     {
                         StepId = ep.StepId,
                         Name = ep.StepName
@@ -106,7 +106,7 @@ namespace WorkflowCore.Providers.Elasticsearch.Models
 
                 if (ep.Status == PointerStatus.Failed)
                 {
-                    result.FailedSteps.Add(new StepInfo()
+                    result.FailedSteps.Add(new StepInfo
                     {
                         StepId = ep.StepId,
                         Name = ep.StepName

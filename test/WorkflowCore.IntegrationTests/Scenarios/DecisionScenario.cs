@@ -78,7 +78,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         [Fact]
         public void Scenario1()
         {
-            var workflowId = StartWorkflow(new MyDataClass() { Op = "+", Value1 = 2, Value2 = 3 });
+            var workflowId = StartWorkflow(new MyDataClass { Op = "+", Value1 = 2, Value2 = 3 });
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
             GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
@@ -89,7 +89,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         [Fact]
         public void Scenario2()
         {
-            var workflowId = StartWorkflow(new MyDataClass() { Op = "-", Value1 = 2, Value2 = 3 });
+            var workflowId = StartWorkflow(new MyDataClass { Op = "-", Value1 = 2, Value2 = 3 });
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
             GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);

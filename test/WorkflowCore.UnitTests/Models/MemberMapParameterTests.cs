@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
@@ -18,7 +17,7 @@ namespace WorkflowCore.UnitTests
             Expression<Func<MyStep, int>> memberExpr = (x => x.Value1);
             Expression<Func<MyData, int>> valueExpr = (x => x.Value1);
             var subject = new MemberMapParameter(valueExpr, memberExpr);
-            var data = new MyData()
+            var data = new MyData
             {
                 Value1 = 5
             };
@@ -36,7 +35,7 @@ namespace WorkflowCore.UnitTests
             Expression<Func<MyStep, int>> valueExpr = (x => x.Value1);
             var subject = new MemberMapParameter(valueExpr, memberExpr);
             var data = new MyData();
-            var step = new MyStep()
+            var step = new MyStep
             {
                 Value1 = 5
             };
@@ -53,7 +52,7 @@ namespace WorkflowCore.UnitTests
             Expression<Func<MyData, int>> valueExpr = (x => x.Value1);
             var subject = new MemberMapParameter(valueExpr, memberExpr);
 
-            var data = new MyData()
+            var data = new MyData
             {
                 Value1 = 5
             };
@@ -72,7 +71,7 @@ namespace WorkflowCore.UnitTests
             Expression<Func<MyStep, int>> valueExpr = (x => x.Value1);
             var subject = new MemberMapParameter(valueExpr, memberExpr);
 
-            var data = new MyData()
+            var data = new MyData
             {
                 Value1 = 5
             };

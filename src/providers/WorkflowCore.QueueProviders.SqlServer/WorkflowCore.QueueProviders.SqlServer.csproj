@@ -5,7 +5,7 @@
     <Authors>Roberto Paterlini</Authors>
     <Description>Queue provider for Workflow-core using SQL Server Service Broker</Description>
     <Company />
-    <Version>1.0.3-alpha</Version>
+    <Stage>alpha</Stage>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,7 +46,7 @@ namespace WorkflowCore.Testing
 
         protected void Host_OnStepError(WorkflowInstance workflow, WorkflowStep step, Exception exception)
         {
-            UnhandledStepErrors.Add(new StepError()
+            UnhandledStepErrors.Add(new StepError
             {
                 Exception = exception,
                 Step = step,

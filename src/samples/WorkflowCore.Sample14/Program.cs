@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 
 namespace WorkflowCore.Sample14

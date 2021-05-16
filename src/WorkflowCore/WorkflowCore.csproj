@@ -7,20 +7,10 @@
     <AssemblyName>WorkflowCore</AssemblyName>
     <PackageId>WorkflowCore</PackageId>
     <PackageTags>workflow;.NET;Core;state machine</PackageTags>
-    <PackageProjectUrl>https://github.com/danielgerlag/workflow-core</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/danielgerlag/workflow-core/blob/master/LICENSE.md</PackageLicenseUrl>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/danielgerlag/workflow-core.git</RepositoryUrl>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <Description>Workflow Core is a light weight workflow engine targeting .NET Standard.</Description>
-    <Version>3.3.5</Version>
-    <AssemblyVersion>3.3.5.0</AssemblyVersion>
-    <FileVersion>3.3.5.0</FileVersion>
-    <PackageReleaseNotes></PackageReleaseNotes>
-    <PackageIconUrl>https://github.com/danielgerlag/workflow-core/raw/master/src/logo.png</PackageIconUrl>
-    <PackageVersion>3.3.5</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>

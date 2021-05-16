@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 using WorkflowCore.Models;
 
@@ -29,11 +28,11 @@ namespace WorkflowCore.Providers.Azure.Models
 
         public DateTime? ExternalTokenExpiry { get; set; }
 
-        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All };
+        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
 
         public static PersistedSubscription FromInstance(EventSubscription instance)
         {
-            return new PersistedSubscription()
+            return new PersistedSubscription
             {
                 id = instance.Id,
                 EventKey = instance.EventKey,
@@ -51,7 +50,7 @@ namespace WorkflowCore.Providers.Azure.Models
 
         public static EventSubscription ToInstance(PersistedSubscription instance)
         {
-            return new EventSubscription()
+            return new EventSubscription
             {
                 Id = instance.id,
                 EventKey = instance.EventKey,
