@@ -217,13 +217,22 @@ namespace WorkflowCore.Services.DefinitionStorage
                 var sourceExpr = DynamicExpressionParser.ParseLambda(new[] { stepParameter }, typeof(object), output.Value);
 
                 var dataParameter = Expression.Parameter(dataType, "data");
-                Expression targetProperty;
+                Expression targetProperty = dataParameter;
 
                 // Check if our datatype has a matching property
-                var propertyInfo = dataType.GetProperty(output.Key);
-                if (propertyInfo != null)
+
+                PropertyInfo propertyInfo = null;
+                String[] paths = output.Key.Split('.');
+                foreach(String propertyName in paths)
                 {
-                    targetProperty = Expression.Property(dataParameter, propertyInfo);
+                    if(targetProperty!=null)
+                    {
+                        targetProperty = Expression.Property(targetProperty, propertyName);
+                    }
+                }
+              
+                if (targetProperty != null)
+                { 
                     var targetExpr = Expression.Lambda(targetProperty, dataParameter);
                     step.Outputs.Add(new MemberMapParameter(sourceExpr, targetExpr));
                 }
