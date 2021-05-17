@@ -228,6 +228,9 @@ namespace WorkflowCore.Services.DefinitionStorage
                     if(targetProperty!=null)
                     {
                         targetProperty = Expression.Property(targetProperty, propertyName);
+                    }else
+                    {
+                        break;
                     }
                 }
               
