@@ -255,10 +255,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                         {
                             throw new ArgumentException($"Unknown property for output {output.Key} on {source.Id}");
                         }
-                        propertyInfo = (PropertyInfo)memberExpression.Member;
-                        var propertyType = propertyInfo.PropertyType.GetProperty("Item"); 
-                        
-                        propertyInfo = propertyInfo.PropertyType.GetProperty("Item");
+                        propertyInfo = ((PropertyInfo)memberExpression.Member).PropertyType.GetProperty("Item");  
 
                         Action<IStepBody, object> acn = (pStep, pData) =>
                         {
@@ -269,7 +266,6 @@ namespace WorkflowCore.Services.DefinitionStorage
                         };
 
                         step.Outputs.Add(new ActionParameter<IStepBody, object>(acn));
-
                         hasAddOutput = true;
                     }
                     else
