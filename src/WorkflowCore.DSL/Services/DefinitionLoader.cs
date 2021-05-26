@@ -223,23 +223,74 @@ namespace WorkflowCore.Services.DefinitionStorage
 
                 PropertyInfo propertyInfo = null;
                 String[] paths = output.Key.Split('.');
-                foreach(String propertyName in paths)
+
+                bool hasAddOutput = false;
+
+                foreach (String propertyName in paths)
                 {
-                    if(targetProperty!=null)
+                    if (hasAddOutput)
                     {
-                        targetProperty = Expression.Property(targetProperty, propertyName);
-                    }else
+                        throw new ArgumentException($"Unknown property for output {output.Key} on {source.Id}");
+                    }
+
+                    if (targetProperty == null)
                     {
                         break;
+                    } 
+
+                    if (propertyName.Contains("["))
+                    {
+                        String[] items = propertyName.Split('[');
+
+                        if (items.Length != 2)
+                        {
+                            throw new ArgumentException($"Unknown property for output {output.Key} on {source.Id}");
+                        }
+
+                        items[1] = items[1].Trim().TrimEnd(']').Trim().Trim('"');
+
+                        MemberExpression memberExpression = Expression.Property(targetProperty, items[0]);
+
+                        if (memberExpression == null)
+                        {
+                            throw new ArgumentException($"Unknown property for output {output.Key} on {source.Id}");
+                        }
+                        propertyInfo = (PropertyInfo)memberExpression.Member;
+                        var propertyType = propertyInfo.PropertyType.GetProperty("Item"); 
+                        
+                        propertyInfo = propertyInfo.PropertyType.GetProperty("Item");
+
+                        Action<IStepBody, object> acn = (pStep, pData) =>
+                        {
+                            var targetExpr = Expression.Lambda(memberExpression, dataParameter);
+                            object data = targetExpr.Compile().DynamicInvoke(pData);
+                            object resolvedValue = sourceExpr.Compile().DynamicInvoke(pStep); ;
+                            propertyInfo.SetValue(data, resolvedValue, new object[] { items[1] });
+                        };
+
+                        step.Outputs.Add(new ActionParameter<IStepBody, object>(acn));
+
+                        hasAddOutput = true;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            targetProperty = Expression.Property(targetProperty, propertyName);
+                        }catch
+                        {
+                            targetProperty = null;
+                            break;
+                        }
                     }
                 }
-              
-                if (targetProperty != null)
-                { 
+
+                if (targetProperty != null && ! hasAddOutput)
+                {
                     var targetExpr = Expression.Lambda(targetProperty, dataParameter);
                     step.Outputs.Add(new MemberMapParameter(sourceExpr, targetExpr));
                 }
-                else
+                else if (! hasAddOutput)
                 {
                     // If we did not find a matching property try to find a Indexer with string parameter
                     propertyInfo = dataType.GetProperty("Item");
