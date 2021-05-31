@@ -15,7 +15,7 @@ Steps:
   Inputs:
     Value: data.Counter2
   Outputs:
-    Counter2: step.Value
+    CounterBoardInstance.Counter1: step.Value
   NextStepId: Step3
 - Id: Step3
   StepType: WorkflowCore.Primitives.If, WorkflowCore
