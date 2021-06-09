@@ -116,12 +116,12 @@ host.Stop();
 
 ## Registry
 
-The workflow host keeps workflow definitions in the registry when they are registered.  When starting a workflow, the workflow host creates a new instance for the desired workflow definition.
+The registry contains workflow definitions which have been registered.  When starting a workflow, the workflow host creates a new instance for the desired workflow definition.
 
 
 ## Persistence
 
-The persistence provider persists the state of a workflow instance with execution pointers.  They are created when visiting a step while executing a workflow and hold information about their outcome.
+The persistence provider persists internal data which allows to resume workflows.  Part of this are execution pointers which are created for every step that is visited during the execution of a workflow.  They hold information about the outcome of the step and thus also indicate which step has to be run next.
 
 
 ## Passing data between steps
