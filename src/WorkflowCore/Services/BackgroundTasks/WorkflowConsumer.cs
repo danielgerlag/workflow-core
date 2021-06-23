@@ -92,18 +92,30 @@ namespace WorkflowCore.Services.BackgroundTasks
 
                 foreach (var evt in events)
                 {
-                    var locked = await _lockProvider.AcquireLock($"evt:{evt}", cancellationToken);
-                    int attempt = 0;
-                    while (locked && attempt < 10)
+                    var eventKey = $"evt:{evt}";
+                    bool acquiredLock = false;
+                    try
                     {
-                        locked = await _lockProvider.AcquireLock($"evt:{evt}", cancellationToken);
-                        await Task.Delay(Options.IdleTime);
+                        acquiredLock = await _lockProvider.AcquireLock(eventKey, cancellationToken);
+                        int attempt = 0;
+                        while (!acquiredLock && attempt < 10)
+                        {
+                            acquiredLock = await _lockProvider.AcquireLock(eventKey, cancellationToken);
+                            await Task.Delay(Options.IdleTime);
 
-                        attempt++;
+                            attempt++;
+                        }
+
+                        await persistenceStore.MarkEventUnprocessed(evt, cancellationToken);
+                        await QueueProvider.QueueWork(evt, QueueType.Event);
                     }
-
-                    await persistenceStore.MarkEventUnprocessed(evt, cancellationToken);
-                    await QueueProvider.QueueWork(evt, QueueType.Event);
+                    finally
+                    {
+                        if (acquiredLock)
+                        {
+                            await _lockProvider.ReleaseLock(eventKey);
+                        }
+                    }
                 }
             }
         }
