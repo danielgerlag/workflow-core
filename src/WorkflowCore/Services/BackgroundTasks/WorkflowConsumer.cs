@@ -89,8 +89,19 @@ namespace WorkflowCore.Services.BackgroundTasks
             if (subscription.EventName != Event.EventTypeActivity)
             {
                 var events = await persistenceStore.GetEvents(subscription.EventName, subscription.EventKey, subscription.SubscribeAsOf, cancellationToken);
+
                 foreach (var evt in events)
                 {
+                    var locked = await _lockProvider.AcquireLock($"evt:{evt}", cancellationToken);
+                    int attempt = 0;
+                    while (locked && attempt < 10)
+                    {
+                        locked = await _lockProvider.AcquireLock($"evt:{evt}", cancellationToken);
+                        await Task.Delay(Options.IdleTime);
+
+                        attempt++;
+                    }
+
                     await persistenceStore.MarkEventUnprocessed(evt, cancellationToken);
                     await QueueProvider.QueueWork(evt, QueueType.Event);
                 }
