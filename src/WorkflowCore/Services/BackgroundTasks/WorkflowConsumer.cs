@@ -84,7 +84,7 @@ namespace WorkflowCore.Services.BackgroundTasks
         {
             //TODO: move to own class
             Logger.LogDebug("Subscribing to event {0} {1} for workflow {2} step {3}", subscription.EventName, subscription.EventKey, subscription.WorkflowId, subscription.StepId);
-            
+
             await persistenceStore.CreateEventSubscription(subscription, cancellationToken);
             if (subscription.EventName != Event.EventTypeActivity)
             {
@@ -101,13 +101,21 @@ namespace WorkflowCore.Services.BackgroundTasks
                         while (!acquiredLock && attempt < 10)
                         {
                             acquiredLock = await _lockProvider.AcquireLock(eventKey, cancellationToken);
-                            await Task.Delay(Options.IdleTime);
+                            await Task.Delay(Options.IdleTime, cancellationToken);
 
                             attempt++;
                         }
 
-                        await persistenceStore.MarkEventUnprocessed(evt, cancellationToken);
-                        await QueueProvider.QueueWork(evt, QueueType.Event);
+                        if (!acquiredLock)
+                        {
+                            Logger.LogWarning($"Failed to lock {evt}");
+                        }
+                        else
+                        {
+                            await persistenceStore.MarkEventUnprocessed(evt, cancellationToken);
+                            await QueueProvider.QueueWork(evt, QueueType.Event);
+                            _greylist.Remove(eventKey);
+                        }
                     }
                     finally
                     {
