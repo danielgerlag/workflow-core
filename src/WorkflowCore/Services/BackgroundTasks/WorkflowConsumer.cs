@@ -35,10 +35,10 @@ namespace WorkflowCore.Services.BackgroundTasks
                 Logger.LogInformation("Workflow locked {0}", itemId);
                 return;
             }
-            
+
             WorkflowInstance workflow = null;
             WorkflowExecutorResult result = null;
-            
+
             try
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -77,9 +77,9 @@ namespace WorkflowCore.Services.BackgroundTasks
                     }
                 }
             }
-            
+
         }
-        
+
         private async Task SubscribeEvent(EventSubscription subscription, IPersistenceProvider persistenceStore, CancellationToken cancellationToken)
         {
             //TODO: move to own class
@@ -100,8 +100,8 @@ namespace WorkflowCore.Services.BackgroundTasks
                         int attempt = 0;
                         while (!acquiredLock && attempt < 10)
                         {
-                            acquiredLock = await _lockProvider.AcquireLock(eventKey, cancellationToken);
                             await Task.Delay(Options.IdleTime, cancellationToken);
+                            acquiredLock = await _lockProvider.AcquireLock(eventKey, cancellationToken);
 
                             attempt++;
                         }
@@ -112,9 +112,9 @@ namespace WorkflowCore.Services.BackgroundTasks
                         }
                         else
                         {
+                            _greylist.Remove(eventKey);
                             await persistenceStore.MarkEventUnprocessed(evt, cancellationToken);
                             await QueueProvider.QueueWork(evt, QueueType.Event);
-                            _greylist.Remove(eventKey);
                         }
                     }
                     finally
