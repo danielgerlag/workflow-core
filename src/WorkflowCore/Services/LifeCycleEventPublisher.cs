@@ -11,7 +11,7 @@ namespace WorkflowCore.Services
     {
         private readonly ILifeCycleEventHub _eventHub;
         private readonly ILogger _logger;
-        private readonly BlockingCollection<LifeCycleEvent> _outbox;
+        private BlockingCollection<LifeCycleEvent> _outbox;
         private Task _dispatchTask;
 
         public LifeCycleEventPublisher(ILifeCycleEventHub eventHub, ILoggerFactory loggerFactory)
@@ -34,6 +34,11 @@ namespace WorkflowCore.Services
             if (_dispatchTask != null)
             {
                 throw new InvalidOperationException();
+            }
+
+            if (_outbox.IsAddingCompleted)
+            {
+                _outbox = new BlockingCollection<LifeCycleEvent>();
             }
 
             _dispatchTask = new Task(Execute);
