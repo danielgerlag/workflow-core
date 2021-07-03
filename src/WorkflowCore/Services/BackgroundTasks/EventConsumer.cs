@@ -74,7 +74,13 @@ namespace WorkflowCore.Services.BackgroundTasks
                         complete = complete && await SeedSubscription(evt, sub, toQueue, cancellationToken);
 
                     if (complete)
+                    {
                         await _eventRepository.MarkEventProcessed(itemId, cancellationToken);
+                    }
+                    else
+                    {
+                        _greylist.Remove($"evt:{evt.Id}");
+                    }
 
                     foreach (var eventId in toQueue)
                         await QueueProvider.QueueWork(eventId, QueueType.Event);
@@ -87,7 +93,7 @@ namespace WorkflowCore.Services.BackgroundTasks
         }
         
         private async Task<bool> SeedSubscription(Event evt, EventSubscription sub, HashSet<string> toQueue, CancellationToken cancellationToken)
-        {            
+        {
             foreach (var eventId in await _eventRepository.GetEvents(sub.EventName, sub.EventKey, sub.SubscribeAsOf, cancellationToken))
             {
                 if (eventId == evt.Id)
