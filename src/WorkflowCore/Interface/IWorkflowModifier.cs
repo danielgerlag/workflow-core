@@ -152,5 +152,15 @@ namespace WorkflowCore.Interface
     IStepBuilder<TData, Activity> Activity(string activityName, Expression<Func<TData, object>> parameters = null,
         Expression<Func<TData, DateTime>> effectiveDate = null, Expression<Func<TData, bool>> cancelCondition = null);
 
+    /// <summary>
+    /// Wait here until an external activity is complete
+    /// </summary>
+    /// <param name="activityName">The name used to identify the activity to wait for</param>
+    /// <param name="parameters">The data to pass the external activity worker</param>
+    /// <param name="effectiveDate">Listen for events as of this effective date</param>
+    /// <param name="cancelCondition">A conditon that when true will cancel this WaitFor</param>
+    /// <returns></returns>
+    IStepBuilder<TData, Activity> Activity(Expression<Func<TData, IStepExecutionContext, string>> activityName, Expression<Func<TData, object>> parameters = null,
+        Expression<Func<TData, DateTime>> effectiveDate = null, Expression<Func<TData, bool>> cancelCondition = null);
     }
 }

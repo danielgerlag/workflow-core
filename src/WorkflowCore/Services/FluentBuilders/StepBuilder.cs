@@ -522,5 +522,24 @@ namespace WorkflowCore.Services
             Step.Outcomes.Add(new ValueOutcome { NextStep = newStep.Id });
             return stepBuilder;
         }
+
+        public IStepBuilder<TData, Activity> Activity(Expression<Func<TData, IStepExecutionContext, string>> activityName, Expression<Func<TData, object>> parameters = null, Expression<Func<TData, DateTime>> effectiveDate = null, Expression<Func<TData, bool>> cancelCondition = null)
+        {
+            var newStep = new WorkflowStep<Activity>();
+            newStep.CancelCondition = cancelCondition;
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, Activity>(WorkflowBuilder, newStep);
+            stepBuilder.Input((step) => step.ActivityName, activityName);
+
+            if (parameters != null)
+                stepBuilder.Input((step) => step.Parameters, parameters);
+
+            if (effectiveDate != null)
+                stepBuilder.Input((step) => step.EffectiveDate, effectiveDate);
+
+            Step.Outcomes.Add(new ValueOutcome { NextStep = newStep.Id });
+            return stepBuilder;
+        }
     }
 }
