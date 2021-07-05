@@ -93,7 +93,6 @@ namespace WorkflowCore.Services.BackgroundTasks
                             if (_greylist.Contains($"evt:{item}"))
                             {
                                 _logger.LogDebug($"Got greylisted event {item}");
-                                _greylist.Add($"evt:{item}");
                                 continue;
                             }
                             _logger.LogDebug($"Got unprocessed event {item}");
