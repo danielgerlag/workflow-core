@@ -9,17 +9,25 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        public static WorkflowOptions UseMongoDB(this WorkflowOptions options, string mongoUrl, string databaseName)
+        public static WorkflowOptions UseMongoDB(
+            this WorkflowOptions options, 
+            string mongoUrl, 
+            string databaseName, 
+            Action<MongoClientSettings> configureClient = default)
         {
             options.UsePersistence(sp =>
             {
-                var client = new MongoClient(mongoUrl);
+                var mongoClientSettings = MongoClientSettings.FromConnectionString(mongoUrl);
+                configureClient?.Invoke(mongoClientSettings);
+                var client = new MongoClient(mongoClientSettings);
                 var db = client.GetDatabase(databaseName);
                 return new MongoPersistenceProvider(db);
             });
             options.Services.AddTransient<IWorkflowPurger>(sp =>
             {
-                var client = new MongoClient(mongoUrl);
+                var mongoClientSettings = MongoClientSettings.FromConnectionString(mongoUrl);
+                configureClient?.Invoke(mongoClientSettings);
+                var client = new MongoClient(mongoClientSettings);
                 var db = client.GetDatabase(databaseName);
                 return new WorkflowPurger(db);
             });
