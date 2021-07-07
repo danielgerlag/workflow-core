@@ -117,7 +117,7 @@ namespace WorkflowCore.Providers.Redis.Services
             }
 
             return result;
-        }
+        }        
 
         public async Task TerminateSubscription(string eventSubscriptionId, CancellationToken _ = default)
         {
@@ -136,6 +136,11 @@ namespace WorkflowCore.Providers.Redis.Services
         public async Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, DateTime asOf, CancellationToken cancellationToken = default)
         {
             return (await GetSubscriptions(eventName, eventKey, asOf, cancellationToken)).FirstOrDefault(sub => string.IsNullOrEmpty(sub.ExternalToken));
+        }
+
+        public async Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, string workflowId, DateTime asOf, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry, CancellationToken _ = default)

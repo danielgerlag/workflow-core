@@ -205,6 +205,14 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             return await query.FirstOrDefaultAsync(cancellationToken);
         }
 
+        public async Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, string workflowId, DateTime asOf, CancellationToken cancellationToken = default)
+        {
+            var query = EventSubscriptions
+                .Find(x => x.EventName == eventName && x.EventKey == eventKey && x.WorkflowId == workflowId && x.SubscribeAsOf <= asOf && x.ExternalToken == null);
+
+            return await query.FirstOrDefaultAsync(cancellationToken);
+        }
+
         public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry, CancellationToken cancellationToken = default)
         {
             var update = Builders<EventSubscription>.Update

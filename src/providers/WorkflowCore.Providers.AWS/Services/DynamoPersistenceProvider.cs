@@ -421,6 +421,45 @@ namespace WorkflowCore.Providers.AWS.Services
             return result.FirstOrDefault();
         }
 
+        public async Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, string workflowId, DateTime asOf, CancellationToken cancellationToken = default)
+        {
+            var result = new List<EventSubscription>();
+            var asOfTicks = asOf.ToUniversalTime().Ticks;
+
+            var request = new QueryRequest
+            {
+                TableName = $"{_tablePrefix}-{SUBCRIPTION_TABLE}",
+                IndexName = "ix_slug",
+                Select = "ALL_PROJECTED_ATTRIBUTES",
+                KeyConditionExpression = "event_slug = :slug and workflow_id = :workflow_id and subscribe_as_of <= :as_of",
+                FilterExpression = "attribute_not_exists(external_token)",
+                Limit = 1,
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    {
+                        ":slug", new AttributeValue($"{eventName}:{eventKey}")
+                    },
+                    {
+                        ":workflow_id", new AttributeValue(workflowId)
+                    },
+                    {
+                        ":as_of", new AttributeValue
+                        {
+                            N = Convert.ToString(asOfTicks)
+                        }
+                    }
+                },
+                ScanIndexForward = true
+            };
+
+            var response = await _client.QueryAsync(request, cancellationToken);
+
+            foreach (var item in response.Items)
+                result.Add(item.ToEventSubscription());
+
+            return result.FirstOrDefault();
+        }
+
         public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry, CancellationToken cancellationToken = default)
         {
             var request = new UpdateItemRequest

@@ -119,6 +119,25 @@ namespace WorkflowCore.Providers.Azure.Services
             return eventSubscription;
         }
 
+        public async Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, string workflowId, DateTime asOf, CancellationToken cancellationToken)
+        {
+            EventSubscription eventSubscription = null;
+            using (FeedIterator<PersistedSubscription> feedIterator = _subscriptionContainer.Value.GetItemLinqQueryable<PersistedSubscription>()
+                    .Where(x => x.ExternalToken == null && x.EventName == eventName && x.EventKey == eventKey && x.WorkflowId == workflowId && x.SubscribeAsOf <= asOf)
+                    .ToFeedIterator())
+            {
+                while (feedIterator.HasMoreResults && eventSubscription == null)
+                {
+                    foreach (var item in await feedIterator.ReadNextAsync(cancellationToken))
+                    {
+                        eventSubscription = PersistedSubscription.ToInstance(item);
+                    }
+                }
+            }
+
+            return eventSubscription;
+        }
+
         public async Task<IEnumerable<string>> GetRunnableEvents(DateTime asAt, CancellationToken cancellationToken)
         {
             var events = new List<string>();
