@@ -172,6 +172,22 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 			}
 		}
 
+		public async Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, string workflowId, DateTime asOf, CancellationToken cancellationToken = default)
+		{
+			using (var session = _database.OpenAsyncSession())
+			{
+				var q = session.Query<EventSubscription>().Where(x =>
+					x.EventName == eventKey
+					&& x.EventKey == eventKey
+					&& x.WorkflowId == workflowId
+					&& x.SubscribeAsOf <= asOf
+					&& x.ExternalToken == null
+				);
+
+				return await q.FirstOrDefaultAsync(cancellationToken);
+			}
+		}
+
 		public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry, CancellationToken cancellationToken = default)
 		{
 			try
