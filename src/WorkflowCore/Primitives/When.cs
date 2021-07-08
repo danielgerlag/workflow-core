@@ -17,10 +17,18 @@ namespace WorkflowCore.Primitives
 
             if (ExpectedOutcome != switchOutcome)
             {
-                if (Convert.ToString(ExpectedOutcome) != Convert.ToString(switchOutcome))
+                var expectedType = ExpectedOutcome?.GetType();
+                var hasMatch = false;
+                if (expectedType?.IsEnum == true)
+                {
+                    try { hasMatch = Enum.Parse(expectedType, Convert.ToString(switchOutcome)).Equals(ExpectedOutcome); }
+                    catch { }
+                }
+                if (!hasMatch && Convert.ToString(ExpectedOutcome) != Convert.ToString(switchOutcome))
                 {
                     return ExecutionResult.Next();
                 }
+             
             }
 
             if (context.PersistenceData == null)
