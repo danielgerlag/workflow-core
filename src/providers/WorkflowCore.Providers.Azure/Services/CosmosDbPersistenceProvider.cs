@@ -14,25 +14,25 @@ namespace WorkflowCore.Providers.Azure.Services
 {
     public class CosmosDbPersistenceProvider : IPersistenceProvider
     {
-        public const string WorkflowContainerName = "workflows";
-        public const string EventContainerName = "events";
-        public const string SubscriptionContainerName = "subscriptions";
+        private readonly ICosmosDbProvisioner _provisioner;
+        private readonly string _dbId;
+        private readonly ICosmosClientFactory _clientFactory;
+        private readonly Lazy<Container> _workflowContainer;
+        private readonly Lazy<Container> _eventContainer;
+        private readonly Lazy<Container> _subscriptionContainer;
 
-        private ICosmosDbProvisioner _provisioner;
-        private string _dbId;
-        private ICosmosClientFactory _clientFactory;
-        private Lazy<Container> _workflowContainer;
-        private Lazy<Container> _eventContainer;
-        private Lazy<Container> _subscriptionContainer;
-
-        public CosmosDbPersistenceProvider(ICosmosClientFactory clientFactory, string dbId, ICosmosDbProvisioner provisioner)
+        public CosmosDbPersistenceProvider(
+            ICosmosClientFactory clientFactory,
+            string dbId,
+            ICosmosDbProvisioner provisioner,
+            CosmosDbStorageOptions cosmosDbStorageOptions)
         {
             _provisioner = provisioner;
             _dbId = dbId;
             _clientFactory = clientFactory;
-            _workflowContainer = new Lazy<Container>(() => _clientFactory.GetCosmosClient().GetDatabase(_dbId).GetContainer(WorkflowContainerName));
-            _eventContainer = new Lazy<Container>(() => _clientFactory.GetCosmosClient().GetDatabase(_dbId).GetContainer(EventContainerName));
-            _subscriptionContainer = new Lazy<Container>(() => _clientFactory.GetCosmosClient().GetDatabase(_dbId).GetContainer(SubscriptionContainerName));
+            _workflowContainer = new Lazy<Container>(() => _clientFactory.GetCosmosClient().GetDatabase(_dbId).GetContainer(cosmosDbStorageOptions.WorkflowContainerName));
+            _eventContainer = new Lazy<Container>(() => _clientFactory.GetCosmosClient().GetDatabase(_dbId).GetContainer(cosmosDbStorageOptions.EventContainerName));
+            _subscriptionContainer = new Lazy<Container>(() => _clientFactory.GetCosmosClient().GetDatabase(_dbId).GetContainer(cosmosDbStorageOptions.SubscriptionContainerName));
         }
 
         public async Task ClearSubscriptionToken(string eventSubscriptionId, string token, CancellationToken cancellationToken = default)
