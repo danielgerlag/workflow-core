@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Providers.Azure.Interface;
 using WorkflowCore.Providers.Azure.Services;
@@ -39,6 +40,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             options.Services.AddSingleton<ICosmosClientFactory>(sp => new CosmosClientFactory(connectionString));
             options.Services.AddTransient<ICosmosDbProvisioner>(sp => new CosmosDbProvisioner(sp.GetService<ICosmosClientFactory>(), cosmosDbStorageOptions));
+            options.Services.AddSingleton<IWorkflowPurger>(sp => new WorkflowPurger(sp.GetService<ICosmosClientFactory>(), databaseId, cosmosDbStorageOptions));
             options.UsePersistence(sp => new CosmosDbPersistenceProvider(sp.GetService<ICosmosClientFactory>(), databaseId, sp.GetService<ICosmosDbProvisioner>(), cosmosDbStorageOptions));
             return options;
         }
