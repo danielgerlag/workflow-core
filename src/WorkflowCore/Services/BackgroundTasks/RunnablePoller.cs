@@ -14,15 +14,13 @@ namespace WorkflowCore.Services.BackgroundTasks
         private readonly IDistributedLockProvider _lockProvider;
         private readonly IQueueProvider _queueProvider;
         private readonly ILogger _logger;
-        private readonly IDistributedCache _greylist;
         private readonly WorkflowOptions _options;
         private readonly IDateTimeProvider _dateTimeProvider;
         private Timer _pollTimer;
 
-        public RunnablePoller(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IDistributedCache greylist, IDateTimeProvider dateTimeProvider, WorkflowOptions options)
+        public RunnablePoller(IPersistenceProvider persistenceStore, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IDateTimeProvider dateTimeProvider, WorkflowOptions options)
         {
             _persistenceStore = persistenceStore;
-            _greylist = greylist;
             _queueProvider = queueProvider;            
             _logger = loggerFactory.CreateLogger<RunnablePoller>();
             _lockProvider = lockProvider;
@@ -52,28 +50,14 @@ namespace WorkflowCore.Services.BackgroundTasks
         {
             try
             {
-                if (await _lockProvider.AcquireLock("poll runnables", new CancellationToken()))
+                _logger.LogInformation("Polling for runnable workflows");
+                var runnables = await _persistenceStore.GetRunnableInstances(_dateTimeProvider.Now);
+                foreach (var item in runnables)
                 {
-                    try
+                    if (await _lockProvider.AcquireLock($"wf:{item}", default))
                     {
-                        _logger.LogInformation("Polling for runnable workflows");                        
-                        var runnables = await _persistenceStore.GetRunnableInstances(_dateTimeProvider.Now);
-                        foreach (var item in runnables)
-                        {
-                            if (await _greylist.ContainsAsync($"wf:{item}"))
-                            {
-                                _logger.LogDebug($"Got greylisted workflow {item}");
-                                continue;
-                            }
-
-                            _logger.LogDebug("Got runnable instance {0}", item);
-                            await _greylist.AddAsync($"wf:{item}");
-                            await _queueProvider.QueueWork(item, QueueType.Workflow);
-                        }
-                    }
-                    finally
-                    {
-                        await _lockProvider.ReleaseLock("poll runnables");
+                        _logger.LogDebug("Got runnable instance {0}", item);
+                        await _queueProvider.QueueWork(item, QueueType.Workflow);
                     }
                 }
             }
@@ -84,28 +68,14 @@ namespace WorkflowCore.Services.BackgroundTasks
 
             try
             {
-                if (await _lockProvider.AcquireLock("unprocessed events", new CancellationToken()))
+                _logger.LogInformation("Polling for unprocessed events");
+                var events = await _persistenceStore.GetRunnableEvents(_dateTimeProvider.Now);
+                foreach (var item in events.ToList())
                 {
-                    try
+                    if (await _lockProvider.AcquireLock($"evt:{item}", default))
                     {
-                        _logger.LogInformation("Polling for unprocessed events");                        
-                        var events = await _persistenceStore.GetRunnableEvents(_dateTimeProvider.Now);
-                        foreach (var item in events.ToList())
-                        {
-                            if (await _greylist.ContainsAsync($"evt:{item}"))
-                            {
-                                _logger.LogDebug($"Event already queued {item}");
-                                continue;
-                            }
-
-                            _logger.LogDebug($"Got unprocessed event {item}");
-                            await _greylist.AddAsync($"evt:{item}");
-                            await _queueProvider.QueueWork(item, QueueType.Event);
-                        }
-                    }
-                    finally
-                    {
-                        await _lockProvider.ReleaseLock("unprocessed events");
+                        _logger.LogDebug($"Got unprocessed event {item}");
+                        await _queueProvider.QueueWork(item, QueueType.Event);
                     }
                 }
             }

@@ -14,16 +14,14 @@ namespace WorkflowCore.Services.BackgroundTasks
         private readonly IDateTimeProvider _datetimeProvider;
         private readonly IPersistenceProvider _persistenceStore;
         private readonly IWorkflowExecutor _executor;
-        private readonly IDistributedCache _greylist;
 
         protected override int MaxConcurrentItems => Options.MaxConcurrentWorkflows;
         protected override QueueType Queue => QueueType.Workflow;
 
-        public WorkflowConsumer(IPersistenceProvider persistenceProvider, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IWorkflowExecutor executor, IDateTimeProvider datetimeProvider, IDistributedCache greylist, WorkflowOptions options)
+        public WorkflowConsumer(IPersistenceProvider persistenceProvider, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IWorkflowExecutor executor, IDateTimeProvider datetimeProvider, WorkflowOptions options)
             : base(queueProvider, loggerFactory, options)
         {
             _persistenceStore = persistenceProvider;
-            _greylist = greylist;
             _executor = executor;
             _lockProvider = lockProvider;
             _datetimeProvider = datetimeProvider;
@@ -53,8 +51,8 @@ namespace WorkflowCore.Services.BackgroundTasks
                     finally
                     {
                         await _persistenceStore.PersistWorkflow(workflow, cancellationToken);
-                        await QueueProvider.QueueWork(itemId, QueueType.Index);
-                        await _greylist.RemoveAsync($"wf:{itemId}", cancellationToken);
+                        await QueueProvider.QueueWork(itemId, QueueType.Index); // TODO: if workflow completed should not go in the queue again, right?!
+                        await _lockProvider.ReleaseLock($"wf:{itemId}");
                     }
                 }
             }
