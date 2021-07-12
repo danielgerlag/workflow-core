@@ -50,14 +50,30 @@ namespace WorkflowCore.Services.BackgroundTasks
                     finally
                     {
                         await _persistenceStore.PersistWorkflow(workflow, cancellationToken);
-                        await QueueProvider.QueueWork(itemId, QueueType.Index); // TODO: if workflow completed should not go in the queue again, right?!
-                        await _lockProvider.ReleaseLock($"wf:{itemId}");
+                        if (workflow.Status != WorkflowStatus.Complete)
+                        {
+                            // If workflow is not completed process it one more time and keep the item lock
+                            // to don't be enqueue again by the poller.
+                            await QueueProvider.QueueWork(itemId, QueueType.Index);
+                        }
+                        else
+                        {
+                            // If workflow is completed no other actions are needed and release the item lock.
+                            await _lockProvider.ReleaseLock($"wf:{itemId}");
+                        }
                     }
                 }
             }
             finally
             {
                 await _lockProvider.ReleaseLock(itemId);
+
+                if (workflow == null)
+                {
+                    // Release the item lock if the workflow doesn't exist anymore.
+                    await _lockProvider.ReleaseLock($"wf:{itemId}");
+                }
+
                 if ((workflow != null) && (result != null))
                 {
                     foreach (var sub in result.Subscriptions)
