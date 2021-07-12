@@ -13,16 +13,14 @@ namespace WorkflowCore.Services.BackgroundTasks
         private readonly IDateTimeProvider _datetimeProvider;
         private readonly IPersistenceProvider _persistenceStore;
         private readonly IWorkflowExecutor _executor;
-        private readonly IGreyList _greylist;
 
         protected override int MaxConcurrentItems => Options.MaxConcurrentWorkflows;
         protected override QueueType Queue => QueueType.Workflow;
 
-        public WorkflowConsumer(IPersistenceProvider persistenceProvider, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IWorkflowExecutor executor, IDateTimeProvider datetimeProvider, IGreyList greylist, WorkflowOptions options)
+        public WorkflowConsumer(IPersistenceProvider persistenceProvider, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, IWorkflowExecutor executor, IDateTimeProvider datetimeProvider, WorkflowOptions options)
             : base(queueProvider, loggerFactory, options)
         {
             _persistenceStore = persistenceProvider;
-            _greylist = greylist;
             _executor = executor;
             _lockProvider = lockProvider;
             _datetimeProvider = datetimeProvider;
@@ -52,14 +50,30 @@ namespace WorkflowCore.Services.BackgroundTasks
                     finally
                     {
                         await _persistenceStore.PersistWorkflow(workflow, cancellationToken);
-                        await QueueProvider.QueueWork(itemId, QueueType.Index);
-                        _greylist.Remove($"wf:{itemId}");
+                        if (workflow.Status != WorkflowStatus.Complete)
+                        {
+                            // If workflow is not completed process it one more time and keep the item lock
+                            // to don't be enqueue again by the poller.
+                            await QueueProvider.QueueWork(itemId, QueueType.Index);
+                        }
+                        else
+                        {
+                            // If workflow is completed no other actions are needed and release the item lock.
+                            await _lockProvider.ReleaseLock($"wf:{itemId}");
+                        }
                     }
                 }
             }
             finally
             {
                 await _lockProvider.ReleaseLock(itemId);
+
+                if (workflow == null)
+                {
+                    // Release the item lock if the workflow doesn't exist anymore.
+                    await _lockProvider.ReleaseLock($"wf:{itemId}");
+                }
+
                 if ((workflow != null) && (result != null))
                 {
                     foreach (var sub in result.Subscriptions)

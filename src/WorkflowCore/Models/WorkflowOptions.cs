@@ -27,11 +27,11 @@ namespace WorkflowCore.Models
             IdleTime = TimeSpan.FromMilliseconds(100);
             ErrorRetryInterval = TimeSpan.FromSeconds(60);
 
-            QueueFactory = new Func<IServiceProvider, IQueueProvider>(sp => new SingleNodeQueueProvider());
-            LockFactory = new Func<IServiceProvider, IDistributedLockProvider>(sp => new SingleNodeLockProvider());
-            PersistanceFactory = new Func<IServiceProvider, IPersistenceProvider>(sp => new TransientMemoryPersistenceProvider(sp.GetService<ISingletonMemoryProvider>()));
-            SearchIndexFactory = new Func<IServiceProvider, ISearchIndex>(sp => new NullSearchIndex());
-            EventHubFactory = new Func<IServiceProvider, ILifeCycleEventHub>(sp => new SingleNodeEventHub(sp.GetService<ILoggerFactory>()));
+            QueueFactory = _ => new SingleNodeQueueProvider();
+            LockFactory = _ => new SingleNodeLockProvider();
+            PersistanceFactory = sp => new TransientMemoryPersistenceProvider(sp.GetService<ISingletonMemoryProvider>());
+            SearchIndexFactory = _ => new NullSearchIndex();
+            EventHubFactory = sp => new SingleNodeEventHub(sp.GetService<ILoggerFactory>());
         }
 
         public bool EnableWorkflows { get; set; } = true;
@@ -79,5 +79,4 @@ namespace WorkflowCore.Models
             MaxConcurrentWorkflows = maxConcurrentWorkflows;
         }
     }
-        
 }
