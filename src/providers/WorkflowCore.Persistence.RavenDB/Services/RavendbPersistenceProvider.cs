@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -38,18 +39,18 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 			}
 		}
 
-		public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
+		public async Task<string> CreateNewWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken = default)
 		{
 			using (var session = _database.OpenAsyncSession())
 			{
-				await session.StoreAsync(workflow);
+				await session.StoreAsync(workflow, cancellationToken);
 				var id = workflow.Id;
-				await session.SaveChangesAsync();
+				await session.SaveChangesAsync(cancellationToken);
 				return id;
 			}
 		}
 
-		public async Task PersistWorkflow(WorkflowInstance workflow)
+		public async Task PersistWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken = default)
 		{
 			using (var session = _database.OpenAsyncSession())
 			{
@@ -64,11 +65,11 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 				session.Advanced.Patch<WorkflowInstance, DateTime>(workflow.Id, x => x.CreateTime, workflow.CreateTime);
 				session.Advanced.Patch<WorkflowInstance, DateTime?>(workflow.Id, x => x.CompleteTime, workflow.CompleteTime);
 
-				await session.SaveChangesAsync();
+				await session.SaveChangesAsync(cancellationToken);
 			}
 		}
 
-		public async Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt)
+		public async Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt, CancellationToken cancellationToken = default)
 		{
 			var now = asAt.ToUniversalTime().Ticks;
 			using (var session = _database.OpenAsyncSession())
@@ -78,20 +79,20 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 					&& (w.Status == WorkflowStatus.Runnable)
 				).Select(x => x.Id);
 
-				return await l.ToListAsync();
+				return await l.ToListAsync(cancellationToken);
 			}
 		}
 
-		public async Task<WorkflowInstance> GetWorkflowInstance(string Id)
+		public async Task<WorkflowInstance> GetWorkflowInstance(string Id, CancellationToken cancellationToken = default)
 		{
 			using (var session = _database.OpenAsyncSession())
 			{
-				var result = await session.Query<WorkflowInstance>().FirstOrDefaultAsync(x => x.Id == Id);
+				var result = await session.Query<WorkflowInstance>().FirstOrDefaultAsync(x => x.Id == Id, cancellationToken);
 				return result;
 			}
 		}
 
-		public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids)
+		public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids, CancellationToken cancellationToken = default)
 		{
 			if (ids == null)
 			{
@@ -101,7 +102,7 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 			using (var session = _database.OpenAsyncSession())
 			{
 				var list = session.Query<WorkflowInstance>().Where(x => x.Id.In(ids));
-				return await list.ToListAsync<WorkflowInstance>();
+				return await list.ToListAsync<WorkflowInstance>(cancellationToken);
 			}
 		}
 
@@ -127,18 +128,18 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 			}
 		}
 
-		public async Task<string> CreateEventSubscription(EventSubscription subscription)
+		public async Task<string> CreateEventSubscription(EventSubscription subscription, CancellationToken cancellationToken = default)
 		{
 			using (var session = _database.OpenAsyncSession())
 			{
-				await session.StoreAsync(subscription);
+				await session.StoreAsync(subscription, cancellationToken);
 				var id = subscription.Id;
-				await session.SaveChangesAsync();
+				await session.SaveChangesAsync(cancellationToken);
 				return id;
 			}
 		}
 
-		public async Task TerminateSubscription(string eventSubscriptionId)
+		public async Task TerminateSubscription(string eventSubscriptionId, CancellationToken _ = default)
 		{
 			using (var session = _database.OpenAsyncSession())
 			{
@@ -147,16 +148,16 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 			}
 		}
 
-		public async Task<EventSubscription> GetSubscription(string eventSubscriptionId)
+		public async Task<EventSubscription> GetSubscription(string eventSubscriptionId, CancellationToken cancellationToken = default)
 		{
 			using (var session = _database.OpenAsyncSession())
 			{
 				var result = session.Query<EventSubscription>().Where(x => x.Id == eventSubscriptionId);
-				return await result.FirstOrDefaultAsync();
+				return await result.FirstOrDefaultAsync(cancellationToken);
 			}
 		}
 
-		public async Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, DateTime asOf)
+		public async Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, DateTime asOf, CancellationToken cancellationToken = default)
 		{
 			using (var session = _database.OpenAsyncSession())
 			{
@@ -167,11 +168,11 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 					&& x.ExternalToken == null
 				);
 
-				return await q.FirstOrDefaultAsync();
+				return await q.FirstOrDefaultAsync(cancellationToken);
 			}
 		}
 
-		public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry)
+		public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry, CancellationToken cancellationToken = default)
 		{
 			try
 			{
@@ -186,7 +187,7 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 				strbuilder.Append($"e.ExternalWorkerId = 'workerId'");
 				strbuilder.Append("}");
 
-				var operation = await _database.Operations.SendAsync(new PatchByQueryOperation(strbuilder.ToString()));
+				var operation = await _database.Operations.SendAsync(new PatchByQueryOperation(strbuilder.ToString()), token: cancellationToken);
 				operation.WaitForCompletion();
 				return true;
 			}
@@ -196,7 +197,7 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 			}
 		}
 
-		public async Task ClearSubscriptionToken(string eventSubscriptionId, string token)
+		public async Task ClearSubscriptionToken(string eventSubscriptionId, string token, CancellationToken cancellationToken = default)
 		{
 			try
 			{
@@ -211,7 +212,7 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 				strbuilder.Append($"e.ExternalWorkerId = null");
 				strbuilder.Append("}");
 
-				var operation = await _database.Operations.SendAsync(new PatchByQueryOperation(strbuilder.ToString()));
+				var operation = await _database.Operations.SendAsync(new PatchByQueryOperation(strbuilder.ToString()), token: cancellationToken);
 				operation.WaitForCompletion();
 			}
 			catch (Exception e)
@@ -222,7 +223,7 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 
 		public void EnsureStoreExists() { }
 
-		public async Task<IEnumerable<EventSubscription>> GetSubscriptions(string eventName, string eventKey, DateTime asOf)
+		public async Task<IEnumerable<EventSubscription>> GetSubscriptions(string eventName, string eventKey, DateTime asOf, CancellationToken cancellationToken = default)
 		{
 			using (var session = _database.OpenAsyncSession())
 			{
@@ -232,31 +233,31 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 					&& x.SubscribeAsOf <= asOf
 				);
 
-				return await q.ToListAsync();
+				return await q.ToListAsync(cancellationToken);
 			}
 		}
 
-		public async Task<string> CreateEvent(Event newEvent)
+		public async Task<string> CreateEvent(Event newEvent, CancellationToken cancellationToken = default)
 		{
 			using (var session = _database.OpenAsyncSession())
 			{
-				await session.StoreAsync(newEvent);
+				await session.StoreAsync(newEvent, cancellationToken);
 				var id = newEvent.Id;
-				await session.SaveChangesAsync();
+				await session.SaveChangesAsync(cancellationToken);
 				return id;
 			}
 		}
 
-		public async Task<Event> GetEvent(string id)
+		public async Task<Event> GetEvent(string id, CancellationToken cancellationToken = default)
 		{
 			using (var session = _database.OpenAsyncSession())
 			{
 				var result = session.Query<Event>().Where(x => x.Id == id);
-				return await result.FirstAsync();
+				return await result.FirstAsync(cancellationToken);
 			}
 		}
 
-		public async Task<IEnumerable<string>> GetRunnableEvents(DateTime asAt)
+		public async Task<IEnumerable<string>> GetRunnableEvents(DateTime asAt, CancellationToken cancellationToken = default)
 		{
 			using (var session = _database.OpenAsyncSession())
 			{
@@ -265,21 +266,21 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 									.Where(x => !x.IsProcessed && x.EventTime < now)
 									.Select(x => x.Id);
 
-				return await result.ToListAsync();
+				return await result.ToListAsync(cancellationToken);
 			}
 		}
 
-		public async Task MarkEventProcessed(string id)
+		public async Task MarkEventProcessed(string id, CancellationToken cancellationToken = default)
 		{
 			using (var session = _database.OpenAsyncSession())
 			{
 				session.Advanced.Patch<Event, bool>(id, x => x.IsProcessed, true);
 
-				await session.SaveChangesAsync();
+				await session.SaveChangesAsync(cancellationToken);
 			}
 		}
 
-		public async Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf)
+		public async Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf, CancellationToken cancellationToken)
 		{
 			using (var session = _database.OpenAsyncSession())
 			{
@@ -290,25 +291,25 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 									&& x.EventTime >= asOf)
 								.Select(x => x.Id);
 
-				return await q.ToListAsync();
+				return await q.ToListAsync(cancellationToken);
 			}
 		}
 
-		public async Task MarkEventUnprocessed(string id)
+		public async Task MarkEventUnprocessed(string id, CancellationToken cancellationToken = default)
 		{
 			using (var session = _database.OpenAsyncSession())
 			{
 				session.Advanced.Patch<Event, bool>(id, x => x.IsProcessed, false);
 
-				await session.SaveChangesAsync();
+				await session.SaveChangesAsync(cancellationToken);
 			}
 		}
 
-		public async Task PersistErrors(IEnumerable<ExecutionError> errors)
+		public async Task PersistErrors(IEnumerable<ExecutionError> errors, CancellationToken cancellationToken = default)
 		{
 			if (errors.Any())
 			{
-				var blk = _database.BulkInsert();
+				var blk = _database.BulkInsert(token: cancellationToken);
 				foreach (var error in errors)
 					await blk.StoreAsync(error);
 

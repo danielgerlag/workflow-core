@@ -53,7 +53,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
         public DataIOScenario()
         {
-            Setup(true);
+            Setup();
         }
 
         [Fact]

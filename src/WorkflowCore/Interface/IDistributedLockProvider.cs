@@ -9,6 +9,12 @@ namespace WorkflowCore.Interface
     /// </remarks>
     public interface IDistributedLockProvider
     {
+        /// <summary>
+        /// Acquire a lock on the specified resource.
+        /// </summary>
+        /// <param name="Id">Resource ID to lock.</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>`true`, if the lock was acquired.</returns>
         Task<bool> AcquireLock(string Id, CancellationToken cancellationToken);
 
         Task ReleaseLock(string Id);

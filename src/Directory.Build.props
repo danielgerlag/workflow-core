@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <PackageProjectUrl>https://github.com/danielgerlag/workflow-core</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/danielgerlag/workflow-core/blob/master/LICENSE.md</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/danielgerlag/workflow-core.git</RepositoryUrl>
+    <Version>3.5.1</Version>
+    <AssemblyVersion>3.5.1.0</AssemblyVersion>
+    <FileVersion>3.5.1.0</FileVersion>
+    <PackageIconUrl>https://github.com/danielgerlag/workflow-core/raw/master/src/logo.png</PackageIconUrl>
+    <PackageVersion>3.5.1</PackageVersion>
+  </PropertyGroup>
+</Project>

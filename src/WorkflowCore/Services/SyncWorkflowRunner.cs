@@ -72,7 +72,7 @@ namespace WorkflowCore.Services
             var id = Guid.NewGuid().ToString();
 
             if (persistSate)
-                id = await _persistenceStore.CreateNewWorkflow(wf);
+                id = await _persistenceStore.CreateNewWorkflow(wf, token);
             else
                 wf.Id = id;
 
@@ -89,7 +89,7 @@ namespace WorkflowCore.Services
                 {
                     await _executor.Execute(wf);
                     if (persistSate)
-                        await _persistenceStore.PersistWorkflow(wf);
+                        await _persistenceStore.PersistWorkflow(wf, token);
                 }
             }
             finally
