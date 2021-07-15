@@ -29,6 +29,8 @@ namespace WorkflowCore.Services.ErrorHandlers
                 WorkflowDefinitionId = workflow.WorkflowDefinitionId,
                 Version = workflow.Version
             });
+
+            step.PrimeForRetry(pointer);
         }
     }
 }
