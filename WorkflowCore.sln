@@ -150,7 +150,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Tests.QueuePro
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample19", "src\samples\WorkflowCore.Sample19\WorkflowCore.Sample19.csproj", "{1223ED47-3E5E-4960-B70D-DFAF550F6666}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Persistence.RavenDB", "src\providers\WorkflowCore.Persistence.RavenDB\WorkflowCore.Persistence.RavenDB.csproj", "{AF205715-C8B7-42EF-BF14-AFC9E7F27242}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.Persistence.RavenDB", "src\providers\WorkflowCore.Persistence.RavenDB\WorkflowCore.Persistence.RavenDB.csproj", "{AF205715-C8B7-42EF-BF14-AFC9E7F27242}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
