@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using Docker.Testify;
 using Xunit;
-using MySql.Data.MySqlClient;
 using System;
+using MySqlConnector;
 
 namespace WorkflowCore.Tests.MySQL
 {
@@ -13,7 +13,7 @@ namespace WorkflowCore.Tests.MySQL
         public static string RootPassword => "rootpwd123";
 
         public override TimeSpan TimeOut => TimeSpan.FromSeconds(60);
-                
+
         public override string ImageName => "mysql";
         public override IList<string> EnvironmentVariables => new List<string> {
             $"MYSQL_ROOT_PASSWORD={RootPassword}"
