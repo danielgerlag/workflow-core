@@ -123,7 +123,7 @@ namespace WorkflowCore.Services
             if (pointer.Status != PointerStatus.Running)
             {
                 pointer.Status = PointerStatus.Running;
-                _publisher.PublishNotification(new StepStarted
+                _publisher?.PublishNotification(new StepStarted
                 {
                     EventTimeUtc = _datetimeProvider.UtcNow,
                     Reference = workflow.Reference,
@@ -264,7 +264,7 @@ namespace WorkflowCore.Services
                 await middlewareRunner.RunPostMiddleware(workflow, def);
             }
 
-            _publisher.PublishNotification(new WorkflowCompleted
+            _publisher?.PublishNotification(new WorkflowCompleted
             {
                 EventTimeUtc = _datetimeProvider.UtcNow,
                 Reference = workflow.Reference,

@@ -23,7 +23,7 @@ namespace WorkflowCore.Services.ErrorHandlers
             workflow.Status = WorkflowStatus.Terminated;
             workflow.CompleteTime = _dateTimeProvider.UtcNow;
 
-            _eventPublisher.PublishNotification(new WorkflowTerminated
+            _eventPublisher?.PublishNotification(new WorkflowTerminated
             {
                 EventTimeUtc = _dateTimeProvider.UtcNow,
                 Reference = workflow.Reference,
