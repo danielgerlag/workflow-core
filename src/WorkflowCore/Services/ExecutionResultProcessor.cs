@@ -77,7 +77,7 @@ namespace WorkflowCore.Services
                     subsequent.Active = true;
                 }
 
-                _eventPublisher?.PublishNotification(new StepCompleted
+                _eventPublisher.PublishNotification(new StepCompleted
                 {
                     EventTimeUtc = _datetimeProvider.UtcNow,
                     Reference = workflow.Reference,
@@ -102,7 +102,7 @@ namespace WorkflowCore.Services
 
         public void HandleStepException(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, Exception exception)
         {
-            _eventPublisher?.PublishNotification(new WorkflowError
+            _eventPublisher.PublishNotification(new WorkflowError
             {
                 EventTimeUtc = _datetimeProvider.UtcNow,
                 Reference = workflow.Reference,

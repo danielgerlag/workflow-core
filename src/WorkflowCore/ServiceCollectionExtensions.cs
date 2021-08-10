@@ -31,16 +31,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddSingleton<IWorkflowRegistry, WorkflowRegistry>();
             services.AddSingleton<WorkflowOptions>(options);
-
-            if (options.EnableLifeCycleEventsPublisher)
-            {
-                services.AddSingleton<ILifeCycleEventPublisher, LifeCycleEventPublisher>();
-                services.AddTransient<IBackgroundTask>(sp => sp.GetService<ILifeCycleEventPublisher>());
-            }
-            else
-            {
-                services.AddTransient<ILifeCycleEventPublisher>(provider => null);
-            }
+            services.AddSingleton<ILifeCycleEventPublisher, LifeCycleEventPublisher>();
 
             if (options.EnableWorkflows)
             {
@@ -61,6 +52,8 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 services.AddTransient<IBackgroundTask, RunnablePoller>();
             }
+
+            services.AddTransient<IBackgroundTask>(sp => sp.GetService<ILifeCycleEventPublisher>());
 
             services.AddTransient<IWorkflowErrorHandler, CompensateHandler>();
             services.AddTransient<IWorkflowErrorHandler, RetryHandler>();
