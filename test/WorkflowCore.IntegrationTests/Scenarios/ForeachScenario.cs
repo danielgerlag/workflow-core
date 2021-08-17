@@ -18,7 +18,6 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
         public class DoSomething : StepBody
         {
-            
             public override ExecutionResult Run(IStepExecutionContext context)
             {
                 Step2Ticker++;
@@ -29,6 +28,9 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
         public class MyDataClass
         {
+            public List<int> Numbers { get; set; } = new List<int>();
+
+            public bool IsParallel { get; set; } = true;
         }
 
         public class ForeachWorkflow : IWorkflow<MyDataClass>
@@ -43,7 +45,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                         Step1Ticker++;
                         return ExecutionResult.Next();
                     })
-                    .ForEach(x => new List<int> { 2, 2, 3 })
+                    .ForEach(x => x.Numbers, x => x.IsParallel)
                         .Do(x => x.StartWith<DoSomething>())                    
                     .Then(context =>
                     {
@@ -57,12 +59,18 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         public ForeachScenario()
         {
             Setup();
+
+            Step1Ticker = 0;
+            Step2Ticker = 0;
+            Step3Ticker = 0;
+            AfterLoopValue = 0;
+            CheckSum = 0;
         }
 
         [Fact]
         public void Scenario()
         {
-            var workflowId = StartWorkflow(null);
+            var workflowId = StartWorkflow(new MyDataClass { Numbers = new List<int> { 2, 2, 3 } });
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
             Step1Ticker.Should().Be(1);
@@ -72,6 +80,21 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             CheckSum.Should().Be(7);
             GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
             UnhandledStepErrors.Count.Should().Be(0);
+        }
+
+        [Fact]
+        public void EmptyCollectionSequentialScenario()
+        {
+            var workflowId = StartWorkflow(new MyDataClass { IsParallel = false });
+            WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
+
+            GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
+            UnhandledStepErrors.Count.Should().Be(0);
+            Step1Ticker.Should().Be(1);
+            Step2Ticker.Should().Be(0);
+            Step3Ticker.Should().Be(1);
+            AfterLoopValue.Should().Be(0);
+            CheckSum.Should().Be(0);
         }
     }
 }
