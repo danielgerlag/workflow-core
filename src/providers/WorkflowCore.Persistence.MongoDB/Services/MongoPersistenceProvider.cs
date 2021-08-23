@@ -126,7 +126,6 @@ namespace WorkflowCore.Persistence.MongoDB.Services
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken = default)
         {
             await WorkflowInstances.InsertOneAsync(workflow, cancellationToken: cancellationToken);
-
             return workflow.Id;
         }
 
