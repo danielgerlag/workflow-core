@@ -13,7 +13,7 @@ namespace WorkflowCore.TestSample01
         [SetUp]
         protected void Setup()
         {
-            base.Setup(false);
+            base.Setup();
         }
 
         [Test]

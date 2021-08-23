@@ -35,14 +35,14 @@ namespace WorkflowCore.Services.BackgroundTasks
                 Logger.LogInformation("Workflow locked {0}", itemId);
                 return;
             }
-            
+
             WorkflowInstance workflow = null;
             WorkflowExecutorResult result = null;
-            
+
             try
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                workflow = await _persistenceStore.GetWorkflowInstance(itemId);
+                workflow = await _persistenceStore.GetWorkflowInstance(itemId, cancellationToken);
                 if (workflow.Status == WorkflowStatus.Runnable)
                 {
                     try
@@ -51,7 +51,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     }
                     finally
                     {
-                        await _persistenceStore.PersistWorkflow(workflow);
+                        await _persistenceStore.PersistWorkflow(workflow, cancellationToken);
                         await QueueProvider.QueueWork(itemId, QueueType.Index);
                         _greylist.Remove($"wf:{itemId}");
                     }
@@ -64,10 +64,10 @@ namespace WorkflowCore.Services.BackgroundTasks
                 {
                     foreach (var sub in result.Subscriptions)
                     {
-                        await SubscribeEvent(sub, _persistenceStore);
+                        await SubscribeEvent(sub, _persistenceStore, cancellationToken);
                     }
 
-                    await _persistenceStore.PersistErrors(result.Errors);
+                    await _persistenceStore.PersistErrors(result.Errors, cancellationToken);
 
                     var readAheadTicks = _datetimeProvider.UtcNow.Add(Options.PollInterval).Ticks;
 
@@ -77,22 +77,53 @@ namespace WorkflowCore.Services.BackgroundTasks
                     }
                 }
             }
-            
+
         }
-        
-        private async Task SubscribeEvent(EventSubscription subscription, IPersistenceProvider persistenceStore)
+
+        private async Task SubscribeEvent(EventSubscription subscription, IPersistenceProvider persistenceStore, CancellationToken cancellationToken)
         {
             //TODO: move to own class
             Logger.LogDebug("Subscribing to event {0} {1} for workflow {2} step {3}", subscription.EventName, subscription.EventKey, subscription.WorkflowId, subscription.StepId);
-            
-            await persistenceStore.CreateEventSubscription(subscription);
+
+            await persistenceStore.CreateEventSubscription(subscription, cancellationToken);
             if (subscription.EventName != Event.EventTypeActivity)
             {
-                var events = await persistenceStore.GetEvents(subscription.EventName, subscription.EventKey, subscription.SubscribeAsOf);
+                var events = await persistenceStore.GetEvents(subscription.EventName, subscription.EventKey, subscription.SubscribeAsOf, cancellationToken);
+
                 foreach (var evt in events)
                 {
-                    await persistenceStore.MarkEventUnprocessed(evt);
-                    await QueueProvider.QueueWork(evt, QueueType.Event);
+                    var eventKey = $"evt:{evt}";
+                    bool acquiredLock = false;
+                    try
+                    {
+                        acquiredLock = await _lockProvider.AcquireLock(eventKey, cancellationToken);
+                        int attempt = 0;
+                        while (!acquiredLock && attempt < 10)
+                        {
+                            await Task.Delay(Options.IdleTime, cancellationToken);
+                            acquiredLock = await _lockProvider.AcquireLock(eventKey, cancellationToken);
+
+                            attempt++;
+                        }
+
+                        if (!acquiredLock)
+                        {
+                            Logger.LogWarning($"Failed to lock {evt}");
+                        }
+                        else
+                        {
+                            _greylist.Remove(eventKey);
+                            await persistenceStore.MarkEventUnprocessed(evt, cancellationToken);
+                            await QueueProvider.QueueWork(evt, QueueType.Event);
+                        }
+                    }
+                    finally
+                    {
+                        if (acquiredLock)
+                        {
+                            await _lockProvider.ReleaseLock(eventKey);
+                        }
+                    }
                 }
             }
         }

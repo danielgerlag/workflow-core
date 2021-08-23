@@ -26,10 +26,20 @@ namespace Microsoft.Extensions.DependencyInjection
             return options;
         }
 
-        public static WorkflowOptions UseCosmosDbPersistence(this WorkflowOptions options, string connectionString, string databaseId)
+        public static WorkflowOptions UseCosmosDbPersistence(
+            this WorkflowOptions options,
+            string connectionString,
+            string databaseId,
+            CosmosDbStorageOptions cosmosDbStorageOptions = null)
         {
-            options.Services.AddTransient<ICosmosDbProvisioner>(sp => new CosmosDbProvisioner(connectionString, sp.GetService<ILoggerFactory>()));
-            options.UsePersistence(sp => new CosmosDbPersistenceProvider(connectionString, databaseId, sp.GetService<ICosmosDbProvisioner>()));
+            if (cosmosDbStorageOptions == null)
+            {
+                cosmosDbStorageOptions = new CosmosDbStorageOptions();
+            }
+
+            options.Services.AddSingleton<ICosmosClientFactory>(sp => new CosmosClientFactory(connectionString));
+            options.Services.AddTransient<ICosmosDbProvisioner>(sp => new CosmosDbProvisioner(sp.GetService<ICosmosClientFactory>(), cosmosDbStorageOptions));
+            options.UsePersistence(sp => new CosmosDbPersistenceProvider(sp.GetService<ICosmosClientFactory>(), databaseId, sp.GetService<ICosmosDbProvisioner>(), cosmosDbStorageOptions));
             return options;
         }
     }

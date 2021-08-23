@@ -1,37 +1,38 @@
-using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
-using Microsoft.Extensions.Logging;
 using WorkflowCore.Providers.Azure.Interface;
 
 namespace WorkflowCore.Providers.Azure.Services
 {
     public class CosmosDbProvisioner : ICosmosDbProvisioner
     {
+        private readonly ICosmosClientFactory _clientFactory;
+        private readonly CosmosDbStorageOptions _cosmosDbStorageOptions;
 
-        private CosmosClient _client;
-
-        public CosmosDbProvisioner(string connectionString, ILoggerFactory loggerFactory)
+        public CosmosDbProvisioner(
+            ICosmosClientFactory clientFactory,
+            CosmosDbStorageOptions cosmosDbStorageOptions)
         {
-            _client = new CosmosClient(connectionString);
+            _clientFactory = clientFactory;
+            _cosmosDbStorageOptions = cosmosDbStorageOptions;
         }
 
-        public async Task Provision(string dbId)
+        public async Task Provision(string dbId, CancellationToken cancellationToken = default)
         {
-            var dbResp = await _client.CreateDatabaseIfNotExistsAsync(dbId);
+            var dbResp = await _clientFactory.GetCosmosClient().CreateDatabaseIfNotExistsAsync(dbId, cancellationToken: cancellationToken);
             var wfIndexPolicy = new IndexingPolicy();
             wfIndexPolicy.IncludedPaths.Add(new IncludedPath { Path = @"/*" });
             wfIndexPolicy.ExcludedPaths.Add(new ExcludedPath { Path = @"/ExecutionPointers/?" });
 
             Task.WaitAll(
-                dbResp.Database.CreateContainerIfNotExistsAsync(new ContainerProperties(CosmosDbPersistenceProvider.WorkflowContainerName, @"/id")
+                dbResp.Database.CreateContainerIfNotExistsAsync(new ContainerProperties(_cosmosDbStorageOptions.WorkflowContainerName, @"/id")
                 {
                     IndexingPolicy = wfIndexPolicy
                 }),
-                dbResp.Database.CreateContainerIfNotExistsAsync(new ContainerProperties(CosmosDbPersistenceProvider.EventContainerName, @"/id")),
-                dbResp.Database.CreateContainerIfNotExistsAsync(new ContainerProperties(CosmosDbPersistenceProvider.SubscriptionContainerName, @"/id"))
+                dbResp.Database.CreateContainerIfNotExistsAsync(new ContainerProperties(_cosmosDbStorageOptions.EventContainerName, @"/id")),
+                dbResp.Database.CreateContainerIfNotExistsAsync(new ContainerProperties(_cosmosDbStorageOptions.SubscriptionContainerName, @"/id"))
             );
         }
-
     }
 }
