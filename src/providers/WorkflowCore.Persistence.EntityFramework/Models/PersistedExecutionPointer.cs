@@ -32,10 +32,10 @@ namespace WorkflowCore.Persistence.EntityFramework.Models
 
         public DateTime? EndTime { get; set; }
 
-        [MaxLength(100)]
+        [MaxLength(200)]
         public string EventName { get; set; }
 
-        [MaxLength(100)]
+        [MaxLength(200)]
         public string EventKey { get; set; }
 
         public bool EventPublished { get; set; }
