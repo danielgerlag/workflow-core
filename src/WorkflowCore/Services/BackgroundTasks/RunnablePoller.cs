@@ -55,7 +55,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                 {
                     try
                     {
-                        _logger.LogInformation("Polling for runnable workflows");                        
+                        _logger.LogDebug("Polling for runnable workflows");                        
                         var runnables = await _persistenceStore.GetRunnableInstances(_dateTimeProvider.Now);
                         foreach (var item in runnables)
                         {
@@ -86,7 +86,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                 {
                     try
                     {
-                        _logger.LogInformation("Polling for unprocessed events");                        
+                        _logger.LogDebug("Polling for unprocessed events");                        
                         var events = await _persistenceStore.GetRunnableEvents(_dateTimeProvider.Now);
                         foreach (var item in events.ToList())
                         {
