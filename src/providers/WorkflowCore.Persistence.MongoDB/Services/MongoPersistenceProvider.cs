@@ -12,7 +12,6 @@ using MongoDB.Driver.Linq;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using System.Threading;
-using MongoDB.Extensions.Transactions;
 
 namespace WorkflowCore.Persistence.MongoDB.Services
 {
@@ -116,13 +115,13 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             }
         }
 
-        private IMongoCollection<WorkflowInstance> WorkflowInstances => _database.GetCollection<WorkflowInstance>(WorkflowCollectionName).AsTransactionCollection();
+        private IMongoCollection<WorkflowInstance> WorkflowInstances => _database.GetCollection<WorkflowInstance>(WorkflowCollectionName);
 
-        private IMongoCollection<EventSubscription> EventSubscriptions => _database.GetCollection<EventSubscription>("wfc.subscriptions").AsTransactionCollection();
+        private IMongoCollection<EventSubscription> EventSubscriptions => _database.GetCollection<EventSubscription>("wfc.subscriptions");
 
-        private IMongoCollection<Event> Events => _database.GetCollection<Event>("wfc.events").AsTransactionCollection();
+        private IMongoCollection<Event> Events => _database.GetCollection<Event>("wfc.events");
 
-        private IMongoCollection<ExecutionError> ExecutionErrors => _database.GetCollection<ExecutionError>("wfc.execution_errors").AsTransactionCollection();
+        private IMongoCollection<ExecutionError> ExecutionErrors => _database.GetCollection<ExecutionError>("wfc.execution_errors");
 
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken = default)
         {
