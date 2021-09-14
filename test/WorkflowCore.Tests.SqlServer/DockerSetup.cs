@@ -11,7 +11,7 @@ namespace WorkflowCore.Tests.SqlServer
         public static string ConnectionString { get; set; }
         public static string ScenarioConnectionString { get; set; }
 
-        public override string ImageName => "microsoft/mssql-server-linux";
+        public override string ImageName => "mcr.microsoft.com/mssql/server";
         public override int InternalPort => 1433;
         public override TimeSpan TimeOut => TimeSpan.FromSeconds(120);
 
