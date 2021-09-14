@@ -29,6 +29,9 @@ namespace WorkflowCore.Providers.AWS
             if (!string.IsNullOrEmpty(source.Reference))
                 result["reference"] = new AttributeValue(source.Reference);
 
+            if (!string.IsNullOrEmpty(source.CorrelationId))
+                result["correlation_id"] = new AttributeValue(source.CorrelationId);
+
             if (source.CompleteTime.HasValue)
                 result["complete_time"] = new AttributeValue { N = source.CompleteTime.Value.Ticks.ToString() };
             
@@ -64,6 +67,9 @@ namespace WorkflowCore.Providers.AWS
 
             if (source.ContainsKey("reference"))
                 result.Reference = source["reference"].S;
+
+            if (source.ContainsKey("correlation_id"))
+                result.CorrelationId = source["correlation_id"].S;
 
             if (source.ContainsKey("complete_time"))
                 result.CompleteTime = new DateTime(Int64.Parse(source["complete_time"].N));

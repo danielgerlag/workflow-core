@@ -14,6 +14,8 @@ namespace WorkflowCore.Tests.DynamoDB
         DynamoDbDockerSetup _dockerSetup;
         private IPersistenceProvider _subject;
 
+        protected override bool IsCorrelationIdSupported => false;
+
         public DynamoPersistenceProviderFixture(DynamoDbDockerSetup dockerSetup)
         {
             _dockerSetup = dockerSetup;

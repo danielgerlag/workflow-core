@@ -40,6 +40,11 @@ namespace WorkflowCore.Providers.Redis.Services
 
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow, CancellationToken _ = default)
         {
+            if (workflow.CorrelationId != null)
+            {
+                throw new NotImplementedException();
+            }
+
             workflow.Id = Guid.NewGuid().ToString();
             await PersistWorkflow(workflow);
             return workflow.Id;
@@ -81,6 +86,11 @@ namespace WorkflowCore.Providers.Redis.Services
         {
             var raw = await _redis.HashGetAsync($"{_prefix}.{WORKFLOW_SET}", Id);
             return JsonConvert.DeserializeObject<WorkflowInstance>(raw, _serializerSettings);
+        }
+
+        public Task<WorkflowInstance> GetWorkflowInstanceByCorrelationId(string correlationId, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids, CancellationToken _ = default)

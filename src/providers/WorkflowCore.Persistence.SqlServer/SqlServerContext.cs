@@ -1,7 +1,10 @@
-﻿using System;
-using System.Linq;
+﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using WorkflowCore.Exceptions;
 using WorkflowCore.Persistence.EntityFramework.Models;
 using WorkflowCore.Persistence.EntityFramework.Services;
 
@@ -57,6 +60,25 @@ namespace WorkflowCore.Persistence.SqlServer
         {
             builder.ToTable("Event", "wfc");
             builder.Property(x => x.PersistenceId).UseIdentityColumn();
+        }
+
+        public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())
+        {
+            try
+            {
+                return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+            }
+            catch (DbUpdateException e)
+                when (e.InnerException is SqlException se)
+            {
+                if (se.Message.Contains("CorrelationId", StringComparison.OrdinalIgnoreCase)
+                    && se.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new WorkflowExistsException(se);
+                }
+
+                throw;
+            }
         }
     }
 }

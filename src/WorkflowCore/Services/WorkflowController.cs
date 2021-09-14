@@ -37,23 +37,23 @@ namespace WorkflowCore.Services
             _dateTimeProvider = dateTimeProvider;
         }
 
-        public Task<string> StartWorkflow(string workflowId, object data = null, string reference=null)
+        public Task<string> StartWorkflow(string workflowId, object data = null, string reference=null, string correlationId = null)
         {
-            return StartWorkflow(workflowId, null, data, reference);
+            return StartWorkflow(workflowId, null, data, reference, correlationId);
         }
 
-        public Task<string> StartWorkflow(string workflowId, int? version, object data = null, string reference=null)
+        public Task<string> StartWorkflow(string workflowId, int? version, object data = null, string reference=null, string correlationId = null)
         {
-            return StartWorkflow<object>(workflowId, version, data, reference);
+            return StartWorkflow<object>(workflowId, version, data, reference, correlationId);
         }
 
-        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null, string reference = null)
+        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null, string reference = null, string correlationId = null)
             where TData : class, new()
         {
-            return StartWorkflow(workflowId, null, data, reference);
+            return StartWorkflow(workflowId, null, data, reference, correlationId);
         }
 
-        public async Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference=null)
+        public async Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference=null, string correlationId = null)
             where TData : class, new()
         {
 
@@ -72,7 +72,8 @@ namespace WorkflowCore.Services
                 NextExecution = 0,
                 CreateTime = _dateTimeProvider.UtcNow,
                 Status = WorkflowStatus.Runnable,
-                Reference = reference
+                Reference = reference,
+                CorrelationId = correlationId
             };
 
             if ((def.DataType != null) && (data == null))
@@ -91,18 +92,26 @@ namespace WorkflowCore.Services
                 await middlewareRunner.RunPreMiddleware(wf, def);
             }
 
-            string id = await _persistenceStore.CreateNewWorkflow(wf);
-            await _queueProvider.QueueWork(id, QueueType.Workflow);
-            await _queueProvider.QueueWork(id, QueueType.Index);
-            await _eventHub.PublishNotification(new WorkflowStarted
+            try
             {
-                EventTimeUtc = _dateTimeProvider.UtcNow,
-                Reference = reference,
-                WorkflowInstanceId = id,
-                WorkflowDefinitionId = def.Id,
-                Version = def.Version
-            });
-            return id;
+                string id = await _persistenceStore.CreateNewWorkflow(wf);
+                await _queueProvider.QueueWork(id, QueueType.Workflow);
+                await _queueProvider.QueueWork(id, QueueType.Index);
+                await _eventHub.PublishNotification(new WorkflowStarted
+                {
+                    EventTimeUtc = _dateTimeProvider.UtcNow,
+                    Reference = reference,
+                    WorkflowInstanceId = id,
+                    WorkflowDefinitionId = def.Id,
+                    Version = def.Version
+                });
+                return id;
+            }
+            catch (WorkflowExistsException)
+            {
+                var existingWf = await _persistenceStore.GetWorkflowInstanceByCorrelationId(correlationId);
+                return existingWf.Id;
+            }
         }
 
         public async Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null)

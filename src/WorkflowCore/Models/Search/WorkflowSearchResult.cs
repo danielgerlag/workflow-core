@@ -15,6 +15,8 @@ namespace WorkflowCore.Models.Search
 
         public string Reference { get; set; }
 
+        public string CorrelationId { get; set; }
+
         public DateTime? NextExecutionUtc { get; set; }
 
         public WorkflowStatus Status { get; set; }

@@ -19,6 +19,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             persistable.Data = JsonConvert.SerializeObject(instance.Data, SerializerSettings);
             persistable.Description = instance.Description;
             persistable.Reference = instance.Reference;
+            persistable.CorrelationId = instance.CorrelationId;
             persistable.InstanceId = new Guid(instance.Id);
             persistable.NextExecution = instance.NextExecution;
             persistable.Version = instance.Version;
@@ -129,6 +130,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.Data = JsonConvert.DeserializeObject(instance.Data, SerializerSettings);
             result.Description = instance.Description;
             result.Reference = instance.Reference;
+            result.CorrelationId = instance.CorrelationId;
             result.Id = instance.InstanceId.ToString();
             result.NextExecution = instance.NextExecution;
             result.Version = instance.Version;

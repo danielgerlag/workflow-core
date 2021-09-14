@@ -24,6 +24,9 @@ namespace WorkflowCore.Persistence.EntityFramework.Models
         [MaxLength(200)]
         public string Reference { get; set; }
 
+        [MaxLength(200)]
+        public string CorrelationId { get; set; }
+
         public virtual PersistedExecutionPointerCollection ExecutionPointers { get; set; } = new PersistedExecutionPointerCollection();
 
         public long? NextExecution { get; set; }

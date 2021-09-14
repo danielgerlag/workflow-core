@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using WorkflowCore.Exceptions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
@@ -28,6 +29,17 @@ namespace WorkflowCore.Services
         {
             lock (_instances)
             {
+                if (workflow.CorrelationId != null)
+                {
+                    var existing = _instances.FirstOrDefault(x =>
+                        workflow.CorrelationId.Equals(x.CorrelationId, StringComparison.Ordinal));
+
+                    if (existing != null)
+                    {
+                        throw new WorkflowExistsException();
+                    }
+                }
+
                 workflow.Id = Guid.NewGuid().ToString();
                 _instances.Add(workflow);
                 return workflow.Id;
@@ -58,6 +70,14 @@ namespace WorkflowCore.Services
             lock (_instances)
             {
                 return _instances.First(x => x.Id == Id);
+            }
+        }
+
+        public async Task<WorkflowInstance> GetWorkflowInstanceByCorrelationId(string correlationId, CancellationToken cancellationToken = default)
+        {
+            lock (_instances)
+            {
+                return _instances.First(x => x.CorrelationId == correlationId);
             }
         }
 

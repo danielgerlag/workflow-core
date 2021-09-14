@@ -1,7 +1,10 @@
-﻿using System;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Npgsql;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using WorkflowCore.Exceptions;
 using WorkflowCore.Persistence.EntityFramework.Models;
 using WorkflowCore.Persistence.EntityFramework.Services;
 
@@ -59,6 +62,25 @@ namespace WorkflowCore.Persistence.PostgreSQL
         {
             builder.ToTable("Event", _schemaName);
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
+        }
+
+        public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())
+        {
+            try
+            {
+                return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+            }
+            catch (DbUpdateException e)
+                when (e.InnerException is PostgresException pe)
+            {
+                if (pe.Message.Contains("CorrelationId", StringComparison.OrdinalIgnoreCase)
+                    && pe.Message.Contains("UNIQUE", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new WorkflowExistsException(pe);
+                }
+
+                throw;
+            }
         }
     }
 }

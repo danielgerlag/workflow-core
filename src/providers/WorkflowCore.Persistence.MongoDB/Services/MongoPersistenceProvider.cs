@@ -1,17 +1,18 @@
-﻿using MongoDB.Bson.Serialization;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson.Serialization.IdGenerators;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Conventions;
-using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver.Linq;
+using WorkflowCore.Exceptions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
-using System.Threading;
 
 namespace WorkflowCore.Persistence.MongoDB.Services
 {
@@ -43,6 +44,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                     .SetSerializer(new DataObjectSerializer());
                 x.MapProperty(y => y.Description);
                 x.MapProperty(y => y.Reference);
+                x.MapProperty(y => y.CorrelationId);
                 x.MapProperty(y => y.WorkflowDefinitionId);
                 x.MapProperty(y => y.Version);
                 x.MapProperty(y => y.NextExecution);
@@ -94,6 +96,16 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                     Builders<WorkflowInstance>.IndexKeys.Ascending(x => x.NextExecution),
                     new CreateIndexOptions {Background = true, Name = "idx_nextExec"}));
 
+                instance.WorkflowInstances.Indexes.CreateOne(new CreateIndexModel<WorkflowInstance>(
+                    Builders<WorkflowInstance>.IndexKeys.Ascending(x => x.CorrelationId),
+                    new CreateIndexOptions<WorkflowInstance>
+                    {
+                        Background = true,
+                        Name = "idx_correlationId",
+                        Unique = true,
+                        PartialFilterExpression = "{CorrelationId: {$type: \"string\"}}"
+                    }));
+
                 instance.Events.Indexes.CreateOne(new CreateIndexModel<Event>(
                     Builders<Event>.IndexKeys.Ascending(x => x.IsProcessed),
                     new CreateIndexOptions {Background = true, Name = "idx_processed"}));
@@ -125,8 +137,21 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken = default)
         {
-            await WorkflowInstances.InsertOneAsync(workflow, cancellationToken: cancellationToken);
-            return workflow.Id;
+            try
+            {
+                await WorkflowInstances.InsertOneAsync(workflow, cancellationToken: cancellationToken);
+                return workflow.Id;
+            }
+            catch (MongoWriteException e)
+            {
+                if (e.Message.Contains("CorrelationId")
+                    && e.Message.Contains("duplicate"))
+                {
+                    throw new WorkflowExistsException(e);
+                }
+
+                throw;
+            }
         }
 
         public async Task PersistWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken = default)
@@ -147,6 +172,12 @@ namespace WorkflowCore.Persistence.MongoDB.Services
         public async Task<WorkflowInstance> GetWorkflowInstance(string Id, CancellationToken cancellationToken = default)
         {
             var result = await WorkflowInstances.FindAsync(x => x.Id == Id, cancellationToken: cancellationToken);
+            return await result.FirstAsync(cancellationToken);
+        }
+
+        public async Task<WorkflowInstance> GetWorkflowInstanceByCorrelationId(string correlationId, CancellationToken cancellationToken = default)
+        {
+            var result = await WorkflowInstances.FindAsync(x => x.CorrelationId == correlationId, cancellationToken: cancellationToken);
             return await result.FirstAsync(cancellationToken);
         }
 

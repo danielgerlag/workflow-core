@@ -19,6 +19,8 @@ namespace WorkflowCore.Providers.Elasticsearch.Models
 
         public string Reference { get; set; }
 
+        public string CorrelationId { get; set; }
+
         public DateTime? NextExecutionUtc { get; set; }
 
         public string Status { get; set; }
@@ -47,6 +49,7 @@ namespace WorkflowCore.Providers.Elasticsearch.Models
                 Description = Description,
                 NextExecutionUtc = NextExecutionUtc,
                 Reference = Reference,
+                CorrelationId = CorrelationId,
                 Status = (WorkflowStatus) Enum.Parse(typeof(WorkflowStatus), Status, true),
                 Version = Version,
                 WorkflowDefinitionId = WorkflowDefinitionId,
@@ -69,6 +72,7 @@ namespace WorkflowCore.Providers.Elasticsearch.Models
             result.WorkflowDefinitionId = workflow.WorkflowDefinitionId;
             result.Description = workflow.Description;
             result.Reference = workflow.Reference;
+            result.CorrelationId = workflow.CorrelationId;
 
             if (workflow.Data != null)
                 result.Data.Add(workflow.Data.GetType().FullName, workflow.Data);

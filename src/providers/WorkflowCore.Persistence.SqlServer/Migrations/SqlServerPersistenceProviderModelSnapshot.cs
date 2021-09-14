@@ -2,6 +2,9 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using WorkflowCore.Persistence.SqlServer;
 
 namespace WorkflowCore.Persistence.SqlServer.Migrations
 {
@@ -255,6 +258,10 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                     b.Property<DateTime?>("CompleteTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("CorrelationId")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<DateTime>("CreateTime")
                         .HasColumnType("datetime2");
 
@@ -287,6 +294,10 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.HasKey("PersistenceId");
+
+                    b.HasIndex("CorrelationId")
+                        .IsUnique()
+                        .HasFilter("[CorrelationId] IS NOT NULL");
 
                     b.HasIndex("InstanceId")
                         .IsUnique();

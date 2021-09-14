@@ -41,6 +41,11 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 
 		public async Task<string> CreateNewWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken = default)
 		{
+			if (workflow.CorrelationId != null)
+			{
+				throw new NotImplementedException();
+			}
+
 			using (var session = _database.OpenAsyncSession())
 			{
 				await session.StoreAsync(workflow, cancellationToken);
@@ -91,6 +96,11 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 				return result;
 			}
 		}
+
+		public Task<WorkflowInstance> GetWorkflowInstanceByCorrelationId(string correlationId, CancellationToken cancellationToken = default)
+        {
+			throw new NotImplementedException();
+        }
 
 		public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids, CancellationToken cancellationToken = default)
 		{

@@ -36,6 +36,8 @@ namespace WorkflowCore.Services
 
         public Task<WorkflowInstance> GetWorkflowInstance(string Id, CancellationToken _ = default) => _innerService.GetWorkflowInstance(Id);
 
+        public Task<WorkflowInstance> GetWorkflowInstanceByCorrelationId(string correlationId, CancellationToken cancellationToken = default) => _innerService.GetWorkflowInstanceByCorrelationId(correlationId, cancellationToken);
+
         public Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids, CancellationToken _ = default) => _innerService.GetWorkflowInstances(ids);
 
         public Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take) => _innerService.GetWorkflowInstances(status, type, createdFrom, createdTo, skip, take);

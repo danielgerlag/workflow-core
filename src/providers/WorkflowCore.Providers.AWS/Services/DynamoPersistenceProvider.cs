@@ -34,6 +34,11 @@ namespace WorkflowCore.Providers.AWS.Services
 
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken = default)
         {
+            if (workflow.CorrelationId != null)
+            {
+                throw new NotImplementedException();
+            }
+
             workflow.Id = Guid.NewGuid().ToString();
 
             var req = new PutItemRequest
@@ -116,6 +121,11 @@ namespace WorkflowCore.Providers.AWS.Services
             var response = await _client.GetItemAsync(req, cancellationToken);
 
             return response.Item.ToWorkflowInstance();
+        }
+
+        public Task<WorkflowInstance> GetWorkflowInstanceByCorrelationId(string correlationId, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids, CancellationToken cancellationToken = default)

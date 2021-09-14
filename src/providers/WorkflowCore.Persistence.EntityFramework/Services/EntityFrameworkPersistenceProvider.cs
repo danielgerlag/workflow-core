@@ -112,6 +112,23 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             }
         }
 
+        public async Task<WorkflowInstance> GetWorkflowInstanceByCorrelationId(string correlationId, CancellationToken cancellationToken = default)
+        {
+            using (var db = ConstructDbContext())
+            {
+                var raw = await db.Set<PersistedWorkflow>()
+                    .Include(wf => wf.ExecutionPointers)
+                    .ThenInclude(ep => ep.ExtensionAttributes)
+                    .Include(wf => wf.ExecutionPointers)
+                    .FirstAsync(x => x.CorrelationId == correlationId, cancellationToken);
+
+                if (raw == null)
+                    return null;
+
+                return raw.ToWorkflowInstance();
+            }
+        }
+
         public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids, CancellationToken cancellationToken = default)
         {
             if (ids == null)

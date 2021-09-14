@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
+using WorkflowCore.Exceptions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.TestAssets;
@@ -13,6 +14,8 @@ namespace WorkflowCore.UnitTests
     public abstract class BasePersistenceFixture
     {
         protected abstract IPersistenceProvider Subject { get; }
+
+        protected virtual bool IsCorrelationIdSupported => true;
 
         [Fact]
         public void CreateNewWorkflow_should_generate_id()
@@ -40,6 +43,74 @@ namespace WorkflowCore.UnitTests
         }
 
         [Fact]
+        public void CreateNewWorkflow_should_create_duplicates_without_correlation_id()
+        {
+            var workflow = new WorkflowInstance
+            {
+                Data = new { Value1 = 7 },
+                Description = "My Description",
+                Status = WorkflowStatus.Runnable,
+                NextExecution = 0,
+                Version = 1,
+                WorkflowDefinitionId = "My Workflow"
+            };
+            workflow.ExecutionPointers.Add(new ExecutionPointer
+            {
+                Id = Guid.NewGuid().ToString(),
+                Active = true,
+                StepId = 0
+            });
+
+            var workflowId1 = Subject.CreateNewWorkflow(workflow).Result;
+
+            workflow.Id = null;
+
+            var workflowId2 = Subject.CreateNewWorkflow(workflow).Result;
+
+            workflowId1.Should().NotBeNull();
+            workflowId2.Should().NotBeNull();
+            workflowId2.Should().NotBe(workflowId1);
+        }
+
+        [Fact]
+        public void CreateNewWorkflow_with_duplicate_correlation_id_should_fail()
+        {
+            var workflow = new WorkflowInstance
+            {
+                Data = new { Value1 = 7 },
+                Description = "My Description",
+                Status = WorkflowStatus.Runnable,
+                NextExecution = 0,
+                Version = 1,
+                WorkflowDefinitionId = "My Workflow",
+                CorrelationId = ""
+            };
+            workflow.ExecutionPointers.Add(new ExecutionPointer
+            {
+                Id = Guid.NewGuid().ToString(),
+                Active = true,
+                StepId = 0
+            });
+
+            Func<Task> action1 = () => Subject.CreateNewWorkflow(workflow);
+            
+            if (IsCorrelationIdSupported)
+            {
+                action1.ShouldNotThrow();
+
+                workflow.Id = null;
+
+                Func<Task> action2 = () => Subject.CreateNewWorkflow(workflow);
+            
+                action2.ShouldThrow<WorkflowExistsException>();
+            }
+            else
+            {
+                action1.ShouldThrow<NotImplementedException>();
+            }
+        }
+
+        [Fact]
         public void GetWorkflowInstance_should_retrieve_workflow()
         {
             var workflow = new WorkflowInstance
@@ -50,7 +121,8 @@ namespace WorkflowCore.UnitTests
                 NextExecution = 0,
                 Version = 1,
                 WorkflowDefinitionId = "My Workflow",
-                Reference = "My Reference"
+                Reference = "My Reference",
+                CorrelationId = IsCorrelationIdSupported ? Guid.NewGuid().ToString() : null
             };
             workflow.ExecutionPointers.Add(new ExecutionPointer
             {
@@ -70,6 +142,48 @@ namespace WorkflowCore.UnitTests
         }
 
         [Fact]
+        public void GetWorkflowInstanceByCorrelationId_should_retrieve_workflow()
+        {
+            var correlationId = Guid.NewGuid().ToString();
+
+            if (IsCorrelationIdSupported)
+            {
+                var workflow = new WorkflowInstance
+                {
+                    Data = new TestData { Value1 = 7 },
+                    Description = "My Description",
+                    Status = WorkflowStatus.Runnable,
+                    NextExecution = 0,
+                    Version = 1,
+                    WorkflowDefinitionId = "My Workflow",
+                    Reference = "My Reference",
+                    CorrelationId = correlationId
+                };
+                workflow.ExecutionPointers.Add(new ExecutionPointer
+                {
+                    Id = "1",
+                    Active = true,
+                    StepId = 0,
+                    SleepUntil = new DateTime(2000, 1, 1).ToUniversalTime(),
+                    Scope = new List<string> { "4", "3", "2", "1" }
+                });
+                var workflowId = Subject.CreateNewWorkflow(workflow).Result;
+
+                var retrievedWorkflow = Subject.GetWorkflowInstanceByCorrelationId(correlationId).Result;
+
+                retrievedWorkflow.ShouldBeEquivalentTo(workflow);
+                retrievedWorkflow.ExecutionPointers.FindById("1")
+                    .Scope.Should().ContainInOrder(workflow.ExecutionPointers.FindById("1").Scope);
+            }
+            else
+            {
+                Func<Task> action = () => Subject.GetWorkflowInstanceByCorrelationId(correlationId);
+                
+                action.ShouldThrow<NotImplementedException>();
+            }
+        }
+
+        [Fact]
         public void GetWorkflowInstances_should_retrieve_workflows()
         {
             var workflow01 = new WorkflowInstance
@@ -80,7 +194,8 @@ namespace WorkflowCore.UnitTests
                 NextExecution = 0,
                 Version = 1,
                 WorkflowDefinitionId = "My Workflow",
-                Reference = "My Reference"
+                Reference = "My Reference",
+                CorrelationId = IsCorrelationIdSupported ? Guid.NewGuid().ToString() : null
             };
             workflow01.ExecutionPointers.Add(new ExecutionPointer
             {
@@ -100,7 +215,8 @@ namespace WorkflowCore.UnitTests
                 NextExecution = 0,
                 Version = 1,
                 WorkflowDefinitionId = "My Workflow",
-                Reference = "My Reference"
+                Reference = "My Reference",
+                CorrelationId = IsCorrelationIdSupported ? Guid.NewGuid().ToString() : null
             };
             workflow02.ExecutionPointers.Add(new ExecutionPointer
             {
@@ -120,7 +236,8 @@ namespace WorkflowCore.UnitTests
                 NextExecution = 0,
                 Version = 1,
                 WorkflowDefinitionId = "My Workflow",
-                Reference = "My Reference"
+                Reference = "My Reference",
+                CorrelationId = IsCorrelationIdSupported ? Guid.NewGuid().ToString() : null
             };
             workflow03.ExecutionPointers.Add(new ExecutionPointer
             {
@@ -164,7 +281,8 @@ namespace WorkflowCore.UnitTests
                 Version = 1,
                 WorkflowDefinitionId = "My Workflow",
                 CreateTime = new DateTime(2000, 1, 1).ToUniversalTime(),
-                Reference = "My Reference"
+                Reference = "My Reference",
+                CorrelationId = IsCorrelationIdSupported ? Guid.NewGuid().ToString() : null
             };
             oldWorkflow.ExecutionPointers.Add(new ExecutionPointer
             {

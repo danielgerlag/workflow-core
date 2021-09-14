@@ -49,26 +49,26 @@ namespace WorkflowCore.Services
             _lifeCycleEventHub = lifeCycleEventHub;
         }
         
-        public Task<string> StartWorkflow(string workflowId, object data = null, string reference=null)
+        public Task<string> StartWorkflow(string workflowId, object data = null, string reference=null, string correlationId = null)
         {
-            return _workflowController.StartWorkflow(workflowId, data, reference);
+            return _workflowController.StartWorkflow(workflowId, data, reference, correlationId);
         }
 
-        public Task<string> StartWorkflow(string workflowId, int? version, object data = null, string reference=null)
+        public Task<string> StartWorkflow(string workflowId, int? version, object data = null, string reference=null, string correlationId = null)
         {
-            return _workflowController.StartWorkflow<object>(workflowId, version, data, reference);
+            return _workflowController.StartWorkflow<object>(workflowId, version, data, reference, correlationId);
         }
 
-        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null, string reference=null)
+        public Task<string> StartWorkflow<TData>(string workflowId, TData data = null, string reference=null, string correlationId = null)
             where TData : class, new()
         {
-            return _workflowController.StartWorkflow<TData>(workflowId, null, data, reference);
+            return _workflowController.StartWorkflow<TData>(workflowId, null, data, reference, correlationId);
         }
         
-        public Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference=null)
+        public Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference=null, string correlationId = null)
             where TData : class, new()
         {
-            return _workflowController.StartWorkflow(workflowId, version, data, reference);
+            return _workflowController.StartWorkflow(workflowId, version, data, reference, correlationId);
         }
 
         public Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null)

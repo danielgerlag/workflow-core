@@ -64,6 +64,11 @@ namespace WorkflowCore.Providers.Azure.Services
 
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken)
         {
+            if (workflow.CorrelationId != null)
+            {
+                throw new NotImplementedException();
+            }
+
             workflow.Id = Guid.NewGuid().ToString();
             var result = await _workflowContainer.Value.CreateItemAsync(PersistedWorkflow.FromInstance(workflow), cancellationToken: cancellationToken);
             return result.Resource.id;
@@ -189,6 +194,11 @@ namespace WorkflowCore.Providers.Azure.Services
         {
             var result = await _workflowContainer.Value.ReadItemAsync<PersistedWorkflow>(Id, new PartitionKey(Id), cancellationToken: cancellationToken);
             return PersistedWorkflow.ToInstance(result.Resource);
+        }
+
+        public Task<WorkflowInstance> GetWorkflowInstanceByCorrelationId(string correlationId, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
 
         public Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take)

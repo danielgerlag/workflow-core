@@ -19,7 +19,8 @@ namespace WorkflowCore.Interface
 
         Task<WorkflowInstance> GetWorkflowInstance(string Id, CancellationToken cancellationToken = default);
 
-        Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids, CancellationToken cancellationToken = default);
+        Task<WorkflowInstance> GetWorkflowInstanceByCorrelationId(string correlationId, CancellationToken cancellationToken = default);
 
+        Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids, CancellationToken cancellationToken = default);
     }
 }

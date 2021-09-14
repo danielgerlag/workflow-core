@@ -13,6 +13,8 @@ namespace WorkflowCore.Tests.Redis
         RedisDockerSetup _dockerSetup;
         private IPersistenceProvider _subject;
 
+        protected override bool IsCorrelationIdSupported => false;
+
         public RedisPersistenceProviderFixture(RedisDockerSetup dockerSetup)
         {
             _dockerSetup = dockerSetup;

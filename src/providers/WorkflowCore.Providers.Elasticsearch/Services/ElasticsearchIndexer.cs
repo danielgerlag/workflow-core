@@ -58,6 +58,7 @@ namespace WorkflowCore.Providers.Elasticsearch.Services
                     .Bool(b => b
                         .Filter(BuildFilterQuery(filters))
                         .Should(
+                            should => should.Match(t => t.Field(f => f.CorrelationId).Query(terms).Boost(1.3)),
                             should => should.Match(t => t.Field(f => f.Reference).Query(terms).Boost(1.2)),
                             should => should.Match(t => t.Field(f => f.DataTokens).Query(terms).Boost(1.1)),
                             should => should.Match(t => t.Field(f => f.WorkflowDefinitionId).Query(terms).Boost(0.9)),

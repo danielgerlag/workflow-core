@@ -41,6 +41,7 @@ namespace WorkflowCore.IntegrationTests
                 CreateTime = new DateTime(2020, 1, 1),
                 Status = WorkflowStatus.Runnable,
                 Reference = "ref2",
+                CorrelationId = "Correlation Id",
                 Data = new DataObject
                 {
                     Value3 = 7
@@ -127,6 +128,16 @@ namespace WorkflowCore.IntegrationTests
         public async void should_filter_on_reference()
         {
             var result = await Subject.Search(null, 0, 10, ScalarFilter.Equals(x => x.Reference, "ref2"));
+
+            result.Data.Should().NotContain(x => x.Id == "1");
+            result.Data.Should().Contain(x => x.Id == "2");
+            result.Data.Should().NotContain(x => x.Id == "3");
+        }
+
+        [Fact]
+        public async void should_filter_on_correlation_id()
+        {
+            var result = await Subject.Search(null, 0, 10, ScalarFilter.Equals(x => x.CorrelationId, "Correlation Id"));
 
             result.Data.Should().NotContain(x => x.Id == "1");
             result.Data.Should().Contain(x => x.Id == "2");

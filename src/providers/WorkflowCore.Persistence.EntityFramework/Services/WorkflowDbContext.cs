@@ -22,6 +22,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             var workflows = modelBuilder.Entity<PersistedWorkflow>();
             workflows.HasIndex(x => x.InstanceId).IsUnique();
             workflows.HasIndex(x => x.NextExecution);
+            workflows.HasIndex(x => x.CorrelationId).IsUnique();
 
             var executionPointers = modelBuilder.Entity<PersistedExecutionPointer>();
             var executionErrors = modelBuilder.Entity<PersistedExecutionError>();

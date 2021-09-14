@@ -1,7 +1,11 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using MySqlConnector;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using WorkflowCore.Exceptions;
 using WorkflowCore.Persistence.EntityFramework.Models;
 using WorkflowCore.Persistence.EntityFramework.Services;
 
@@ -62,6 +66,25 @@ namespace WorkflowCore.Persistence.MySQL
         {
             builder.ToTable("Event");
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
+        }
+
+        public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())
+        {
+            try
+            {
+                return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+            }
+            catch (DbUpdateException e)
+                when (e.InnerException is MySqlException se)
+            {
+                if (se.Message.Contains("CorrelationId", StringComparison.OrdinalIgnoreCase)
+                    && se.Message.Contains("Duplicate", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new WorkflowExistsException(se);
+                }
+
+                throw;
+            }
         }
     }
 }
