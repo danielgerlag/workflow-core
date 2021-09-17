@@ -217,30 +217,116 @@ namespace WorkflowCore.Services.DefinitionStorage
                 var sourceExpr = DynamicExpressionParser.ParseLambda(new[] { stepParameter }, typeof(object), output.Value);
 
                 var dataParameter = Expression.Parameter(dataType, "data");
-                Expression targetProperty;
 
-                // Check if our datatype has a matching property
-                var propertyInfo = dataType.GetProperty(output.Key);
-                if (propertyInfo != null)
+
+                if(output.Key.Contains(".") || output.Key.Contains("["))
                 {
-                    targetProperty = Expression.Property(dataParameter, propertyInfo);
-                    var targetExpr = Expression.Lambda(targetProperty, dataParameter);
-                    step.Outputs.Add(new MemberMapParameter(sourceExpr, targetExpr));
+                    AttachNestedOutput(output, step, source, sourceExpr, dataParameter);
+                }else
+                {
+                    AttachDirectlyOutput(output, step, dataType, sourceExpr, dataParameter);
                 }
-                else
+            }
+        }
+
+        private void AttachDirectlyOutput(KeyValuePair<string, string> output, WorkflowStep step, Type dataType, LambdaExpression sourceExpr, ParameterExpression dataParameter)
+        {
+            Expression targetProperty;
+
+            // Check if our datatype has a matching property
+            var propertyInfo = dataType.GetProperty(output.Key);
+            if (propertyInfo != null)
+            {
+                targetProperty = Expression.Property(dataParameter, propertyInfo);
+                var targetExpr = Expression.Lambda(targetProperty, dataParameter);
+                step.Outputs.Add(new MemberMapParameter(sourceExpr, targetExpr));
+            }
+            else
+            {
+                // If we did not find a matching property try to find a Indexer with string parameter
+                propertyInfo = dataType.GetProperty("Item");
+                targetProperty = Expression.Property(dataParameter, propertyInfo, Expression.Constant(output.Key));
+
+                Action<IStepBody, object> acn = (pStep, pData) =>
                 {
-                    // If we did not find a matching property try to find a Indexer with string parameter
-                    propertyInfo = dataType.GetProperty("Item");
-                    targetProperty = Expression.Property(dataParameter, propertyInfo, Expression.Constant(output.Key));
+                    object resolvedValue = sourceExpr.Compile().DynamicInvoke(pStep); ;
+                    propertyInfo.SetValue(pData, resolvedValue, new object[] { output.Key });
+                };
+
+                step.Outputs.Add(new ActionParameter<IStepBody, object>(acn));
+            }
+
+        }
+
+        private void AttachNestedOutput( KeyValuePair<string, string> output, WorkflowStep step, StepSourceV1 source, LambdaExpression sourceExpr, ParameterExpression dataParameter)
+        {
+            PropertyInfo propertyInfo = null;
+            String[] paths = output.Key.Split('.');
+         
+            Expression targetProperty = dataParameter;
+
+            bool hasAddOutput = false;
+
+            foreach (String propertyName in paths)
+            {
+                if (hasAddOutput)
+                {
+                    throw new ArgumentException($"Unknown property for output {output.Key} on {source.Id}");
+                }
+
+                if (targetProperty == null)
+                {
+                    break;
+                }
+
+                if (propertyName.Contains("["))
+                {
+                    String[] items = propertyName.Split('[');
+
+                    if (items.Length != 2)
+                    {
+                        throw new ArgumentException($"Unknown property for output {output.Key} on {source.Id}");
+                    }
+
+                    items[1] = items[1].Trim().TrimEnd(']').Trim().Trim('"');
+
+                    MemberExpression memberExpression = Expression.Property(targetProperty, items[0]);
+
+                    if (memberExpression == null)
+                    {
+                        throw new ArgumentException($"Unknown property for output {output.Key} on {source.Id}");
+                    }
+                    propertyInfo = ((PropertyInfo)memberExpression.Member).PropertyType.GetProperty("Item");
 
                     Action<IStepBody, object> acn = (pStep, pData) =>
                     {
+                        var targetExpr = Expression.Lambda(memberExpression, dataParameter);
+                        object data = targetExpr.Compile().DynamicInvoke(pData);
                         object resolvedValue = sourceExpr.Compile().DynamicInvoke(pStep); ;
-                        propertyInfo.SetValue(pData, resolvedValue, new object[] { output.Key });
+                        propertyInfo.SetValue(data, resolvedValue, new object[] { items[1] });
                     };
 
                     step.Outputs.Add(new ActionParameter<IStepBody, object>(acn));
+                    hasAddOutput = true;
                 }
+                else
+                {
+                    try
+                    {
+                        targetProperty = Expression.Property(targetProperty, propertyName);
+                    }
+                    catch
+                    {
+                        targetProperty = null;
+                        break;
+                    }
+                }
+            }
+
+            if (targetProperty != null && !hasAddOutput)
+            {
+                var targetExpr = Expression.Lambda(targetProperty, dataParameter);
+                step.Outputs.Add(new MemberMapParameter(sourceExpr, targetExpr));
             }
         }
 
