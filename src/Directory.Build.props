@@ -5,9 +5,9 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/danielgerlag/workflow-core.git</RepositoryUrl>
     <Version>3.5.5</Version>
-    <AssemblyVersion>3.5.5.0</AssemblyVersion>
-    <FileVersion>3.5.5.0</FileVersion>
+    <AssemblyVersion>3.5.6.0</AssemblyVersion>
+    <FileVersion>3.5.6.0</FileVersion>
     <PackageIconUrl>https://github.com/danielgerlag/workflow-core/raw/master/src/logo.png</PackageIconUrl>
-    <PackageVersion>3.5.5</PackageVersion>
+    <PackageVersion>3.5.6</PackageVersion>
   </PropertyGroup>
 </Project>
