@@ -9,7 +9,10 @@ namespace WorkflowCore.Tests.MongoDB.Scenarios
     {        
         protected override void ConfigureServices(IServiceCollection services)
         {
-            services.AddWorkflow(x => x.UseMongoDB(MongoDockerSetup.ConnectionString, "integration-tests"));
+            // Should be "integration-tests".
+            // But MongoPersistenceProvider uses static indexesCreated
+            // so if we have two databases in same process then second database is created without indexes.
+            services.AddWorkflow(x => x.UseMongoDB(MongoDockerSetup.ConnectionString, "workflow-tests"));
         }
     }
 }

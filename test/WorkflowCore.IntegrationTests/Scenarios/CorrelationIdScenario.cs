@@ -37,10 +37,9 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
+            workflowId2.Should().Be(workflowId);
             GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
             UnhandledStepErrors.Count.Should().Be(0);
-
-            workflowId2.Should().Be(workflowId);
         }
     }
 }

@@ -15,7 +15,6 @@ namespace WorkflowCore.Models
 
         public string Reference { get; set; }
 
-        // TODO: search with Reference
         public string CorrelationId { get; set; }
 
         public ExecutionPointerCollection ExecutionPointers { get; set; } = new ExecutionPointerCollection();
