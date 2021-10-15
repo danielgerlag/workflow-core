@@ -69,11 +69,25 @@ namespace WorkflowCore.Services.BackgroundTasks
 
                     await _persistenceStore.PersistErrors(result.Errors, cancellationToken);
 
-                    var readAheadTicks = _datetimeProvider.UtcNow.Add(Options.PollInterval).Ticks;
-
-                    if ((workflow.Status == WorkflowStatus.Runnable) && workflow.NextExecution.HasValue && workflow.NextExecution.Value < readAheadTicks)
+                    if ((workflow.Status == WorkflowStatus.Runnable) && workflow.NextExecution.HasValue)
                     {
-                        new Task(() => FutureQueue(workflow, cancellationToken)).Start();
+                        var readAheadTicks = _datetimeProvider.UtcNow.Add(Options.PollInterval).Ticks;
+                        if (workflow.NextExecution.Value < readAheadTicks)
+                        {
+                            new Task(() => FutureQueue(workflow, cancellationToken)).Start();
+                        }
+                        else
+                        {
+                            if (_persistenceStore.SupportsScheduledCommands)
+                            {
+                                await _persistenceStore.ScheduleCommand(new ScheduledCommand()
+                                {
+                                    CommandName = ScheduledCommand.ProcessWorkflow,
+                                    Data = workflow.Id,
+                                    ExecuteTime = workflow.NextExecution.Value
+                                });
+                            }
+                        }
                     }
                 }
             }

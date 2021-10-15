@@ -17,6 +17,8 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
         private readonly bool _canMigrateDB;
         private readonly IWorkflowDbContextFactory _contextFactory;
 
+        public bool SupportsScheduledCommands => false;
+
         public EntityFrameworkPersistenceProvider(IWorkflowDbContextFactory contextFactory, bool canCreateDB, bool canMigrateDB)
         {
             _contextFactory = contextFactory;
@@ -364,6 +366,16 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 existingEntity.ExternalTokenExpiry = null;
                 await db.SaveChangesAsync(cancellationToken);
             }
+        }
+
+        public Task ScheduleCommand(ScheduledCommand command)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task ProcessCommands(DateTimeOffset asOf, Func<ScheduledCommand, Task> action, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
     }
 }

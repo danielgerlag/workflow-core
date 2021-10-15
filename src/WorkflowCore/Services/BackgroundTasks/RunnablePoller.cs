@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -49,16 +50,33 @@ namespace WorkflowCore.Services.BackgroundTasks
         /// </summary>        
         private async void PollRunnables(object target)
         {
+            await PollWorkflows();
+            await PollEvents();
+            await PollCommands();
+        }
+
+        private async Task PollWorkflows()
+        {
             try
             {
                 if (await _lockProvider.AcquireLock("poll runnables", new CancellationToken()))
                 {
                     try
                     {
-                        _logger.LogInformation("Polling for runnable workflows");                        
+                        _logger.LogInformation("Polling for runnable workflows");
                         var runnables = await _persistenceStore.GetRunnableInstances(_dateTimeProvider.Now);
                         foreach (var item in runnables)
                         {
+                            if (_persistenceStore.SupportsScheduledCommands)
+                            {
+                                await _persistenceStore.ScheduleCommand(new ScheduledCommand()
+                                {
+                                    CommandName = ScheduledCommand.ProcessWorkflow,
+                                    Data = item,
+                                    ExecuteTime = _dateTimeProvider.UtcNow.Ticks
+                                });
+                                continue;
+                            }
                             if (_greylist.Contains($"wf:{item}"))
                             {
                                 _logger.LogDebug($"Got greylisted workflow {item}");
@@ -79,17 +97,30 @@ namespace WorkflowCore.Services.BackgroundTasks
             {
                 _logger.LogError(ex, ex.Message);
             }
+        }
 
+        private async Task PollEvents()
+        {
             try
             {
                 if (await _lockProvider.AcquireLock("unprocessed events", new CancellationToken()))
                 {
                     try
                     {
-                        _logger.LogInformation("Polling for unprocessed events");                        
+                        _logger.LogInformation("Polling for unprocessed events");
                         var events = await _persistenceStore.GetRunnableEvents(_dateTimeProvider.Now);
                         foreach (var item in events.ToList())
                         {
+                            if (_persistenceStore.SupportsScheduledCommands)
+                            {
+                                await _persistenceStore.ScheduleCommand(new ScheduledCommand()
+                                {
+                                    CommandName = ScheduledCommand.ProcessEvent,
+                                    Data = item,
+                                    ExecuteTime = _dateTimeProvider.UtcNow.Ticks
+                                });
+                                continue;
+                            }
                             if (_greylist.Contains($"evt:{item}"))
                             {
                                 _logger.LogDebug($"Got greylisted event {item}");
@@ -103,6 +134,40 @@ namespace WorkflowCore.Services.BackgroundTasks
                     finally
                     {
                         await _lockProvider.ReleaseLock("unprocessed events");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+            }
+        }
+
+        private async Task PollCommands()
+        {
+            try
+            {
+                if (await _lockProvider.AcquireLock("poll-commands", new CancellationToken()))
+                {
+                    try
+                    {
+                        _logger.LogInformation("Polling for scheduled commands");
+                        await _persistenceStore.ProcessCommands(new DateTimeOffset(_dateTimeProvider.UtcNow), async (command) =>
+                        {
+                            switch (command.CommandName)
+                            {
+                                case ScheduledCommand.ProcessWorkflow:
+                                    await _queueProvider.QueueWork(command.Data, QueueType.Workflow);
+                                    break;
+                                case ScheduledCommand.ProcessEvent:
+                                    await _queueProvider.QueueWork(command.Data, QueueType.Event);
+                                    break;
+                            }
+                        });
+                    }
+                    finally
+                    {
+                        await _lockProvider.ReleaseLock("poll-commands");
                     }
                 }
             }

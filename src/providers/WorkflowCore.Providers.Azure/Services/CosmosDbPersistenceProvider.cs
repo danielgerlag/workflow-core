@@ -35,6 +35,8 @@ namespace WorkflowCore.Providers.Azure.Services
             _subscriptionContainer = new Lazy<Container>(() => _clientFactory.GetCosmosClient().GetDatabase(_dbId).GetContainer(cosmosDbStorageOptions.SubscriptionContainerName));
         }
 
+        public bool SupportsScheduledCommands => false;
+
         public async Task ClearSubscriptionToken(string eventSubscriptionId, string token, CancellationToken cancellationToken = default)
         {
             var existing = await _subscriptionContainer.Value.ReadItemAsync<PersistedSubscription>(eventSubscriptionId, new PartitionKey(eventSubscriptionId));
@@ -223,6 +225,16 @@ namespace WorkflowCore.Providers.Azure.Services
         public async Task PersistWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken)
         {
             await _workflowContainer.Value.UpsertItemAsync(PersistedWorkflow.FromInstance(workflow), cancellationToken: cancellationToken);
+        }
+
+        public Task ProcessCommands(DateTimeOffset asOf, Func<ScheduledCommand, Task> action, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task ScheduleCommand(ScheduledCommand command)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry, CancellationToken cancellationToken)
