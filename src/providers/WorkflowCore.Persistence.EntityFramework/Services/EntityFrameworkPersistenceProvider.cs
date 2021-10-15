@@ -17,7 +17,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
         private readonly bool _canMigrateDB;
         private readonly IWorkflowDbContextFactory _contextFactory;
 
-        public bool SupportsScheduledCommands => false;
+        public bool SupportsScheduledCommands => true;
 
         public EntityFrameworkPersistenceProvider(IWorkflowDbContextFactory contextFactory, bool canCreateDB, bool canMigrateDB)
         {
@@ -368,14 +368,45 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             }
         }
 
-        public Task ScheduleCommand(ScheduledCommand command)
+        public async Task ScheduleCommand(ScheduledCommand command)
         {
-            throw new NotImplementedException();
+            try
+            {
+                using (var db = ConstructDbContext())
+                {
+                    var persistable = command.ToPersistable();
+                    var result = db.Set<PersistedScheduledCommand>().Add(persistable);
+                    await db.SaveChangesAsync();
+                }
+            }
+            catch (DbUpdateException)
+            {
+                //log
+            }
         }
 
-        public Task ProcessCommands(DateTimeOffset asOf, Func<ScheduledCommand, Task> action, CancellationToken cancellationToken = default)
+        public async Task ProcessCommands(DateTimeOffset asOf, Func<ScheduledCommand, Task> action, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            using (var db = ConstructDbContext())
+            {
+                var cursor = db.Set<PersistedScheduledCommand>()
+                    .Where(x => x.ExecuteTime < asOf.UtcDateTime.Ticks)
+                    .AsAsyncEnumerable();
+
+                await foreach (var command in cursor)
+                {
+                    try
+                    {
+                        await action(command.ToScheduledCommand());
+                        db.Set<PersistedScheduledCommand>().Remove(command);
+                        await db.SaveChangesAsync();
+                    }
+                    catch (Exception)
+                    {
+                        //TODO: add logger
+                    }
+                }
+            }
         }
     }
 }

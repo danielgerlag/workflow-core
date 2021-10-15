@@ -69,13 +69,20 @@ namespace WorkflowCore.Services.BackgroundTasks
                         {
                             if (_persistenceStore.SupportsScheduledCommands)
                             {
-                                await _persistenceStore.ScheduleCommand(new ScheduledCommand()
+                                try
                                 {
-                                    CommandName = ScheduledCommand.ProcessWorkflow,
-                                    Data = item,
-                                    ExecuteTime = _dateTimeProvider.UtcNow.Ticks
-                                });
-                                continue;
+                                    await _persistenceStore.ScheduleCommand(new ScheduledCommand()
+                                    {
+                                        CommandName = ScheduledCommand.ProcessWorkflow,
+                                        Data = item,
+                                        ExecuteTime = _dateTimeProvider.UtcNow.Ticks
+                                    });
+                                    continue;
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError(ex, ex.Message);
+                                }
                             }
                             if (_greylist.Contains($"wf:{item}"))
                             {
@@ -113,13 +120,20 @@ namespace WorkflowCore.Services.BackgroundTasks
                         {
                             if (_persistenceStore.SupportsScheduledCommands)
                             {
-                                await _persistenceStore.ScheduleCommand(new ScheduledCommand()
+                                try
                                 {
-                                    CommandName = ScheduledCommand.ProcessEvent,
-                                    Data = item,
-                                    ExecuteTime = _dateTimeProvider.UtcNow.Ticks
-                                });
-                                continue;
+                                    await _persistenceStore.ScheduleCommand(new ScheduledCommand()
+                                    {
+                                        CommandName = ScheduledCommand.ProcessEvent,
+                                        Data = item,
+                                        ExecuteTime = _dateTimeProvider.UtcNow.Ticks
+                                    });
+                                    continue;
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError(ex, ex.Message);
+                                }
                             }
                             if (_greylist.Contains($"evt:{item}"))
                             {

@@ -38,6 +38,10 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             events.HasIndex(x => x.EventTime);
             events.HasIndex(x => x.IsProcessed);
 
+            var commands = modelBuilder.Entity<PersistedScheduledCommand>();
+            commands.HasIndex(x => x.ExecuteTime);
+            commands.HasIndex(x => new { x.CommandName, x.Data}).IsUnique();
+
             ConfigureWorkflowStorage(workflows);
             ConfigureExecutionPointerStorage(executionPointers);
             ConfigureExecutionErrorStorage(executionErrors);
