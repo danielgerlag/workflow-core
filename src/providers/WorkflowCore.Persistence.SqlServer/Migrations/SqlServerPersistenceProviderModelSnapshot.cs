@@ -2,6 +2,9 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using WorkflowCore.Persistence.SqlServer;
 
 namespace WorkflowCore.Persistence.SqlServer.Migrations
 {
@@ -106,12 +109,12 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EventKey")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("EventName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<bool>("EventPublished")
                         .HasColumnType("bit");
