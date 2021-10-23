@@ -7,7 +7,8 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "PersistedScheduledCommand",
+                name: "ScheduledCommand",
+                schema: "wfc",
                 columns: table => new
                 {
                     PersistenceId = table.Column<long>(type: "bigint", nullable: false)
@@ -18,26 +19,29 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PersistedScheduledCommand", x => x.PersistenceId);
+                    table.PrimaryKey("PK_ScheduledCommand", x => x.PersistenceId);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_PersistedScheduledCommand_CommandName_Data",
-                table: "PersistedScheduledCommand",
+                name: "IX_ScheduledCommand_CommandName_Data",
+                schema: "wfc",
+                table: "ScheduledCommand",
                 columns: new[] { "CommandName", "Data" },
                 unique: true,
                 filter: "[CommandName] IS NOT NULL AND [Data] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PersistedScheduledCommand_ExecuteTime",
-                table: "PersistedScheduledCommand",
+                name: "IX_ScheduledCommand_ExecuteTime",
+                schema: "wfc",
+                table: "ScheduledCommand",
                 column: "ExecuteTime");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "PersistedScheduledCommand");
+                name: "ScheduledCommand",
+                schema: "wfc");
         }
     }
 }

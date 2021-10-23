@@ -207,7 +207,7 @@ namespace WorkflowCore.Persistence.MySQL.Migrations
                     b.HasIndex("CommandName", "Data")
                         .IsUnique();
 
-                    b.ToTable("PersistedScheduledCommand");
+                    b.ToTable("ScheduledCommand");
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedSubscription", b =>

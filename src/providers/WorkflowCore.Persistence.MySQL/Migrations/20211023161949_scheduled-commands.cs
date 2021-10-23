@@ -154,7 +154,7 @@ namespace WorkflowCore.Persistence.MySQL.Migrations
                 .OldAnnotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "PersistedScheduledCommand",
+                name: "ScheduledCommand",
                 columns: table => new
                 {
                     PersistenceId = table.Column<long>(type: "bigint", nullable: false)
@@ -167,26 +167,26 @@ namespace WorkflowCore.Persistence.MySQL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PersistedScheduledCommand", x => x.PersistenceId);
+                    table.PrimaryKey("PK_ScheduledCommand", x => x.PersistenceId);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PersistedScheduledCommand_CommandName_Data",
-                table: "PersistedScheduledCommand",
+                name: "IX_ScheduledCommand_CommandName_Data",
+                table: "ScheduledCommand",
                 columns: new[] { "CommandName", "Data" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PersistedScheduledCommand_ExecuteTime",
-                table: "PersistedScheduledCommand",
+                name: "IX_ScheduledCommand_ExecuteTime",
+                table: "ScheduledCommand",
                 column: "ExecuteTime");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "PersistedScheduledCommand");
+                name: "ScheduledCommand");
 
             migrationBuilder.AlterColumn<string>(
                 name: "InstanceId",

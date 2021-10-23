@@ -202,6 +202,8 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                     b.Property<long>("PersistenceId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:IdentityIncrement", 1)
+                        .HasAnnotation("SqlServer:IdentitySeed", 1)
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("CommandName")
@@ -223,7 +225,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                         .IsUnique()
                         .HasFilter("[CommandName] IS NOT NULL AND [Data] IS NOT NULL");
 
-                    b.ToTable("PersistedScheduledCommand");
+                    b.ToTable("ScheduledCommand", "wfc");
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedSubscription", b =>

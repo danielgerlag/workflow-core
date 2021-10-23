@@ -214,7 +214,7 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                     b.HasIndex("CommandName", "Data")
                         .IsUnique();
 
-                    b.ToTable("PersistedScheduledCommand");
+                    b.ToTable("ScheduledCommand", "wfc");
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedSubscription", b =>
