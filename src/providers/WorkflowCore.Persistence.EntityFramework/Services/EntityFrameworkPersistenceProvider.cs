@@ -398,8 +398,9 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     try
                     {
                         await action(command.ToScheduledCommand());
-                        db.Set<PersistedScheduledCommand>().Remove(command);
-                        await db.SaveChangesAsync();
+                        using var db2 = ConstructDbContext();
+                        db2.Set<PersistedScheduledCommand>().Remove(command);
+                        await db2.SaveChangesAsync();
                     }
                     catch (Exception)
                     {
