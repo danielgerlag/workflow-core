@@ -123,6 +123,16 @@ namespace WorkflowCore.Persistence.EntityFramework
             return result;
         }
 
+        internal static PersistedScheduledCommand ToPersistable(this ScheduledCommand instance)
+        {
+            var result = new PersistedScheduledCommand();
+            result.CommandName = instance.CommandName;
+            result.Data = instance.Data;
+            result.ExecuteTime = instance.ExecuteTime;
+
+            return result;
+        }
+
         internal static WorkflowInstance ToWorkflowInstance(this PersistedWorkflow instance)
         {
             WorkflowInstance result = new WorkflowInstance();
@@ -216,6 +226,16 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.EventTime = DateTime.SpecifyKind(instance.EventTime, DateTimeKind.Utc);
             result.IsProcessed = instance.IsProcessed;
             result.EventData = JsonConvert.DeserializeObject(instance.EventData, SerializerSettings);
+
+            return result;
+        }
+
+        internal static ScheduledCommand ToScheduledCommand(this PersistedScheduledCommand instance)
+        {
+            var result = new ScheduledCommand();
+            result.CommandName = instance.CommandName;
+            result.Data = instance.Data;
+            result.ExecuteTime = instance.ExecuteTime;
 
             return result;
         }

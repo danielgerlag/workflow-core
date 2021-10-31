@@ -24,6 +24,8 @@ namespace WorkflowCore.Providers.AWS.Services
         public const string SUBCRIPTION_TABLE = "subscriptions";
         public const string EVENT_TABLE = "events";
 
+        public bool SupportsScheduledCommands => false;
+
         public DynamoPersistenceProvider(AWSCredentials credentials, AmazonDynamoDBConfig config, IDynamoDbProvisioner provisioner, string tablePrefix, ILoggerFactory logFactory)
         {
             _logger = logFactory.CreateLogger<DynamoPersistenceProvider>();
@@ -468,6 +470,16 @@ namespace WorkflowCore.Providers.AWS.Services
             };
             
             await _client.UpdateItemAsync(request, cancellationToken);
+        }
+
+        public Task ScheduleCommand(ScheduledCommand command)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task ProcessCommands(DateTimeOffset asOf, Func<ScheduledCommand, Task> action, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
     }
 }

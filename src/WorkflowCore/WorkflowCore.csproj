@@ -26,6 +26,7 @@
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.7.0" />
     <PackageReference Include="System.Threading.Thread" Version="4.3.0" />
     <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
+	<InternalsVisibleTo Include="WorkflowCore.IntegrationTests" />
   </ItemGroup>
 
   <ItemGroup>
