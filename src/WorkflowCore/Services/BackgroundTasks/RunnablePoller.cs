@@ -161,6 +161,9 @@ namespace WorkflowCore.Services.BackgroundTasks
         {
             try
             {
+                if (!_persistenceStore.SupportsScheduledCommands)
+                    return;
+
                 if (await _lockProvider.AcquireLock("poll-commands", new CancellationToken()))
                 {
                     try
