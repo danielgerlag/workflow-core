@@ -2,6 +2,8 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using WorkflowCore.Persistence.MySQL;
 
 namespace WorkflowCore.Persistence.MySQL.Migrations
 {
@@ -12,8 +14,8 @@ namespace WorkflowCore.Persistence.MySQL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.2")
-                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+                .HasAnnotation("Relational:MaxIdentifierLength", 64)
+                .HasAnnotation("ProductVersion", "5.0.8");
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedEvent", b =>
                 {
@@ -22,18 +24,18 @@ namespace WorkflowCore.Persistence.MySQL.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("EventData")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.Property<Guid>("EventId")
                         .HasColumnType("char(36)");
 
                     b.Property<string>("EventKey")
-                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
 
                     b.Property<string>("EventName")
-                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
 
                     b.Property<DateTime>("EventTime")
                         .HasColumnType("datetime(6)");
@@ -65,15 +67,15 @@ namespace WorkflowCore.Persistence.MySQL.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("ExecutionPointerId")
-                        .HasColumnType("varchar(100) CHARACTER SET utf8mb4")
-                        .HasMaxLength(100);
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("Message")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("WorkflowId")
-                        .HasColumnType("varchar(100) CHARACTER SET utf8mb4")
-                        .HasMaxLength(100);
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.HasKey("PersistenceId");
 
@@ -90,47 +92,47 @@ namespace WorkflowCore.Persistence.MySQL.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Children")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ContextItem")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("EndTime")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("EventData")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("EventKey")
-                        .HasColumnType("varchar(100) CHARACTER SET utf8mb4")
-                        .HasMaxLength(100);
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("EventName")
-                        .HasColumnType("varchar(100) CHARACTER SET utf8mb4")
-                        .HasMaxLength(100);
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<bool>("EventPublished")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Id")
-                        .HasColumnType("varchar(50) CHARACTER SET utf8mb4")
-                        .HasMaxLength(50);
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("Outcome")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("PersistenceData")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("PredecessorId")
-                        .HasColumnType("varchar(100) CHARACTER SET utf8mb4")
-                        .HasMaxLength(100);
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<int>("RetryCount")
                         .HasColumnType("int");
 
                     b.Property<string>("Scope")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("SleepUntil")
                         .HasColumnType("datetime(6)");
@@ -145,8 +147,8 @@ namespace WorkflowCore.Persistence.MySQL.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("StepName")
-                        .HasColumnType("varchar(100) CHARACTER SET utf8mb4")
-                        .HasMaxLength(100);
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<long>("WorkflowId")
                         .HasColumnType("bigint");
@@ -165,11 +167,11 @@ namespace WorkflowCore.Persistence.MySQL.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("AttributeKey")
-                        .HasColumnType("varchar(100) CHARACTER SET utf8mb4")
-                        .HasMaxLength(100);
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("AttributeValue")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.Property<long>("ExecutionPointerId")
                         .HasColumnType("bigint");
@@ -181,6 +183,33 @@ namespace WorkflowCore.Persistence.MySQL.Migrations
                     b.ToTable("ExtensionAttribute");
                 });
 
+            modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedScheduledCommand", b =>
+                {
+                    b.Property<long>("PersistenceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("CommandName")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<string>("Data")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<long>("ExecuteTime")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("PersistenceId");
+
+                    b.HasIndex("ExecuteTime");
+
+                    b.HasIndex("CommandName", "Data")
+                        .IsUnique();
+
+                    b.ToTable("ScheduledCommand");
+                });
+
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedSubscription", b =>
                 {
                     b.Property<long>("PersistenceId")
@@ -188,27 +217,27 @@ namespace WorkflowCore.Persistence.MySQL.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("EventKey")
-                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
 
                     b.Property<string>("EventName")
-                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
 
                     b.Property<string>("ExecutionPointerId")
-                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
 
                     b.Property<string>("ExternalToken")
-                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
 
                     b.Property<DateTime?>("ExternalTokenExpiry")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("ExternalWorkerId")
-                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
 
                     b.Property<int>("StepId")
                         .HasColumnType("int");
@@ -217,15 +246,15 @@ namespace WorkflowCore.Persistence.MySQL.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("SubscriptionData")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.Property<Guid>("SubscriptionId")
-                        .HasColumnType("char(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("char(200)");
 
                     b.Property<string>("WorkflowId")
-                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
 
                     b.HasKey("PersistenceId");
 
@@ -252,22 +281,22 @@ namespace WorkflowCore.Persistence.MySQL.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Data")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Description")
-                        .HasColumnType("varchar(500) CHARACTER SET utf8mb4")
-                        .HasMaxLength(500);
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
 
                     b.Property<Guid>("InstanceId")
-                        .HasColumnType("char(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("char(200)");
 
                     b.Property<long?>("NextExecution")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Reference")
-                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -276,8 +305,8 @@ namespace WorkflowCore.Persistence.MySQL.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("WorkflowDefinitionId")
-                        .HasColumnType("varchar(200) CHARACTER SET utf8mb4")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
 
                     b.HasKey("PersistenceId");
 
@@ -296,6 +325,8 @@ namespace WorkflowCore.Persistence.MySQL.Migrations
                         .HasForeignKey("WorkflowId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Workflow");
                 });
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExtensionAttribute", b =>
@@ -305,6 +336,18 @@ namespace WorkflowCore.Persistence.MySQL.Migrations
                         .HasForeignKey("ExecutionPointerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ExecutionPointer");
+                });
+
+            modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedExecutionPointer", b =>
+                {
+                    b.Navigation("ExtensionAttributes");
+                });
+
+            modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedWorkflow", b =>
+                {
+                    b.Navigation("ExecutionPointers");
                 });
 #pragma warning restore 612, 618
         }

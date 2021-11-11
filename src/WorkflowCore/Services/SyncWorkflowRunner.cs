@@ -87,7 +87,7 @@ namespace WorkflowCore.Services
             {
                 while ((wf.Status == WorkflowStatus.Runnable) && !token.IsCancellationRequested)
                 {
-                    await _executor.Execute(wf);
+                    await _executor.Execute(wf, token);
                     if (persistSate)
                         await _persistenceStore.PersistWorkflow(wf, token);
                 }

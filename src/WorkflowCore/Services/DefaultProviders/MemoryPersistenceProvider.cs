@@ -24,6 +24,8 @@ namespace WorkflowCore.Services
         private readonly List<Event> _events = new List<Event>();
         private readonly List<ExecutionError> _errors = new List<ExecutionError>();
 
+        public bool SupportsScheduledCommands => false;
+
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow, CancellationToken _ = default)
         {
             lock (_instances)
@@ -254,6 +256,16 @@ namespace WorkflowCore.Services
             {
                 _errors.AddRange(errors);
             }
+        }
+
+        public Task ScheduleCommand(ScheduledCommand command)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task ProcessCommands(DateTimeOffset asOf, Func<ScheduledCommand, Task> action, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
     }
 

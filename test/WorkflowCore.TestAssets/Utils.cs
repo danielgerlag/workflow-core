@@ -30,6 +30,10 @@ namespace WorkflowCore.TestAssets
         {
             return File.ReadAllText("stored-dynamic-definition.json");
         }
+        public static string GetTestDefinitionDynamicYaml()
+        {
+            return File.ReadAllText("stored-dynamic-definition.yaml");
+        }
 
         public static string GetTestDefinitionJsonMissingInputProperty()
         {

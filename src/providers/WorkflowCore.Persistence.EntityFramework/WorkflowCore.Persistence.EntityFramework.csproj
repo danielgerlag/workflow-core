@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyTitle>Workflow Core EntityFramework Core Persistence Provider</AssemblyTitle>
     <Authors>Daniel Gerlag</Authors>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>WorkflowCore.Persistence.EntityFramework</AssemblyName>
     <PackageId>WorkflowCore.Persistence.EntityFramework</PackageId>
     <PackageTags>workflow;.NET;Core;state machine;WorkflowCore;EntityFramework;EntityFrameworkCore</PackageTags>

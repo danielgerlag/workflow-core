@@ -46,7 +46,7 @@ namespace WorkflowCore.Testing
 
         protected virtual void ConfigureServices(IServiceCollection services)
         {
-            services.AddWorkflow();
+            services.AddWorkflow(options => options.UsePollInterval(TimeSpan.FromSeconds(3)));
         }
 
         public string StartWorkflow(TData data)

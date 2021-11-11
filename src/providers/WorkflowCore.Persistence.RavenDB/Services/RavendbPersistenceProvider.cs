@@ -18,7 +18,9 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 		private readonly IDocumentStore _database;
 		static bool indexesCreated = false;
 
-		public RavendbPersistenceProvider(IDocumentStore database)
+        public bool SupportsScheduledCommands => false;
+
+        public RavendbPersistenceProvider(IDocumentStore database)
 		{
 			_database = database;
 			CreateIndexes(this);
@@ -316,5 +318,14 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 			}
 		}
 
-	}
+        public Task ScheduleCommand(ScheduledCommand command)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task ProcessCommands(DateTimeOffset asOf, Func<ScheduledCommand, Task> action, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

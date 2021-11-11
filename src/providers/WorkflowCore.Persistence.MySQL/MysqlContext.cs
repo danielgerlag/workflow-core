@@ -63,5 +63,11 @@ namespace WorkflowCore.Persistence.MySQL
             builder.ToTable("Event");
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
+
+        protected override void ConfigureScheduledCommandStorage(EntityTypeBuilder<PersistedScheduledCommand> builder)
+        {
+            builder.ToTable("ScheduledCommand");
+            builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
+        }
     }
 }
