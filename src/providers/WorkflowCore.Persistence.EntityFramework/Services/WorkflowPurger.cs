@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using WorkflowCore.Interface;
@@ -18,12 +19,12 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             _contextFactory = contextFactory;
         }
         
-        public async Task PurgeWorkflows(WorkflowStatus status, DateTime olderThan)
+        public async Task PurgeWorkflows(WorkflowStatus status, DateTime olderThan, CancellationToken cancellationToken = default)
         {
             var olderThanUtc = olderThan.ToUniversalTime();
             using (var db = ConstructDbContext())
             {
-                var workflows = await db.Set<PersistedWorkflow>().Where(x => x.Status == status && x.CompleteTime < olderThanUtc).ToListAsync();
+                var workflows = await db.Set<PersistedWorkflow>().Where(x => x.Status == status && x.CompleteTime < olderThanUtc).ToListAsync(cancellationToken);
                 foreach (var wf in workflows)
                 {
                     foreach (var pointer in wf.ExecutionPointers)
@@ -38,7 +39,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     db.Remove(wf);
                 }
 
-                await db.SaveChangesAsync();
+                await db.SaveChangesAsync(cancellationToken);
             }
         }
         
