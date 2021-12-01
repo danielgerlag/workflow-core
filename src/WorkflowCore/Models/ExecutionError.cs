@@ -4,7 +4,9 @@ namespace WorkflowCore.Models
 {
     public class ExecutionError
     {
-        public DateTime ErrorTime { get; set; }
+	    public string Id { get; set; } = Guid.NewGuid().ToString();
+	    
+	    public DateTime ErrorTime { get; set; }
 
         public string WorkflowId { get; set; }
 
