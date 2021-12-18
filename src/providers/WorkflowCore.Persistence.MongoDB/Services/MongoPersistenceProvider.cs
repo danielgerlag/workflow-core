@@ -315,9 +315,9 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             {
                 await ScheduledCommands.InsertOneAsync(command);
             }
-            catch (MongoBulkWriteException ex)
+            catch (MongoWriteException ex)
             {
-                if (ex.WriteErrors.All(x => x.Category == ServerErrorCategory.DuplicateKey))
+                if (ex.WriteError?.Category == ServerErrorCategory.DuplicateKey)
                      return;
                 throw;
             }
