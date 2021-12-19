@@ -321,6 +321,12 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                      return;
                 throw;
             }
+            catch (MongoBulkWriteException ex)
+            {
+                if (ex.WriteErrors.All(x => x.Category == ServerErrorCategory.DuplicateKey))
+                    return;
+                throw;
+            }
         }
 
         public async Task ProcessCommands(DateTimeOffset asOf, Func<ScheduledCommand, Task> action, CancellationToken cancellationToken = default)
