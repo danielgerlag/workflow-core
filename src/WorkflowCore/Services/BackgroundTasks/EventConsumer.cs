@@ -17,7 +17,7 @@ namespace WorkflowCore.Services.BackgroundTasks
         private readonly IDistributedLockProvider _lockProvider;
         private readonly IDateTimeProvider _datetimeProvider;
         private readonly IGreyList _greylist;
-        protected override int MaxConcurrentItems => 2;
+
         protected override QueueType Queue => QueueType.Event;
 
         public EventConsumer(IWorkflowRepository workflowRepository, ISubscriptionRepository subscriptionRepository, IEventRepository eventRepository, IQueueProvider queueProvider, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IWorkflowRegistry registry, IDistributedLockProvider lockProvider, WorkflowOptions options, IDateTimeProvider datetimeProvider, IGreyList greylist)
