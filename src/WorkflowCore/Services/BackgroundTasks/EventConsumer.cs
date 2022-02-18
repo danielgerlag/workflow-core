@@ -43,6 +43,8 @@ namespace WorkflowCore.Services.BackgroundTasks
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var evt = await _eventRepository.GetEvent(itemId, cancellationToken);
+
+                WorkflowActivity.Enrich(evt);
                 if (evt.IsProcessed)
                 {
                     _greylist.Add($"evt:{evt.Id}");

@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using OpenTelemetry.Trace;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
@@ -57,13 +59,14 @@ namespace WorkflowCore.Services.BackgroundTasks
 
         private async Task PollWorkflows()
         {
+            var activity = WorkflowActivity.StartPoll("workflows");
             try
             {
                 if (await _lockProvider.AcquireLock("poll runnables", new CancellationToken()))
                 {
                     try
                     {
-                        _logger.LogDebug("Polling for runnable workflows");                        
+                        _logger.LogDebug("Polling for runnable workflows");
 
                         var runnables = await _persistenceStore.GetRunnableInstances(_dateTimeProvider.Now);
                         foreach (var item in runnables)
@@ -83,6 +86,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                                 catch (Exception ex)
                                 {
                                     _logger.LogError(ex, ex.Message);
+                                    activity?.RecordException(ex);
                                 }
                             }
                             if (_greylist.Contains($"wf:{item}"))
@@ -104,11 +108,17 @@ namespace WorkflowCore.Services.BackgroundTasks
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
+                activity?.RecordException(ex);
+            }
+            finally
+            {
+                activity?.Dispose();
             }
         }
 
         private async Task PollEvents()
         {
+            var activity = WorkflowActivity.StartPoll("events");
             try
             {
                 if (await _lockProvider.AcquireLock("unprocessed events", new CancellationToken()))
@@ -135,6 +145,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                                 catch (Exception ex)
                                 {
                                     _logger.LogError(ex, ex.Message);
+                                    activity?.RecordException(ex);
                                 }
                             }
                             if (_greylist.Contains($"evt:{item}"))
@@ -156,11 +167,17 @@ namespace WorkflowCore.Services.BackgroundTasks
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
+                activity?.RecordException(ex);
+            }
+            finally
+            {
+                activity?.Dispose();
             }
         }
 
         private async Task PollCommands()
         {
+            var activity = WorkflowActivity.StartPoll("commands");
             try
             {
                 if (!_persistenceStore.SupportsScheduledCommands)
@@ -193,6 +210,11 @@ namespace WorkflowCore.Services.BackgroundTasks
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
+                activity?.RecordException(ex);
+            }
+            finally
+            {
+                activity?.Dispose();
             }
         }
     }
