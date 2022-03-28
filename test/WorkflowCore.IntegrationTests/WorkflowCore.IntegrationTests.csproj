@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>WorkflowCore.IntegrationTests</AssemblyName>
     <PackageId>WorkflowCore.IntegrationTests</PackageId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
@@ -14,7 +13,7 @@
     <ProjectReference Include="..\..\src\WorkflowCore\WorkflowCore.csproj" />
     <ProjectReference Include="..\WorkflowCore.TestAssets\WorkflowCore.TestAssets.csproj" />
     <ProjectReference Include="..\..\src\extensions\WorkflowCore.Users\WorkflowCore.Users.csproj" />
-    <ProjectReference Include="..\WorkflowCore.Testing\WorkflowCore.Testing.csproj" />
+    <ProjectReference Include="..\..\src\WorkflowCore.Testing\WorkflowCore.Testing.csproj" />
   </ItemGroup>
 
   <ItemGroup>

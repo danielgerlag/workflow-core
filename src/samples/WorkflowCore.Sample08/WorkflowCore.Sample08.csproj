@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
     <AssemblyName>WorkflowCore.Sample08</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>WorkflowCore.Sample08</PackageId>
