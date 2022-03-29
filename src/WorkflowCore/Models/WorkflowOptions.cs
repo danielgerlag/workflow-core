@@ -75,6 +75,11 @@ namespace WorkflowCore.Models
             ErrorRetryInterval = interval;
         }
 
+        public void UseIdleTime(TimeSpan interval)
+        {
+            IdleTime = interval;
+        }
+
         public void UseMaxConcurrentWorkflows(int maxConcurrentWorkflows)
         {
             MaxConcurrentWorkflows = maxConcurrentWorkflows;

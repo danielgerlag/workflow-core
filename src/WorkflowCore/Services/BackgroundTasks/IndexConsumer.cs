@@ -32,6 +32,8 @@ namespace WorkflowCore.Services.BackgroundTasks
             try
             {
                 var workflow = await FetchWorkflow(itemId);
+                
+                WorkflowActivity.Enrich(workflow, "index");
                 await _searchIndex.IndexWorkflow(workflow);
                 lock (_errorCounts)
                 {
