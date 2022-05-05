@@ -77,6 +77,10 @@ namespace WorkflowCore.Services.DefinitionStorage
                 }
                 else
                 {
+                    if (1 == 1)
+                    {
+                        var a = 1;
+                    }
                     targetStep = stepType.GetConstructor(new Type[] { }).Invoke(null) as WorkflowStep;
                     if (targetStep != null)
                         stepType = targetStep.BodyType;
