@@ -1,0 +1,14 @@
+﻿Id: TestDSLHelloWorld
+Version: 1
+DataType: WebApiSample.DataTypes.MyDataType, WebApiSample
+Steps:
+- Id: HelloWorldId
+  Name: HelloWorld
+  StepType: WebApiSample.Steps.DSLHelloWorldStep, WebApiSample
+  Inputs:
+    Home:
+      City: '"HelloWorld City"'
+      Street: '"HelloWorld Street"'
+      "@Number": data.Number
+  Outputs:
+    Home: step.Result
