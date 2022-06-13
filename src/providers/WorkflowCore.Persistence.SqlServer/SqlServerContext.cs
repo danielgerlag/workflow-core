@@ -58,5 +58,11 @@ namespace WorkflowCore.Persistence.SqlServer
             builder.ToTable("Event", "wfc");
             builder.Property(x => x.PersistenceId).UseIdentityColumn();
         }
+
+        protected override void ConfigureScheduledCommandStorage(EntityTypeBuilder<PersistedScheduledCommand> builder)
+        {
+            builder.ToTable("ScheduledCommand", "wfc");
+            builder.Property(x => x.PersistenceId).UseIdentityColumn();
+        }
     }
 }

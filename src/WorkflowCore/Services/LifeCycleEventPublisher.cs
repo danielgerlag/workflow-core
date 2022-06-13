@@ -3,6 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
+using WorkflowCore.Models;
 using WorkflowCore.Models.LifeCycleEvents;
 
 namespace WorkflowCore.Services
@@ -10,20 +11,22 @@ namespace WorkflowCore.Services
     public class LifeCycleEventPublisher : ILifeCycleEventPublisher, IDisposable
     {
         private readonly ILifeCycleEventHub _eventHub;
+        private readonly WorkflowOptions _workflowOptions;
         private readonly ILogger _logger;
-        private readonly BlockingCollection<LifeCycleEvent> _outbox;
+        private BlockingCollection<LifeCycleEvent> _outbox;
         private Task _dispatchTask;
 
-        public LifeCycleEventPublisher(ILifeCycleEventHub eventHub, ILoggerFactory loggerFactory)
+        public LifeCycleEventPublisher(ILifeCycleEventHub eventHub, WorkflowOptions workflowOptions, ILoggerFactory loggerFactory)
         {
             _eventHub = eventHub;
+            _workflowOptions = workflowOptions;
             _outbox = new BlockingCollection<LifeCycleEvent>();
             _logger = loggerFactory.CreateLogger(GetType());
         }
 
         public void PublishNotification(LifeCycleEvent evt)
         {
-            if (_outbox.IsAddingCompleted)
+            if (_outbox.IsAddingCompleted || !_workflowOptions.EnableLifeCycleEventsPublisher)
                 return;
 
             _outbox.Add(evt);
@@ -34,6 +37,11 @@ namespace WorkflowCore.Services
             if (_dispatchTask != null)
             {
                 throw new InvalidOperationException();
+            }
+
+            if (_outbox.IsAddingCompleted)
+            {
+                _outbox = new BlockingCollection<LifeCycleEvent>();
             }
 
             _dispatchTask = new Task(Execute);

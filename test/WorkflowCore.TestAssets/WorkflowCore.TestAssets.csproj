@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>WorkflowCore.TestAssets</AssemblyName>
     <PackageId>WorkflowCore.TestAssets</PackageId>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
@@ -13,9 +12,13 @@
     <None Remove="stored-definition.json" />
     <None Remove="stored-definition.yaml" />
     <None Remove="stored-dynamic-definition.json" />
+    <None Remove="stored-dynamic-definition.yaml" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="stored-dynamic-definition.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="stored-definition.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>

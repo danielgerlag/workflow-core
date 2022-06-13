@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson.Serialization;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
@@ -19,7 +18,7 @@ namespace WorkflowCore.Testing
         protected IPersistenceProvider PersistenceProvider;
         protected List<StepError> UnhandledStepErrors = new List<StepError>();
 
-        protected virtual void Setup(bool registerClassMap = false)
+        protected virtual void Setup()
         {
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
@@ -27,15 +26,6 @@ namespace WorkflowCore.Testing
             ConfigureServices(services);
 
             var serviceProvider = services.BuildServiceProvider();
-
-            //config logging
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            //loggerFactory.AddConsole(LogLevel.Debug);
-
-            if (registerClassMap && !BsonClassMap.IsClassMapRegistered(typeof(TData)))
-            {
-                BsonClassMap.RegisterClassMap<TData>(map => map.AutoMap());
-            }
 
             PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
             Host = serviceProvider.GetService<IWorkflowHost>();
@@ -56,7 +46,7 @@ namespace WorkflowCore.Testing
 
         protected virtual void ConfigureServices(IServiceCollection services)
         {
-            services.AddWorkflow();
+            services.AddWorkflow(options => options.UsePollInterval(TimeSpan.FromSeconds(3)));
         }
 
         public string StartWorkflow(TData data)

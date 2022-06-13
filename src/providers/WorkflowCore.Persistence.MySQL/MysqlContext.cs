@@ -21,7 +21,11 @@ namespace WorkflowCore.Persistence.MySQL
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
+#if NETSTANDARD2_0
             optionsBuilder.UseMySql(_connectionString, _mysqlOptionsAction);
+#elif NETSTANDARD2_1_OR_GREATER
+            optionsBuilder.UseMySql(_connectionString, ServerVersion.AutoDetect(_connectionString), _mysqlOptionsAction);
+#endif
         }
 
         protected override void ConfigureSubscriptionStorage(EntityTypeBuilder<PersistedSubscription> builder)
@@ -57,6 +61,12 @@ namespace WorkflowCore.Persistence.MySQL
         protected override void ConfigureEventStorage(EntityTypeBuilder<PersistedEvent> builder)
         {
             builder.ToTable("Event");
+            builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
+        }
+
+        protected override void ConfigureScheduledCommandStorage(EntityTypeBuilder<PersistedScheduledCommand> builder)
+        {
+            builder.ToTable("ScheduledCommand");
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
     }

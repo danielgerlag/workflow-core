@@ -15,7 +15,12 @@ namespace WorkflowCore.Primitives
         {
             if (context.PersistenceData == null)
             {
-                var values = Collection.Cast<object>();
+                var values = Collection.Cast<object>().ToList();
+                if (!values.Any())
+                {
+                    return ExecutionResult.Next();
+                }
+
                 if (RunParallel)
                 {
                     return ExecutionResult.Branch(new List<object>(values), new IteratorPersistenceData { ChildrenActive = true });

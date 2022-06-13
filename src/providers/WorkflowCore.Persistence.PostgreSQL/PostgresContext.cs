@@ -60,6 +60,12 @@ namespace WorkflowCore.Persistence.PostgreSQL
             builder.ToTable("Event", _schemaName);
             builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
         }
+
+        protected override void ConfigureScheduledCommandStorage(EntityTypeBuilder<PersistedScheduledCommand> builder)
+        {
+            builder.ToTable("ScheduledCommand", _schemaName);
+            builder.Property(x => x.PersistenceId).ValueGeneratedOnAdd();
+        }
     }
 }
 

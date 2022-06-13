@@ -11,7 +11,7 @@ namespace WorkflowCore.Tests.DynamoDB
     {
         public static string ConnectionString { get; set; }
 
-        public static AWSCredentials Credentials => new EnvironmentVariablesAWSCredentials();
+        public static AWSCredentials Credentials => new BasicAWSCredentials("DUMMYIDEXAMPLE", "DUMMYEXAMPLEKEY");
 
         public override string ImageName => @"amazon/dynamodb-local";
         public override int InternalPort => 8000;
@@ -30,7 +30,7 @@ namespace WorkflowCore.Tests.DynamoDB
                 {
                     ServiceURL = $"http://localhost:{ExternalPort}"
                 };
-                AmazonDynamoDBClient client = new AmazonDynamoDBClient(clientConfig);
+                AmazonDynamoDBClient client = new AmazonDynamoDBClient(Credentials, clientConfig);
                 var resp = client.ListTablesAsync().Result;
 
                 return resp.HttpStatusCode == HttpStatusCode.OK;
