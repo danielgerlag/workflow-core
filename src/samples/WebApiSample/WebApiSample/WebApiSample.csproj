@@ -3,22 +3,39 @@
   <PropertyGroup>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+    <TargetFrameworks>net6.0;netcoreapp3.1</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\" />
+	  <None Update="WorkflowDSL/**" LinkBase="WorkflowDSL/">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		  <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </None>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.0.2105168" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
-    <PackageReference Include="WorkflowCore" Version="1.8.0" />
-    <PackageReference Include="WorkflowCore.Persistence.MongoDB" Version="1.7.0" />
-    <PackageReference Include="WorkflowCore.Providers.Elasticsearch" Version="1.8.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.1" />
+    <PackageReference Include="WorkflowCore" Version="3.6.3" />
+    <PackageReference Include="WorkflowCore.DSL" Version="3.6.3" />
+    <PackageReference Include="WorkflowCore.Persistence.MongoDB" Version="3.6.3" />
+    <PackageReference Include="WorkflowCore.Providers.Elasticsearch" Version="3.6.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="WorkflowDSL\TestDSLWorkflow.yml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson">
+			<Version>6.0.5</Version>
+		</PackageReference>
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson">
+			<Version>3.1.9</Version>
+		</PackageReference>
+	</ItemGroup>
 </Project>
