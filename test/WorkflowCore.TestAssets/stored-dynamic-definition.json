@@ -57,6 +57,26 @@
             "Inputs": { "Value": "data[\"Counter5\"]" },
             "Outputs": { "Counter5": "step.Value" }
           }
+        ],
+        [
+          {
+            "Id": "Step3.3.1",
+            "StepType": "WorkflowCore.Primitives.WaitFor, WorkflowCore",
+            "NextStepId": "Step3.3.2",
+            "CancelCondition": "object.Equals(data[\"Flag2\"], true)",
+            "ProceedOnCancel": true,
+            "Inputs": {
+              "EventName": "\"Event1\"",
+              "EventKey": "\"Key1\"",
+              "EffectiveDate": "DateTime.Now"
+            }
+          },
+          {
+            "Id": "Step3.3.2",
+            "StepType": "WorkflowCore.TestAssets.Steps.Counter, WorkflowCore.TestAssets",
+            "Inputs": { "Value": "data[\"Counter10\"]" },
+            "Outputs": { "Counter10": "step.Value" }
+          }
         ]
       ]
     },
