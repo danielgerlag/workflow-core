@@ -23,7 +23,7 @@ namespace WorkflowCore.Persistence.MySQL
             base.OnConfiguring(optionsBuilder);
 #if NETSTANDARD2_0
             optionsBuilder.UseMySql(_connectionString, _mysqlOptionsAction);
-#elif NETSTANDARD2_1_OR_GREATER
+#elif NETSTANDARD2_1_OR_GREATER || NET6_0_OR_GREATER
             optionsBuilder.UseMySql(_connectionString, ServerVersion.AutoDetect(_connectionString), _mysqlOptionsAction);
 #endif
         }
