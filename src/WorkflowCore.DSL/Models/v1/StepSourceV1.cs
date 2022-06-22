@@ -32,5 +32,6 @@ namespace WorkflowCore.Models.DefinitionStorage.v1
         
         public Dictionary<string, string> SelectNextStep { get; set; } = new Dictionary<string, string>();
 
+        public bool ProceedOnCancel { get; set; } = false;
     }
 }
