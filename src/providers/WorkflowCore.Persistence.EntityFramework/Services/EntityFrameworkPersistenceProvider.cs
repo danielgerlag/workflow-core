@@ -391,16 +391,18 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             {
                 var cursor = db.Set<PersistedScheduledCommand>()
                     .Where(x => x.ExecuteTime < asOf.UtcDateTime.Ticks)
-                    .AsAsyncEnumerable();
+                    .AsEnumerable();
 
-                await foreach (var command in cursor)
+                foreach (var command in cursor)
                 {
                     try
                     {
                         await action(command.ToScheduledCommand());
-                        using var db2 = ConstructDbContext();
-                        db2.Set<PersistedScheduledCommand>().Remove(command);
-                        await db2.SaveChangesAsync();
+                        using (var db2 = ConstructDbContext())
+                        {
+                            db2.Set<PersistedScheduledCommand>().Remove(command);
+                            await db2.SaveChangesAsync();
+                        }
                     }
                     catch (Exception)
                     {
