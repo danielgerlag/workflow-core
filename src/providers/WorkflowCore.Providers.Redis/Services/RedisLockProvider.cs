@@ -14,15 +14,17 @@ namespace WorkflowCore.Providers.Redis.Services
     public class RedisLockProvider : IDistributedLockProvider
     {
         private readonly ILogger _logger;        
-        private readonly string _connectionString;        
+        private readonly string _connectionString;
+        private readonly string _prefix;
         private IConnectionMultiplexer _multiplexer;
         private RedLockFactory _redlockFactory;
         private readonly TimeSpan _lockTimeout = TimeSpan.FromMinutes(1);
         private readonly List<IRedLock> ManagedLocks = new List<IRedLock>();
 
-        public RedisLockProvider(string connectionString, ILoggerFactory logFactory)
+        public RedisLockProvider(string connectionString, string prefix, ILoggerFactory logFactory)
         {
             _connectionString = connectionString;
+            _prefix = prefix;
             _logger = logFactory.CreateLogger(GetType());
         }
 
@@ -31,7 +33,7 @@ namespace WorkflowCore.Providers.Redis.Services
             if (_redlockFactory == null)
                 throw new InvalidOperationException();
 
-            var redLock = await _redlockFactory.CreateLockAsync(Id, _lockTimeout);
+            var redLock = await _redlockFactory.CreateLockAsync(GetResource(Id), _lockTimeout);
 
             if (redLock.IsAcquired)
             {
@@ -50,11 +52,13 @@ namespace WorkflowCore.Providers.Redis.Services
             if (_redlockFactory == null)
                 throw new InvalidOperationException();
 
+            var resource = GetResource(Id);
+
             lock (ManagedLocks)
             {
                 foreach (var redLock in ManagedLocks)
                 {
-                    if (redLock.Resource == Id)
+                    if (redLock.Resource == resource)
                     {
                         redLock.Dispose();
                         ManagedLocks.Remove(redLock);
@@ -77,7 +81,15 @@ namespace WorkflowCore.Providers.Redis.Services
             _redlockFactory?.Dispose();
             await _multiplexer.CloseAsync();
             _multiplexer = null;
-            
+
+        }
+
+        private string GetResource(string key)
+        {
+            if (string.IsNullOrEmpty(_prefix))
+                return key;
+
+            return $"{_prefix}:{key}";
         }
     }
 }
