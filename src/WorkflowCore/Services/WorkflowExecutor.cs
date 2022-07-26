@@ -47,7 +47,7 @@ namespace WorkflowCore.Services
             var def = _registry.GetDefinition(workflow.WorkflowDefinitionId, workflow.Version);
             if (def == null)
             {
-                _logger.LogError("Workflow {0} version {1} is not registered", workflow.WorkflowDefinitionId, workflow.Version);
+                _logger.LogError("Workflow {WorkflowDefinitionId} version {Version} is not registered", workflow.WorkflowDefinitionId, workflow.Version);
                 return wfResult;
             }
 
@@ -61,7 +61,7 @@ namespace WorkflowCore.Services
                 var step = def.Steps.FindById(pointer.StepId);
                 if (step == null)
                 {
-                    _logger.LogError("Unable to find step {0} in workflow definition", pointer.StepId);
+                    _logger.LogError("Unable to find step {StepId} in workflow definition", pointer.StepId);
                     pointer.SleepUntil = _datetimeProvider.UtcNow.Add(_options.ErrorRetryInterval);
                     wfResult.Errors.Add(new ExecutionError
                     {
@@ -83,7 +83,7 @@ namespace WorkflowCore.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Workflow {0} raised error on step {1} Message: {2}", workflow.Id, pointer.StepId, ex.Message);
+                    _logger.LogError(ex, "Workflow {WorkflowId} raised error on step {StepId} Message: {Message}", workflow.Id, pointer.StepId, ex.Message);
                     wfResult.Errors.Add(new ExecutionError
                     {
                         WorkflowId = workflow.Id,
@@ -158,14 +158,14 @@ namespace WorkflowCore.Services
 
             using (var scope = _scopeProvider.CreateScope(context))
             {
-                _logger.LogDebug("Starting step {0} on workflow {1}", step.Name, workflow.Id);
+                _logger.LogDebug("Starting step {StepName} on workflow {WorkflowId}", step.Name, workflow.Id);
 
                 IStepBody body = step.ConstructBody(scope.ServiceProvider);
                 var stepExecutor = scope.ServiceProvider.GetRequiredService<IStepExecutor>();
 
                 if (body == null)
                 {
-                    _logger.LogError("Unable to construct step body {0}", step.BodyType.ToString());
+                    _logger.LogError("Unable to construct step body {BodyType}", step.BodyType.ToString());
                     pointer.SleepUntil = _datetimeProvider.UtcNow.Add(_options.ErrorRetryInterval);
                     wfResult.Errors.Add(new ExecutionError
                     {

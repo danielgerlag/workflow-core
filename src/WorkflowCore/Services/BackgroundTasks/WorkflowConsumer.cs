@@ -33,7 +33,7 @@ namespace WorkflowCore.Services.BackgroundTasks
         {
             if (!await _lockProvider.AcquireLock(itemId, cancellationToken))
             {
-                Logger.LogInformation("Workflow locked {0}", itemId);
+                Logger.LogInformation("Workflow locked {ItemId}", itemId);
                 return;
             }
 
@@ -101,7 +101,7 @@ namespace WorkflowCore.Services.BackgroundTasks
         private async Task SubscribeEvent(EventSubscription subscription, IPersistenceProvider persistenceStore, CancellationToken cancellationToken)
         {
             //TODO: move to own class
-            Logger.LogDebug("Subscribing to event {0} {1} for workflow {2} step {3}", subscription.EventName, subscription.EventKey, subscription.WorkflowId, subscription.StepId);
+            Logger.LogDebug("Subscribing to event {EventName} {EventKey} for workflow {WorkflowId} step {StepId}", subscription.EventName, subscription.EventKey, subscription.WorkflowId, subscription.StepId);
 
             await persistenceStore.CreateEventSubscription(subscription, cancellationToken);
             if (subscription.EventName != Event.EventTypeActivity)

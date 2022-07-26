@@ -107,7 +107,7 @@ namespace WorkflowCore.Services
 
         public async Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null)
         {
-            _logger.LogDebug("Creating event {0} {1}", eventName, eventKey);
+            _logger.LogDebug("Creating event {EventName} {EventKey}", eventName, eventKey);
             Event evt = new Event();
 
             if (effectiveDate.HasValue)
