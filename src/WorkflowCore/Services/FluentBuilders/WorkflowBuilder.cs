@@ -84,6 +84,11 @@ namespace WorkflowCore.Services
                         if (step2.Children[i] == oldId)
                             step2.Children[i] = step.Id;
                     }
+
+                    if (step2.CompensationStepId == oldId)
+                    {
+                        step2.CompensationStepId = step.Id;
+                    }
                 }
             }
 
@@ -103,6 +108,11 @@ namespace WorkflowCore.Services
                     {
                         if (step2.Children[i] == oldId)
                             step2.Children[i] = step.Id;
+                    }
+
+                    if (step2.CompensationStepId == oldId)
+                    {
+                        step2.CompensationStepId = step.Id;
                     }
                 }
             }
