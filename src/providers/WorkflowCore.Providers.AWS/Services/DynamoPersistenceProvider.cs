@@ -61,6 +61,43 @@ namespace WorkflowCore.Providers.AWS.Services
             var response = await _client.PutItemAsync(request, cancellationToken);
         }
 
+        public async Task PersistWorkflow(WorkflowInstance workflow, List<EventSubscription> subscriptions, CancellationToken cancellationToken = default)
+        {
+            var transactionWriteItemsRequest = new TransactWriteItemsRequest()
+            {
+                TransactItems = new List<TransactWriteItem>()
+                {
+                    { 
+                        new TransactWriteItem() 
+                        { 
+                            Put = new Put() 
+                            {
+                                TableName = $"{_tablePrefix}-{WORKFLOW_TABLE}",
+                                Item = workflow.ToDynamoMap()
+                            } 
+                        } 
+                    }
+                }
+            };
+
+            foreach(var subscription in subscriptions)
+            {
+                subscription.Id = Guid.NewGuid().ToString();
+
+                transactionWriteItemsRequest.TransactItems.Add(new TransactWriteItem() 
+                {
+                    Put = new Put()
+                    {
+                        TableName = $"{_tablePrefix}-{SUBCRIPTION_TABLE}",
+                        Item = subscription.ToDynamoMap(),
+                        ConditionExpression = "attribute_not_exists(id)"
+                    }
+                });
+            }
+
+            await _client.TransactWriteItemsAsync(transactionWriteItemsRequest, cancellationToken);
+        }
+
         public async Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt, CancellationToken cancellationToken = default)
         {
             var result = new List<string>();

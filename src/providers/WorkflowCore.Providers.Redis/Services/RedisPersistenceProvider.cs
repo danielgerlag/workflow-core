@@ -47,6 +47,16 @@ namespace WorkflowCore.Providers.Redis.Services
             return workflow.Id;
         }
 
+        public async Task PersistWorkflow(WorkflowInstance workflow, List<EventSubscription> subscriptions, CancellationToken cancellationToken = default)
+        {
+            await PersistWorkflow(workflow, cancellationToken);
+
+            foreach (var subscription in subscriptions)
+            {
+                await CreateEventSubscription(subscription, cancellationToken);
+            }
+        }
+
         public async Task PersistWorkflow(WorkflowInstance workflow, CancellationToken _ = default)
         {
             var str = JsonConvert.SerializeObject(workflow, _serializerSettings);

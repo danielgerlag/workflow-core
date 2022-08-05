@@ -55,7 +55,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     finally
                     {
                         WorkflowActivity.Enrich(result);
-                        await _persistenceStore.PersistWorkflow(workflow, cancellationToken);
+                        await _persistenceStore.PersistWorkflow(workflow, result.Subscriptions, cancellationToken);
                         await QueueProvider.QueueWork(itemId, QueueType.Index);
                         _greylist.Remove($"wf:{itemId}");
                     }
@@ -100,10 +100,6 @@ namespace WorkflowCore.Services.BackgroundTasks
 
         private async Task SubscribeEvent(EventSubscription subscription, IPersistenceProvider persistenceStore, CancellationToken cancellationToken)
         {
-            //TODO: move to own class
-            Logger.LogDebug("Subscribing to event {0} {1} for workflow {2} step {3}", subscription.EventName, subscription.EventKey, subscription.WorkflowId, subscription.StepId);
-
-            await persistenceStore.CreateEventSubscription(subscription, cancellationToken);
             if (subscription.EventName != Event.EventTypeActivity)
             {
                 var events = await persistenceStore.GetEvents(subscription.EventName, subscription.EventKey, subscription.SubscribeAsOf, cancellationToken);

@@ -149,6 +149,17 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             await WorkflowInstances.ReplaceOneAsync(x => x.Id == workflow.Id, workflow, cancellationToken: cancellationToken);
         }
 
+        public async Task PersistWorkflow(WorkflowInstance workflow, List<EventSubscription> subscriptions, CancellationToken cancellationToken = default)
+        {
+            using (var session = await _database.Client.StartSessionAsync())
+            {
+                session.StartTransaction();
+                await PersistWorkflow(workflow, cancellationToken);
+                await EventSubscriptions.InsertManyAsync(subscriptions, cancellationToken: cancellationToken);
+                await session.CommitTransactionAsync();
+            }
+        }
+
         public async Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt, CancellationToken cancellationToken = default)
         {
             var now = asAt.ToUniversalTime().Ticks;
