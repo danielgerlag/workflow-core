@@ -1,12 +1,11 @@
-﻿using WorkflowCore.Interface;
-using WorkflowCore.Models;
-using Xunit;
-using FluentAssertions;
-using WorkflowCore.Testing;
-using WorkflowCore.Models.LifeCycleEvents;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using System.Threading;
-using Moq;
+using FluentAssertions;
+using WorkflowCore.Interface;
+using WorkflowCore.Models;
+using WorkflowCore.Models.LifeCycleEvents;
+using WorkflowCore.Testing;
+using Xunit;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
@@ -18,33 +17,29 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             public int Version => 1;
             public void Build(IWorkflowBuilder<object> builder)
             {
-                builder.StartWith(context => ExecutionResult.Next());                    
+                builder.StartWith(context => ExecutionResult.Next());
             }
         }
 
-        public StopScenario()
-        {
-            Setup();
-        }
+        public StopScenario() => Setup();
 
         [Fact]
         public async Task Scenario()
         {
             var tcs = new TaskCompletionSource<object>();
-            Host.OnLifeCycleEvent += (evt) => OnLifeCycleEvent(evt, tcs);
-            var workflowId = StartWorkflow(null);
-
-            await tcs.Task;
-            GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
-        }
-
-        private async void OnLifeCycleEvent(LifeCycleEvent evt, TaskCompletionSource<object> tcs)
-        {
-            if (evt is WorkflowCompleted)
+            Host.OnLifeCycleEvent += async (evt) =>
             {
-                await Host.StopAsync(CancellationToken.None);
-                tcs.SetResult(new());
-            }
+                if (evt is WorkflowCompleted)
+                {
+                    await Host.StopAsync(CancellationToken.None);
+                    tcs.SetResult(default);
+                }
+            };
+
+            var workflowId = StartWorkflow(default);
+            await tcs.Task;
+
+            GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
         }
 
         protected override void Dispose(bool disposing) { }
