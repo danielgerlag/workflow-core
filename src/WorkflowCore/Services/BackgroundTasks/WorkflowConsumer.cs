@@ -55,7 +55,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     finally
                     {
                         WorkflowActivity.Enrich(result);
-                        await _persistenceStore.PersistWorkflow(workflow, cancellationToken);
+                        await _persistenceStore.PersistWorkflow(workflow);
                         await QueueProvider.QueueWork(itemId, QueueType.Index);
                         _greylist.Remove($"wf:{itemId}");
                     }
@@ -71,7 +71,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                         await SubscribeEvent(sub, _persistenceStore, cancellationToken);
                     }
 
-                    await _persistenceStore.PersistErrors(result.Errors, cancellationToken);
+                    await _persistenceStore.PersistErrors(result.Errors);
 
                     if ((workflow.Status == WorkflowStatus.Runnable) && workflow.NextExecution.HasValue)
                     {
@@ -103,7 +103,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             //TODO: move to own class
             Logger.LogDebug("Subscribing to event {0} {1} for workflow {2} step {3}", subscription.EventName, subscription.EventKey, subscription.WorkflowId, subscription.StepId);
 
-            await persistenceStore.CreateEventSubscription(subscription, cancellationToken);
+            await persistenceStore.CreateEventSubscription(subscription);
             if (subscription.EventName != Event.EventTypeActivity)
             {
                 var events = await persistenceStore.GetEvents(subscription.EventName, subscription.EventKey, subscription.SubscribeAsOf, cancellationToken);
@@ -131,7 +131,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                         else
                         {
                             _greylist.Remove(eventKey);
-                            await persistenceStore.MarkEventUnprocessed(evt, cancellationToken);
+                            await persistenceStore.MarkEventUnprocessed(evt);
                             await QueueProvider.QueueWork(evt, QueueType.Event);
                         }
                     }

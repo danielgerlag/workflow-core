@@ -8,7 +8,7 @@ namespace WorkflowCore.Interface
 {
     public interface IEventRepository
     {
-        Task<string> CreateEvent(Event newEvent, CancellationToken cancellationToken = default);
+        Task<string> CreateEvent(Event newEvent);
 
         Task<Event> GetEvent(string id, CancellationToken cancellationToken = default);
 
@@ -16,9 +16,9 @@ namespace WorkflowCore.Interface
 
         Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf, CancellationToken cancellationToken = default);
 
-        Task MarkEventProcessed(string id, CancellationToken cancellationToken = default);
+        Task MarkEventProcessed(string id);
 
-        Task MarkEventUnprocessed(string id, CancellationToken cancellationToken = default);
+        Task MarkEventUnprocessed(string id);
 
     }
 }

@@ -138,15 +138,15 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         private IMongoCollection<ScheduledCommand> ScheduledCommands => _database.GetCollection<ScheduledCommand>("wfc.scheduled_commands");
 
-        public async Task<string> CreateNewWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken = default)
+        public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
         {
-            await WorkflowInstances.InsertOneAsync(workflow, cancellationToken: cancellationToken);
+            await WorkflowInstances.InsertOneAsync(workflow);
             return workflow.Id;
         }
 
-        public async Task PersistWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken = default)
+        public async Task PersistWorkflow(WorkflowInstance workflow)
         {
-            await WorkflowInstances.ReplaceOneAsync(x => x.Id == workflow.Id, workflow, cancellationToken: cancellationToken);
+            await WorkflowInstances.ReplaceOneAsync(x => x.Id == workflow.Id, workflow);
         }
 
         public async Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt, CancellationToken cancellationToken = default)
@@ -195,15 +195,15 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             return await result.Skip(skip).Take(take).ToListAsync();
         }
 
-        public async Task<string> CreateEventSubscription(EventSubscription subscription, CancellationToken cancellationToken = default)
+        public async Task<string> CreateEventSubscription(EventSubscription subscription)
         {
-            await EventSubscriptions.InsertOneAsync(subscription, cancellationToken: cancellationToken);
+            await EventSubscriptions.InsertOneAsync(subscription);
             return subscription.Id;
         }
 
-        public async Task TerminateSubscription(string eventSubscriptionId, CancellationToken cancellationToken = default)
+        public async Task TerminateSubscription(string eventSubscriptionId)
         {
-            await EventSubscriptions.DeleteOneAsync(x => x.Id == eventSubscriptionId, cancellationToken);
+            await EventSubscriptions.DeleteOneAsync(x => x.Id == eventSubscriptionId);
         }
 
         public async Task<EventSubscription> GetSubscription(string eventSubscriptionId, CancellationToken cancellationToken = default)
@@ -220,25 +220,25 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             return await query.FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry, CancellationToken cancellationToken = default)
+        public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry)
         {
             var update = Builders<EventSubscription>.Update
                 .Set(x => x.ExternalToken, token)
                 .Set(x => x.ExternalTokenExpiry, expiry)
                 .Set(x => x.ExternalWorkerId, workerId);
 
-            var result = await EventSubscriptions.UpdateOneAsync(x => x.Id == eventSubscriptionId && x.ExternalToken == null, update, cancellationToken: cancellationToken);
+            var result = await EventSubscriptions.UpdateOneAsync(x => x.Id == eventSubscriptionId && x.ExternalToken == null, update);
             return (result.ModifiedCount > 0);
         }
 
-        public async Task ClearSubscriptionToken(string eventSubscriptionId, string token, CancellationToken cancellationToken = default)
+        public async Task ClearSubscriptionToken(string eventSubscriptionId, string token)
         {
             var update = Builders<EventSubscription>.Update
                 .Set(x => x.ExternalToken, null)
                 .Set(x => x.ExternalTokenExpiry, null)
                 .Set(x => x.ExternalWorkerId, null);
 
-            await EventSubscriptions.UpdateOneAsync(x => x.Id == eventSubscriptionId && x.ExternalToken == token, update, cancellationToken: cancellationToken);
+            await EventSubscriptions.UpdateOneAsync(x => x.Id == eventSubscriptionId && x.ExternalToken == token, update);
         }
 
         public void EnsureStoreExists()
@@ -254,9 +254,9 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             return await query.ToListAsync(cancellationToken);
         }
 
-        public async Task<string> CreateEvent(Event newEvent, CancellationToken cancellationToken = default)
+        public async Task<string> CreateEvent(Event newEvent)
         {
-            await Events.InsertOneAsync(newEvent, cancellationToken: cancellationToken);
+            await Events.InsertOneAsync(newEvent);
             return newEvent.Id;
         }
 
@@ -276,12 +276,12 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             return await query.ToListAsync(cancellationToken);
         }
 
-        public async Task MarkEventProcessed(string id, CancellationToken cancellationToken = default)
+        public async Task MarkEventProcessed(string id)
         {
             var update = Builders<Event>.Update
                 .Set(x => x.IsProcessed, true);
 
-            await Events.UpdateOneAsync(x => x.Id == id, update, cancellationToken: cancellationToken);
+            await Events.UpdateOneAsync(x => x.Id == id, update);
         }
 
         public async Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf, CancellationToken cancellationToken)
@@ -293,18 +293,18 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             return await query.ToListAsync(cancellationToken);
         }
 
-        public async Task MarkEventUnprocessed(string id, CancellationToken cancellationToken = default)
+        public async Task MarkEventUnprocessed(string id)
         {
             var update = Builders<Event>.Update
                 .Set(x => x.IsProcessed, false);
 
-            await Events.UpdateOneAsync(x => x.Id == id, update, cancellationToken: cancellationToken);
+            await Events.UpdateOneAsync(x => x.Id == id, update);
         }
 
-        public async Task PersistErrors(IEnumerable<ExecutionError> errors, CancellationToken cancellationToken = default)
+        public async Task PersistErrors(IEnumerable<ExecutionError> errors)
         {
             if (errors.Any())
-                await ExecutionErrors.InsertManyAsync(errors, cancellationToken: cancellationToken);
+                await ExecutionErrors.InsertManyAsync(errors);
         }
 
         public bool SupportsScheduledCommands => true;

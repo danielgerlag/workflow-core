@@ -40,14 +40,14 @@ namespace WorkflowCore.Providers.Redis.Services
             _removeComplete = removeComplete;
         }
 
-        public async Task<string> CreateNewWorkflow(WorkflowInstance workflow, CancellationToken _ = default)
+        public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
         {
             workflow.Id = Guid.NewGuid().ToString();
             await PersistWorkflow(workflow);
             return workflow.Id;
         }
 
-        public async Task PersistWorkflow(WorkflowInstance workflow, CancellationToken _ = default)
+        public async Task PersistWorkflow(WorkflowInstance workflow)
         {
             var str = JsonConvert.SerializeObject(workflow, _serializerSettings);
             await _redis.HashSetAsync($"{_prefix}.{WORKFLOW_SET}", workflow.Id, str);
@@ -96,7 +96,7 @@ namespace WorkflowCore.Providers.Redis.Services
             return raw.Select(r => JsonConvert.DeserializeObject<WorkflowInstance>(r, _serializerSettings));
         }
 
-        public async Task<string> CreateEventSubscription(EventSubscription subscription, CancellationToken _ = default)
+        public async Task<string> CreateEventSubscription(EventSubscription subscription)
         {
             subscription.Id = Guid.NewGuid().ToString();
             var str = JsonConvert.SerializeObject(subscription, _serializerSettings);
@@ -121,7 +121,7 @@ namespace WorkflowCore.Providers.Redis.Services
             return result;
         }
 
-        public async Task TerminateSubscription(string eventSubscriptionId, CancellationToken _ = default)
+        public async Task TerminateSubscription(string eventSubscriptionId)
         {
             var existingRaw = await _redis.HashGetAsync($"{_prefix}.{SUBSCRIPTION_SET}", eventSubscriptionId);
             var existing = JsonConvert.DeserializeObject<EventSubscription>(existingRaw, _serializerSettings);
@@ -140,7 +140,7 @@ namespace WorkflowCore.Providers.Redis.Services
             return (await GetSubscriptions(eventName, eventKey, asOf, cancellationToken)).FirstOrDefault(sub => string.IsNullOrEmpty(sub.ExternalToken));
         }
 
-        public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry, CancellationToken _ = default)
+        public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry)
         {
             var item = JsonConvert.DeserializeObject<EventSubscription>(await _redis.HashGetAsync($"{_prefix}.{SUBSCRIPTION_SET}", eventSubscriptionId), _serializerSettings);
             if (item.ExternalToken != null)
@@ -153,7 +153,7 @@ namespace WorkflowCore.Providers.Redis.Services
             return true;
         }
 
-        public async Task ClearSubscriptionToken(string eventSubscriptionId, string token, CancellationToken _ = default)
+        public async Task ClearSubscriptionToken(string eventSubscriptionId, string token)
         {
             var item = JsonConvert.DeserializeObject<EventSubscription>(await _redis.HashGetAsync($"{_prefix}.{SUBSCRIPTION_SET}", eventSubscriptionId), _serializerSettings);
             if (item.ExternalToken != token)
@@ -165,7 +165,7 @@ namespace WorkflowCore.Providers.Redis.Services
             await _redis.HashSetAsync($"{_prefix}.{SUBSCRIPTION_SET}", eventSubscriptionId, str);
         }
 
-        public async Task<string> CreateEvent(Event newEvent, CancellationToken _ = default)
+        public async Task<string> CreateEvent(Event newEvent)
         {
             newEvent.Id = Guid.NewGuid().ToString();
             var str = JsonConvert.SerializeObject(newEvent, _serializerSettings);
@@ -208,25 +208,25 @@ namespace WorkflowCore.Providers.Redis.Services
             return result;
         }
 
-        public async Task MarkEventProcessed(string id, CancellationToken cancellationToken = default)
+        public async Task MarkEventProcessed(string id)
         {
-            var evt = await GetEvent(id, cancellationToken);
+            var evt = await GetEvent(id);
             evt.IsProcessed = true;
             var str = JsonConvert.SerializeObject(evt, _serializerSettings);
             await _redis.HashSetAsync($"{_prefix}.{EVENT_SET}", evt.Id, str);
             await _redis.SortedSetRemoveAsync($"{_prefix}.{EVENT_SET}.{RUNNABLE_INDEX}", id);
         }
 
-        public async Task MarkEventUnprocessed(string id, CancellationToken cancellationToken = default)
+        public async Task MarkEventUnprocessed(string id)
         {
-            var evt = await GetEvent(id, cancellationToken);
+            var evt = await GetEvent(id);
             evt.IsProcessed = false;
             var str = JsonConvert.SerializeObject(evt, _serializerSettings);
             await _redis.HashSetAsync($"{_prefix}.{EVENT_SET}", evt.Id, str);
             await _redis.SortedSetAddAsync($"{_prefix}.{EVENT_SET}.{RUNNABLE_INDEX}", evt.Id, evt.EventTime.Ticks);
         }
 
-        public Task PersistErrors(IEnumerable<ExecutionError> errors, CancellationToken _ = default)
+        public Task PersistErrors(IEnumerable<ExecutionError> errors)
         {
             return Task.CompletedTask;
         }

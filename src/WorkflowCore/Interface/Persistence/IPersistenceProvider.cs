@@ -9,7 +9,7 @@ namespace WorkflowCore.Interface
     public interface IPersistenceProvider : IWorkflowRepository, ISubscriptionRepository, IEventRepository, IScheduledCommandRepository
     {        
 
-        Task PersistErrors(IEnumerable<ExecutionError> errors, CancellationToken cancellationToken = default);
+        Task PersistErrors(IEnumerable<ExecutionError> errors);
 
         void EnsureStoreExists();
 

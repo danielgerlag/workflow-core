@@ -34,7 +34,7 @@ namespace WorkflowCore.Providers.AWS.Services
             _provisioner = provisioner;
         }
 
-        public async Task<string> CreateNewWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken = default)
+        public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
         {
             workflow.Id = Guid.NewGuid().ToString();
 
@@ -45,12 +45,12 @@ namespace WorkflowCore.Providers.AWS.Services
                 ConditionExpression = "attribute_not_exists(id)"
             };
 
-            var _ = await _client.PutItemAsync(req, cancellationToken);
+            var _ = await _client.PutItemAsync(req);
 
             return workflow.Id;
         }
 
-        public async Task PersistWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken = default)
+        public async Task PersistWorkflow(WorkflowInstance workflow)
         {
             var request = new PutItemRequest
             {
@@ -58,7 +58,7 @@ namespace WorkflowCore.Providers.AWS.Services
                 Item = workflow.ToDynamoMap()
             };
 
-            var response = await _client.PutItemAsync(request, cancellationToken);
+            var response = await _client.PutItemAsync(request);
         }
 
         public async Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt, CancellationToken cancellationToken = default)
@@ -163,7 +163,7 @@ namespace WorkflowCore.Providers.AWS.Services
             return result.Select(i => i.ToWorkflowInstance());
         }
 
-        public async Task<string> CreateEventSubscription(EventSubscription subscription, CancellationToken cancellationToken = default)
+        public async Task<string> CreateEventSubscription(EventSubscription subscription)
         {
             subscription.Id = Guid.NewGuid().ToString();
 
@@ -174,7 +174,7 @@ namespace WorkflowCore.Providers.AWS.Services
                 ConditionExpression = "attribute_not_exists(id)"
             };
 
-            var response = await _client.PutItemAsync(req, cancellationToken);
+            var response = await _client.PutItemAsync(req);
 
             return subscription.Id;
         }
@@ -215,7 +215,7 @@ namespace WorkflowCore.Providers.AWS.Services
             return result;
         }
 
-        public async Task TerminateSubscription(string eventSubscriptionId, CancellationToken cancellationToken = default)
+        public async Task TerminateSubscription(string eventSubscriptionId)
         {
             var request = new DeleteItemRequest
             {
@@ -225,10 +225,10 @@ namespace WorkflowCore.Providers.AWS.Services
                     { "id", new AttributeValue(eventSubscriptionId) }
                 }
             };
-            await _client.DeleteItemAsync(request, cancellationToken);
+            await _client.DeleteItemAsync(request);
         }
 
-        public async Task<string> CreateEvent(Event newEvent, CancellationToken cancellationToken = default)
+        public async Task<string> CreateEvent(Event newEvent)
         {
             newEvent.Id = Guid.NewGuid().ToString();
 
@@ -239,7 +239,7 @@ namespace WorkflowCore.Providers.AWS.Services
                 ConditionExpression = "attribute_not_exists(id)"
             };
 
-            var _ = await _client.PutItemAsync(req, cancellationToken);
+            var _ = await _client.PutItemAsync(req);
 
             return newEvent.Id;
         }
@@ -329,7 +329,7 @@ namespace WorkflowCore.Providers.AWS.Services
             return result;
         }
 
-        public async Task MarkEventProcessed(string id, CancellationToken cancellationToken = default)
+        public async Task MarkEventProcessed(string id)
         {
             var request = new UpdateItemRequest
             {
@@ -340,10 +340,10 @@ namespace WorkflowCore.Providers.AWS.Services
                 },
                 UpdateExpression = "REMOVE not_processed"
             };
-            await _client.UpdateItemAsync(request, cancellationToken);
+            await _client.UpdateItemAsync(request);
         }
 
-        public async Task MarkEventUnprocessed(string id, CancellationToken cancellationToken = default)
+        public async Task MarkEventUnprocessed(string id)
         {
             var request = new UpdateItemRequest
             {
@@ -358,10 +358,10 @@ namespace WorkflowCore.Providers.AWS.Services
                     { ":n" , new AttributeValue { N = 1.ToString() } }
                 }
             };
-            await _client.UpdateItemAsync(request, cancellationToken);
+            await _client.UpdateItemAsync(request);
         }
 
-        public Task PersistErrors(IEnumerable<ExecutionError> errors, CancellationToken _ = default)
+        public Task PersistErrors(IEnumerable<ExecutionError> errors)
         {
             //TODO
             return Task.CompletedTask;
@@ -423,7 +423,7 @@ namespace WorkflowCore.Providers.AWS.Services
             return result.FirstOrDefault();
         }
 
-        public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry, CancellationToken cancellationToken = default)
+        public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry)
         {
             var request = new UpdateItemRequest
             {
@@ -443,7 +443,7 @@ namespace WorkflowCore.Providers.AWS.Services
             };
             try
             {
-                await _client.UpdateItemAsync(request, cancellationToken);
+                await _client.UpdateItemAsync(request);
                 return true;
             }
             catch (ConditionalCheckFailedException)
@@ -452,7 +452,7 @@ namespace WorkflowCore.Providers.AWS.Services
             }
         }
 
-        public async Task ClearSubscriptionToken(string eventSubscriptionId, string token, CancellationToken cancellationToken = default)
+        public async Task ClearSubscriptionToken(string eventSubscriptionId, string token)
         {
             var request = new UpdateItemRequest
             {
@@ -469,7 +469,7 @@ namespace WorkflowCore.Providers.AWS.Services
                 }
             };
             
-            await _client.UpdateItemAsync(request, cancellationToken);
+            await _client.UpdateItemAsync(request);
         }
 
         public Task ScheduleCommand(ScheduledCommand command)

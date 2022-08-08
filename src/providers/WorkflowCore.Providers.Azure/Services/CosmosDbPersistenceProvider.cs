@@ -37,7 +37,7 @@ namespace WorkflowCore.Providers.Azure.Services
 
         public bool SupportsScheduledCommands => false;
 
-        public async Task ClearSubscriptionToken(string eventSubscriptionId, string token, CancellationToken cancellationToken = default)
+        public async Task ClearSubscriptionToken(string eventSubscriptionId, string token)
         {
             var existing = await _subscriptionContainer.Value.ReadItemAsync<PersistedSubscription>(eventSubscriptionId, new PartitionKey(eventSubscriptionId));
             
@@ -47,27 +47,27 @@ namespace WorkflowCore.Providers.Azure.Services
             existing.Resource.ExternalWorkerId = null;
             existing.Resource.ExternalTokenExpiry = null;
 
-            await _subscriptionContainer.Value.ReplaceItemAsync(existing.Resource, eventSubscriptionId, cancellationToken: cancellationToken);
+            await _subscriptionContainer.Value.ReplaceItemAsync(existing.Resource, eventSubscriptionId);
         }
 
-        public async Task<string> CreateEvent(Event newEvent, CancellationToken cancellationToken)
+        public async Task<string> CreateEvent(Event newEvent)
         {
             newEvent.Id = Guid.NewGuid().ToString();
-            var result = await _eventContainer.Value.CreateItemAsync(PersistedEvent.FromInstance(newEvent), cancellationToken: cancellationToken);
+            var result = await _eventContainer.Value.CreateItemAsync(PersistedEvent.FromInstance(newEvent));
             return result.Resource.id;
         }
 
-        public async Task<string> CreateEventSubscription(EventSubscription subscription, CancellationToken cancellationToken)
+        public async Task<string> CreateEventSubscription(EventSubscription subscription)
         {
             subscription.Id = Guid.NewGuid().ToString();
-            var result = await _subscriptionContainer.Value.CreateItemAsync(PersistedSubscription.FromInstance(subscription), cancellationToken: cancellationToken);
+            var result = await _subscriptionContainer.Value.CreateItemAsync(PersistedSubscription.FromInstance(subscription));
             return result.Resource.id;
         }
 
-        public async Task<string> CreateNewWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken)
+        public async Task<string> CreateNewWorkflow(WorkflowInstance workflow)
         {
             workflow.Id = Guid.NewGuid().ToString();
-            var result = await _workflowContainer.Value.CreateItemAsync(PersistedWorkflow.FromInstance(workflow), cancellationToken: cancellationToken);
+            var result = await _workflowContainer.Value.CreateItemAsync(PersistedWorkflow.FromInstance(workflow));
             return result.Resource.id;
         }
 
@@ -203,28 +203,28 @@ namespace WorkflowCore.Providers.Azure.Services
             throw new NotImplementedException();
         }
 
-        public async Task MarkEventProcessed(string id, CancellationToken cancellationToken)
+        public async Task MarkEventProcessed(string id)
         {
-            var evt = await _eventContainer.Value.ReadItemAsync<PersistedEvent>(id, new PartitionKey(id), cancellationToken: cancellationToken);
+            var evt = await _eventContainer.Value.ReadItemAsync<PersistedEvent>(id, new PartitionKey(id));
             evt.Resource.IsProcessed = true;
-            await _eventContainer.Value.ReplaceItemAsync(evt.Resource, id, cancellationToken: cancellationToken);
+            await _eventContainer.Value.ReplaceItemAsync(evt.Resource, id);
         }
 
-        public async Task MarkEventUnprocessed(string id, CancellationToken cancellationToken)
+        public async Task MarkEventUnprocessed(string id)
         {
-            var evt = await _eventContainer.Value.ReadItemAsync<PersistedEvent>(id, new PartitionKey(id), cancellationToken: cancellationToken);
+            var evt = await _eventContainer.Value.ReadItemAsync<PersistedEvent>(id, new PartitionKey(id));
             evt.Resource.IsProcessed = false;
-            await _eventContainer.Value.ReplaceItemAsync(evt.Resource, id, cancellationToken: cancellationToken);
+            await _eventContainer.Value.ReplaceItemAsync(evt.Resource, id);
         }
 
-        public Task PersistErrors(IEnumerable<ExecutionError> errors, CancellationToken _ = default)
+        public Task PersistErrors(IEnumerable<ExecutionError> errors)
         {
             return Task.CompletedTask;
         }
 
-        public async Task PersistWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken)
+        public async Task PersistWorkflow(WorkflowInstance workflow)
         {
-            await _workflowContainer.Value.UpsertItemAsync(PersistedWorkflow.FromInstance(workflow), cancellationToken: cancellationToken);
+            await _workflowContainer.Value.UpsertItemAsync(PersistedWorkflow.FromInstance(workflow));
         }
 
         public Task ProcessCommands(DateTimeOffset asOf, Func<ScheduledCommand, Task> action, CancellationToken cancellationToken = default)
@@ -237,22 +237,22 @@ namespace WorkflowCore.Providers.Azure.Services
             throw new NotImplementedException();
         }
 
-        public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry, CancellationToken cancellationToken)
+        public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry)
         {
-            var sub = await _subscriptionContainer.Value.ReadItemAsync<PersistedSubscription>(eventSubscriptionId, new PartitionKey(eventSubscriptionId), cancellationToken: cancellationToken);
+            var sub = await _subscriptionContainer.Value.ReadItemAsync<PersistedSubscription>(eventSubscriptionId, new PartitionKey(eventSubscriptionId));
             var existingEntity = sub.Resource;
             existingEntity.ExternalToken = token;
             existingEntity.ExternalWorkerId = workerId;
             existingEntity.ExternalTokenExpiry = expiry;
             
-            await _subscriptionContainer.Value.ReplaceItemAsync(existingEntity, eventSubscriptionId, cancellationToken: cancellationToken);
+            await _subscriptionContainer.Value.ReplaceItemAsync(existingEntity, eventSubscriptionId);
 
             return true;
         }
 
-        public async Task TerminateSubscription(string eventSubscriptionId, CancellationToken cancellationToken)
+        public async Task TerminateSubscription(string eventSubscriptionId)
         {
-            await _subscriptionContainer.Value.DeleteItemAsync<PersistedSubscription>(eventSubscriptionId, new PartitionKey(eventSubscriptionId), cancellationToken: cancellationToken);
+            await _subscriptionContainer.Value.DeleteItemAsync<PersistedSubscription>(eventSubscriptionId, new PartitionKey(eventSubscriptionId));
         }
     }
 }

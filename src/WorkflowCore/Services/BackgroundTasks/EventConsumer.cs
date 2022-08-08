@@ -59,7 +59,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                         if (activity == null)
                         {
                             Logger.LogWarning($"Activity already processed - {(evt.EventData as ActivityResult).SubscriptionId}");
-                            await _eventRepository.MarkEventProcessed(itemId, cancellationToken);
+                            await _eventRepository.MarkEventProcessed(itemId);
                             return;
                         }
                         subs = new List<EventSubscription> { activity };
@@ -77,7 +77,7 @@ namespace WorkflowCore.Services.BackgroundTasks
 
                     if (complete)
                     {
-                        await _eventRepository.MarkEventProcessed(itemId, cancellationToken);
+                        await _eventRepository.MarkEventProcessed(itemId);
                     }
                     else
                     {
@@ -135,8 +135,8 @@ namespace WorkflowCore.Services.BackgroundTasks
                     p.Active = true;
                 }
                 workflow.NextExecution = 0;
-                await _workflowRepository.PersistWorkflow(workflow, cancellationToken);
-                await _subscriptionRepository.TerminateSubscription(sub.Id, cancellationToken);
+                await _workflowRepository.PersistWorkflow(workflow);
+                await _subscriptionRepository.TerminateSubscription(sub.Id);
                 return true;
             }
             catch (Exception ex)

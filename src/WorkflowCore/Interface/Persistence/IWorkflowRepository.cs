@@ -8,9 +8,9 @@ namespace WorkflowCore.Interface
 {
     public interface IWorkflowRepository
     {
-        Task<string> CreateNewWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken = default);
+        Task<string> CreateNewWorkflow(WorkflowInstance workflow);
 
-        Task PersistWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken = default);
+        Task PersistWorkflow(WorkflowInstance workflow);
 
         Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt, CancellationToken cancellationToken = default);
 
