@@ -68,7 +68,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                 {
                     foreach (var sub in result.Subscriptions)
                     {
-                        await SubscribeEvent(sub, _persistenceStore, cancellationToken);
+                        await TryProcessSubscription(sub, _persistenceStore, cancellationToken);
                     }
 
                     await _persistenceStore.PersistErrors(result.Errors, cancellationToken);
@@ -98,7 +98,7 @@ namespace WorkflowCore.Services.BackgroundTasks
 
         }
 
-        private async Task SubscribeEvent(EventSubscription subscription, IPersistenceProvider persistenceStore, CancellationToken cancellationToken)
+        private async Task TryProcessSubscription(EventSubscription subscription, IPersistenceProvider persistenceStore, CancellationToken cancellationToken)
         {
             if (subscription.EventName != Event.EventTypeActivity)
             {
