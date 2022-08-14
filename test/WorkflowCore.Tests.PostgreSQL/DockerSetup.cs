@@ -26,6 +26,8 @@ namespace WorkflowCore.Tests.PostgreSQL
 
         public override bool TestReady()
         {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
             try
             {
                 var connection = new NpgsqlConnection($"Server=127.0.0.1;Port={ExternalPort};Database=postgres;User Id=postgres;");
