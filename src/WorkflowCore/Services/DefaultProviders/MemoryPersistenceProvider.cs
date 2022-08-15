@@ -46,6 +46,25 @@ namespace WorkflowCore.Services
             }
         }
 
+        public async Task PersistWorkflow(WorkflowInstance workflow, List<EventSubscription> subscriptions, CancellationToken cancellationToken = default)
+        {
+            lock (_instances)
+            {
+                var existing = _instances.First(x => x.Id == workflow.Id);
+                _instances.Remove(existing);
+                _instances.Add(workflow);
+
+                lock (_subscriptions)
+                {
+                    foreach (var subscription in subscriptions)
+                    {
+                        subscription.Id = Guid.NewGuid().ToString();
+                        _subscriptions.Add(subscription);
+                    }
+                }
+            }
+        }
+
         public async Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt, CancellationToken _ = default)
         {
             lock (_instances)

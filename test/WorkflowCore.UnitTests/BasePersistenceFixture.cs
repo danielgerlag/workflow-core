@@ -185,6 +185,72 @@ namespace WorkflowCore.UnitTests
             var current = Subject.GetWorkflowInstance(workflowId).Result;
             current.ShouldBeEquivalentTo(newWorkflow);
         }
+		
+		[Fact]
+        public void PersistWorkflow_with_subscriptions()
+        {
+            var workflow = new WorkflowInstance
+            {
+                Data = new TestData { Value1 = 7 },
+                Description = "My Description",
+                Status = WorkflowStatus.Runnable,
+                NextExecution = 0,
+                Version = 1,
+                WorkflowDefinitionId = "My Workflow",
+                CreateTime = new DateTime(2000, 1, 1).ToUniversalTime(),
+                ExecutionPointers = new ExecutionPointerCollection(),
+                Reference = Guid.NewGuid().ToString()
+            };
+
+            workflow.ExecutionPointers.Add(new ExecutionPointer
+            {
+                Id = Guid.NewGuid().ToString(),
+                Active = true,
+                StepId = 0,
+                Scope = new List<string> { "1", "2", "3", "4" },
+                EventName = "Event1"
+            });
+
+            workflow.ExecutionPointers.Add(new ExecutionPointer
+            {
+                Id = Guid.NewGuid().ToString(),
+                Active = true,
+                StepId = 1,
+                Scope = new List<string> { "1", "2", "3", "4" },
+                EventName = "Event2",
+            });
+
+            var workflowId = Subject.CreateNewWorkflow(workflow).Result;
+            workflow.NextExecution = 0;
+
+            List<EventSubscription> subscriptions = new List<EventSubscription>();
+            foreach (var pointer in workflow.ExecutionPointers)
+            {
+                var subscription = new EventSubscription()
+                {
+                    WorkflowId = workflowId,
+                    StepId = pointer.StepId,
+                    ExecutionPointerId = pointer.Id,
+                    EventName = pointer.EventName,
+                    EventKey = workflowId,
+                    SubscribeAsOf = DateTime.UtcNow,
+                    SubscriptionData = "data"
+                };
+
+                subscriptions.Add(subscription);
+            }
+
+            Subject.PersistWorkflow(workflow, subscriptions).Wait();
+
+            var current = Subject.GetWorkflowInstance(workflowId).Result;
+            current.ShouldBeEquivalentTo(workflow);
+
+            foreach (var pointer in workflow.ExecutionPointers)
+            {
+                subscriptions = Subject.GetSubscriptions(pointer.EventName, workflowId, DateTime.UtcNow).Result.ToList();
+                subscriptions.Should().HaveCount(1);
+            }
+        }
 
         [Fact]
         public void ConcurrentPersistWorkflow()

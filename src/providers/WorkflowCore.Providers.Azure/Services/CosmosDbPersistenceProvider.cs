@@ -227,6 +227,16 @@ namespace WorkflowCore.Providers.Azure.Services
             await _workflowContainer.Value.UpsertItemAsync(PersistedWorkflow.FromInstance(workflow), cancellationToken: cancellationToken);
         }
 
+        public async Task PersistWorkflow(WorkflowInstance workflow, List<EventSubscription> subscriptions, CancellationToken cancellationToken = default)
+        {
+            await PersistWorkflow(workflow, cancellationToken);
+
+            foreach(var subscription in subscriptions)
+            {
+                await CreateEventSubscription(subscription, cancellationToken);
+            }
+        }
+
         public Task ProcessCommands(DateTimeOffset asOf, Func<ScheduledCommand, Task> action, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();

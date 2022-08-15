@@ -151,6 +151,32 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 await db.SaveChangesAsync(cancellationToken);
             }
         }
+		
+		public async Task PersistWorkflow(WorkflowInstance workflow, List<EventSubscription> subscriptions, CancellationToken cancellationToken = default)
+        {
+            using (var db = ConstructDbContext())
+            {
+                var uid = new Guid(workflow.Id);
+                var existingEntity = await db.Set<PersistedWorkflow>()
+                    .Where(x => x.InstanceId == uid)
+                    .Include(wf => wf.ExecutionPointers)
+                    .ThenInclude(ep => ep.ExtensionAttributes)
+                    .Include(wf => wf.ExecutionPointers)
+                    .AsTracking()
+                    .FirstAsync(cancellationToken);
+
+                var workflowPersistable = workflow.ToPersistable(existingEntity);
+
+                foreach (var subscription in subscriptions)
+                {
+                    subscription.Id = Guid.NewGuid().ToString();
+                    var subscriptionPersistable = subscription.ToPersistable();
+                    db.Set<PersistedSubscription>().Add(subscriptionPersistable);
+                }
+
+                await db.SaveChangesAsync(cancellationToken);
+            }
+        }
 
         public async Task TerminateSubscription(string eventSubscriptionId, CancellationToken cancellationToken = default)
         {

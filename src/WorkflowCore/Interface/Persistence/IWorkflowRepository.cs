@@ -12,6 +12,8 @@ namespace WorkflowCore.Interface
 
         Task PersistWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken = default);
 
+        Task PersistWorkflow(WorkflowInstance workflow, List<EventSubscription> subscriptions, CancellationToken cancellationToken = default);
+
         Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt, CancellationToken cancellationToken = default);
 
         [Obsolete]
