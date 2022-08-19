@@ -23,8 +23,19 @@ namespace WorkflowCore.Services
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _logger;
         private readonly IDateTimeProvider _dateTimeProvider;
+        private readonly WorkflowOptions _options;
 
-        public WorkflowController(IPersistenceProvider persistenceStore, IDistributedLockProvider lockProvider, IWorkflowRegistry registry, IQueueProvider queueProvider, IExecutionPointerFactory pointerFactory, ILifeCycleEventHub eventHub, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IDateTimeProvider dateTimeProvider)
+
+        public WorkflowController(IPersistenceProvider persistenceStore, 
+            IDistributedLockProvider lockProvider, 
+            IWorkflowRegistry registry, 
+            IQueueProvider queueProvider, 
+            IExecutionPointerFactory pointerFactory, 
+            ILifeCycleEventHub eventHub, 
+            ILoggerFactory loggerFactory, 
+            IServiceProvider serviceProvider, 
+            IDateTimeProvider dateTimeProvider, 
+            WorkflowOptions options)
         {
             _persistenceStore = persistenceStore;
             _lockProvider = lockProvider;
@@ -35,6 +46,7 @@ namespace WorkflowCore.Services
             _serviceProvider = serviceProvider;
             _logger = loggerFactory.CreateLogger<WorkflowController>();
             _dateTimeProvider = dateTimeProvider;
+            _options = options;
         }
 
         public Task<string> StartWorkflow(string workflowId, object data = null, string reference=null)
@@ -93,7 +105,10 @@ namespace WorkflowCore.Services
 
             string id = await _persistenceStore.CreateNewWorkflow(wf);
             await _queueProvider.QueueWork(id, QueueType.Workflow);
-            await _queueProvider.QueueWork(id, QueueType.Index);
+
+            if(_options.EnableIndexes)
+                await _queueProvider.QueueWork(id, QueueType.Index);
+
             await _eventHub.PublishNotification(new WorkflowStarted
             {
                 EventTimeUtc = _dateTimeProvider.UtcNow,
@@ -136,7 +151,10 @@ namespace WorkflowCore.Services
                 {
                     wf.Status = WorkflowStatus.Suspended;
                     await _persistenceStore.PersistWorkflow(wf);
-                    await _queueProvider.QueueWork(workflowId, QueueType.Index);
+
+                    if (_options.EnableIndexes)
+                        await _queueProvider.QueueWork(workflowId, QueueType.Index);
+
                     await _eventHub.PublishNotification(new WorkflowSuspended
                     {
                         EventTimeUtc = _dateTimeProvider.UtcNow,
@@ -172,7 +190,10 @@ namespace WorkflowCore.Services
                     wf.Status = WorkflowStatus.Runnable;
                     await _persistenceStore.PersistWorkflow(wf);
                     requeue = true;
-                    await _queueProvider.QueueWork(workflowId, QueueType.Index);
+
+                    if (_options.EnableIndexes)
+                        await _queueProvider.QueueWork(workflowId, QueueType.Index);
+
                     await _eventHub.PublishNotification(new WorkflowResumed
                     {
                         EventTimeUtc = _dateTimeProvider.UtcNow,
@@ -190,7 +211,10 @@ namespace WorkflowCore.Services
             {
                 await _lockProvider.ReleaseLock(workflowId);
                 if (requeue)
-                    await _queueProvider.QueueWork(workflowId, QueueType.Workflow);
+                {
+                    if (_options.EnableIndexes)
+                        await _queueProvider.QueueWork(workflowId, QueueType.Index);
+                }
             }
         }
 
@@ -209,7 +233,10 @@ namespace WorkflowCore.Services
                 wf.CompleteTime = _dateTimeProvider.UtcNow;
 
                 await _persistenceStore.PersistWorkflow(wf);
-                await _queueProvider.QueueWork(workflowId, QueueType.Index);
+
+                if (_options.EnableIndexes)
+                    await _queueProvider.QueueWork(workflowId, QueueType.Index);
+
                 await _eventHub.PublishNotification(new WorkflowTerminated
                 {
                     EventTimeUtc = _dateTimeProvider.UtcNow,

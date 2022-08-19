@@ -17,8 +17,17 @@ namespace WorkflowCore.Services
         private readonly IExecutionPointerFactory _pointerFactory;
         private readonly IQueueProvider _queueService;
         private readonly IDateTimeProvider _dateTimeProvider;
+        private readonly WorkflowOptions _options;
 
-        public SyncWorkflowRunner(IWorkflowHost host, IWorkflowExecutor executor, IDistributedLockProvider lockService, IWorkflowRegistry registry, IPersistenceProvider persistenceStore, IExecutionPointerFactory pointerFactory, IQueueProvider queueService, IDateTimeProvider dateTimeProvider)
+        public SyncWorkflowRunner(IWorkflowHost host, 
+            IWorkflowExecutor executor, 
+            IDistributedLockProvider lockService, 
+            IWorkflowRegistry registry, 
+            IPersistenceProvider persistenceStore, 
+            IExecutionPointerFactory pointerFactory, 
+            IQueueProvider queueService, 
+            IDateTimeProvider dateTimeProvider,
+            WorkflowOptions options)
         {
             _host = host;
             _executor = executor;
@@ -28,6 +37,7 @@ namespace WorkflowCore.Services
             _pointerFactory = pointerFactory;
             _queueService = queueService;
             _dateTimeProvider = dateTimeProvider;
+            _options = options;
         }
 
         public Task<WorkflowInstance> RunWorkflowSync<TData>(string workflowId, int version, TData data,
@@ -98,7 +108,10 @@ namespace WorkflowCore.Services
             }
 
             if (persistSate)
-                await _queueService.QueueWork(id, QueueType.Index);
+            {
+                if(_options.EnableIndexes)
+                    await _queueService.QueueWork(id, QueueType.Index);
+            }
 
             return wf;
         }
