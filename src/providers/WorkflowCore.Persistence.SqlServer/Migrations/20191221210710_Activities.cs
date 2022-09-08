@@ -18,7 +18,7 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
                 name: "ExternalToken",
                 schema: "wfc",
                 table: "Subscription",
-                maxLength: 200,
+                maxLength: 500,
                 nullable: true);
 
             migrationBuilder.AddColumn<DateTime>(
