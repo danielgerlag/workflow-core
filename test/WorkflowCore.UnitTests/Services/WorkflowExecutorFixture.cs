@@ -9,6 +9,9 @@ using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Services;
 using Xunit;
+using WorkflowCore.Models.LifeCycleEvents;
+using Moq;
+using Times = Moq.Times;
 
 namespace WorkflowCore.UnitTests.Services
 {
@@ -19,7 +22,7 @@ namespace WorkflowCore.UnitTests.Services
         protected IPersistenceProvider PersistenceProvider;
         protected IWorkflowRegistry Registry;
         protected IExecutionResultProcessor ResultProcesser;
-        protected ILifeCycleEventPublisher EventHub;
+        protected Mock<ILifeCycleEventPublisher> EventHub;
         protected ICancellationProcessor CancellationProcessor;
         protected IServiceProvider ServiceProvider;
         protected IScopeProvider ScopeProvider;
@@ -36,7 +39,7 @@ namespace WorkflowCore.UnitTests.Services
             ScopeProvider = A.Fake<IScopeProvider>();
             Registry = A.Fake<IWorkflowRegistry>();
             ResultProcesser = A.Fake<IExecutionResultProcessor>();
-            EventHub = A.Fake<ILifeCycleEventPublisher>();
+            EventHub = new Mock<ILifeCycleEventPublisher>();
             CancellationProcessor = A.Fake<ICancellationProcessor>();
             DateTimeProvider = A.Fake<IDateTimeProvider>();
             MiddlewareRunner = A.Fake<IWorkflowMiddlewareRunner>();
@@ -82,7 +85,7 @@ namespace WorkflowCore.UnitTests.Services
             var loggerFactory = new LoggerFactory();
             //loggerFactory.AddConsole(LogLevel.Debug);
 
-            Subject = new WorkflowExecutor(Registry, ServiceProvider, ScopeProvider, DateTimeProvider, ResultProcesser, EventHub, CancellationProcessor, Options, loggerFactory);
+            Subject = new WorkflowExecutor(Registry, ServiceProvider, ScopeProvider, DateTimeProvider, ResultProcesser, EventHub.Object, CancellationProcessor, Options, loggerFactory);
         }
 
         [Fact(DisplayName = "Should execute active step")]
@@ -401,6 +404,62 @@ namespace WorkflowCore.UnitTests.Services
 
             //assert
             A.CallTo(() => CancellationProcessor.ProcessCancellations(instance, A<WorkflowDefinition>.Ignored, A<WorkflowExecutorResult>.Ignored)).MustHaveHappened();
+        }
+
+        [Fact(DisplayName = "Should execute active step")]
+        public void should_execute_publisher_sends_Event_when_completed()
+        {
+            //arrange
+            var param = A.Fake<IStepParameter>();
+
+            var step1Body = A.Fake<IStepBody>();
+            A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
+            WorkflowStep step1 = BuildFakeEndStep(step1Body, new List<IStepParameter>
+            {
+                param
+            },
+            new List<IStepParameter>());
+
+            Given1StepWorkflow(step1, "Workflow", 1);
+
+            var instance = new WorkflowInstance
+            {
+                WorkflowDefinitionId = "Workflow",
+                Version = 1,
+                Status = WorkflowStatus.Runnable,
+                NextExecution = 0,
+                Id = "001",
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>
+                {
+                    new ExecutionPointer { Id = "1", Active = true, StepId = 0 }
+                })
+            };
+
+            EventHub.Setup(m => m.PublishNotification(new WorkflowCompleted()));
+
+            //act
+            Subject.Execute(instance);
+
+            //assert
+            EventHub.Verify(hub => hub.PublishNotification(It.IsAny<WorkflowCompleted>()), Times.Once());
+            A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => ResultProcesser.ProcessExecutionResult(instance, A<WorkflowDefinition>.Ignored, A<ExecutionPointer>.Ignored, step1, A<ExecutionResult>.Ignored, A<WorkflowExecutorResult>.Ignored)).MustNotHaveHappened();
+        }
+
+        private WorkflowStep BuildFakeEndStep(IStepBody stepBody, List<IStepParameter> inputs, List<IStepParameter> outputs)
+        {
+            var result = A.Fake<WorkflowStep>();
+            A.CallTo(() => result.Id).Returns(0);
+            A.CallTo(() => result.BodyType).Returns(stepBody.GetType());
+            A.CallTo(() => result.ResumeChildrenAfterCompensation).Returns(true);
+            A.CallTo(() => result.RevertChildrenAfterCompensation).Returns(false);
+            A.CallTo(() => result.ConstructBody(ServiceProvider)).Returns(stepBody);
+            A.CallTo(() => result.Inputs).Returns(inputs);
+            A.CallTo(() => result.Outputs).Returns(outputs);
+            A.CallTo(() => result.Outcomes).Returns(new List<IStepOutcome>());
+            A.CallTo(() => result.InitForExecution(A<WorkflowExecutorResult>.Ignored, A<WorkflowDefinition>.Ignored, A<WorkflowInstance>.Ignored, A<ExecutionPointer>.Ignored)).Returns(ExecutionPipelineDirective.EndWorkflow);
+            A.CallTo(() => result.BeforeExecute(A<WorkflowExecutorResult>.Ignored, A<IStepExecutionContext>.Ignored, A<ExecutionPointer>.Ignored, A<IStepBody>.Ignored)).Returns(ExecutionPipelineDirective.Next);
+            return result;
         }
 
 
