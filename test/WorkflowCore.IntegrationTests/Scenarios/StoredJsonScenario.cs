@@ -31,6 +31,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             data.Counter6.Should().Be(1);
             data.Counter7.Should().Be(1);
             data.Counter8.Should().Be(0);
+            data.Counter10.Should().Be(1);
         }
 
         [Fact(DisplayName = "Execute branch 2")]
@@ -50,6 +51,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             data.Counter6.Should().Be(1);
             data.Counter7.Should().Be(0);
             data.Counter8.Should().Be(1);
+            data.Counter10.Should().Be(1);
         }
 
         [Fact]
@@ -64,7 +66,8 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                 ["Counter3"] = 0,
                 ["Counter4"] = 0,
                 ["Counter5"] = 0,
-                ["Counter6"] = 0
+                ["Counter6"] = 0,
+                ["Counter10"] = 0
             };
 
             var workflowId = StartWorkflow(TestAssets.Utils.GetTestDefinitionDynamicJson(), initialData);
@@ -79,6 +82,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             data["Counter4"].Should().Be(1);
             data["Counter5"].Should().Be(0);
             data["Counter6"].Should().Be(1);
+            data["Counter10"].Should().Be(1);
         }
     }
 }

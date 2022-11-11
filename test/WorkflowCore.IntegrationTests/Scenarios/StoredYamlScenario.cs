@@ -29,6 +29,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             data.Counter4.Should().Be(1);
             data.Counter5.Should().Be(0);
             data.Counter6.Should().Be(1);
+            data.Counter10.Should().Be(1);
         }
     }
 }

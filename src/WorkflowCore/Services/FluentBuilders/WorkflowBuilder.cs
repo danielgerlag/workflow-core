@@ -84,6 +84,11 @@ namespace WorkflowCore.Services
                         if (step2.Children[i] == oldId)
                             step2.Children[i] = step.Id;
                     }
+
+                    if (step2.CompensationStepId == oldId)
+                    {
+                        step2.CompensationStepId = step.Id;
+                    }
                 }
             }
 
@@ -103,6 +108,11 @@ namespace WorkflowCore.Services
                     {
                         if (step2.Children[i] == oldId)
                             step2.Children[i] = step.Id;
+                    }
+
+                    if (step2.CompensationStepId == oldId)
+                    {
+                        step2.CompensationStepId = step.Id;
                     }
                 }
             }
@@ -268,6 +278,10 @@ namespace WorkflowCore.Services
 
         public IStepBuilder<TData, Activity> Activity(string activityName, Expression<Func<TData, object>> parameters = null, Expression<Func<TData, DateTime>> effectiveDate = null,
             Expression<Func<TData, bool>> cancelCondition = null)
+        {
+            return Start().Activity(activityName, parameters, effectiveDate, cancelCondition);
+        }
+        public IStepBuilder<TData, Activity> Activity(Expression<Func<TData, IStepExecutionContext, string>> activityName, Expression<Func<TData, object>> parameters = null, Expression<Func<TData, DateTime>> effectiveDate = null, Expression<Func<TData, bool>> cancelCondition = null)
         {
             return Start().Activity(activityName, parameters, effectiveDate, cancelCondition);
         }
