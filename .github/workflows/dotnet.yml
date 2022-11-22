@@ -27,6 +27,8 @@ jobs:
       run: dotnet test test/WorkflowCore.UnitTests --no-build --verbosity normal -p:ParallelizeTestCollections=false
     - name: Integration Tests
       run: dotnet test test/WorkflowCore.IntegrationTests --no-build --verbosity normal -p:ParallelizeTestCollections=false
+    - name: MongoDB Tests
+      run: dotnet test test/WorkflowCore.Tests.MongoDB --no-build --verbosity normal -p:ParallelizeTestCollections=false
     - name: PostgreSQL Tests
       run: dotnet test test/WorkflowCore.Tests.PostgreSQL --no-build --verbosity normal -p:ParallelizeTestCollections=false
     - name: Redis Tests
