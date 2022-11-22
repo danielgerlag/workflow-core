@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="NEST" Version="7.14.1" />
     <PackageReference Include="Squadron.Elasticsearch" Version="0.17.0" />
   </ItemGroup>
 
