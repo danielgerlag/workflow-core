@@ -1,5 +1,6 @@
 ﻿using System;
 using Docker.Testify;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using Xunit;
 
@@ -23,6 +24,10 @@ namespace WorkflowCore.Tests.MongoDB
             {
                 var client = new MongoClient($"mongodb://localhost:{ExternalPort}");
                 client.ListDatabases();
+                
+                var command = new BsonDocument { { "setParameter", 1 }, { "notablescan", 1 } };
+                client.GetDatabase("admin").RunCommand<BsonDocument>(command);
+                
                 return true;
             }
             catch
