@@ -31,6 +31,6 @@ namespace WorkflowCore.Tests.SqlServer
 
     [CollectionDefinition("SqlServer collection")]
     public class SqlServerCollection : ICollectionFixture<SqlDockerSetup>
-    {        
+    {
     }
 }

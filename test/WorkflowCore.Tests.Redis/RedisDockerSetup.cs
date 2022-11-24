@@ -4,7 +4,7 @@ using Squadron;
 using Xunit;
 
 namespace WorkflowCore.Tests.Redis
-{    
+{
     public class RedisDockerSetup : IAsyncLifetime
     {
         private readonly RedisResource _redisResource;
@@ -29,6 +29,6 @@ namespace WorkflowCore.Tests.Redis
 
     [CollectionDefinition("Redis collection")]
     public class RedisCollection : ICollectionFixture<RedisDockerSetup>
-    {        
+    {
     }
 }

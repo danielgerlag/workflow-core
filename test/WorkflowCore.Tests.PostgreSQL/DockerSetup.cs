@@ -16,7 +16,7 @@ namespace WorkflowCore.Tests.PostgreSQL
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             _postgreSqlResource = new PostgreSqlResource();
         }
-        
+
         public async Task InitializeAsync()
         {
             await _postgreSqlResource.InitializeAsync();
@@ -29,9 +29,9 @@ namespace WorkflowCore.Tests.PostgreSQL
             return _postgreSqlResource.DisposeAsync();
         }
     }
-    
+
     [CollectionDefinition("Postgres collection")]
     public class PostgresCollection : ICollectionFixture<PostgresDockerSetup>
-    {        
+    {
     }
 }

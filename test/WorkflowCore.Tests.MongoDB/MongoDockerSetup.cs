@@ -5,7 +5,7 @@ using Squadron;
 using Xunit;
 
 namespace WorkflowCore.Tests.MongoDB
-{    
+{
     public class MongoDockerSetup : IAsyncLifetime
     {
         private readonly MongoResource _mongoResource;
@@ -15,7 +15,7 @@ namespace WorkflowCore.Tests.MongoDB
         {
             _mongoResource = new MongoResource();
         }
-        
+
         public async Task InitializeAsync()
         {
             await _mongoResource.InitializeAsync();
@@ -33,6 +33,6 @@ namespace WorkflowCore.Tests.MongoDB
 
     [CollectionDefinition("Mongo collection")]
     public class MongoCollection : ICollectionFixture<MongoDockerSetup>
-    {        
+    {
     }
 }

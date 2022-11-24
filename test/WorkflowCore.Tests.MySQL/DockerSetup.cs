@@ -15,7 +15,7 @@ namespace WorkflowCore.Tests.MySQL
         {
             _mySqlResource = new MySqlResource();
         }
-        
+
         public async Task InitializeAsync()
         {
             await _mySqlResource.InitializeAsync();
