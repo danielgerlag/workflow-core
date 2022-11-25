@@ -19,9 +19,8 @@ namespace WorkflowCore.Tests.MongoDB
         public async Task InitializeAsync()
         {
             await _mongoResource.InitializeAsync();
-            // TODO: Should be enabled
-            // var command = new BsonDocument { { "setParameter", 1 }, { "notablescan", 1 } };
-            // _mongoResource.Client.GetDatabase("admin").RunCommand<BsonDocument>(command);
+            var command = new BsonDocument { { "setParameter", 1 }, { "notablescan", 1 } };
+            _mongoResource.Client.GetDatabase("admin").RunCommand<BsonDocument>(command);
             ConnectionString = _mongoResource.ConnectionString;
         }
 
