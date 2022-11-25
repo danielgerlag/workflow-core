@@ -111,8 +111,8 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
                 instance.EventSubscriptions.Indexes.CreateOne(new CreateIndexModel<EventSubscription>(
                     Builders<EventSubscription>.IndexKeys
-                        .Ascending(x => x.EventName)
                         .Ascending(x => x.EventKey)
+                        .Ascending(x => x.EventName)
                         .Ascending(x => x.SubscribeAsOf)
                         .Ascending(x => x.ExternalToken),
                     new CreateIndexOptions { Background = true, Name = "idx_namekey_v2" }));
