@@ -95,7 +95,8 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                 instance.WorkflowInstances.Indexes.CreateOne(new CreateIndexModel<WorkflowInstance>(
                     Builders<WorkflowInstance>.IndexKeys
                         .Ascending(x => x.NextExecution)
-                        .Ascending(x => x.Status),
+                        .Ascending(x => x.Status)
+                        .Ascending(x => x.Id),
                     new CreateIndexOptions {Background = true, Name = "idx_nextExec_v2"}));
 
                 instance.Events.Indexes.CreateOne(new CreateIndexModel<Event>(
@@ -111,17 +112,9 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
                 instance.EventSubscriptions.Indexes.CreateOne(new CreateIndexModel<EventSubscription>(
                     Builders<EventSubscription>.IndexKeys
-                        .Ascending(x => x.EventKey)
-                        .Ascending(x => x.EventName),
-                    new CreateIndexOptions { Background = true, Name = "idx_namekey_v2" }));
-                
-                instance.EventSubscriptions.Indexes.CreateOne(new CreateIndexModel<EventSubscription>(
-                    Builders<EventSubscription>.IndexKeys.Ascending(x => x.SubscribeAsOf),
-                    new CreateIndexOptions { Background = true, Name = "idx_subscribe" }));
-                
-                instance.EventSubscriptions.Indexes.CreateOne(new CreateIndexModel<EventSubscription>(
-                    Builders<EventSubscription>.IndexKeys.Ascending(x => x.ExternalToken),
-                    new CreateIndexOptions { Background = true, Name = "idx_token" }));
+                        .Ascending(x => x.EventName)
+                        .Ascending(x => x.EventKey),
+                    new CreateIndexOptions { Background = true, Name = "idx_namekey" }));
 
                 instance.ScheduledCommands.Indexes.CreateOne(new CreateIndexModel<ScheduledCommand>(
                     Builders<ScheduledCommand>.IndexKeys
