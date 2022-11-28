@@ -56,7 +56,10 @@ namespace WorkflowCore.Services.BackgroundTasks
                     {
                         WorkflowActivity.Enrich(result);
                         await _persistenceStore.PersistWorkflow(workflow, result.Subscriptions, cancellationToken);
-                        await QueueProvider.QueueWork(itemId, QueueType.Index);
+
+                        if(Options.EnableIndexes)
+                            await QueueProvider.QueueWork(itemId, QueueType.Index);
+
                         _greylist.Remove($"wf:{itemId}");
                     }
                 }
