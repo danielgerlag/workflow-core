@@ -16,7 +16,7 @@ namespace WorkflowCore.Tests.MongoDB.Scenarios
 
         protected override void ConfigureServices(IServiceCollection services)
         {
-            services.AddWorkflow(x => x.UseMongoDB(MongoDockerSetup.ConnectionString, "integration-tests"));
+            services.AddWorkflow(x => x.UseMongoDB(MongoDockerSetup.ConnectionString, nameof(MongoDataScenario)));
         }
     }
 }

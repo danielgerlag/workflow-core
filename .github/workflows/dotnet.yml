@@ -7,10 +7,8 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
-
+  Unit-Tests:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET
@@ -25,13 +23,99 @@ jobs:
       run: dotnet build --no-restore
     - name: Unit Tests
       run: dotnet test test/WorkflowCore.UnitTests --no-build --verbosity normal -p:ParallelizeTestCollections=false
-    - name: Integration Tests
-      run: dotnet test test/WorkflowCore.IntegrationTests --no-build --verbosity normal -p:ParallelizeTestCollections=false
-    - name: PostgreSQL Tests
-      run: dotnet test test/WorkflowCore.Tests.PostgreSQL --no-build --verbosity normal -p:ParallelizeTestCollections=false
-    - name: Redis Tests
-      run: dotnet test test/WorkflowCore.Tests.Redis --no-build --verbosity normal -p:ParallelizeTestCollections=false
-    - name: SQL Server Tests
-      run: dotnet test test/WorkflowCore.Tests.SqlServer --no-build --verbosity normal -p:ParallelizeTestCollections=false
-    - name: Elasticsearch Tests
-      run: dotnet test test/WorkflowCore.Tests.Elasticsearch --no-build --verbosity normal -p:ParallelizeTestCollections=false
+  Integration-Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: |
+            3.1.x
+            6.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Integration Tests
+        run: dotnet test test/WorkflowCore.IntegrationTests --no-build --verbosity normal -p:ParallelizeTestCollections=false
+  MongoDB-Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: |
+            3.1.x
+            6.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: MongoDB Tests
+        run: dotnet test test/WorkflowCore.Tests.MongoDB --no-build --verbosity normal -p:ParallelizeTestCollections=false
+  PostgreSQL-Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: |
+            3.1.x
+            6.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: PostgreSQL Tests
+        run: dotnet test test/WorkflowCore.Tests.PostgreSQL --no-build --verbosity normal -p:ParallelizeTestCollections=false
+  Redis-Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: |
+            3.1.x
+            6.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Redis Tests
+        run: dotnet test test/WorkflowCore.Tests.Redis --no-build --verbosity normal -p:ParallelizeTestCollections=false
+  SQLServer-Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: |
+            3.1.x
+            6.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: SQL Server Tests
+        run: dotnet test test/WorkflowCore.Tests.SqlServer --no-build --verbosity normal -p:ParallelizeTestCollections=false
+  Elasticsearch-Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: |
+            3.1.x
+            6.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Elasticsearch Tests
+        run: dotnet test test/WorkflowCore.Tests.Elasticsearch --no-build --verbosity normal -p:ParallelizeTestCollections=false

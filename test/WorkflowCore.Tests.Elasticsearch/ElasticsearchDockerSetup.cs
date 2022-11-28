@@ -1,42 +1,29 @@
 ﻿using System;
-using System.Collections.Generic;
-using Docker.Testify;
-using Nest;
+using System.Threading.Tasks;
+using Squadron;
 using Xunit;
 
 namespace WorkflowCore.Tests.Elasticsearch
 {
-    public class ElasticsearchDockerSetup : DockerSetup
+    public class ElasticsearchDockerSetup : IAsyncLifetime
     {
+        private readonly ElasticsearchResource _elasticsearchResource;
         public static string ConnectionString { get; set; }
-        
-        public override string ImageName => @"elasticsearch";
-        public override string ImageTag => "7.5.1";
-        public override int InternalPort => 9200;
-        public override TimeSpan TimeOut => TimeSpan.FromSeconds(30);
-        
-        public override IList<string> EnvironmentVariables => new List<string> {
-            $"discovery.type=single-node"
-        };
 
-        public override void PublishConnectionInfo()
+        public ElasticsearchDockerSetup()
         {
-            ConnectionString = $"http://localhost:{ExternalPort}";
+            _elasticsearchResource = new ElasticsearchResource();
         }
 
-        public override bool TestReady()
+        public async Task InitializeAsync()
         {
-            try
-            {
-                var client = new ElasticClient(new ConnectionSettings(new Uri($"http://localhost:{ExternalPort}")));
-                var ping = client.Ping();
-                return ping.IsValid;
-            }
-            catch
-            {
-                return false;
-            }
+            await _elasticsearchResource.InitializeAsync();
+            ConnectionString = $"http://localhost:{_elasticsearchResource.Instance.HostPort}";
+        }
 
+        public Task DisposeAsync()
+        {
+            return _elasticsearchResource.DisposeAsync();
         }
     }
 

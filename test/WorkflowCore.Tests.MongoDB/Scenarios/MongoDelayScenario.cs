@@ -18,7 +18,7 @@ namespace WorkflowCore.Tests.MongoDB.Scenarios
         {
             services.AddWorkflow(cfg =>
             {
-                cfg.UseMongoDB(MongoDockerSetup.ConnectionString, "integration-tests");
+                cfg.UseMongoDB(MongoDockerSetup.ConnectionString, nameof(MongoDelayScenario));
                 cfg.UsePollInterval(TimeSpan.FromSeconds(2));
             });
         }

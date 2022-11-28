@@ -14,7 +14,7 @@ namespace WorkflowCore.Tests.MongoDB.Scenarios
             BsonClassMap.RegisterClassMap<ActivityScenario.ActivityInput>(x => x.AutoMap());
             BsonClassMap.RegisterClassMap<ActivityScenario.ActivityOutput>(x => x.AutoMap());
 
-            services.AddWorkflow(x => x.UseMongoDB(MongoDockerSetup.ConnectionString, "integration-tests"));
+            services.AddWorkflow(x => x.UseMongoDB(MongoDockerSetup.ConnectionString, nameof(MongoActivityScenario)));
         }
     }
 }
