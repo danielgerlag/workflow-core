@@ -154,12 +154,18 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         public async Task PersistWorkflow(WorkflowInstance workflow, List<EventSubscription> subscriptions, CancellationToken cancellationToken = default)
         {
-            using (var session = await _database.Client.StartSessionAsync())
+            if (subscriptions == null || subscriptions.Count < 1)
+            {
+                await PersistWorkflow(workflow, cancellationToken);
+                return;
+            }
+
+            using (var session = await _database.Client.StartSessionAsync(cancellationToken: cancellationToken))
             {
                 session.StartTransaction();
                 await PersistWorkflow(workflow, cancellationToken);
                 await EventSubscriptions.InsertManyAsync(subscriptions, cancellationToken: cancellationToken);
-                await session.CommitTransactionAsync();
+                await session.CommitTransactionAsync(cancellationToken);
             }
         }
 
