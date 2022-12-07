@@ -19,8 +19,10 @@ namespace WorkflowCore.Tests.MySQL
         public async Task InitializeAsync()
         {
             await _mySqlResource.InitializeAsync();
-            ConnectionString = _mySqlResource.ConnectionString;
-            ScenarioConnectionString = _mySqlResource.ConnectionString;
+            var workflowConnection = await _mySqlResource.CreateDatabaseAsync("workflow");
+            ConnectionString = workflowConnection.ConnectionString;
+            var scenariosConnection = await _mySqlResource.CreateDatabaseAsync("scenarios");
+            ScenarioConnectionString = scenariosConnection.ConnectionString;
         }
 
         public Task DisposeAsync()
@@ -28,7 +30,7 @@ namespace WorkflowCore.Tests.MySQL
             return _mySqlResource.DisposeAsync();
         }
     }
-
+    
     [CollectionDefinition("Mysql collection")]
     public class MysqlCollection : ICollectionFixture<MysqlDockerSetup>
     {
