@@ -398,12 +398,30 @@ namespace WorkflowCore.Services.DefinitionStorage
                         }
                     }
 
-                    foreach (var child in subobj.Children<JObject>())
-                        stack.Push(child);
+                    foreach (var child in subobj.Children())
+                    {
+                        var jobj = destObj.SelectToken(child.Path);
+
+                        if (jobj is JObject)
+                        {
+                            stack.Push(jobj as JObject);
+                        }
+                        else if (jobj is JArray)
+                        {
+                            foreach (var obj in jobj as JArray)
+                            {
+                                var jobj2 = destObj.SelectToken(obj.Path);
+                                if (jobj2 is JObject)
+                                {
+                                    stack.Push(jobj2 as JObject);
+                                }
+                            }
+                        }
+                    }
                 }
 
                 stepProperty.SetValue(pStep, destObj);
-            }
+            }   
             return acn;
         }
 
