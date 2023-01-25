@@ -14,15 +14,17 @@ namespace WorkflowCore.Interface
         /// <summary>
         /// Enqueues work to be processed by a host in the cluster
         /// </summary>
-        /// <param name="Id"></param>
-        /// <returns></returns>
         Task QueueWork(string id, QueueType queue);
+
+        /// <summary>
+        /// Enqueues work to be processed by a host in the cluster
+        /// </summary>
+        Task QueueWork(string id, QueueType queue, QueuePriority priority);
 
         /// <summary>
         /// Fetches the next work item from the front of the process queue.
         /// If the queue is empty, NULL is returned
         /// </summary>
-        /// <returns></returns>
         Task<string> DequeueWork(QueueType queue, CancellationToken cancellationToken);
 
         bool IsDequeueBlocking { get; }
@@ -33,4 +35,5 @@ namespace WorkflowCore.Interface
     }
 
     public enum QueueType { Workflow = 0, Event = 1, Index = 2 }
+    public enum QueuePriority { Normal = 1, High = 3 }
 }

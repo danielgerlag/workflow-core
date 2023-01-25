@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using RabbitMQ.Client;
+﻿using RabbitMQ.Client;
 using System;
 using System.Linq;
 using System.Text;
@@ -8,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
 using WorkflowCore.QueueProviders.RabbitMQ.Interfaces;
+using System.Collections.Generic;
 
 namespace WorkflowCore.QueueProviders.RabbitMQ.Services
 {
@@ -19,7 +19,6 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
         private readonly IServiceProvider _serviceProvider;
         
         private IConnection _connection = null;
-        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
 
         public bool IsDequeueBlocking => false;
 
@@ -32,7 +31,15 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
             _rabbitMqConnectionFactory = connectionFactory;
         }
 
-        public async Task QueueWork(string id, QueueType queue)
+        private IEnumerable<string> GetQueuesSortedByPriority(QueueType queue)
+        {
+            return _queueNameProvider.GetAll()
+                .Where(kvp => kvp.Key.Item1 == queue)
+                .OrderByDescending(kvp => kvp.Key.Item2)
+                .Select(kvp => kvp.Value);
+        }
+
+        public async Task QueueWork(string id, QueueType queue, QueuePriority priority)
         {
             if (_connection == null)
                 throw new InvalidOperationException("RabbitMQ provider not running");
@@ -45,14 +52,19 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
             }
         }
 
-        public async Task<string> DequeueWork(QueueType queue, CancellationToken cancellationToken)
+        public Task QueueWork(string id, QueueType queue)
+        {
+            return QueueWork(id, queue, QueuePriority.Normal);
+        }
+
+        private async Task<string> DequeueWork(string queueName)
         {
             if (_connection == null)
                 throw new InvalidOperationException("RabbitMQ provider not running");
 
             using (var channel = _connection.CreateModel())
             {
-                channel.QueueDeclare(queue: _queueNameProvider.GetQueueName(queue),
+                channel.QueueDeclare(queue: queueName,
                                      durable: true,
                                      exclusive: false,
                                      autoDelete: false,
@@ -60,7 +72,7 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
 
                 channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
 
-                var msg = channel.BasicGet(_queueNameProvider.GetQueueName(queue), false);
+                var msg = channel.BasicGet(queueName, false);
                 if (msg != null)
                 {
                     var data = Encoding.UTF8.GetString(msg.Body);
@@ -70,7 +82,19 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
                 return null;
             }
         }
-        
+
+        public async Task<string> DequeueWork(QueueType queue, CancellationToken cancellationToken)
+        {
+            foreach (var q in GetQueuesSortedByPriority(queue))
+            {
+                var result = await DequeueWork(q);
+                if (result != null)
+                    return result;
+            }
+
+            return null;
+        }
+
         public void Dispose()
         {
             if (_connection != null)

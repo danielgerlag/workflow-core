@@ -16,13 +16,21 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
     /// </summary>    
     public class QueueConfigProvider : IQueueConfigProvider
     {
-        private readonly Dictionary<QueueType, QueueConfig> _queues = new Dictionary<QueueType, QueueConfig>
+        private readonly Dictionary<(QueueType, QueuePriority), QueueConfig> _queues = new Dictionary<(QueueType, QueuePriority), QueueConfig>
         {
-            [QueueType.Workflow] = new QueueConfig("workflow"),
-            [QueueType.Event] = new QueueConfig("event"),
-            [QueueType.Index] = new QueueConfig("indexq")
+            [(QueueType.Workflow, QueuePriority.Normal)] = new QueueConfig("workflow"),
+            [(QueueType.Workflow, QueuePriority.High)] = new QueueConfig("workflowhigh"),
+            [(QueueType.Event, QueuePriority.Normal)] = new QueueConfig("event"),
+            [(QueueType.Index, QueuePriority.Normal)] = new QueueConfig("indexq")
         };
 
-        public QueueConfig GetByQueue(QueueType queue) => _queues[queue];
+        public IDictionary<(QueueType, QueuePriority), QueueConfig> GetAll() => _queues;
+
+        public QueueConfig GetByQueue(
+            QueueType queue) => GetByQueue(queue, QueuePriority.Normal);
+
+        public QueueConfig GetByQueue(
+            QueueType queue,
+            QueuePriority priority) => _queues[(queue, priority)];
     }
 }

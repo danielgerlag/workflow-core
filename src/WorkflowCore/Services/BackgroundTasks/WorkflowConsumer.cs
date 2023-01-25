@@ -157,7 +157,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     await Task.Delay(TimeSpan.FromTicks(target), cancellationToken);
                 }
 
-                await QueueProvider.QueueWork(workflow.Id, QueueType.Workflow);
+                await QueueProvider.QueueWork(workflow.Id, QueueType.Workflow, QueuePriority.High);
             }
             catch (Exception ex)
             {
