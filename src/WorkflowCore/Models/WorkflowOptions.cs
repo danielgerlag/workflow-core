@@ -13,7 +13,9 @@ namespace WorkflowCore.Models
         internal Func<IServiceProvider, IDistributedLockProvider> LockFactory;
         internal Func<IServiceProvider, ILifeCycleEventHub> EventHubFactory;
         internal Func<IServiceProvider, ISearchIndex> SearchIndexFactory;
-        internal TimeSpan PollInterval;
+        internal TimeSpan PollWorkflowsInterval;
+        internal TimeSpan PollEventsInterval;
+        internal TimeSpan PollCommandsInterval;
         internal TimeSpan IdleTime;
         internal TimeSpan ErrorRetryInterval;
         internal int MaxConcurrentWorkflows = Math.Max(Environment.ProcessorCount, 4);
@@ -23,7 +25,9 @@ namespace WorkflowCore.Models
         public WorkflowOptions(IServiceCollection services)
         {
             Services = services;
-            PollInterval = TimeSpan.FromSeconds(10);
+            PollWorkflowsInterval = TimeSpan.FromSeconds(10);
+            PollEventsInterval = TimeSpan.FromSeconds(10);
+            PollCommandsInterval = TimeSpan.FromSeconds(10);
             IdleTime = TimeSpan.FromMilliseconds(100);
             ErrorRetryInterval = TimeSpan.FromSeconds(60);
 
@@ -65,9 +69,19 @@ namespace WorkflowCore.Models
             SearchIndexFactory = factory;
         }
 
-        public void UsePollInterval(TimeSpan interval)
+        public void UsePollWorkflowsInterval(TimeSpan interval)
         {
-            PollInterval = interval;
+            PollWorkflowsInterval = interval;
+        }
+
+        public void UsePollEventsInterval(TimeSpan interval)
+        {
+            PollEventsInterval = interval;
+        }
+
+        public void UsePollCommandsInterval(TimeSpan interval)
+        {
+            PollCommandsInterval = interval;
         }
 
         public void UseErrorRetryInterval(TimeSpan interval)

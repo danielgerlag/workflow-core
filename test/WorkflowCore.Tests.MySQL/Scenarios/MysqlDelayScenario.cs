@@ -13,7 +13,7 @@ namespace WorkflowCore.Tests.MySQL.Scenarios
             services.AddWorkflow(cfg =>
             {
                 cfg.UseMySQL(MysqlDockerSetup.ScenarioConnectionString, true, true);
-                cfg.UsePollInterval(TimeSpan.FromSeconds(2));
+                cfg.UsePollWorkflowsInterval(TimeSpan.FromSeconds(2));
             });
         }
     }

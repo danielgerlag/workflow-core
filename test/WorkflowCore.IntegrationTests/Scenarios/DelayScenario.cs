@@ -44,7 +44,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             
             var workflowId = StartWorkflow(new DelayWorkflow.MyDataClass()
             {
-                WaitTime = Host.Options.PollInterval.Add(TimeSpan.FromSeconds(1))
+                WaitTime = Host.Options.PollWorkflowsInterval.Add(TimeSpan.FromSeconds(1))
             });
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 

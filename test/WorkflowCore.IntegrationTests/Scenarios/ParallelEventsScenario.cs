@@ -71,7 +71,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
         protected override void ConfigureServices(IServiceCollection services)
         {
-            services.AddWorkflow(s => s.UsePollInterval(TimeSpan.FromSeconds(1)));
+            services.AddWorkflow(s => s.UsePollEventsInterval(TimeSpan.FromSeconds(1)));
         }
 
         [Fact]

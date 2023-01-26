@@ -75,7 +75,9 @@ namespace WorkflowCore.Services.BackgroundTasks
 
                     if ((workflow.Status == WorkflowStatus.Runnable) && workflow.NextExecution.HasValue)
                     {
-                        var readAheadTicks = _datetimeProvider.UtcNow.Add(Options.PollInterval).Ticks;
+                        var timeSpanBeforeNextPoll = _persistenceStore.SupportsScheduledCommands ?
+                            Options.PollCommandsInterval : Options.PollWorkflowsInterval;
+                        var readAheadTicks = _datetimeProvider.UtcNow.Add(timeSpanBeforeNextPoll).Ticks;
                         if (workflow.NextExecution.Value < readAheadTicks)
                         {
                             new Task(() => FutureQueue(workflow, cancellationToken)).Start();

@@ -7,6 +7,7 @@ using Microsoft.Extensions.ObjectPool;
 using WorkflowCore.Primitives;
 using WorkflowCore.Services.BackgroundTasks;
 using WorkflowCore.Services.ErrorHandlers;
+using WorkflowCore.Services.BackgroundTasks.RunnablePoller;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -50,7 +51,9 @@ namespace Microsoft.Extensions.DependencyInjection
 
             if (options.EnablePolling)
             {
-                services.AddTransient<IBackgroundTask, RunnablePoller>();
+                services.AddTransient<IBackgroundTask, WorkflowRunnablePoller>();
+                services.AddTransient<IBackgroundTask, EventRunnablePoller>();
+                services.AddTransient<IBackgroundTask, CommandRunnablePoller>();
             }
 
             services.AddTransient<IBackgroundTask>(sp => sp.GetService<ILifeCycleEventPublisher>());

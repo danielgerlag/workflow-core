@@ -13,7 +13,7 @@ namespace WorkflowCore.Tests.PostgreSQL.Scenarios
             services.AddWorkflow(cfg =>
             {
                 cfg.UsePostgreSQL(PostgresDockerSetup.ScenarioConnectionString, true, true);
-                cfg.UsePollInterval(TimeSpan.FromSeconds(2));
+                cfg.UsePollWorkflowsInterval(TimeSpan.FromSeconds(2));
             });
         }
     }
