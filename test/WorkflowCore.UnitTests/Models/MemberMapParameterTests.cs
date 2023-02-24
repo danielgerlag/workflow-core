@@ -51,9 +51,9 @@ namespace WorkflowCore.UnitTests
             Expression<Func<MyStep, StepExecutionContext, object>> valueExpr = ((step, context) => ((string[])step.Value2)[(int)context.Item]);
             var subject = new MemberMapParameter(valueExpr, memberExpr);
             var data = new MyData();
-			var step = new MyStep {
-				Value2 = new []{"A", "B", "C", "D"}
-			};
+            var step = new MyStep {
+                Value2 = new []{"A", "B", "C", "D"}
+            };
 
             var context = new StepExecutionContext {Item = 2};
 
