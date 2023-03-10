@@ -43,7 +43,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
         public ActivityScenario()
         {
-            Setup();
+            Setup(); //NOTE cjundt [10/03/2023] setup shouldn't be here in constructor. It prevents from using ICollectionFixture data.
         }
 
         [Fact]
