@@ -15,20 +15,39 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static WorkflowOptions UseAwsSimpleQueueService(this WorkflowOptions options, AWSCredentials credentials, AmazonSQSConfig config, string queuesPrefix = "workflowcore")
         {
-            options.UseQueueProvider(sp => new SQSQueueProvider(credentials, config, sp.GetService<ILoggerFactory>(), queuesPrefix));
+            options.UseQueueProvider(sp => new SQSQueueProvider(credentials, config, null, sp.GetService<ILoggerFactory>(), queuesPrefix));
+            return options;
+        }
+
+        public static WorkflowOptions UseAwsSimpleQueueServiceWithProvisionedClient(this WorkflowOptions options, AmazonSQSClient sqsClient, string queuesPrefix = "workflowcore")
+        {
+            options.UseQueueProvider(sp => new SQSQueueProvider(null, null, sqsClient, sp.GetService<ILoggerFactory>(), queuesPrefix));
             return options;
         }
 
         public static WorkflowOptions UseAwsDynamoLocking(this WorkflowOptions options, AWSCredentials credentials, AmazonDynamoDBConfig config, string tableName)
         {
-            options.UseDistributedLockManager(sp => new DynamoLockProvider(credentials, config, tableName, sp.GetService<ILoggerFactory>(), sp.GetService<IDateTimeProvider>()));
+            options.UseDistributedLockManager(sp => new DynamoLockProvider(credentials, config, null, tableName, sp.GetService<ILoggerFactory>(), sp.GetService<IDateTimeProvider>()));
+            return options;
+        }
+
+        public static WorkflowOptions UseAwsDynamoLockingWithProvisionedClient (this WorkflowOptions options, AmazonDynamoDBClient dynamoClient, string tableName)
+        {
+            options.UseDistributedLockManager(sp => new DynamoLockProvider(null, null, dynamoClient, tableName, sp.GetService<ILoggerFactory>(), sp.GetService<IDateTimeProvider>()));
             return options;
         }
 
         public static WorkflowOptions UseAwsDynamoPersistence(this WorkflowOptions options, AWSCredentials credentials, AmazonDynamoDBConfig config, string tablePrefix)
         {
-            options.Services.AddTransient<IDynamoDbProvisioner>(sp => new DynamoDbProvisioner(credentials, config, tablePrefix, sp.GetService<ILoggerFactory>()));
-            options.UsePersistence(sp => new DynamoPersistenceProvider(credentials, config, sp.GetService<IDynamoDbProvisioner>(), tablePrefix, sp.GetService<ILoggerFactory>()));
+            options.Services.AddTransient<IDynamoDbProvisioner>(sp => new DynamoDbProvisioner(credentials, config, null, tablePrefix, sp.GetService<ILoggerFactory>()));
+            options.UsePersistence(sp => new DynamoPersistenceProvider(credentials, config, null, sp.GetService<IDynamoDbProvisioner>(), tablePrefix, sp.GetService<ILoggerFactory>()));
+            return options;
+        }
+
+        public static WorkflowOptions UseAwsDynamoPersistenceWithProvisionedClient(this WorkflowOptions options, AmazonDynamoDBClient dynamoClient, string tablePrefix)
+        {
+            options.Services.AddTransient<IDynamoDbProvisioner>(sp => new DynamoDbProvisioner(null, null, dynamoClient, tablePrefix, sp.GetService<ILoggerFactory>()));
+            options.UsePersistence(sp => new DynamoPersistenceProvider(null, null, dynamoClient, sp.GetService<IDynamoDbProvisioner>(), tablePrefix, sp.GetService<ILoggerFactory>()));
             return options;
         }
 

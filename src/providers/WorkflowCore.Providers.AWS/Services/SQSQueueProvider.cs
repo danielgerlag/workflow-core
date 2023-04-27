@@ -21,10 +21,10 @@ namespace WorkflowCore.Providers.AWS.Services
 
         public bool IsDequeueBlocking => true;
 
-        public SQSQueueProvider(AWSCredentials credentials, AmazonSQSConfig config, ILoggerFactory logFactory, string queuesPrefix)
+        public SQSQueueProvider(AWSCredentials credentials, AmazonSQSConfig config, AmazonSQSClient sqsClient, ILoggerFactory logFactory, string queuesPrefix)
         {
             _logger = logFactory.CreateLogger<SQSQueueProvider>();
-            _client = new AmazonSQSClient(credentials, config);
+            _client = sqsClient ?? new AmazonSQSClient(credentials, config);
             _queuesPrefix = queuesPrefix;
         }
 

@@ -26,10 +26,10 @@ namespace WorkflowCore.Providers.AWS.Services
 
         public bool SupportsScheduledCommands => false;
 
-        public DynamoPersistenceProvider(AWSCredentials credentials, AmazonDynamoDBConfig config, IDynamoDbProvisioner provisioner, string tablePrefix, ILoggerFactory logFactory)
+        public DynamoPersistenceProvider(AWSCredentials credentials, AmazonDynamoDBConfig config, AmazonDynamoDBClient dynamoDBClient, IDynamoDbProvisioner provisioner, string tablePrefix, ILoggerFactory logFactory)
         {
             _logger = logFactory.CreateLogger<DynamoPersistenceProvider>();
-            _client = new AmazonDynamoDBClient(credentials, config);
+            _client = dynamoDBClient ?? new AmazonDynamoDBClient(credentials, config);
             _tablePrefix = tablePrefix;
             _provisioner = provisioner;
         }
