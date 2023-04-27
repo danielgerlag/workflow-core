@@ -83,13 +83,20 @@ namespace WorkflowCore.Interface
     /// <param name="collection">Resolves a collection for iterate over</param>
     /// <returns></returns>
     IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection);
-    
+
     /// <summary>
     /// Execute a block of steps, once for each item in a collection in a RunParallel foreach
     /// </summary>
     /// <param name="collection">Resolves a collection for iterate over</param>
     /// <returns></returns>
     IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection, Expression<Func<TData, bool>> runParallel);
+
+    /// <summary>
+    /// Execute a block of steps, once for each item in a collection in a RunParallel foreach
+    /// </summary>
+    /// <param name="collection">Resolves a collection for iterate over</param>
+    /// <returns></returns>
+    IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IStepExecutionContext, IEnumerable>> collection, Expression<Func<TData, bool>> runParallel);
 
     /// <summary>
     /// Repeat a block of steps until a condition becomes true
@@ -99,11 +106,25 @@ namespace WorkflowCore.Interface
     IContainerStepBuilder<TData, While, While> While(Expression<Func<TData, bool>> condition);
 
     /// <summary>
+    /// Repeat a block of steps until a condition becomes true
+    /// </summary>
+    /// <param name="condition">Resolves a condition to break out of the while loop</param>
+    /// <returns></returns>
+    IContainerStepBuilder<TData, While, While> While(Expression<Func<TData, IStepExecutionContext, bool>> condition);
+
+    /// <summary>
     /// Execute a block of steps if a condition is true
     /// </summary>
     /// <param name="condition">Resolves a condition to evaluate</param>
     /// <returns></returns>
     IContainerStepBuilder<TData, If, If> If(Expression<Func<TData, bool>> condition);
+
+    /// <summary>
+    /// Execute a block of steps if a condition is true
+    /// </summary>
+    /// <param name="condition">Resolves a condition to evaluate</param>
+    /// <returns></returns>
+    IContainerStepBuilder<TData, If, If> If(Expression<Func<TData, IStepExecutionContext, bool>> condition);
 
     /// <summary>
     /// Configure an outcome for this step, then wire it to a sequence
