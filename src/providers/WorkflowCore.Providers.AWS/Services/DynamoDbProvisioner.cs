@@ -15,10 +15,10 @@ namespace WorkflowCore.Providers.AWS.Services
         private readonly IAmazonDynamoDB _client;
         private readonly string _tablePrefix;
 
-        public DynamoDbProvisioner(AWSCredentials credentials, AmazonDynamoDBConfig config, AmazonDynamoDBClient dynamoDBClient, string tablePrefix, ILoggerFactory logFactory)
+        public DynamoDbProvisioner(AmazonDynamoDBClient dynamoDBClient, string tablePrefix, ILoggerFactory logFactory)
         {
             _logger = logFactory.CreateLogger<DynamoDbProvisioner>();
-            _client = dynamoDBClient ?? new AmazonDynamoDBClient(credentials, config);
+            _client = dynamoDBClient;
             _tablePrefix = tablePrefix;
         }
 
