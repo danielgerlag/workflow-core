@@ -17,7 +17,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static WorkflowOptions UseAwsSimpleQueueService(this WorkflowOptions options, AWSCredentials credentials, AmazonSQSConfig config, string queuesPrefix = "workflowcore")
         {
             var sqsClient = new AmazonSQSClient(credentials, config);
-            return UseAwsSimpleQueueServiceWithProvisionedClient(options, sqsClient, queuesPrefix);
+            return options.UseAwsSimpleQueueServiceWithProvisionedClient(sqsClient, queuesPrefix);
         }
 
         public static WorkflowOptions UseAwsSimpleQueueServiceWithProvisionedClient(this WorkflowOptions options, AmazonSQSClient sqsClient, string queuesPrefix = "workflowcore")
@@ -29,7 +29,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static WorkflowOptions UseAwsDynamoLocking(this WorkflowOptions options, AWSCredentials credentials, AmazonDynamoDBConfig config, string tableName)
         {
             var dbClient = new AmazonDynamoDBClient(credentials, config);
-            return UseAwsDynamoLockingWithProvisionedClient(options, dbClient, tableName);
+            return options.UseAwsDynamoLockingWithProvisionedClient(dbClient, tableName);
         }
 
         public static WorkflowOptions UseAwsDynamoLockingWithProvisionedClient (this WorkflowOptions options, AmazonDynamoDBClient dynamoClient, string tableName)
@@ -41,7 +41,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static WorkflowOptions UseAwsDynamoPersistence(this WorkflowOptions options, AWSCredentials credentials, AmazonDynamoDBConfig config, string tablePrefix)
         {
             var dbClient = new AmazonDynamoDBClient(credentials, config);
-            return UseAwsDynamoPersistenceWithProvisionedClient(options, dbClient, tablePrefix);
+            return options.UseAwsDynamoPersistenceWithProvisionedClient(dbClient, tablePrefix);
         }
 
         public static WorkflowOptions UseAwsDynamoPersistenceWithProvisionedClient(this WorkflowOptions options, AmazonDynamoDBClient dynamoClient, string tablePrefix)
@@ -56,7 +56,7 @@ namespace Microsoft.Extensions.DependencyInjection
             var kinesisClient = new AmazonKinesisClient(credentials, region);
             var dynamoClient = new AmazonDynamoDBClient(credentials, region);
             
-            return UseAwsKinesisWithProvisionedClients(options, kinesisClient, dynamoClient,appName, streamName);
+            return options.UseAwsKinesisWithProvisionedClients(kinesisClient, dynamoClient,appName, streamName);
 
         }
 
