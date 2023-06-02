@@ -72,7 +72,7 @@ namespace WorkflowCore.Persistence.Oracle.Migrations
                     EventKey = table.Column<string>(type: "NVARCHAR2(200)", maxLength: 200, nullable: true),
                     SubscribeAsOf = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
                     SubscriptionData = table.Column<string>(type: "NVARCHAR2(2000)", nullable: true),
-                    ExternalToken = table.Column<string>(type: "NVARCHAR2(200)", maxLength: 200, nullable: true),
+                    ExternalToken = table.Column<string>(type: "NVARCHAR2(400)", maxLength: 400, nullable: true),
                     ExternalWorkerId = table.Column<string>(type: "NVARCHAR2(200)", maxLength: 200, nullable: true),
                     ExternalTokenExpiry = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: true)
                 },
