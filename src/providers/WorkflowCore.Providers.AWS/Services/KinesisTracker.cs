@@ -17,10 +17,10 @@ namespace WorkflowCore.Providers.AWS.Services
         private readonly string _tableName;
         private bool _tableConfirmed = false;
 
-        public KinesisTracker(AWSCredentials credentials, RegionEndpoint region, string tableName, ILoggerFactory logFactory)
+        public KinesisTracker(AmazonDynamoDBClient client, string tableName, ILoggerFactory logFactory)
         {
             _logger = logFactory.CreateLogger(GetType());
-            _client = new AmazonDynamoDBClient(credentials, region);
+            _client = client;
             _tableName = tableName;
         }
 

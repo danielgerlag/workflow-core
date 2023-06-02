@@ -25,12 +25,12 @@ namespace WorkflowCore.Providers.AWS.Services
         private ICollection<ShardSubscription> _subscribers = new HashSet<ShardSubscription>();
         private readonly IDateTimeProvider _dateTimeProvider;
         
-        public KinesisStreamConsumer(AWSCredentials credentials, RegionEndpoint region, IKinesisTracker tracker, IDistributedLockProvider lockManager, ILoggerFactory logFactory, IDateTimeProvider dateTimeProvider)
+        public KinesisStreamConsumer(AmazonKinesisClient kinesisClient, IKinesisTracker tracker, IDistributedLockProvider lockManager, ILoggerFactory logFactory, IDateTimeProvider dateTimeProvider)
         {
             _logger = logFactory.CreateLogger(GetType());
             _tracker = tracker;
             _lockManager = lockManager;
-            _client = new AmazonKinesisClient(credentials, region);
+            _client = kinesisClient;
             _processTask = new Task(Process);
             _processTask.Start();
             _dateTimeProvider = dateTimeProvider;
