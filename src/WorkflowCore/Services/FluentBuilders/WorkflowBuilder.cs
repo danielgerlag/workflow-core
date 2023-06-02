@@ -241,12 +241,27 @@ namespace WorkflowCore.Services
             return Start().ForEach(collection, runParallel);
         }
 
+        public IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IStepExecutionContext, IEnumerable>> collection, Expression<Func<TData, bool>> runParallel)
+        {
+            return Start().ForEach(collection, runParallel);
+        }
+
         public IContainerStepBuilder<TData, While, While> While(Expression<Func<TData, bool>> condition)
         {
             return Start().While(condition);
         }
 
+        public IContainerStepBuilder<TData, While, While> While(Expression<Func<TData, IStepExecutionContext, bool>> condition)
+        {
+            return Start().While(condition);
+        }
+
         public IContainerStepBuilder<TData, If, If> If(Expression<Func<TData, bool>> condition)
+        {
+            return Start().If(condition);
+        }
+
+        public IContainerStepBuilder<TData, If, If> If(Expression<Func<TData, IStepExecutionContext, bool>> condition)
         {
             return Start().If(condition);
         }
