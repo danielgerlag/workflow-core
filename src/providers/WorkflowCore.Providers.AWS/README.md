@@ -34,6 +34,18 @@ services.AddWorkflow(cfg =>
 If any AWS resources do not exists, they will be automatcially created. By default, all DynamoDB tables and indexes will be provisioned with a throughput of 1, you can modify these values from the AWS console.
 You may also specify a prefix for the dynamo table names.
 
+If you have a preconfigured dynamoClient, you can pass this in instead of the credentials and config
+```C#
+var client = new AmazonDynamoDBClient();
+var sqsClient = new AmazonSQSClient();
+services.AddWorkflow(cfg =>
+{
+    cfg.UseAwsDynamoPersistenceWithProvisionedClient(client, "table-prefix");
+    cfg.UseAwsDynamoLockingWithProvisionedClient(client, "workflow-core-locks");
+    cfg.UseAwsSimpleQueueServiceWithProvisionedClient(sqsClient, "queues-prefix");
+});
+```
+
 
 ## Usage (Kinesis)
 
