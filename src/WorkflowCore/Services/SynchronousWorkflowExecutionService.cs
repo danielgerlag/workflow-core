@@ -18,6 +18,7 @@ namespace WorkflowCore.Services
         public Task WorkflowCompletionTask { get; set; }
     }
     
+    // todo: fix cancellations
     public class SynchronousWorkflowExecutionService : ISynchronousWorkflowExecutionService
     {
         private readonly IWorkflowHost _host;
@@ -91,6 +92,21 @@ namespace WorkflowCore.Services
             var workflowInstance = await _persistenceProvider.GetWorkflowInstance(executionResult.WorkflowInstanceId, cancellationToken);
             var lastPointerWithOutcome = workflowInstance.ExecutionPointers.LastOrDefault(p => p.Outcome != null);
             return lastPointerWithOutcome?.Outcome;
+        }
+        
+        /// <summary>
+        /// Executes the workflow steps to the end.
+        /// </summary>
+        /// <returns>The last outcome of the steps. This can be null</returns>
+        public async Task<object> RunWorkflowAsync<TData>(string workflowId, int? version = null, TData data = null, string reference = null, CancellationToken cancellationToken = default) where TData : class, new()
+        {
+            var executionResult = await StartWorkflowAsync(workflowId, version, data, reference);
+
+            await executionResult.WorkflowCompletionTask;
+
+            var workflowInstance = await _persistenceProvider.GetWorkflowInstance(executionResult.WorkflowInstanceId, cancellationToken);
+            var lastOutcome = workflowInstance.ExecutionPointers.LastOrDefault()?.Outcome;
+            return lastOutcome;
         }
     }
 }
