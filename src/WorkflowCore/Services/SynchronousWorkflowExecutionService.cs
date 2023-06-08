@@ -22,27 +22,26 @@ namespace WorkflowCore.Services
     public class SynchronousWorkflowExecutionService : ISynchronousWorkflowExecutionService
     {
         private readonly IWorkflowHost _host;
-        private readonly ILifeCycleEventHub _hub;
         private readonly IPersistenceProvider _persistenceProvider;
 
         private readonly Dictionary<string, TaskCompletionSource<object>>
             _completionSources = new Dictionary<string, TaskCompletionSource<object>>();
 
-        public SynchronousWorkflowExecutionService(IWorkflowHost host, ILifeCycleEventHub hub)
+        public SynchronousWorkflowExecutionService(IWorkflowHost host, ILifeCycleEventHub hub, IPersistenceProvider persistenceProvider)
         {
             _host = host;
 
-            _hub = hub;
-            _hub.Subscribe(HandleWorkflowEvent);
+            _persistenceProvider = persistenceProvider;
+            hub.Subscribe(HandleWorkflowEvent);
         }
 
         private void HandleWorkflowEvent(LifeCycleEvent @event)
         {
             switch (@event)
             {
-                case WorkflowCompleted completed:
-                case WorkflowTerminated terminated:
-                case WorkflowError error:
+                case WorkflowCompleted _:
+                case WorkflowTerminated _:
+                case WorkflowError _:
                     if (_completionSources.TryGetValue(@event.WorkflowInstanceId, out var taskCompletionSource))
                     {
                         var result = (SynchronousWorkflowExecutionResult)taskCompletionSource.Task.AsyncState;
@@ -51,6 +50,11 @@ namespace WorkflowCore.Services
                     }
 
                     break;
+            }
+
+            if (@event is WorkflowError error)
+            {
+                throw new Exception(error.Message);
             }
         }
 
@@ -68,7 +72,7 @@ namespace WorkflowCore.Services
             result.WorkflowInstanceId = instanceId;
 
             _completionSources.Add(instanceId, completionSource);
-            result.WorkflowCompletionTask = completionSource.Task;
+            result.WorkflowCompletionTask = Task.Run(() => completionSource.Task);
 
             return result;
         }
@@ -80,13 +84,17 @@ namespace WorkflowCore.Services
         public async Task<object> RunWorkflowUntilActivityAsync<TData>(string workflowId, string activity, int? version = null, TData data = null, string reference = null, CancellationToken cancellationToken = default) where TData : class, new()
         {
             var executionResult = await StartWorkflowAsync(workflowId, version, data, reference);
-            var activityTask = _host.GetPendingActivity(activity, workflowId);
+            var activityTask = _host.GetPendingActivity(activity, workflowId, TimeSpan.FromMinutes(10));
             var cancellationTask = Task.Delay(Timeout.Infinite, cancellationToken);
 
             var completedTask = await Task.WhenAny(executionResult.WorkflowCompletionTask, activityTask, cancellationTask);
             if (completedTask == executionResult.WorkflowCompletionTask)
             {
-                throw new InvalidOperationException("Workflow completed without completing the specified activity");
+                if (executionResult.WorkflowCompletionTask.IsFaulted)
+                {
+                    executionResult.WorkflowCompletionTask.GetAwaiter().GetResult();
+                }
+                throw new InvalidOperationException("Workflow completed without reaching the specified activity");
             }
 
             var workflowInstance = await _persistenceProvider.GetWorkflowInstance(executionResult.WorkflowInstanceId, cancellationToken);
