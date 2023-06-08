@@ -93,7 +93,7 @@ namespace WorkflowCore.Persistence.Oracle.Migrations
                     Description = table.Column<string>(type: "NVARCHAR2(500)", maxLength: 500, nullable: true),
                     Reference = table.Column<string>(type: "NVARCHAR2(200)", maxLength: 200, nullable: true),
                     NextExecution = table.Column<long>(type: "NUMBER(19)", nullable: true),
-                    Data = table.Column<string>(type: "NVARCHAR2(2000)", nullable: true),
+                    Data = table.Column<string>(type: "CLOB", nullable: true),
                     CreateTime = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
                     CompleteTime = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: true),
                     Status = table.Column<int>(type: "NUMBER(10)", nullable: false)

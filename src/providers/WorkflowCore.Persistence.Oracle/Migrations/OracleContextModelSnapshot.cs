@@ -301,7 +301,7 @@ namespace WorkflowCore.Persistence.Oracle.Migrations
                         .HasColumnType("TIMESTAMP(7)");
 
                     b.Property<string>("Data")
-                        .HasColumnType("NVARCHAR2(2000)");
+                        .HasColumnType("CLOB");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
