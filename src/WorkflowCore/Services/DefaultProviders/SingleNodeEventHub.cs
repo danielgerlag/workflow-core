@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using ConcurrentCollections;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models.LifeCycleEvents;
@@ -9,7 +11,7 @@ namespace WorkflowCore.Services
 {
     public class SingleNodeEventHub : ILifeCycleEventHub
     {
-        private ICollection<Action<LifeCycleEvent>> _subscribers = new HashSet<Action<LifeCycleEvent>>();
+        private ICollection<Action<LifeCycleEvent>> _subscribers = new ConcurrentHashSet<Action<LifeCycleEvent>>();
         private readonly ILogger _logger;
 
         public SingleNodeEventHub(ILoggerFactory loggerFactory)

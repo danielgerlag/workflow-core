@@ -9,6 +9,7 @@ namespace WorkflowCore.Persistence.EntityFramework
 {
     internal static class ExtensionMethods
     {
+        // todo: provide serializer settings customization option for the package
         private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings
         {
             TypeNameHandling = TypeNameHandling.All,
