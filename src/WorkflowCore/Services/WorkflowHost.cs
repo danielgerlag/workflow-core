@@ -179,9 +179,9 @@ namespace WorkflowCore.Services
                 Stop();
         }
 
-        public Task<PendingActivity> GetPendingActivity(string activityName, string workerId, TimeSpan? timeout = null)
+        public Task<PendingActivity> GetPendingActivity(string activityName, string workerId, CancellationToken cancellationToken = default)
         {
-            return _activityController.GetPendingActivity(activityName, workerId, timeout);
+            return _activityController.GetPendingActivity(activityName, workerId, cancellationToken);
         }
 
         public Task ReleaseActivityToken(string token)

@@ -25,16 +25,15 @@ namespace WorkflowCore.Services
             _workflowController = workflowController;
         }
         
-        public async Task<PendingActivity> GetPendingActivity(string activityName, string workerId, TimeSpan? timeout = null)
+        public async Task<PendingActivity> GetPendingActivity(string activityName, string workerId, CancellationToken cancellationToken = default)
         {
-            var endTime = _dateTimeProvider.UtcNow.Add(timeout ?? TimeSpan.Zero);
             var firstPass = true;
             EventSubscription subscription = null;
-            while ((subscription == null && _dateTimeProvider.UtcNow < endTime) || firstPass)
+            while ((subscription == null && !cancellationToken.IsCancellationRequested) || firstPass)
             {
                 if (!firstPass)
-                    await Task.Delay(100);
-                subscription = await _subscriptionRepository.GetFirstOpenSubscription(Event.EventTypeActivity, activityName, _dateTimeProvider.Now);
+                    await Task.Delay(100, cancellationToken);
+                subscription = await _subscriptionRepository.GetFirstOpenSubscription(Event.EventTypeActivity, activityName, _dateTimeProvider.Now, cancellationToken);
                 if (subscription != null)
                     if (!await _lockProvider.AcquireLock($"sub:{subscription.Id}", CancellationToken.None))
                         subscription = null;
@@ -54,7 +53,7 @@ namespace WorkflowCore.Services
                     TokenExpiry = DateTime.MaxValue
                 };
 
-                if (!await _subscriptionRepository.SetSubscriptionToken(subscription.Id, result.Token, workerId, result.TokenExpiry))
+                if (!await _subscriptionRepository.SetSubscriptionToken(subscription.Id, result.Token, workerId, result.TokenExpiry, cancellationToken))
                     return null;
 
                 return result;

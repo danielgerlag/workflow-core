@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace WorkflowCore.Interface
@@ -14,7 +15,7 @@ namespace WorkflowCore.Interface
     
     public interface IActivityController
     {
-        Task<PendingActivity> GetPendingActivity(string activityName, string workerId, TimeSpan? timeout = null);
+        Task<PendingActivity> GetPendingActivity(string activityName, string workerId, CancellationToken cancellationToken = default);
         Task ReleaseActivityToken(string token);
         Task SubmitActivitySuccess(string token, object result);
         Task SubmitActivityFailure(string token, object result);
