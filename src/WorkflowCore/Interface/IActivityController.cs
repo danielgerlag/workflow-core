@@ -16,6 +16,7 @@ namespace WorkflowCore.Interface
     public interface IActivityController
     {
         Task<PendingActivity> GetPendingActivity(string activityName, string workerId, CancellationToken cancellationToken = default);
+        Task<PendingActivity> GetPendingActivity(string activityName, string workerId, string workflowId, CancellationToken cancellationToken = default);
         Task ReleaseActivityToken(string token);
         Task SubmitActivitySuccess(string token, object result);
         Task SubmitActivityFailure(string token, object result);

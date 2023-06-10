@@ -162,6 +162,17 @@ namespace WorkflowCore.Services
                 return Task.FromResult(sub);
             }
         }
+        
+        // todo: remove duplication
+        public Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, string workflowId, DateTime asOf, CancellationToken _ = default)
+        {
+            lock (_subscriptions)
+            {
+                var result =  _subscriptions
+                    .FirstOrDefault(x => x.ExternalToken == null &&  x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf);
+                return Task.FromResult(result);
+            }
+        }
 
         public Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, DateTime asOf, CancellationToken _ = default)
         {

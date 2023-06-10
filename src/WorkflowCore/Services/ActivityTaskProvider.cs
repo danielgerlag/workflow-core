@@ -15,7 +15,7 @@ namespace WorkflowCore.Services
         
         public async Task WaitForActivityCreation(string activity, string workflowInstanceId, CancellationToken cancellationToken = default)
         {
-            await _host.GetPendingActivity(activity, workflowInstanceId, cancellationToken);
+            await _host.GetPendingActivity(activity, "worker-1", workflowInstanceId, cancellationToken);
         }
     }
 }

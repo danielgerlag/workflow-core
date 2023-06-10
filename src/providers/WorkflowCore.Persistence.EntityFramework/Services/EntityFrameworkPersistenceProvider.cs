@@ -354,6 +354,16 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 return raw?.ToEventSubscription();
             }
         }
+        
+        public async Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, string workflowId, DateTime asOf, CancellationToken cancellationToken = default)
+        {
+            using (var db = ConstructDbContext())
+            {
+                var raw = await db.Set<PersistedSubscription>().FirstOrDefaultAsync(x => x.WorkflowId == workflowId && x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf && x.ExternalToken == null, cancellationToken);
+
+                return raw?.ToEventSubscription();
+            }
+        }
 
         public async Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry, CancellationToken cancellationToken = default)
         {
