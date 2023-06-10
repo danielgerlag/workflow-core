@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
@@ -15,7 +16,11 @@ namespace WorkflowCore.Services
         
         public async Task WaitForActivityCreation(string activity, string workflowInstanceId, CancellationToken cancellationToken = default)
         {
-            await _host.GetPendingActivity(activity, "worker-1", workflowInstanceId, cancellationToken);
+            var pendingActivity = await _host.GetPendingActivity(activity, "worker-1", workflowInstanceId, cancellationToken);
+            if (pendingActivity == null)
+            {
+                throw new InvalidOperationException("Couldn't retrieve the activity");
+            }
         }
     }
 }
