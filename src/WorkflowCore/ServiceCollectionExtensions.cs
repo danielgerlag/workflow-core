@@ -32,7 +32,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IWorkflowRegistry, WorkflowRegistry>();
             services.AddSingleton<WorkflowOptions>(options);
             services.AddSingleton<ILifeCycleEventPublisher, LifeCycleEventPublisher>();
-            services.AddSingleton<IActivityTaskProvider, ActivityTaskProvider>();
+            services.AddSingleton<IWorkflowCaptureService, WorkflowCaptureService>();
 
             if (options.EnableWorkflows)
             {
