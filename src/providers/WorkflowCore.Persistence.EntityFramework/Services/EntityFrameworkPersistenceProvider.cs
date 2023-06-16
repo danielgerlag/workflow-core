@@ -355,7 +355,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             }
         }
         
-        public async Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, string workflowId, DateTime asOf, CancellationToken cancellationToken = default)
+        public async Task<EventSubscription> GetWorkflowSubscription(string eventName, string eventKey, string workflowId, DateTime asOf, CancellationToken cancellationToken = default)
         {
             using (var db = ConstructDbContext())
             {

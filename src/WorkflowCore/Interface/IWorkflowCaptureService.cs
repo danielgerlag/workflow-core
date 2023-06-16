@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using WorkflowCore.Models.LifeCycleEvents;
+using WorkflowCore.Models;
 
 namespace WorkflowCore.Interface
 {
@@ -9,6 +9,6 @@ namespace WorkflowCore.Interface
     {
         Task<PendingActivity> CaptureActivity(string activity, string workflowInstanceId, CancellationToken cancellationToken = default);
         
-        Task<LifeCycleEvent> CaptureWorkflowCompletion(string workflowInstanceId, CancellationToken cancellationToken = default);
+        Task<WorkflowInstance> CaptureWorkflowCompletion(string workflowInstanceId, CancellationToken cancellationToken = default);
     }
 }

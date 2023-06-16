@@ -163,8 +163,7 @@ namespace WorkflowCore.Services
             }
         }
         
-        // todo: remove duplication
-        public Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, string workflowId, DateTime asOf, CancellationToken _ = default)
+        public Task<EventSubscription> GetWorkflowSubscription(string eventName, string eventKey, string workflowId, DateTime asOf, CancellationToken _ = default)
         {
             lock (_subscriptions)
             {

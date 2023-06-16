@@ -11,7 +11,7 @@ namespace WorkflowCore.Services
     public class WorkflowCaptureService : IWorkflowCaptureService, IDisposable
     {
         private readonly IWorkflowHost _host;
-        private readonly Dictionary<string, TaskCompletionSource<LifeCycleEvent>> _completionSources = new Dictionary<string, TaskCompletionSource<LifeCycleEvent>>();
+        private readonly Dictionary<string, TaskCompletionSource<WorkflowInstance>> _completionSources = new Dictionary<string, TaskCompletionSource<WorkflowInstance>>();
 
         public WorkflowCaptureService(IWorkflowHost host)
         {
@@ -28,7 +28,7 @@ namespace WorkflowCore.Services
             
             if (evt is WorkflowCompleted)
             {
-                completionSource.SetResult(evt);
+                completionSource.SetResult(evt.Workflow);
             }
         }
 
@@ -63,18 +63,18 @@ namespace WorkflowCore.Services
             return pendingActivity;
         }
 
-        public async Task<LifeCycleEvent> CaptureWorkflowCompletion(string workflowInstanceId, CancellationToken cancellationToken = default)
+        public async Task<WorkflowInstance> CaptureWorkflowCompletion(string workflowInstanceId, CancellationToken cancellationToken = default)
         {
             try
             {
                 // todo: lock if needed
                 if (!_completionSources.TryGetValue(workflowInstanceId, out var completionSource))
                 {
-                    completionSource = new TaskCompletionSource<LifeCycleEvent>();
+                    completionSource = new TaskCompletionSource<WorkflowInstance>();
                     _completionSources.Add(workflowInstanceId, completionSource);
                 }
                 
-                var cancelledTaskCompletionSource = new TaskCompletionSource<LifeCycleEvent>();
+                var cancelledTaskCompletionSource = new TaskCompletionSource<WorkflowInstance>();
 
                 cancellationToken.Register(() => cancelledTaskCompletionSource.TrySetCanceled());
 

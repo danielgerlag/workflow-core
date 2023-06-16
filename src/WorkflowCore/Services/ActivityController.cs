@@ -34,7 +34,7 @@ namespace WorkflowCore.Services
             {
                 if (!firstPass)
                     await Task.Delay(100, cancellationToken);
-                subscription = await _subscriptionRepository.GetFirstOpenSubscription(Event.EventTypeActivity, activityName, workflowId, _dateTimeProvider.Now, cancellationToken);
+                subscription = await _subscriptionRepository.GetWorkflowSubscription(Event.EventTypeActivity, activityName, workflowId, _dateTimeProvider.Now, cancellationToken);
                 if (subscription != null)
                     if (!await _lockProvider.AcquireLock($"sub:{subscription.Id}", CancellationToken.None))
                         subscription = null;
