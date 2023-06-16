@@ -126,6 +126,7 @@ namespace WorkflowCore.Services
                 pointer.Status = PointerStatus.Running;
                 _publisher.PublishNotification(new StepStarted
                 {
+                    Workflow = workflow,
                     EventTimeUtc = _datetimeProvider.UtcNow,
                     Reference = workflow.Reference,
                     ExecutionPointerId = pointer.Id,
@@ -158,7 +159,7 @@ namespace WorkflowCore.Services
 
             using (var scope = _scopeProvider.CreateScope(context))
             {
-                _logger.LogDebug("Starting step {0} on workflow {1}", step.Name, workflow.Id);
+                _logger.LogDebug("Starting step {0} on workflow {1}", step.Id, workflow.Id);
 
                 IStepBody body = step.ConstructBody(scope.ServiceProvider);
                 var stepExecutor = scope.ServiceProvider.GetRequiredService<IStepExecutor>();
@@ -267,6 +268,7 @@ namespace WorkflowCore.Services
 
             _publisher.PublishNotification(new WorkflowCompleted
             {
+                Workflow = workflow,
                 EventTimeUtc = _datetimeProvider.UtcNow,
                 Reference = workflow.Reference,
                 WorkflowInstanceId = workflow.Id,

@@ -23,6 +23,7 @@ namespace WorkflowCore.Services.ErrorHandlers
             workflow.Status = WorkflowStatus.Suspended;
             _eventPublisher.PublishNotification(new WorkflowSuspended
             {
+                Workflow = workflow,
                 EventTimeUtc = _datetimeProvider.UtcNow,
                 Reference = workflow.Reference,
                 WorkflowInstanceId = workflow.Id,

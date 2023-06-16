@@ -11,7 +11,7 @@ namespace WorkflowCore.Services
     public class WorkflowCaptureService : IWorkflowCaptureService, IDisposable
     {
         private readonly IWorkflowHost _host;
-        private readonly Dictionary<string, TaskCompletionSource<object>> _completionSources = new Dictionary<string, TaskCompletionSource<object>>();
+        private readonly Dictionary<string, TaskCompletionSource<LifeCycleEvent>> _completionSources = new Dictionary<string, TaskCompletionSource<LifeCycleEvent>>();
 
         public WorkflowCaptureService(IWorkflowHost host)
         {
@@ -28,7 +28,7 @@ namespace WorkflowCore.Services
             
             if (evt is WorkflowCompleted)
             {
-                completionSource.SetResult(true);
+                completionSource.SetResult(evt);
             }
         }
 
@@ -42,7 +42,7 @@ namespace WorkflowCore.Services
 
         public async Task<PendingActivity> CaptureActivity(string activity, string workflowInstanceId, CancellationToken cancellationToken = default)
         {
-            var workflowCompletionTask = CaptureWorkflowExceptions(workflowInstanceId, cancellationToken);
+            var workflowCompletionTask = CaptureWorkflowCompletion(workflowInstanceId, cancellationToken);
             var pendingActivityTask = _host.GetPendingActivity(activity, "worker-1", workflowInstanceId, cancellationToken);
 
             var completedTask = await Task.WhenAny(pendingActivityTask, workflowCompletionTask);
@@ -63,23 +63,23 @@ namespace WorkflowCore.Services
             return pendingActivity;
         }
 
-        public async Task CaptureWorkflowExceptions(string workflowInstanceId, CancellationToken cancellationToken = default)
+        public async Task<LifeCycleEvent> CaptureWorkflowCompletion(string workflowInstanceId, CancellationToken cancellationToken = default)
         {
             try
             {
                 // todo: lock if needed
                 if (!_completionSources.TryGetValue(workflowInstanceId, out var completionSource))
                 {
-                    completionSource = new TaskCompletionSource<object>();
+                    completionSource = new TaskCompletionSource<LifeCycleEvent>();
                     _completionSources.Add(workflowInstanceId, completionSource);
                 }
                 
-                var cancelledTaskCompletionSource = new TaskCompletionSource<object>();
+                var cancelledTaskCompletionSource = new TaskCompletionSource<LifeCycleEvent>();
 
                 cancellationToken.Register(() => cancelledTaskCompletionSource.TrySetCanceled());
 
                 var completedTask = await Task.WhenAny(cancelledTaskCompletionSource.Task, completionSource.Task);
-                completedTask.GetAwaiter().GetResult();
+                return completedTask.GetAwaiter().GetResult();
             }
             finally
             {

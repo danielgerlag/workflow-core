@@ -13,5 +13,7 @@ namespace WorkflowCore.Models.LifeCycleEvents
         public int Version { get; set; }
 
         public string Reference { get; set; }
+        
+        public WorkflowInstance Workflow { get; set; }
     }
 }
