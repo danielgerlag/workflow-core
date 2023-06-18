@@ -64,6 +64,17 @@ namespace WorkflowCore.Services
                 await _lockProvider.ReleaseLock($"sub:{subscription.Id}");
             }
         }
+
+        public async Task<PendingActivity> GetPendingActivity(string activityName, string workerId, TimeSpan? timeout = null)
+        {
+            if (timeout == null)
+            {
+                return await GetPendingActivity(activityName, workerId, CancellationToken.None);
+            }
+
+            var cts = new CancellationTokenSource(timeout.Value);
+            return await GetPendingActivity(activityName, workerId, cts.Token);
+        }
         
         public async Task<PendingActivity> GetPendingActivity(string activityName, string workerId, CancellationToken cancellationToken = default)
         {
