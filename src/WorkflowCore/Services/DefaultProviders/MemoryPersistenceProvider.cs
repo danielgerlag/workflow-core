@@ -163,12 +163,12 @@ namespace WorkflowCore.Services
             }
         }
         
-        public Task<EventSubscription> GetWorkflowSubscription(string eventName, string eventKey, string workflowId, DateTime asOf, CancellationToken _ = default)
+        public Task<EventSubscription> GetNextWorkflowSubscription(string eventName, string workflowId, DateTime asOf, CancellationToken _ = default)
         {
             lock (_subscriptions)
             {
                 var result =  _subscriptions
-                    .FirstOrDefault(x => x.ExternalToken == null &&  x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf);
+                    .FirstOrDefault(x => x.EventName == eventName && x.SubscribeAsOf <= asOf);
                 return Task.FromResult(result);
             }
         }

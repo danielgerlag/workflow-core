@@ -355,11 +355,11 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             }
         }
         
-        public async Task<EventSubscription> GetWorkflowSubscription(string eventName, string eventKey, string workflowId, DateTime asOf, CancellationToken cancellationToken = default)
+        public async Task<EventSubscription> GetNextWorkflowSubscription(string eventName, string workflowId, DateTime asOf, CancellationToken cancellationToken = default)
         {
             using (var db = ConstructDbContext())
             {
-                var raw = await db.Set<PersistedSubscription>().FirstOrDefaultAsync(x => x.WorkflowId == workflowId && x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf && x.ExternalToken == null, cancellationToken);
+                var raw = await db.Set<PersistedSubscription>().FirstOrDefaultAsync(x => x.WorkflowId == workflowId && x.EventName == eventName && x.SubscribeAsOf <= asOf, cancellationToken);
 
                 return raw?.ToEventSubscription();
             }

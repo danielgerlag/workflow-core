@@ -18,7 +18,7 @@ namespace WorkflowCore.Interface
 
         Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, DateTime asOf, CancellationToken cancellationToken = default);
         
-        Task<EventSubscription> GetWorkflowSubscription(string eventName, string eventKey, string workflowId, DateTime asOf, CancellationToken cancellationToken = default);
+        Task<EventSubscription> GetNextWorkflowSubscription(string eventName, string workflowId, DateTime asOf, CancellationToken cancellationToken = default);
         
         Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry, CancellationToken cancellationToken = default);
         

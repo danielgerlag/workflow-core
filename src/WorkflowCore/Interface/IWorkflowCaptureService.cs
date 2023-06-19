@@ -7,7 +7,7 @@ namespace WorkflowCore.Interface
 {
     public interface IWorkflowCaptureService
     {
-        Task<PendingActivity> CaptureActivity(string activity, string workflowInstanceId, CancellationToken cancellationToken = default);
+        Task<PendingActivity> CaptureActivity(string workflowInstanceId, CancellationToken cancellationToken = default);
         
         Task<WorkflowInstance> CaptureWorkflowCompletion(string workflowInstanceId, CancellationToken cancellationToken = default);
     }

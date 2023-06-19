@@ -40,10 +40,10 @@ namespace WorkflowCore.Services
             }
         }
 
-        public async Task<PendingActivity> CaptureActivity(string activity, string workflowInstanceId, CancellationToken cancellationToken = default)
+        public async Task<PendingActivity> CaptureActivity(string workflowInstanceId, CancellationToken cancellationToken = default)
         {
             var workflowCompletionTask = CaptureWorkflowCompletion(workflowInstanceId, cancellationToken);
-            var pendingActivityTask = _host.GetPendingActivity(activity, "worker-1", workflowInstanceId, cancellationToken);
+            var pendingActivityTask = _host.GetFirstPendingActivity("worker-1", workflowInstanceId, cancellationToken);
 
             var completedTask = await Task.WhenAny(pendingActivityTask, workflowCompletionTask);
 
@@ -51,7 +51,7 @@ namespace WorkflowCore.Services
             {
                 completedTask.GetAwaiter().GetResult();
 
-                throw new InvalidOperationException("Workflow completed without creating the activity");
+                throw new InvalidOperationException("Workflow completed without creating an activity");
             }
 
             var pendingActivity = pendingActivityTask.GetAwaiter().GetResult();
