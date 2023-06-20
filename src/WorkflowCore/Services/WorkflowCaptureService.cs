@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using WorkflowCore.Exceptions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Models.LifeCycleEvents;
@@ -11,11 +12,13 @@ namespace WorkflowCore.Services
     public class WorkflowCaptureService : IWorkflowCaptureService, IDisposable
     {
         private readonly IWorkflowHost _host;
+        private readonly IPersistenceProvider _persistence;
         private readonly Dictionary<string, TaskCompletionSource<WorkflowInstance>> _completionSources = new Dictionary<string, TaskCompletionSource<WorkflowInstance>>();
 
-        public WorkflowCaptureService(IWorkflowHost host)
+        public WorkflowCaptureService(IWorkflowHost host, IPersistenceProvider persistence)
         {
             _host = host;
+            _persistence = persistence;
 
             _host.OnStepError += StepErrorHandler;
             _host.OnLifeCycleEvent += LifeCycleEventHandler;
@@ -40,10 +43,10 @@ namespace WorkflowCore.Services
             }
         }
 
-        public async Task<PendingActivity> CaptureActivity(string workflowInstanceId, CancellationToken cancellationToken = default)
+        public async Task<PendingActivity> CaptureActivity(string workflowId, CancellationToken cancellationToken = default)
         {
-            var workflowCompletionTask = CaptureWorkflowCompletion(workflowInstanceId, cancellationToken);
-            var pendingActivityTask = _host.GetFirstPendingActivity("worker-1", workflowInstanceId, cancellationToken);
+            var workflowCompletionTask = CaptureWorkflowCompletion(workflowId, cancellationToken);
+            var pendingActivityTask = _host.GetFirstPendingActivity("worker-1", workflowId, cancellationToken);
 
             var completedTask = await Task.WhenAny(pendingActivityTask, workflowCompletionTask);
 
@@ -51,27 +54,29 @@ namespace WorkflowCore.Services
             {
                 completedTask.GetAwaiter().GetResult();
 
-                throw new InvalidOperationException("Workflow completed without creating an activity");
+                return null;
             }
 
             var pendingActivity = pendingActivityTask.GetAwaiter().GetResult();
-            if (pendingActivity == null)
-            {
-                throw new InvalidOperationException("Couldn't retrieve the activity");
-            }
 
             return pendingActivity;
         }
 
-        public async Task<WorkflowInstance> CaptureWorkflowCompletion(string workflowInstanceId, CancellationToken cancellationToken = default)
+        public async Task<WorkflowInstance> CaptureWorkflowCompletion(string workflowId, CancellationToken cancellationToken = default)
         {
             try
             {
                 // todo: lock if needed
-                if (!_completionSources.TryGetValue(workflowInstanceId, out var completionSource))
+                if (!_completionSources.TryGetValue(workflowId, out var completionSource))
                 {
                     completionSource = new TaskCompletionSource<WorkflowInstance>();
-                    _completionSources.Add(workflowInstanceId, completionSource);
+                    _completionSources.Add(workflowId, completionSource);
+                }
+
+                var workflow = await _persistence.GetWorkflowInstance(workflowId, cancellationToken);
+                if (workflow.Status != WorkflowStatus.Runnable)
+                {
+                    return workflow;
                 }
                 
                 var cancelledTaskCompletionSource = new TaskCompletionSource<WorkflowInstance>();
@@ -83,7 +88,7 @@ namespace WorkflowCore.Services
             }
             finally
             {
-                _completionSources.Remove(workflowInstanceId);
+                _completionSources.Remove(workflowId);
             }
         }
 
