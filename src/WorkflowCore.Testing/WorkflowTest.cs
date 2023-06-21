@@ -15,6 +15,8 @@ namespace WorkflowCore.Testing
         where TData : class, new()
     {
         protected IWorkflowHost Host;
+        protected IWorkflowPurger WorkflowPurger;
+        protected IEventsPurger EventsPurger;
         protected IPersistenceProvider PersistenceProvider;
         protected List<StepError> UnhandledStepErrors = new List<StepError>();
 
@@ -27,6 +29,8 @@ namespace WorkflowCore.Testing
 
             var serviceProvider = services.BuildServiceProvider();
 
+            WorkflowPurger = serviceProvider.GetService<IWorkflowPurger>();
+            EventsPurger = serviceProvider.GetService<IEventsPurger>();
             PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
             Host = serviceProvider.GetService<IWorkflowHost>();
             Host.RegisterWorkflow<TWorkflow, TData>();
@@ -110,10 +114,21 @@ namespace WorkflowCore.Testing
             return instance.Status;
         }
 
+        protected IEnumerable<string> GetEvents(string eventKey, string eventName)
+        {
+            var events = PersistenceProvider.GetEvents(eventName, eventKey, DateTime.MinValue).Result;
+            return events;
+        }
+
         protected TData GetData(string workflowId)
         {
             var instance = PersistenceProvider.GetWorkflowInstance(workflowId).Result;
             return (TData)instance.Data;
+        }
+
+        protected Task<WorkflowInstance> GetWorkflowInstance(string workflowId)
+        {
+            return PersistenceProvider.GetWorkflowInstance(workflowId);
         }
 
         public void Dispose()
