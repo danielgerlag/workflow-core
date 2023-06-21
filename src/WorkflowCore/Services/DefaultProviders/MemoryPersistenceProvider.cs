@@ -168,7 +168,7 @@ namespace WorkflowCore.Services
             lock (_subscriptions)
             {
                 var result =  _subscriptions
-                    .FirstOrDefault(x => x.EventName == eventName && x.EventKey != activityToExclude && x.SubscribeAsOf <= asOf);
+                    .FirstOrDefault(x => x.WorkflowId == workflowId && x.EventName == eventName && x.EventKey != activityToExclude && x.SubscribeAsOf <= asOf);
                 return Task.FromResult(result);
             }
         }
