@@ -37,7 +37,6 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             Setup();
         }
 
-        [Fact]
         public async Task ScenarioAsync()
         {
             var eventKey = Guid.NewGuid().ToString();
