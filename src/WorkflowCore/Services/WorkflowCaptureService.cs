@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using WorkflowCore.Exceptions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Models.LifeCycleEvents;
@@ -28,7 +27,7 @@ namespace WorkflowCore.Services
         {
             if (!_completionSources.TryGetValue(evt.WorkflowInstanceId, out var completionSource))
                 return;
-            
+
             if (evt is WorkflowCompleted)
             {
                 completionSource.SetResult(evt.Workflow);
@@ -43,26 +42,23 @@ namespace WorkflowCore.Services
             }
         }
 
-        public async Task<PendingActivity> CaptureActivity(string workflowId, CancellationToken cancellationToken = default)
+        public async Task CaptureWorkflowStop(string workflowId, CancellationToken cancellationToken = default)
         {
             var workflowCompletionTask = CaptureWorkflowCompletion(workflowId, cancellationToken);
-            var pendingActivityTask = _host.GetFirstPendingActivity("worker-1", workflowId, cancellationToken);
+            var pendingActivityTask = _host.GetFirstPendingActivity(workflowId, cancellationToken);
 
             var completedTask = await Task.WhenAny(pendingActivityTask, workflowCompletionTask);
 
             if (completedTask == workflowCompletionTask)
             {
-                completedTask.GetAwaiter().GetResult();
-
-                return null;
+                workflowCompletionTask.GetAwaiter().GetResult();
+                return;
             }
 
-            var pendingActivity = pendingActivityTask.GetAwaiter().GetResult();
-
-            return pendingActivity;
+            pendingActivityTask.GetAwaiter().GetResult();
         }
 
-        public async Task<WorkflowInstance> CaptureWorkflowCompletion(string workflowId, CancellationToken cancellationToken = default)
+        private async Task<WorkflowInstance> CaptureWorkflowCompletion(string workflowId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -78,7 +74,7 @@ namespace WorkflowCore.Services
                 {
                     return workflow;
                 }
-                
+
                 var cancelledTaskCompletionSource = new TaskCompletionSource<WorkflowInstance>();
 
                 cancellationToken.Register(() => cancelledTaskCompletionSource.TrySetCanceled());

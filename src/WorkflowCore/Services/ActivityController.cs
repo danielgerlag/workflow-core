@@ -26,7 +26,7 @@ namespace WorkflowCore.Services
         }
         
         // todo: remove duplication
-        public async Task<PendingActivity> GetFirstPendingActivity(string workerId, string workflowId, CancellationToken cancellationToken = default)
+        public async Task<PendingActivity> GetFirstPendingActivity(string workflowId, CancellationToken cancellationToken = default)
         {
             var firstPass = true;
             EventSubscription subscription = null;
@@ -54,7 +54,7 @@ namespace WorkflowCore.Services
                     TokenExpiry = DateTime.MaxValue
                 };
 
-                if (!await _subscriptionRepository.SetSubscriptionToken(subscription.Id, result.Token, workerId, result.TokenExpiry, cancellationToken))
+                if (!await _subscriptionRepository.SetSubscriptionToken(subscription.Id, result.Token, "worker", result.TokenExpiry, cancellationToken))
                     return null;
 
                 return result;
