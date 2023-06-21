@@ -10,7 +10,11 @@ namespace WorkflowCore.Tests.MongoDB.Scenarios
     {
         protected override void ConfigureServices(IServiceCollection services)
         {
-            services.AddWorkflow(x => x.UseMongoDB(MongoDockerSetup.ConnectionString, nameof(MongoRetrySagaScenario)));
+            services.AddWorkflow(options =>
+            {
+                options.SetEventsPurgerBatchSize(1);
+                options.UseMongoDB(MongoDockerSetup.ConnectionString, nameof(MongoRetrySagaScenario));
+            });
         }
 
         [Fact]

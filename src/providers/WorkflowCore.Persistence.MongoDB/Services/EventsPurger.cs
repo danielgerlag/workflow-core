@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
-using MongoDB.Bson;
 
 namespace WorkflowCore.Persistence.MongoDB.Services
 {
@@ -21,24 +20,11 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             BatchSize = batchSize;
         }
 
-        public async Task PurgeEvents(DateTime olderThan, CancellationToken cancellationToken = default)
+        public Task PurgeEvents(DateTime olderThan, CancellationToken cancellationToken = default)
         {
             var olderThanUtc = olderThan.ToUniversalTime();
-
-            long deletedEvents = BatchSize;
-            while(deletedEvents > 0)
-            {
-                var events = Events
-                    .Find(x => x.EventTime < olderThanUtc &&
-                               x.IsProcessed == true)
-                    .Limit(BatchSize)
-                    .ToBsonDocument();
-
-                var deletedResult = await Events
-                    .DeleteManyAsync(events, cancellationToken);
-
-                deletedEvents = deletedResult.DeletedCount;
-            }
+            return Events.DeleteManyAsync(x => x.EventTime < olderThanUtc &&
+                                               x.IsProcessed == true, cancellationToken);
         }
     }
 }
