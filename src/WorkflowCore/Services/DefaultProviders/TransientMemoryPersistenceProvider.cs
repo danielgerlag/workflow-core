@@ -65,7 +65,7 @@ namespace WorkflowCore.Services
 
         public Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, DateTime asOf, CancellationToken _ = default) => _innerService.GetFirstOpenSubscription(eventName, eventKey, asOf);
 
-        public Task<EventSubscription> GetNextWorkflowSubscription(string eventName, string workflowId, DateTime asOf, CancellationToken _ = default) => _innerService.GetNextWorkflowSubscription(eventName, workflowId, asOf);
+        public Task<EventSubscription> GetNextWorkflowSubscription(string eventName, string workflowId, string activityToExclude, DateTime asOf, CancellationToken _ = default) => _innerService.GetNextWorkflowSubscription(eventName, workflowId, activityToExclude, asOf);
 
         public Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry, CancellationToken _ = default) => _innerService.SetSubscriptionToken(eventSubscriptionId, token, workerId, expiry);
 

@@ -5,6 +5,6 @@ namespace WorkflowCore.Interface
 {
     public interface IWorkflowCaptureService
     {
-        Task CaptureWorkflowStop(string workflowInstanceId, CancellationToken cancellationToken = default);
+        Task CaptureWorkflowStop(string workflowId, string activityToExclude = "", CancellationToken cancellationToken = default);
     }
 }

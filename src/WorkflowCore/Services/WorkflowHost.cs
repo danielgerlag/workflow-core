@@ -189,9 +189,9 @@ namespace WorkflowCore.Services
             return _activityController.GetPendingActivity(activityName, workerId, cancellationToken);
         }
         
-        public Task<PendingActivity> GetFirstPendingActivity(string workflowId, CancellationToken cancellationToken = default)
+        public Task<PendingActivity> GetFirstPendingActivity(string workflowId, string activityToExclude, CancellationToken cancellationToken = default)
         {
-            return _activityController.GetFirstPendingActivity(workflowId, cancellationToken);
+            return _activityController.GetFirstPendingActivity(workflowId, activityToExclude, cancellationToken);
         }
 
         public Task ReleaseActivityToken(string token)

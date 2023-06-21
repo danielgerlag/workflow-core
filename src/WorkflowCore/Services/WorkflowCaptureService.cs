@@ -42,10 +42,10 @@ namespace WorkflowCore.Services
             }
         }
 
-        public async Task CaptureWorkflowStop(string workflowId, CancellationToken cancellationToken = default)
+        public async Task CaptureWorkflowStop(string workflowId, string activityToExclude = "", CancellationToken cancellationToken = default)
         {
             var workflowCompletionTask = CaptureWorkflowCompletion(workflowId, cancellationToken);
-            var pendingActivityTask = _host.GetFirstPendingActivity(workflowId, cancellationToken);
+            var pendingActivityTask = _host.GetFirstPendingActivity(workflowId, activityToExclude, cancellationToken);
 
             var completedTask = await Task.WhenAny(pendingActivityTask, workflowCompletionTask);
 
