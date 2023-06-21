@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
+using WorkflowCore.Models;
 using WorkflowCore.Providers.Azure.Interface;
 using WorkflowCore.Providers.Azure.Models;
 
@@ -13,22 +14,21 @@ namespace WorkflowCore.Providers.Azure.Services
     public class EventsPurger : IEventsPurger
     {
         private readonly Lazy<Container> _workflowContainer;
-        public int BatchSize { get; }
+        public EventsPurgerOptions Options { get; }
 
-        public EventsPurger(ICosmosClientFactory clientFactory, string dbId, CosmosDbStorageOptions cosmosDbStorageOptions, int batchSize)
+        public EventsPurger(ICosmosClientFactory clientFactory, string dbId, CosmosDbStorageOptions cosmosDbStorageOptions, EventsPurgerOptions options)
         {
             _workflowContainer = new Lazy<Container>(() => clientFactory.GetCosmosClient()
                 .GetDatabase(dbId)
                 .GetContainer(cosmosDbStorageOptions.WorkflowContainerName));
 
-            BatchSize = batchSize;
+            Options = options;
         }
-
 
         public async Task PurgeEvents(DateTime olderThan, CancellationToken cancellationToken = default)
         {
             var olderThanUtc = olderThan.ToUniversalTime();
-            var events = _workflowContainer.Value.GetItemLinqQueryable<PersistedEvent>(requestOptions: new QueryRequestOptions() { MaxItemCount = BatchSize })
+            var events = _workflowContainer.Value.GetItemLinqQueryable<PersistedEvent>(requestOptions: new QueryRequestOptions() { MaxItemCount = Options.BatchSize })
                 .Where(x => x.EventTime < olderThanUtc && x.IsProcessed == true);
 
             var eventsToDelete = await events.CountAsync();
@@ -47,7 +47,7 @@ namespace WorkflowCore.Providers.Azure.Services
                     }
                 }
 
-                events = _workflowContainer.Value.GetItemLinqQueryable<PersistedEvent>(requestOptions: new QueryRequestOptions() { MaxItemCount = BatchSize })
+                events = _workflowContainer.Value.GetItemLinqQueryable<PersistedEvent>(requestOptions: new QueryRequestOptions() { MaxItemCount = Options.BatchSize })
                     .Where(x => x.EventTime < olderThanUtc && x.IsProcessed == true);
                 eventsToDelete = await events.CountAsync();
             }

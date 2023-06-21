@@ -39,14 +39,11 @@ namespace WorkflowCore.Models
         public bool EnableIndexes { get; set; } = true;
         public bool EnablePolling { get; set; } = true;
         public bool EnableLifeCycleEventsPublisher { get; set; } = true;
-        public int EventsPurgerBatchSize { get; private set; } = 100;
+        public EventsPurgerOptions EventsPurgerOptions { get; private set; } = new EventsPurgerOptions(batchSize: 100);
 
-        public void SetEventsPurgerBatchSize(int batchSize)
+        public void SetEventsPurgerOptions(EventsPurgerOptions eventsPurgerOptions)
         {
-            if (batchSize < 0)
-                throw new ArgumentOutOfRangeException("Batch size shoud be greater than 0");
-            
-            EventsPurgerBatchSize = batchSize;
+            EventsPurgerOptions = eventsPurgerOptions;
         }
 
         public void UsePersistence(Func<IServiceProvider, IPersistenceProvider> factory)

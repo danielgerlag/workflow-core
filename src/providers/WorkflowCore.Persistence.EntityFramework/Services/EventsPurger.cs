@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using WorkflowCore.Interface;
+using WorkflowCore.Models;
 using WorkflowCore.Persistence.EntityFramework.Interfaces;
 using WorkflowCore.Persistence.EntityFramework.Models;
 
@@ -12,12 +13,12 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
     public class EventsPurger : IEventsPurger
     {
         private readonly IWorkflowDbContextFactory _contextFactory;
-        public int BatchSize { get; }
+        public EventsPurgerOptions Options { get; }
 
-        public EventsPurger(IWorkflowDbContextFactory contextFactory, int batchSize)
+        public EventsPurger(IWorkflowDbContextFactory contextFactory, EventsPurgerOptions options)
         {
             _contextFactory = contextFactory;
-            BatchSize = batchSize;
+            Options = options;
         }
 
         /// <summary>
@@ -31,7 +32,8 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             var olderThanUtc = olderThan.ToUniversalTime();
             using (var db = ConstructDbContext())
             {
-                int deleteEvents = BatchSize;
+                int deleteEvents = Options.BatchSize;
+                db.Database.SetCommandTimeout(Options.DeleteCommandTimeoutSeconds);
 
                 #if NET6_0_OR_GREATER
                     while(deleteEvents != 0)
@@ -39,8 +41,9 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                         deleteEvents = await db.Set<PersistedEvent>()
                             .Where(x => x.EventTime < olderThanUtc &&
                                         x.IsProcessed == true)
-                            .Take(BatchSize)
+                            .Take(Options.BatchSize)
                             .ExecuteDeleteAsync(cancellationToken);
+
                     }
                 #else
                     while (deleteEvents != 0)
@@ -48,7 +51,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                         var events = db.Set<PersistedEvent>()
                             .Where(x => x.EventTime < olderThanUtc &&
                                         x.IsProcessed == true)
-                            .Take(BatchSize);
+                            .Take(Options.BatchSize);
                     
                         deleteEvents = await events.CountAsync();
                     

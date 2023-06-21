@@ -42,7 +42,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             var eventKey = Guid.NewGuid().ToString();
             var workflowId = StartWorkflow(new MyDataClass { StrValue1 = eventKey, StrValue2 = eventKey });
 
-            for(int i = 0; i < EventsPurger.BatchSize * 2; i++)
+            for(int i = 0; i < EventsPurger.Options.BatchSize * 2; i++)
             {
                 WaitForEventSubscription($"MyEvent{i}", eventKey, TimeSpan.FromSeconds(30));
                 await Host.PublishEvent($"MyEvent{i}", eventKey, $"Pass{i}");
@@ -58,10 +58,11 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
             await WorkflowPurger.PurgeWorkflows(WorkflowStatus.Complete, DateTime.UtcNow);
             await EventsPurger.PurgeEvents(DateTime.UtcNow);
+            await EventsPurger.PurgeEvents(DateTime.UtcNow);
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => GetWorkflowInstance(workflowId));
             exception.Message.Should().Contain("Sequence contains no elements");
-            for (int i = 0; i < EventsPurger.BatchSize * 2; i++)
+            for (int i = 0; i < EventsPurger.Options.BatchSize * 2; i++)
             {
                 GetEvents(eventKey, $"MyEvent{i}").Count().Should().Be(0);
             }

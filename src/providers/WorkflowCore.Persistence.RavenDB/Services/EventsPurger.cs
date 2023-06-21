@@ -1,5 +1,4 @@
-﻿using OpenTelemetry.Trace;
-using Raven.Client.Documents;
+﻿using Raven.Client.Documents;
 using Raven.Client.Documents.Operations;
 using Raven.Client.Documents.Queries;
 using System;
@@ -19,7 +18,7 @@ namespace WorkflowCore.Persistence.RavenDB.Services
             _database = database;
         }
 
-        public int BatchSize => throw new NotImplementedException();
+        public EventsPurgerOptions Options => throw new NotImplementedException();
 
         public Task PurgeEvents(DateTime olderThan, CancellationToken cancellationToken = default)
         {

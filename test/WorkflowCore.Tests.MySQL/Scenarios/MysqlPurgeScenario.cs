@@ -12,7 +12,7 @@ namespace WorkflowCore.Tests.MySQL.Scenarios
         {
             services.AddWorkflow(options =>
             {
-                options.SetEventsPurgerBatchSize(1);
+                options.SetEventsPurgerOptions(new Models.EventsPurgerOptions(1));
                 options.UseMySQL(MysqlDockerSetup.ScenarioConnectionString, true, true);
             });
         }

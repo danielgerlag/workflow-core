@@ -12,12 +12,12 @@ namespace WorkflowCore.Persistence.MongoDB.Services
         private readonly IMongoDatabase _database;
         private IMongoCollection<Event> Events => _database.GetCollection<Event>(MongoPersistenceProvider.EventCollectionName);
 
-        public int BatchSize { get; }
+        public EventsPurgerOptions Options { get; }
 
-        public EventsPurger(IMongoDatabase database, int batchSize)
+        public EventsPurger(IMongoDatabase database, EventsPurgerOptions options)
         {
             _database = database;
-            BatchSize = batchSize;
+            Options = options;
         }
 
         public Task PurgeEvents(DateTime olderThan, CancellationToken cancellationToken = default)
