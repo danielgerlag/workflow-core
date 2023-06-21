@@ -10,7 +10,11 @@ namespace WorkflowCore.Tests.MySQL.Scenarios
     {
         protected override void ConfigureServices(IServiceCollection services)
         {
-            services.AddWorkflow(x => x.UseMySQL(MysqlDockerSetup.ScenarioConnectionString, true, true));
+            services.AddWorkflow(options =>
+            {
+                options.SetEventsPurgerBatchSize(1);
+                options.UseMySQL(MysqlDockerSetup.ScenarioConnectionString, true, true);
+            });
         }
 
         [Fact]

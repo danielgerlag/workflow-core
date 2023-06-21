@@ -10,7 +10,11 @@ namespace WorkflowCore.Tests.SqlServer.Scenarios
     {
         protected override void ConfigureServices(IServiceCollection services)
         {
-            services.AddWorkflow(x => x.UseSqlServer(SqlDockerSetup.ScenarioConnectionString, true, true));
+            services.AddWorkflow(options =>
+            {
+                options.SetEventsPurgerBatchSize(1);
+                options.UseSqlServer(SqlDockerSetup.ScenarioConnectionString, true, true);
+            });
         }
 
         [Fact]

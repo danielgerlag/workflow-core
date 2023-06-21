@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,10 +12,12 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
     public class EventsPurger : IEventsPurger
     {
         private readonly IWorkflowDbContextFactory _contextFactory;
+        public int BatchSize { get; }
 
-        public EventsPurger(IWorkflowDbContextFactory contextFactory)
+        public EventsPurger(IWorkflowDbContextFactory contextFactory, int batchSize)
         {
             _contextFactory = contextFactory;
+            BatchSize = batchSize;
         }
 
         /// <summary>
@@ -28,12 +31,34 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             var olderThanUtc = olderThan.ToUniversalTime();
             using (var db = ConstructDbContext())
             {
-                var events = db.Set<PersistedEvent>()
-                    .Where(x => x.EventTime < olderThanUtc &&
-                                x.IsProcessed == true);
+                int deleteEvents = BatchSize;
 
-                db.RemoveRange(events);
-                await db.SaveChangesAsync(cancellationToken);
+                #if NET6_0_OR_GREATER
+                    while(deleteEvents != 0)
+                    {
+                        deleteEvents = await db.Set<PersistedEvent>()
+                            .Where(x => x.EventTime < olderThanUtc &&
+                                        x.IsProcessed == true)
+                            .Take(BatchSize)
+                            .ExecuteDeleteAsync(cancellationToken);
+                    }
+                #else
+                    while (deleteEvents != 0)
+                    {
+                        var events = db.Set<PersistedEvent>()
+                            .Where(x => x.EventTime < olderThanUtc &&
+                                        x.IsProcessed == true)
+                            .Take(BatchSize);
+                    
+                        deleteEvents = await events.CountAsync();
+                    
+                        if(deleteEvents != 0)
+                        {
+                            db.RemoveRange(events);
+                            await db.SaveChangesAsync(cancellationToken);
+                        }
+                    }  
+                #endif
             }
         }
 

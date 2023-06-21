@@ -10,7 +10,11 @@ namespace WorkflowCore.Tests.PostgreSQL.Scenarios
     {
         protected override void ConfigureServices(IServiceCollection services)
         {
-            services.AddWorkflow(x => x.UsePostgreSQL(PostgresDockerSetup.ScenarioConnectionString, true, true));
+            services.AddWorkflow(options => 
+            {
+                options.SetEventsPurgerBatchSize(1);
+                options.UsePostgreSQL(PostgresDockerSetup.ScenarioConnectionString, true, true);
+            });
         }
 
         [Fact]

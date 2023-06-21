@@ -13,28 +13,43 @@ namespace WorkflowCore.Providers.Azure.Services
     public class EventsPurger : IEventsPurger
     {
         private readonly Lazy<Container> _workflowContainer;
+        public int BatchSize { get; }
 
-        public EventsPurger(ICosmosClientFactory clientFactory, string dbId, CosmosDbStorageOptions cosmosDbStorageOptions)
+        public EventsPurger(ICosmosClientFactory clientFactory, string dbId, CosmosDbStorageOptions cosmosDbStorageOptions, int batchSize)
         {
             _workflowContainer = new Lazy<Container>(() => clientFactory.GetCosmosClient()
                 .GetDatabase(dbId)
                 .GetContainer(cosmosDbStorageOptions.WorkflowContainerName));
+
+            BatchSize = batchSize;
         }
+
 
         public async Task PurgeEvents(DateTime olderThan, CancellationToken cancellationToken = default)
         {
             var olderThanUtc = olderThan.ToUniversalTime();
-            using (FeedIterator<PersistedEvent> feedIterator = _workflowContainer.Value.GetItemLinqQueryable<PersistedEvent>()
-                    .Where(x => x.EventTime < olderThanUtc && x.IsProcessed == true)
-                    .ToFeedIterator())
+            var events = _workflowContainer.Value.GetItemLinqQueryable<PersistedEvent>(requestOptions: new QueryRequestOptions() { MaxItemCount = BatchSize })
+                .Where(x => x.EventTime < olderThanUtc && x.IsProcessed == true);
+
+            var eventsToDelete = await events.CountAsync();
+
+            while(eventsToDelete > 0)
             {
-                while (feedIterator.HasMoreResults)
-                {
-                    foreach (var item in await feedIterator.ReadNextAsync(cancellationToken))
+                using (FeedIterator<PersistedEvent> feedIterator = events.ToFeedIterator())
+                { 
+
+                    while (feedIterator.HasMoreResults)
                     {
-                        await _workflowContainer.Value.DeleteItemAsync<PersistedEvent>(item.id, new PartitionKey(item.id), cancellationToken: cancellationToken);
+                        foreach (var item in await feedIterator.ReadNextAsync(cancellationToken))
+                        {
+                            await _workflowContainer.Value.DeleteItemAsync<PersistedEvent>(item.id, new PartitionKey(item.id), cancellationToken: cancellationToken);
+                        }
                     }
                 }
+
+                events = _workflowContainer.Value.GetItemLinqQueryable<PersistedEvent>(requestOptions: new QueryRequestOptions() { MaxItemCount = BatchSize })
+                    .Where(x => x.EventTime < olderThanUtc && x.IsProcessed == true);
+                eventsToDelete = await events.CountAsync();
             }
         }
     }

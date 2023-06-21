@@ -19,6 +19,8 @@ namespace WorkflowCore.Persistence.RavenDB.Services
             _database = database;
         }
 
+        public int BatchSize => throw new NotImplementedException();
+
         public Task PurgeEvents(DateTime olderThan, CancellationToken cancellationToken = default)
         {
             var utcTime = olderThan.ToUniversalTime();

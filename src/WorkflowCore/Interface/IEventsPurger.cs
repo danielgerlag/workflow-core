@@ -6,6 +6,7 @@ namespace WorkflowCore.Interface
 {
     public interface IEventsPurger
     {
+        int BatchSize { get; }
         Task PurgeEvents(DateTime olderThan, CancellationToken cancellationToken = default);
     }
 }

@@ -36,7 +36,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 configureClient?.Invoke(mongoClientSettings);
                 var client = new MongoClient(mongoClientSettings);
                 var db = client.GetDatabase(databaseName);
-                return new EventsPurger(db);
+                return new EventsPurger(db, options.EventsPurgerBatchSize);
             });
             return options;
         }
