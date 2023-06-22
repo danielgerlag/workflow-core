@@ -96,7 +96,6 @@ namespace WorkflowCore.Services
             await _queueProvider.QueueWork(id, QueueType.Index);
             await _eventHub.PublishNotification(new WorkflowStarted
             {
-                Workflow = wf,
                 EventTimeUtc = _dateTimeProvider.UtcNow,
                 Reference = reference,
                 WorkflowInstanceId = id,
@@ -140,7 +139,6 @@ namespace WorkflowCore.Services
                     await _queueProvider.QueueWork(workflowId, QueueType.Index);
                     await _eventHub.PublishNotification(new WorkflowSuspended
                     {
-                        Workflow = wf,
                         EventTimeUtc = _dateTimeProvider.UtcNow,
                         Reference = wf.Reference,
                         WorkflowInstanceId = wf.Id,
@@ -177,7 +175,6 @@ namespace WorkflowCore.Services
                     await _queueProvider.QueueWork(workflowId, QueueType.Index);
                     await _eventHub.PublishNotification(new WorkflowResumed
                     {
-                        Workflow = wf,
                         EventTimeUtc = _dateTimeProvider.UtcNow,
                         Reference = wf.Reference,
                         WorkflowInstanceId = wf.Id,
@@ -215,7 +212,6 @@ namespace WorkflowCore.Services
                 await _queueProvider.QueueWork(workflowId, QueueType.Index);
                 await _eventHub.PublishNotification(new WorkflowTerminated
                 {
-                    Workflow = wf,
                     EventTimeUtc = _dateTimeProvider.UtcNow,
                     Reference = wf.Reference,
                     WorkflowInstanceId = wf.Id,

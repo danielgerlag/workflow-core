@@ -79,7 +79,6 @@ namespace WorkflowCore.Services
 
                 _eventPublisher.PublishNotification(new StepCompleted
                 {
-                    Workflow = workflow,
                     EventTimeUtc = _datetimeProvider.UtcNow,
                     Reference = workflow.Reference,
                     ExecutionPointerId = pointer.Id,
@@ -105,7 +104,6 @@ namespace WorkflowCore.Services
         {
             _eventPublisher.PublishNotification(new WorkflowError
             {
-                Workflow = workflow,
                 EventTimeUtc = _datetimeProvider.UtcNow,
                 Reference = workflow.Reference,
                 WorkflowInstanceId = workflow.Id,
