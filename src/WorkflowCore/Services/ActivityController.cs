@@ -25,66 +25,16 @@ namespace WorkflowCore.Services
             _workflowController = workflowController;
         }
         
-        // todo: remove duplication
-        public async Task<PendingActivity> GetFirstPendingActivity(string workflowId, string activityToExclude, CancellationToken cancellationToken = default)
-        {
-            var firstPass = true;
-            EventSubscription subscription = null;
-            while ((subscription == null && !cancellationToken.IsCancellationRequested) || firstPass)
-            {
-                if (!firstPass)
-                    await Task.Delay(100, cancellationToken);
-                subscription = await _subscriptionRepository.GetNextWorkflowSubscription(Event.EventTypeActivity, workflowId, activityToExclude, _dateTimeProvider.Now, cancellationToken);
-                if (subscription != null)
-                    if (!await _lockProvider.AcquireLock($"sub:{subscription.Id}", CancellationToken.None))
-                        subscription = null;
-                firstPass = false;
-            }
-            if (subscription == null)
-                return null;
-            
-            try
-            {
-                var token = Token.Create(subscription.Id, subscription.EventKey);
-                var result = new PendingActivity
-                {
-                    Token = token.Encode(),
-                    ActivityName = subscription.EventKey,
-                    Parameters = subscription.SubscriptionData,
-                    TokenExpiry = DateTime.MaxValue
-                };
-
-                if (!await _subscriptionRepository.SetSubscriptionToken(subscription.Id, result.Token, "worker", result.TokenExpiry, cancellationToken))
-                    return null;
-
-                return result;
-            }
-            finally
-            {
-                await _lockProvider.ReleaseLock($"sub:{subscription.Id}");
-            }
-        }
-
         public async Task<PendingActivity> GetPendingActivity(string activityName, string workerId, TimeSpan? timeout = null)
         {
-            if (timeout == null)
-            {
-                return await GetPendingActivity(activityName, workerId, CancellationToken.None);
-            }
-
-            var cts = new CancellationTokenSource(timeout.Value);
-            return await GetPendingActivity(activityName, workerId, cts.Token);
-        }
-        
-        public async Task<PendingActivity> GetPendingActivity(string activityName, string workerId, CancellationToken cancellationToken = default)
-        {
+            var endTime = _dateTimeProvider.UtcNow.Add(timeout ?? TimeSpan.Zero);
             var firstPass = true;
             EventSubscription subscription = null;
-            while ((subscription == null && !cancellationToken.IsCancellationRequested) || firstPass)
+            while ((subscription == null && _dateTimeProvider.UtcNow < endTime) || firstPass)
             {
                 if (!firstPass)
-                    await Task.Delay(100, cancellationToken);
-                subscription = await _subscriptionRepository.GetFirstOpenSubscription(Event.EventTypeActivity, activityName, _dateTimeProvider.Now, cancellationToken);
+                    await Task.Delay(100);
+                subscription = await _subscriptionRepository.GetFirstOpenSubscription(Event.EventTypeActivity, activityName, _dateTimeProvider.Now);
                 if (subscription != null)
                     if (!await _lockProvider.AcquireLock($"sub:{subscription.Id}", CancellationToken.None))
                         subscription = null;
@@ -104,7 +54,7 @@ namespace WorkflowCore.Services
                     TokenExpiry = DateTime.MaxValue
                 };
 
-                if (!await _subscriptionRepository.SetSubscriptionToken(subscription.Id, result.Token, workerId, result.TokenExpiry, cancellationToken))
+                if (!await _subscriptionRepository.SetSubscriptionToken(subscription.Id, result.Token, workerId, result.TokenExpiry))
                     return null;
 
                 return result;
@@ -113,6 +63,7 @@ namespace WorkflowCore.Services
             {
                 await _lockProvider.ReleaseLock($"sub:{subscription.Id}");
             }
+
         }
 
         public async Task ReleaseActivityToken(string token)
@@ -152,36 +103,6 @@ namespace WorkflowCore.Services
             result.SubscriptionId = sub.Id;
 
             await _workflowController.PublishEvent(sub.EventName, sub.EventKey, result);
-        }
-
-        class Token
-        {
-            public string SubscriptionId { get; set; }
-            public string ActivityName { get; set; }
-            public string Nonce { get; set; }
-
-            public string Encode()
-            {
-                var json = JsonConvert.SerializeObject(this);
-                return Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
-            }
-
-            public static Token Create(string subscriptionId, string activityName)
-            {
-                return new Token
-                {
-                    SubscriptionId = subscriptionId,
-                    ActivityName = activityName,
-                    Nonce = Guid.NewGuid().ToString()
-                };
-            }
-
-            public static Token Decode(string encodedToken)
-            {
-                var raw = Convert.FromBase64String(encodedToken);
-                var json = Encoding.UTF8.GetString(raw);
-                return JsonConvert.DeserializeObject<Token>(json);
-            }
         }
     }
 }

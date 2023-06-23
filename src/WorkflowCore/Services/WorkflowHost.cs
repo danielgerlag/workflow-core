@@ -178,20 +178,10 @@ namespace WorkflowCore.Services
             if (!_shutdown)
                 Stop();
         }
-        
+
         public Task<PendingActivity> GetPendingActivity(string activityName, string workerId, TimeSpan? timeout = null)
         {
             return _activityController.GetPendingActivity(activityName, workerId, timeout);
-        }
-
-        public Task<PendingActivity> GetPendingActivity(string activityName, string workerId, CancellationToken cancellationToken = default)
-        {
-            return _activityController.GetPendingActivity(activityName, workerId, cancellationToken);
-        }
-        
-        public Task<PendingActivity> GetFirstPendingActivity(string workflowId, string activityToExclude, CancellationToken cancellationToken = default)
-        {
-            return _activityController.GetFirstPendingActivity(workflowId, activityToExclude, cancellationToken);
         }
 
         public Task ReleaseActivityToken(string token)

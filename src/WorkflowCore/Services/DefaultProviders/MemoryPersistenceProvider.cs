@@ -162,16 +162,6 @@ namespace WorkflowCore.Services
                 return Task.FromResult(sub);
             }
         }
-        
-        public Task<EventSubscription> GetNextWorkflowSubscription(string eventName, string workflowId, string activityToExclude, DateTime asOf, CancellationToken _ = default)
-        {
-            lock (_subscriptions)
-            {
-                var result =  _subscriptions
-                    .FirstOrDefault(x => x.WorkflowId == workflowId && x.EventName == eventName && x.EventKey != activityToExclude && x.SubscribeAsOf <= asOf);
-                return Task.FromResult(result);
-            }
-        }
 
         public Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, DateTime asOf, CancellationToken _ = default)
         {

@@ -7,7 +7,7 @@ using WorkflowCore.Persistence.EntityFramework.Models;
 
 namespace WorkflowCore.Persistence.EntityFramework
 {
-    internal static class ExtensionMethods
+    public static class ExtensionMethods
     {
         // todo: provide serializer settings customization option for the package
         private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings
@@ -16,7 +16,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             PreserveReferencesHandling = PreserveReferencesHandling.Objects,
         };
 
-        internal static PersistedWorkflow ToPersistable(this WorkflowInstance instance, PersistedWorkflow persistable = null)
+        public static PersistedWorkflow ToPersistable(this WorkflowInstance instance, PersistedWorkflow persistable = null)
         {
             if (persistable == null)            
                 persistable = new PersistedWorkflow();                        
@@ -86,7 +86,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             return persistable;
         }
 
-        internal static PersistedExecutionError ToPersistable(this ExecutionError instance)
+        public static PersistedExecutionError ToPersistable(this ExecutionError instance)
         {
             var result = new PersistedExecutionError();            
             result.ErrorTime = instance.ErrorTime;
@@ -97,7 +97,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             return result;
         }
 
-        internal static PersistedSubscription ToPersistable(this EventSubscription instance)
+        public static PersistedSubscription ToPersistable(this EventSubscription instance)
         {
             PersistedSubscription result = new PersistedSubscription();            
             result.SubscriptionId = new Guid(instance.Id);
@@ -115,7 +115,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             return result;
         }
 
-        internal static PersistedEvent ToPersistable(this Event instance)
+        public static PersistedEvent ToPersistable(this Event instance)
         {
             PersistedEvent result = new PersistedEvent();
             result.EventId = new Guid(instance.Id);
@@ -128,7 +128,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             return result;
         }
 
-        internal static PersistedScheduledCommand ToPersistable(this ScheduledCommand instance)
+        public static PersistedScheduledCommand ToPersistable(this ScheduledCommand instance)
         {
             var result = new PersistedScheduledCommand();
             result.CommandName = instance.CommandName;
@@ -138,7 +138,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             return result;
         }
 
-        internal static WorkflowInstance ToWorkflowInstance(this PersistedWorkflow instance)
+        public static WorkflowInstance ToWorkflowInstance(this PersistedWorkflow instance)
         {
             WorkflowInstance result = new WorkflowInstance();
             result.Data = JsonConvert.DeserializeObject(instance.Data, SerializerSettings);
@@ -204,7 +204,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             return result;
         }
 
-        internal static EventSubscription ToEventSubscription(this PersistedSubscription instance)
+        public static EventSubscription ToEventSubscription(this PersistedSubscription instance)
         {
             EventSubscription result = new EventSubscription();
             result.Id = instance.SubscriptionId.ToString();
@@ -222,7 +222,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             return result;
         }
 
-        internal static Event ToEvent(this PersistedEvent instance)
+        public static Event ToEvent(this PersistedEvent instance)
         {
             Event result = new Event();
             result.Id = instance.EventId.ToString();
@@ -235,7 +235,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             return result;
         }
 
-        internal static ScheduledCommand ToScheduledCommand(this PersistedScheduledCommand instance)
+        public static ScheduledCommand ToScheduledCommand(this PersistedScheduledCommand instance)
         {
             var result = new ScheduledCommand();
             result.CommandName = instance.CommandName;
