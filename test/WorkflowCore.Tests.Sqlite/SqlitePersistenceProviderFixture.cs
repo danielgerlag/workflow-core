@@ -23,7 +23,7 @@ namespace WorkflowCore.Tests.Sqlite
         {
             get
             {                
-                var db = new EntityFrameworkPersistenceProvider(new SqliteContextFactory(_connectionString), new ModelConverterService(new JsonSerializerSettings()),true, false);
+                var db = new EntityFrameworkPersistenceProvider(new SqliteContextFactory(_connectionString), new ModelConverterService(new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }),true, false);
                 db.EnsureStoreExists();
                 return db;
             }

@@ -22,7 +22,7 @@ namespace WorkflowCore.Tests.SqlServer
         {
             get
             {
-                var db = new EntityFrameworkPersistenceProvider(new SqlContextFactory(_connectionString), new ModelConverterService(new JsonSerializerSettings()),true, true);
+                var db = new EntityFrameworkPersistenceProvider(new SqlContextFactory(_connectionString), new ModelConverterService(new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }),true, true);
                 db.EnsureStoreExists();
                 return db;
             }

@@ -19,7 +19,7 @@ namespace WorkflowCore.Tests.PostgreSQL
         public PostgresPersistenceProviderFixture(PostgresDockerSetup dockerSetup, ITestOutputHelper output)
         {
             output.WriteLine($"Connecting on {PostgresDockerSetup.ConnectionString}");
-            _subject = new EntityFrameworkPersistenceProvider(new PostgresContextFactory(PostgresDockerSetup.ConnectionString,"wfc"), new ModelConverterService(new JsonSerializerSettings()),true, true);
+            _subject = new EntityFrameworkPersistenceProvider(new PostgresContextFactory(PostgresDockerSetup.ConnectionString,"wfc"), new ModelConverterService(new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }),true, true);
             _subject.EnsureStoreExists();
         }
     }
