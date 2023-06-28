@@ -1,4 +1,6 @@
+using Newtonsoft.Json;
 using WorkflowCore.Interface;
+using WorkflowCore.Persistence.EntityFramework;
 using WorkflowCore.Persistence.EntityFramework.Services;
 using WorkflowCore.Persistence.SqlServer;
 using WorkflowCore.UnitTests;
@@ -20,7 +22,7 @@ namespace WorkflowCore.Tests.SqlServer
         {
             get
             {
-                var db = new EntityFrameworkPersistenceProvider(new SqlContextFactory(_connectionString), true, true);
+                var db = new EntityFrameworkPersistenceProvider(new SqlContextFactory(_connectionString), new ModelConverterService(new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }),true, true);
                 db.EnsureStoreExists();
                 return db;
             }

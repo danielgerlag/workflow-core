@@ -1,4 +1,6 @@
-﻿using WorkflowCore.Interface;
+﻿using Newtonsoft.Json;
+using WorkflowCore.Interface;
+using WorkflowCore.Persistence.EntityFramework;
 using WorkflowCore.Persistence.EntityFramework.Services;
 using WorkflowCore.Persistence.MySQL;
 using WorkflowCore.UnitTests;
@@ -16,7 +18,7 @@ namespace WorkflowCore.Tests.MySQL
         public MysqlPersistenceProviderFixture(MysqlDockerSetup dockerSetup, ITestOutputHelper output)
         {
             output.WriteLine($"Connecting on {MysqlDockerSetup.ConnectionString}");
-            _subject = new EntityFrameworkPersistenceProvider(new MysqlContextFactory(MysqlDockerSetup.ConnectionString), true, true);
+            _subject = new EntityFrameworkPersistenceProvider(new MysqlContextFactory(MysqlDockerSetup.ConnectionString), new ModelConverterService(new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }), true, true);
             _subject.EnsureStoreExists();
         }
     }

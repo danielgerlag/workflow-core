@@ -1,5 +1,7 @@
 ﻿using System;
+using Newtonsoft.Json;
 using WorkflowCore.Interface;
+using WorkflowCore.Persistence.EntityFramework;
 using WorkflowCore.Persistence.EntityFramework.Services;
 using WorkflowCore.Persistence.Sqlite;
 using WorkflowCore.UnitTests;
@@ -21,7 +23,7 @@ namespace WorkflowCore.Tests.Sqlite
         {
             get
             {                
-                var db = new EntityFrameworkPersistenceProvider(new SqliteContextFactory(_connectionString), true, false);
+                var db = new EntityFrameworkPersistenceProvider(new SqliteContextFactory(_connectionString), new ModelConverterService(new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All }),true, false);
                 db.EnsureStoreExists();
                 return db;
             }

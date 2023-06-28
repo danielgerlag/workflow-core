@@ -16,12 +16,14 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
         private readonly bool _canCreateDB;
         private readonly bool _canMigrateDB;
         private readonly IWorkflowDbContextFactory _contextFactory;
+        private readonly ModelConverterService _modelConverterService;
 
         public bool SupportsScheduledCommands => true;
 
-        public EntityFrameworkPersistenceProvider(IWorkflowDbContextFactory contextFactory, bool canCreateDB, bool canMigrateDB)
+        public EntityFrameworkPersistenceProvider(IWorkflowDbContextFactory contextFactory, ModelConverterService modelConverterService, bool canCreateDB, bool canMigrateDB)
         {
             _contextFactory = contextFactory;
+            _modelConverterService = modelConverterService;
             _canCreateDB = canCreateDB;
             _canMigrateDB = canMigrateDB;
         }
@@ -31,7 +33,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             using (var db = ConstructDbContext())
             {
                 subscription.Id = Guid.NewGuid().ToString();
-                var persistable = subscription.ToPersistable();
+                var persistable = _modelConverterService.ToPersistable(subscription);
                 var result = db.Set<PersistedSubscription>().Add(persistable);
                 await db.SaveChangesAsync(cancellationToken);
                 return subscription.Id;
@@ -43,7 +45,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             using (var db = ConstructDbContext())
             {
                 workflow.Id = Guid.NewGuid().ToString();
-                var persistable = workflow.ToPersistable();
+                var persistable = _modelConverterService.ToPersistable(workflow);
                 var result = db.Set<PersistedWorkflow>().Add(persistable);
                 await db.SaveChangesAsync(cancellationToken);
                 return workflow.Id;
@@ -90,7 +92,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 List<WorkflowInstance> result = new List<WorkflowInstance>();
 
                 foreach (var item in rawResult)
-                    result.Add(item.ToWorkflowInstance());
+                    result.Add(_modelConverterService.ToWorkflowInstance(item));
 
                 return result;
             }
@@ -110,7 +112,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 if (raw == null)
                     return null;
 
-                return raw.ToWorkflowInstance();
+                return _modelConverterService.ToWorkflowInstance(raw);
             }
         }
 
@@ -130,7 +132,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .Include(wf => wf.ExecutionPointers)
                     .Where(x => uids.Contains(x.InstanceId));
 
-                return (await raw.ToListAsync(cancellationToken)).Select(i => i.ToWorkflowInstance());
+                return (await raw.ToListAsync(cancellationToken)).Select(i => _modelConverterService.ToWorkflowInstance(i));
             }
         }
 
@@ -147,7 +149,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .AsTracking()
                     .FirstAsync(cancellationToken);
 
-                var persistable = workflow.ToPersistable(existingEntity);
+                var persistable = _modelConverterService.ToPersistable(workflow, existingEntity);
                 await db.SaveChangesAsync(cancellationToken);
             }
         }
@@ -165,12 +167,12 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .AsTracking()
                     .FirstAsync(cancellationToken);
 
-                var workflowPersistable = workflow.ToPersistable(existingEntity);
+                var workflowPersistable = _modelConverterService.ToPersistable(workflow, existingEntity);
 
                 foreach (var subscription in subscriptions)
                 {
                     subscription.Id = Guid.NewGuid().ToString();
-                    var subscriptionPersistable = subscription.ToPersistable();
+                    var subscriptionPersistable = _modelConverterService.ToPersistable(subscription);
                     db.Set<PersistedSubscription>().Add(subscriptionPersistable);
                 }
 
@@ -216,7 +218,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .Where(x => x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf)
                     .ToListAsync(cancellationToken);
 
-                return raw.Select(item => item.ToEventSubscription()).ToList();
+                return raw.Select(item => _modelConverterService.ToEventSubscription(item)).ToList();
             }
         }
 
@@ -225,7 +227,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             using (var db = ConstructDbContext())
             {
                 newEvent.Id = Guid.NewGuid().ToString();
-                var persistable = newEvent.ToPersistable();
+                var persistable = _modelConverterService.ToPersistable(newEvent);
                 var result = db.Set<PersistedEvent>().Add(persistable);
                 await db.SaveChangesAsync(cancellationToken);
                 return newEvent.Id;
@@ -243,7 +245,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 if (raw == null)
                     return null;
 
-                return raw.ToEvent();
+                return _modelConverterService.ToEvent(raw);
             }
         }
 
@@ -321,7 +323,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 {
                     foreach (var error in executionErrors)
                     {
-                        db.Set<PersistedExecutionError>().Add(error.ToPersistable());
+                        db.Set<PersistedExecutionError>().Add(_modelConverterService.ToPersistable(error));
                     }
                     await db.SaveChangesAsync(cancellationToken);
 
@@ -340,8 +342,12 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             {
                 var uid = new Guid(eventSubscriptionId);
                 var raw = await db.Set<PersistedSubscription>().FirstOrDefaultAsync(x => x.SubscriptionId == uid, cancellationToken);
-
-                return raw?.ToEventSubscription();
+                if (raw == null)
+                {
+                    return null;
+                }
+                
+                return _modelConverterService.ToEventSubscription(raw);
             }
         }
 
@@ -350,8 +356,12 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             using (var db = ConstructDbContext())
             {
                 var raw = await db.Set<PersistedSubscription>().FirstOrDefaultAsync(x => x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf && x.ExternalToken == null, cancellationToken);
+                if (raw == null)
+                {
+                    return null;
+                }
 
-                return raw?.ToEventSubscription();
+                return _modelConverterService.ToEventSubscription(raw);
             }
         }
 
@@ -400,7 +410,8 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             {
                 using (var db = ConstructDbContext())
                 {
-                    var persistable = command.ToPersistable();
+                    var persistable = _modelConverterService.ToPersistable(command);
+
                     var result = db.Set<PersistedScheduledCommand>().Add(persistable);
                     await db.SaveChangesAsync();
                 }
@@ -423,7 +434,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 {
                     try
                     {
-                        await action(command.ToScheduledCommand());
+                        await action(_modelConverterService.ToScheduledCommand(command));
                         using var db2 = ConstructDbContext();
                         db2.Set<PersistedScheduledCommand>().Remove(command);
                         await db2.SaveChangesAsync();

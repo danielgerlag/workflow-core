@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using WorkflowCore.Interface;
 using WorkflowCore.Services;
 
@@ -26,6 +27,10 @@ namespace WorkflowCore.Models
             PollInterval = TimeSpan.FromSeconds(10);
             IdleTime = TimeSpan.FromMilliseconds(100);
             ErrorRetryInterval = TimeSpan.FromSeconds(60);
+            JsonSerializerSettings = new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.All,
+            };
 
             QueueFactory = new Func<IServiceProvider, IQueueProvider>(sp => new SingleNodeQueueProvider());
             LockFactory = new Func<IServiceProvider, IDistributedLockProvider>(sp => new SingleNodeLockProvider());
@@ -39,6 +44,7 @@ namespace WorkflowCore.Models
         public bool EnableIndexes { get; set; } = true;
         public bool EnablePolling { get; set; } = true;
         public bool EnableLifeCycleEventsPublisher { get; set; } = true;
+        public JsonSerializerSettings JsonSerializerSettings { get; set; }
 
         public void UsePersistence(Func<IServiceProvider, IPersistenceProvider> factory)
         {
