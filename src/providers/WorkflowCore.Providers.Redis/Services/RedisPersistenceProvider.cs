@@ -186,7 +186,7 @@ namespace WorkflowCore.Providers.Redis.Services
                 await _redis.SortedSetRemoveAsync($"{_prefix}.{EVENT_SET}.{RUNNABLE_INDEX}", newEvent.Id);
                 
                 if (_removeComplete){
-                    await _redis.SortedSetRemoveAsync($"{_prefix}.{EVENT_SET}", id);
+                    await _redis.SortedSetRemoveAsync($"{_prefix}.{EVENT_SET}", newEvent.Id);
                 }
             }
             else
