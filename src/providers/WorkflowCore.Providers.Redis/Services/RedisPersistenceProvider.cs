@@ -225,6 +225,9 @@ namespace WorkflowCore.Providers.Redis.Services
             var str = JsonConvert.SerializeObject(evt, _serializerSettings);
             await _redis.HashSetAsync($"{_prefix}.{EVENT_SET}", evt.Id, str);
             await _redis.SortedSetRemoveAsync($"{_prefix}.{EVENT_SET}.{RUNNABLE_INDEX}", id);
+            if (_removeComplete){
+                 await _redis.SortedSetRemoveAsync($"{_prefix}.{EVENT_SET}", id);
+            }
         }
 
         public async Task MarkEventUnprocessed(string id, CancellationToken cancellationToken = default)
