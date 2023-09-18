@@ -10,7 +10,6 @@
 
 namespace ScratchPad.Properties {
     using System;
-    using System.Reflection;
     
     
     /// <summary>
@@ -20,7 +19,7 @@ namespace ScratchPad.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -40,7 +39,7 @@ namespace ScratchPad.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ScratchPad.Properties.Resources", typeof(Resources).GetTypeInfo().Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ScratchPad.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -63,26 +62,27 @@ namespace ScratchPad.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to {
-        ///  &quot;Id&quot;: &quot;HelloWorld&quot;,
+        ///  &quot;Id&quot;: &quot;Test02&quot;,
         ///  &quot;Version&quot;: 1,
         ///  &quot;Description&quot;: &quot;&quot;,
-        ///  &quot;DataType&quot;: &quot;System.Object&quot;,
+        ///  &quot;DataType&quot;: &quot;ScratchPad.WfData, ScratchPad&quot;,
         ///  &quot;Steps&quot;: [
         ///    {
         ///      &quot;Id&quot;: &quot;Hello&quot;,
-        ///      &quot;StepType&quot;: &quot;ScratchPad.HelloWorld; ScratchPad&quot;,
-        ///      &quot;Name&quot;: &quot;Hello&quot;,
-        ///      &quot;NextStepId&quot;: &quot;Bye&quot;,
-        ///      &quot;Inputs&quot;: [],
-        ///      &quot;Outputs&quot;: []
+        ///      &quot;StepType&quot;: &quot;ScratchPad.HelloWorld, ScratchPad&quot;,
+        ///      &quot;NextStepId&quot;: &quot;decide&quot;
         ///    },
         ///    {
-        ///      &quot;Id&quot;: &quot;Bye&quot;,
-        ///      &quot;StepType&quot;: &quot;ScratchPad.GoodbyeWorld; ScratchPad&quot;,
-        ///      &quot;Name&quot;: &quot;Bye&quot;
-        ///    }
-        ///  ] 
-        ///}.
+        ///      &quot;Id&quot;: &quot;decide&quot;,
+        ///      &quot;StepType&quot;: &quot;WorkflowCore.Primitives.Decide, WorkflowCore&quot;,
+        ///      &quot;SelectNextStep&quot;:
+        ///      {
+        ///        &quot;Print1&quot;: &quot;data.Value1 == \&quot;one\&quot;&quot;,
+        ///        &quot;Print2&quot;: &quot;data.Value1 == \&quot;two\&quot;&quot;
+        ///      }
+        ///    },
+        ///    {
+        ///      &quot;Id&quot;: &quot;Print1&quot;,        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string HelloWorld {
             get {

@@ -25,10 +25,10 @@ namespace WorkflowCore.Providers.AWS.Services
         private readonly AutoResetEvent _mutex = new AutoResetEvent(true);
         private readonly IDateTimeProvider _dateTimeProvider;
 
-        public DynamoLockProvider(AWSCredentials credentials, AmazonDynamoDBConfig config, string tableName, ILoggerFactory logFactory, IDateTimeProvider dateTimeProvider)
+        public DynamoLockProvider(AmazonDynamoDBClient dynamoDBClient, string tableName, ILoggerFactory logFactory, IDateTimeProvider dateTimeProvider)
         {
             _logger = logFactory.CreateLogger<DynamoLockProvider>();
-            _client = new AmazonDynamoDBClient(credentials, config);
+            _client = dynamoDBClient;
             _localLocks = new List<string>();
             _tableName = tableName;
             _nodeId = Guid.NewGuid().ToString();

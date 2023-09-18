@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -43,6 +44,8 @@ namespace WorkflowCore.Services.BackgroundTasks
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 workflow = await _persistenceStore.GetWorkflowInstance(itemId, cancellationToken);
+
+                WorkflowActivity.Enrich(workflow, "process");
                 if (workflow.Status == WorkflowStatus.Runnable)
                 {
                     try
@@ -51,7 +54,8 @@ namespace WorkflowCore.Services.BackgroundTasks
                     }
                     finally
                     {
-                        await _persistenceStore.PersistWorkflow(workflow, cancellationToken);
+                        WorkflowActivity.Enrich(result);
+                        await _persistenceStore.PersistWorkflow(workflow, result?.Subscriptions, cancellationToken);
                         await QueueProvider.QueueWork(itemId, QueueType.Index);
                         _greylist.Remove($"wf:{itemId}");
                     }
@@ -64,7 +68,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                 {
                     foreach (var sub in result.Subscriptions)
                     {
-                        await SubscribeEvent(sub, _persistenceStore, cancellationToken);
+                        await TryProcessSubscription(sub, _persistenceStore, cancellationToken);
                     }
 
                     await _persistenceStore.PersistErrors(result.Errors, cancellationToken);
@@ -94,12 +98,8 @@ namespace WorkflowCore.Services.BackgroundTasks
 
         }
 
-        private async Task SubscribeEvent(EventSubscription subscription, IPersistenceProvider persistenceStore, CancellationToken cancellationToken)
+        private async Task TryProcessSubscription(EventSubscription subscription, IPersistenceProvider persistenceStore, CancellationToken cancellationToken)
         {
-            //TODO: move to own class
-            Logger.LogDebug("Subscribing to event {0} {1} for workflow {2} step {3}", subscription.EventName, subscription.EventKey, subscription.WorkflowId, subscription.StepId);
-
-            await persistenceStore.CreateEventSubscription(subscription, cancellationToken);
             if (subscription.EventName != Event.EventTypeActivity)
             {
                 var events = await persistenceStore.GetEvents(subscription.EventName, subscription.EventKey, subscription.SubscribeAsOf, cancellationToken);

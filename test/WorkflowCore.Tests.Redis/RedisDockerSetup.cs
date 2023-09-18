@@ -1,40 +1,34 @@
 ﻿using System;
-using Docker.Testify;
-using StackExchange.Redis;
+using System.Threading.Tasks;
+using Squadron;
 using Xunit;
 
 namespace WorkflowCore.Tests.Redis
-{    
-    public class RedisDockerSetup : DockerSetup
+{
+    public class RedisDockerSetup : IAsyncLifetime
     {
+        private readonly RedisResource _redisResource;
         public static string ConnectionString { get; set; }
 
-        public override string ImageName => @"redis";
-        public override int InternalPort => 6379;
-
-        public override void PublishConnectionInfo()
+        public RedisDockerSetup()
         {
-            ConnectionString = $"localhost:{ExternalPort}";
+            _redisResource = new RedisResource();
         }
 
-        public override bool TestReady()
+        public async Task InitializeAsync()
         {
-            try
-            {
-                var multiplexer = ConnectionMultiplexer.Connect($"localhost:{ExternalPort}");
-                return multiplexer.IsConnected;
-            }
-            catch
-            {
-                return false;
-            }
+            await _redisResource.InitializeAsync();
+            ConnectionString = _redisResource.ConnectionString;
+        }
 
+        public Task DisposeAsync()
+        {
+            return _redisResource.DisposeAsync();
         }
     }
 
     [CollectionDefinition("Redis collection")]
     public class RedisCollection : ICollectionFixture<RedisDockerSetup>
-    {        
+    {
     }
-
 }

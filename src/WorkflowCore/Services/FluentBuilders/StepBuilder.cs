@@ -59,7 +59,7 @@ namespace WorkflowCore.Services
         }
 
         public IStepBuilder<TData, InlineStepBody> Then(Func<IStepExecutionContext, ExecutionResult> body)
-        {            
+        {
             WorkflowStepInline newStep = new WorkflowStepInline();
             newStep.Body = body;
             WorkflowBuilder.AddStep(newStep);
@@ -100,7 +100,7 @@ namespace WorkflowCore.Services
             var outcomeBuilder = new StepOutcomeBuilder<TData>(WorkflowBuilder, result);
             return outcomeBuilder;
         }
-        
+
         public IStepBuilder<TData, TStepBody> Branch<TStep>(object outcomeValue, IStepBuilder<TData, TStep> branch) where TStep : IStepBody
         {
             if (branch.WorkflowBuilder.Steps.Count == 0)
@@ -123,10 +123,10 @@ namespace WorkflowCore.Services
             if (branch.WorkflowBuilder.Steps.Count == 0)
                 return this;
 
-            WorkflowBuilder.AttachBranch(branch.WorkflowBuilder);            
+            WorkflowBuilder.AttachBranch(branch.WorkflowBuilder);
 
             Step.Outcomes.Add(new ExpressionOutcome<TData>(outcomeExpression)
-            {            
+            {
                 NextStep = branch.WorkflowBuilder.Steps[0].Id
             });
 
@@ -155,7 +155,7 @@ namespace WorkflowCore.Services
         {
             Step.Inputs.Add(new ActionParameter<TStepBody, TData>(action));
             return this;
-        }        
+        }
 
         public IStepBuilder<TData, TStepBody> Output<TOutput>(Expression<Func<TData, TOutput>> dataProperty, Expression<Func<TStepBody, object>> value)
         {
@@ -206,7 +206,7 @@ namespace WorkflowCore.Services
             Step.Outcomes.Add(new ValueOutcome { NextStep = newStep.Id });
             return stepBuilder;
         }
-        
+
         public IStepBuilder<TData, TStep> End<TStep>(string name) where TStep : IStepBody
         {
             var ancestor = IterateParents(Step.Id, name);
@@ -294,12 +294,12 @@ namespace WorkflowCore.Services
         public IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection)
         {
             var newStep = new WorkflowStep<Foreach>();
-            
+
             Expression<Func<Foreach, IEnumerable>> inputExpr = (x => x.Collection);
-            newStep.Inputs.Add(new MemberMapParameter(collection, inputExpr));            
+            newStep.Inputs.Add(new MemberMapParameter(collection, inputExpr));
 
             WorkflowBuilder.AddStep(newStep);
-            var stepBuilder = new StepBuilder<TData, Foreach>(WorkflowBuilder, newStep);                        
+            var stepBuilder = new StepBuilder<TData, Foreach>(WorkflowBuilder, newStep);
 
             Step.Outcomes.Add(new ValueOutcome { NextStep = newStep.Id });
 
@@ -324,8 +324,40 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
+        public IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IStepExecutionContext, IEnumerable>> collection, Expression<Func<TData, bool>> runParallel)
+        {
+            var newStep = new WorkflowStep<Foreach>();
+
+            Expression<Func<Foreach, IEnumerable>> inputExpr = (x => x.Collection);
+            newStep.Inputs.Add(new MemberMapParameter(collection, inputExpr));
+
+            Expression<Func<Foreach, bool>> pExpr = (x => x.RunParallel);
+            newStep.Inputs.Add(new MemberMapParameter(runParallel, pExpr));
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, Foreach>(WorkflowBuilder, newStep);
+
+            Step.Outcomes.Add(new ValueOutcome { NextStep = newStep.Id });
+
+            return stepBuilder;
+        }
 
         public IContainerStepBuilder<TData, While, While> While(Expression<Func<TData, bool>> condition)
+        {
+            var newStep = new WorkflowStep<While>();
+
+            Expression<Func<While, bool>> inputExpr = (x => x.Condition);
+            newStep.Inputs.Add(new MemberMapParameter(condition, inputExpr));
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, While>(WorkflowBuilder, newStep);
+
+            Step.Outcomes.Add(new ValueOutcome { NextStep = newStep.Id });
+
+            return stepBuilder;
+        }
+
+        public IContainerStepBuilder<TData, While, While> While(Expression<Func<TData, IStepExecutionContext, bool>> condition)
         {
             var newStep = new WorkflowStep<While>();
 
@@ -354,7 +386,22 @@ namespace WorkflowCore.Services
 
             return stepBuilder;
         }
-        
+
+        public IContainerStepBuilder<TData, If, If> If(Expression<Func<TData, IStepExecutionContext, bool>> condition)
+        {
+            var newStep = new WorkflowStep<If>();
+
+            Expression<Func<If, bool>> inputExpr = (x => x.Condition);
+            newStep.Inputs.Add(new MemberMapParameter(condition, inputExpr));
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, If>(WorkflowBuilder, newStep);
+
+            Step.Outcomes.Add(new ValueOutcome { NextStep = newStep.Id });
+
+            return stepBuilder;
+        }
+
         public IContainerStepBuilder<TData, When, OutcomeSwitch> When(Expression<Func<TData, object>> outcomeValue, string label = null)
         {
             var newStep = new WorkflowStep<When>();
@@ -378,7 +425,7 @@ namespace WorkflowCore.Services
             {
                 switchBuilder = (this as IStepBuilder<TData, OutcomeSwitch>);
             }
-            
+
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new ReturnStepBuilder<TData, When, OutcomeSwitch>(WorkflowBuilder, newStep, switchBuilder);
             switchBuilder.Step.Children.Add(newStep.Id);
@@ -512,10 +559,29 @@ namespace WorkflowCore.Services
             WorkflowBuilder.AddStep(newStep);
             var stepBuilder = new StepBuilder<TData, Activity>(WorkflowBuilder, newStep);
             stepBuilder.Input((step) => step.ActivityName, (data) => activityName);
-            
+
             if (parameters != null)
                 stepBuilder.Input((step) => step.Parameters, parameters);
-            
+
+            if (effectiveDate != null)
+                stepBuilder.Input((step) => step.EffectiveDate, effectiveDate);
+
+            Step.Outcomes.Add(new ValueOutcome { NextStep = newStep.Id });
+            return stepBuilder;
+        }
+
+        public IStepBuilder<TData, Activity> Activity(Expression<Func<TData, IStepExecutionContext, string>> activityName, Expression<Func<TData, object>> parameters = null, Expression<Func<TData, DateTime>> effectiveDate = null, Expression<Func<TData, bool>> cancelCondition = null)
+        {
+            var newStep = new WorkflowStep<Activity>();
+            newStep.CancelCondition = cancelCondition;
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, Activity>(WorkflowBuilder, newStep);
+            stepBuilder.Input((step) => step.ActivityName, activityName);
+
+            if (parameters != null)
+                stepBuilder.Input((step) => step.Parameters, parameters);
+
             if (effectiveDate != null)
                 stepBuilder.Input((step) => step.EffectiveDate, effectiveDate);
 

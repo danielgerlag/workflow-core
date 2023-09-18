@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ConcurrentCollections;
 using Microsoft.Extensions.Logging;
+using OpenTelemetry.Trace;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
@@ -51,8 +53,11 @@ namespace WorkflowCore.Services.BackgroundTasks
         public virtual void Stop()
         {
             _cancellationTokenSource.Cancel();
-            DispatchTask.Wait();
-            DispatchTask = null;
+            if (DispatchTask != null)
+            {
+                DispatchTask.Wait();
+                DispatchTask = null;
+            }
         }
 
         private async Task Execute()
@@ -61,6 +66,7 @@ namespace WorkflowCore.Services.BackgroundTasks
 
             while (!cancelToken.IsCancellationRequested)
             {
+                Activity activity = default;
                 try
                 {
                     var activeCount = 0;
@@ -74,14 +80,18 @@ namespace WorkflowCore.Services.BackgroundTasks
                         continue;
                     }
 
+                    activity = WorkflowActivity.StartConsume(Queue);
                     var item = await QueueProvider.DequeueWork(Queue, cancelToken);
 
                     if (item == null)
                     {
+                        activity?.Dispose();
                         if (!QueueProvider.IsDequeueBlocking)
                             await Task.Delay(Options.IdleTime, cancelToken);
                         continue;
                     }
+
+                    activity?.EnrichWithDequeuedItem(item);
 
                     var hasTask = false;
                     lock (_activeTasks)
@@ -93,8 +103,9 @@ namespace WorkflowCore.Services.BackgroundTasks
                         _secondPasses.Add(item);
                         if (!EnableSecondPasses)
                             await QueueProvider.QueueWork(item, Queue);
+                        activity?.Dispose();
                         continue;
-                    }                   
+                    }
 
                     _secondPasses.TryRemove(item);
 
@@ -103,7 +114,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     {
                         _activeTasks.Add(item, waitHandle);
                     }
-                    var task = ExecuteItem(item, waitHandle);
+                    var task = ExecuteItem(item, waitHandle, activity);
                 }
                 catch (OperationCanceledException)
                 {
@@ -111,6 +122,11 @@ namespace WorkflowCore.Services.BackgroundTasks
                 catch (Exception ex)
                 {
                     Logger.LogError(ex, ex.Message);
+                    activity?.RecordException(ex);
+                }
+                finally
+                {
+                    activity?.Dispose();
                 }
             }
 
@@ -124,7 +140,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                 handle.WaitOne();
         }
 
-        private async Task ExecuteItem(string itemId, EventWaitHandle waitHandle)
+        private async Task ExecuteItem(string itemId, EventWaitHandle waitHandle, Activity activity)
         {
             try
             {
@@ -142,6 +158,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             catch (Exception ex)
             {
                 Logger.LogError(default(EventId), ex, $"Error executing item {itemId} - {ex.Message}");
+                activity?.RecordException(ex);
             }
             finally
             {

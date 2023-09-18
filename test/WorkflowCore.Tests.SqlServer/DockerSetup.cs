@@ -1,50 +1,36 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using Docker.Testify;
+using System.Threading.Tasks;
+using Squadron;
 using Xunit;
 
 namespace WorkflowCore.Tests.SqlServer
 {
-    public class SqlDockerSetup : DockerSetup
+    public class SqlDockerSetup : IAsyncLifetime
     {
+        private readonly SqlServerResource _sqlServerResource;
         public static string ConnectionString { get; set; }
         public static string ScenarioConnectionString { get; set; }
 
-        public override string ImageName => "mcr.microsoft.com/mssql/server";
-        public override int InternalPort => 1433;
-        public override TimeSpan TimeOut => TimeSpan.FromSeconds(120);
-
-        public const string SqlPassword = "I@mJustT3st1ing";
-
-        public override IList<string> EnvironmentVariables => new List<string> {"ACCEPT_EULA=Y", $"SA_PASSWORD={SqlPassword}"};
-
-        public override void PublishConnectionInfo()
+        public SqlDockerSetup()
         {
-            ConnectionString = $"Server=127.0.0.1,{ExternalPort};Database=workflowcore-tests;User Id=sa;Password={SqlPassword};";
-            ScenarioConnectionString = $"Server=127.0.0.1,{ExternalPort};Database=workflowcore-scenario-tests;User Id=sa;Password={SqlPassword};";
+            _sqlServerResource = new SqlServerResource();
         }
 
-        public override bool TestReady()
+        public async Task InitializeAsync()
         {
-            try
-            {
-                var client = new SqlConnection($"Server=127.0.0.1,{ExternalPort};Database=master;User Id=sa;Password={SqlPassword};");
-                client.Open();
-                client.Close();
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            await _sqlServerResource.InitializeAsync();
+            ConnectionString = _sqlServerResource.CreateConnectionString("workflowcore-tests");
+            ScenarioConnectionString = _sqlServerResource.CreateConnectionString("workflowcore-scenario-tests");
+        }
 
+        public Task DisposeAsync()
+        {
+            return _sqlServerResource.DisposeAsync();
         }
     }
 
     [CollectionDefinition("SqlServer collection")]
     public class SqlServerCollection : ICollectionFixture<SqlDockerSetup>
-    {        
+    {
     }
-
 }

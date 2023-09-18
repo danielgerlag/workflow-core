@@ -38,6 +38,7 @@ namespace WorkflowCore.Models
         public bool EnableEvents { get; set; } = true;
         public bool EnableIndexes { get; set; } = true;
         public bool EnablePolling { get; set; } = true;
+        public bool EnableLifeCycleEventsPublisher { get; set; } = true;
 
         public void UsePersistence(Func<IServiceProvider, IPersistenceProvider> factory)
         {
@@ -72,6 +73,11 @@ namespace WorkflowCore.Models
         public void UseErrorRetryInterval(TimeSpan interval)
         {
             ErrorRetryInterval = interval;
+        }
+
+        public void UseIdleTime(TimeSpan interval)
+        {
+            IdleTime = interval;
         }
 
         public void UseMaxConcurrentWorkflows(int maxConcurrentWorkflows)

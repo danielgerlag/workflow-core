@@ -4,7 +4,7 @@
     <AssemblyTitle>Workflow Core Sqlite Persistence Provider</AssemblyTitle>
     <VersionPrefix>1.5.0</VersionPrefix>
     <Authors>Daniel Gerlag</Authors>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
     <AssemblyName>WorkflowCore.Persistence.Sqlite</AssemblyName>
     <PackageId>WorkflowCore.Persistence.Sqlite</PackageId>
     <PackageTags>workflow;.NET;Core;state machine;WorkflowCore;Sqlite</PackageTags>
@@ -23,7 +23,11 @@
     <ProjectReference Include="..\WorkflowCore.Persistence.EntityFramework\WorkflowCore.Persistence.EntityFramework.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.*" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.1" />
   </ItemGroup>
 

@@ -8,17 +8,15 @@ namespace WorkflowCore.Services.ErrorHandlers
 {
     public class CompensateHandler : IWorkflowErrorHandler
     {
-        private readonly ILifeCycleEventPublisher _eventPublisher;
         private readonly IExecutionPointerFactory _pointerFactory;
         private readonly IDateTimeProvider _datetimeProvider;
         private readonly WorkflowOptions _options;
 
         public WorkflowErrorHandling Type => WorkflowErrorHandling.Compensate;
 
-        public CompensateHandler(IExecutionPointerFactory pointerFactory, ILifeCycleEventPublisher eventPublisher, IDateTimeProvider datetimeProvider, WorkflowOptions options)
+        public CompensateHandler(IExecutionPointerFactory pointerFactory, IDateTimeProvider datetimeProvider, WorkflowOptions options)
         {
             _pointerFactory = pointerFactory;
-            _eventPublisher = eventPublisher;
             _datetimeProvider = datetimeProvider;
             _options = options;
         }

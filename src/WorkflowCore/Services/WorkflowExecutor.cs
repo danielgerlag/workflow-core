@@ -73,6 +73,7 @@ namespace WorkflowCore.Services
                     continue;
                 }
 
+                WorkflowActivity.Enrich(step);
                 try
                 {
                     if (!InitializeStep(workflow, step, wfResult, def, pointer))

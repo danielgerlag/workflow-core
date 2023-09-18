@@ -22,7 +22,7 @@ namespace WorkflowCore.Tests.MongoDB
             get
             {
                 var client = new MongoClient(MongoDockerSetup.ConnectionString);
-                var db = client.GetDatabase("workflow-tests");
+                var db = client.GetDatabase(nameof(MongoPersistenceProviderFixture));
                 return new MongoPersistenceProvider(db);
             }
         }

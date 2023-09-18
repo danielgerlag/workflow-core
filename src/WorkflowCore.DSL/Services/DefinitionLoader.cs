@@ -101,6 +101,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                 targetStep.ErrorBehavior = nextStep.ErrorBehavior;
                 targetStep.RetryInterval = nextStep.RetryInterval;
                 targetStep.ExternalId = $"{nextStep.Id}";
+                targetStep.ProceedOnCancel = nextStep.ProceedOnCancel;
 
                 AttachInputs(nextStep, dataType, stepType, targetStep);
                 AttachOutputs(nextStep, dataType, stepType, targetStep);

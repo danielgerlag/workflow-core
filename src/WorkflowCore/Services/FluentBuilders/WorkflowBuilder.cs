@@ -84,6 +84,11 @@ namespace WorkflowCore.Services
                         if (step2.Children[i] == oldId)
                             step2.Children[i] = step.Id;
                     }
+
+                    if (step2.CompensationStepId == oldId)
+                    {
+                        step2.CompensationStepId = step.Id;
+                    }
                 }
             }
 
@@ -103,6 +108,11 @@ namespace WorkflowCore.Services
                     {
                         if (step2.Children[i] == oldId)
                             step2.Children[i] = step.Id;
+                    }
+
+                    if (step2.CompensationStepId == oldId)
+                    {
+                        step2.CompensationStepId = step.Id;
                     }
                 }
             }
@@ -231,12 +241,27 @@ namespace WorkflowCore.Services
             return Start().ForEach(collection, runParallel);
         }
 
+        public IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IStepExecutionContext, IEnumerable>> collection, Expression<Func<TData, bool>> runParallel)
+        {
+            return Start().ForEach(collection, runParallel);
+        }
+
         public IContainerStepBuilder<TData, While, While> While(Expression<Func<TData, bool>> condition)
         {
             return Start().While(condition);
         }
 
+        public IContainerStepBuilder<TData, While, While> While(Expression<Func<TData, IStepExecutionContext, bool>> condition)
+        {
+            return Start().While(condition);
+        }
+
         public IContainerStepBuilder<TData, If, If> If(Expression<Func<TData, bool>> condition)
+        {
+            return Start().If(condition);
+        }
+
+        public IContainerStepBuilder<TData, If, If> If(Expression<Func<TData, IStepExecutionContext, bool>> condition)
         {
             return Start().If(condition);
         }
@@ -268,6 +293,10 @@ namespace WorkflowCore.Services
 
         public IStepBuilder<TData, Activity> Activity(string activityName, Expression<Func<TData, object>> parameters = null, Expression<Func<TData, DateTime>> effectiveDate = null,
             Expression<Func<TData, bool>> cancelCondition = null)
+        {
+            return Start().Activity(activityName, parameters, effectiveDate, cancelCondition);
+        }
+        public IStepBuilder<TData, Activity> Activity(Expression<Func<TData, IStepExecutionContext, string>> activityName, Expression<Func<TData, object>> parameters = null, Expression<Func<TData, DateTime>> effectiveDate = null, Expression<Func<TData, bool>> cancelCondition = null)
         {
             return Start().Activity(activityName, parameters, effectiveDate, cancelCondition);
         }

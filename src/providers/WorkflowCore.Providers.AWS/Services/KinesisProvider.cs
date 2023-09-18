@@ -26,7 +26,7 @@ namespace WorkflowCore.Providers.AWS.Services
         private readonly int _defaultShardCount = 1;
         private bool _started = false;
 
-        public KinesisProvider(AWSCredentials credentials, RegionEndpoint region, string appName, string streamName, IKinesisStreamConsumer consumer, ILoggerFactory logFactory)
+        public KinesisProvider(AmazonKinesisClient kinesisClient, string appName, string streamName, IKinesisStreamConsumer consumer, ILoggerFactory logFactory)
         {
             _logger = logFactory.CreateLogger(GetType());
             _appName = appName;
@@ -34,7 +34,7 @@ namespace WorkflowCore.Providers.AWS.Services
             _consumer = consumer;
             _serializer = new JsonSerializer();            
             _serializer.TypeNameHandling = TypeNameHandling.All;
-            _client = new AmazonKinesisClient(credentials, region);
+            _client = kinesisClient;
         }
 
         public async Task PublishNotification(LifeCycleEvent evt)

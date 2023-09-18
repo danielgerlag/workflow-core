@@ -93,8 +93,11 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             if (!indexesCreated)
             {
                 instance.WorkflowInstances.Indexes.CreateOne(new CreateIndexModel<WorkflowInstance>(
-                    Builders<WorkflowInstance>.IndexKeys.Ascending(x => x.NextExecution),
-                    new CreateIndexOptions {Background = true, Name = "idx_nextExec"}));
+                    Builders<WorkflowInstance>.IndexKeys
+                        .Ascending(x => x.NextExecution)
+                        .Ascending(x => x.Status)
+                        .Ascending(x => x.Id),
+                    new CreateIndexOptions {Background = true, Name = "idx_nextExec_v2"}));
 
                 instance.Events.Indexes.CreateOne(new CreateIndexModel<Event>(
                     Builders<Event>.IndexKeys.Ascending(x => x.IsProcessed),
@@ -147,6 +150,23 @@ namespace WorkflowCore.Persistence.MongoDB.Services
         public async Task PersistWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken = default)
         {
             await WorkflowInstances.ReplaceOneAsync(x => x.Id == workflow.Id, workflow, cancellationToken: cancellationToken);
+        }
+
+        public async Task PersistWorkflow(WorkflowInstance workflow, List<EventSubscription> subscriptions, CancellationToken cancellationToken = default)
+        {
+            if (subscriptions == null || subscriptions.Count < 1)
+            {
+                await PersistWorkflow(workflow, cancellationToken);
+                return;
+            }
+
+            using (var session = await _database.Client.StartSessionAsync(cancellationToken: cancellationToken))
+            {
+                session.StartTransaction();
+                await PersistWorkflow(workflow, cancellationToken);
+                await EventSubscriptions.InsertManyAsync(subscriptions, cancellationToken: cancellationToken);
+                await session.CommitTransactionAsync(cancellationToken);
+            }
         }
 
         public async Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt, CancellationToken cancellationToken = default)
