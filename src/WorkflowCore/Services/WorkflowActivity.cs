@@ -60,7 +60,7 @@ namespace WorkflowCore.Services
                 activity.DisplayName += $" step {stepName}";
                 activity.SetTag("workflow.step.id", workflowStep.Id);
                 activity.SetTag("workflow.step.name", workflowStep.Name);
-                activity.SetTag("workflow.step.type", workflowStep.BodyType.Name);
+                activity.SetTag("workflow.step.type", workflowStep.BodyType?.Name);
             }
         }
 
