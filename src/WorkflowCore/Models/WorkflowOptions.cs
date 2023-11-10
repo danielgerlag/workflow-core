@@ -39,6 +39,12 @@ namespace WorkflowCore.Models
         public bool EnableIndexes { get; set; } = true;
         public bool EnablePolling { get; set; } = true;
         public bool EnableLifeCycleEventsPublisher { get; set; } = true;
+        public EventsPurgerOptions EventsPurgerOptions { get; private set; } = new EventsPurgerOptions(batchSize: 100);
+
+        public void SetEventsPurgerOptions(EventsPurgerOptions eventsPurgerOptions)
+        {
+            EventsPurgerOptions = eventsPurgerOptions;
+        }
 
         public void UsePersistence(Func<IServiceProvider, IPersistenceProvider> factory)
         {

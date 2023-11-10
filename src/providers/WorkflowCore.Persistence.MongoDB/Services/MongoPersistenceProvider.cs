@@ -18,6 +18,8 @@ namespace WorkflowCore.Persistence.MongoDB.Services
     public class MongoPersistenceProvider : IPersistenceProvider
     {
         internal const string WorkflowCollectionName = "wfc.workflows";
+        internal const string EventCollectionName = "wfc.events";
+
         private readonly IMongoDatabase _database;
 
         public MongoPersistenceProvider(IMongoDatabase database)

@@ -30,6 +30,14 @@ namespace Microsoft.Extensions.DependencyInjection
                 var db = client.GetDatabase(databaseName);
                 return new WorkflowPurger(db);
             });
+            options.Services.AddTransient<IEventsPurger>(sp =>
+            {
+                var mongoClientSettings = MongoClientSettings.FromConnectionString(mongoUrl);
+                configureClient?.Invoke(mongoClientSettings);
+                var client = new MongoClient(mongoClientSettings);
+                var db = client.GetDatabase(databaseName);
+                return new EventsPurger(db, options.EventsPurgerOptions);
+            });
             return options;
         }
 

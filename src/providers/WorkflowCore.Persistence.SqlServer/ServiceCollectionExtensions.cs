@@ -13,6 +13,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             options.UsePersistence(sp => new EntityFrameworkPersistenceProvider(new SqlContextFactory(connectionString, initAction), canCreateDB, canMigrateDB));
             options.Services.AddTransient<IWorkflowPurger>(sp => new WorkflowPurger(new SqlContextFactory(connectionString, initAction)));
+            options.Services.AddTransient<IEventsPurger>(sp => new EventsPurger(new SqlContextFactory(connectionString, initAction), options.EventsPurgerOptions));
             return options;
         }
     }
