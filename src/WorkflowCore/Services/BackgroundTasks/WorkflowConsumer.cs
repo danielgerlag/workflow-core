@@ -33,7 +33,7 @@ namespace WorkflowCore.Services.BackgroundTasks
         {
             if (!await _lockProvider.AcquireLock(itemId, cancellationToken))
             {
-                Logger.LogInformation("Workflow locked {0}", itemId);
+                Logger.LogInformation("Workflow locked {ItemId}", itemId);
                 return;
             }
 
