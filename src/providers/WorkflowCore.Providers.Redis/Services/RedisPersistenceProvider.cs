@@ -182,8 +182,13 @@ namespace WorkflowCore.Providers.Redis.Services
             await _redis.HashSetAsync($"{_prefix}.{EVENT_SET}", newEvent.Id, str);
             await _redis.SortedSetAddAsync($"{_prefix}.{EVENT_SET}.{EVENTSLUG_INDEX}.{newEvent.EventName}-{newEvent.EventKey}", newEvent.Id, newEvent.EventTime.Ticks);
 
-            if (newEvent.IsProcessed)
+            if (newEvent.IsProcessed){
                 await _redis.SortedSetRemoveAsync($"{_prefix}.{EVENT_SET}.{RUNNABLE_INDEX}", newEvent.Id);
+                
+                if (_removeComplete){
+                    await _redis.SortedSetRemoveAsync($"{_prefix}.{EVENT_SET}", newEvent.Id);
+                }
+            }
             else
                 await _redis.SortedSetAddAsync($"{_prefix}.{EVENT_SET}.{RUNNABLE_INDEX}", newEvent.Id, newEvent.EventTime.Ticks);
 
@@ -225,6 +230,9 @@ namespace WorkflowCore.Providers.Redis.Services
             var str = JsonConvert.SerializeObject(evt, _serializerSettings);
             await _redis.HashSetAsync($"{_prefix}.{EVENT_SET}", evt.Id, str);
             await _redis.SortedSetRemoveAsync($"{_prefix}.{EVENT_SET}.{RUNNABLE_INDEX}", id);
+            if (_removeComplete){
+                 await _redis.SortedSetRemoveAsync($"{_prefix}.{EVENT_SET}", id);
+            }
         }
 
         public async Task MarkEventUnprocessed(string id, CancellationToken cancellationToken = default)
