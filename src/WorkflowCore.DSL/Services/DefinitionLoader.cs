@@ -17,10 +17,12 @@ namespace WorkflowCore.Services.DefinitionStorage
     public class DefinitionLoader : IDefinitionLoader
     {
         private readonly IWorkflowRegistry _registry;
+        private readonly ITypeResolver _typeResolver;
 
-        public DefinitionLoader(IWorkflowRegistry registry)
+        public DefinitionLoader(IWorkflowRegistry registry, ITypeResolver typeResolver)
         {
             _registry = registry;
+            _typeResolver = typeResolver;
         }
 
         public WorkflowDefinition LoadDefinition(string source, Func<string, DefinitionSourceV1> deserializer)
@@ -220,10 +222,11 @@ namespace WorkflowCore.Services.DefinitionStorage
                 var dataParameter = Expression.Parameter(dataType, "data");
 
 
-                if(output.Key.Contains(".") || output.Key.Contains("["))
+                if (output.Key.Contains(".") || output.Key.Contains("["))
                 {
                     AttachNestedOutput(output, step, source, sourceExpr, dataParameter);
-                }else
+                }
+                else
                 {
                     AttachDirectlyOutput(output, step, dataType, sourceExpr, dataParameter);
                 }
@@ -259,11 +262,11 @@ namespace WorkflowCore.Services.DefinitionStorage
 
         }
 
-        private void AttachNestedOutput( KeyValuePair<string, string> output, WorkflowStep step, StepSourceV1 source, LambdaExpression sourceExpr, ParameterExpression dataParameter)
+        private void AttachNestedOutput(KeyValuePair<string, string> output, WorkflowStep step, StepSourceV1 source, LambdaExpression sourceExpr, ParameterExpression dataParameter)
         {
             PropertyInfo propertyInfo = null;
             String[] paths = output.Key.Split('.');
-         
+
             Expression targetProperty = dataParameter;
 
             bool hasAddOutput = false;
@@ -352,7 +355,7 @@ namespace WorkflowCore.Services.DefinitionStorage
 
         private Type FindType(string name)
         {
-            return Type.GetType(name, true, true);
+            return _typeResolver.FindType(name);
         }
 
         private static Action<IStepBody, object, IStepExecutionContext> BuildScalarInputAction(KeyValuePair<string, object> input, ParameterExpression dataParameter, ParameterExpression contextParameter, ParameterExpression environmentVarsParameter, PropertyInfo stepProperty)
