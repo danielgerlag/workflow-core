@@ -10,18 +10,15 @@ namespace WorkflowCore.Tests.Sqlite
     [Collection("Sqlite collection")]
     public class SqlitePersistenceProviderFixture : BasePersistenceFixture
     {
-        string _connectionString;
-
         public SqlitePersistenceProviderFixture(SqliteSetup setup)
         {
-            _connectionString = setup.ConnectionString;
         }
 
         protected override IPersistenceProvider Subject
         {
             get
-            {                
-                var db = new EntityFrameworkPersistenceProvider(new SqliteContextFactory(_connectionString), true, false);
+            {
+                var db = new EntityFrameworkPersistenceProvider(new SqliteContextFactory(SqliteSetup.ConnectionString), true, false);
                 db.EnsureStoreExists();
                 return db;
             }
