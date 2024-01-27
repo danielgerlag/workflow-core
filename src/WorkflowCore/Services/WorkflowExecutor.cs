@@ -156,50 +156,60 @@ namespace WorkflowCore.Services
                 CancellationToken = cancellationToken
             };
 
-            using (var scope = _scopeProvider.CreateScope(context))
+            var shouldDisposeScope = false;
+            var scope = context.Workflow.CurrentServiceScope;
+            if (scope == null)
             {
-                _logger.LogDebug("Starting step {StepName} on workflow {WorkflowId}", step.Name, workflow.Id);
+                scope = _scopeProvider.CreateScope(context);
+                shouldDisposeScope = true;
+            }
 
-                IStepBody body = step.ConstructBody(scope.ServiceProvider);
-                var stepExecutor = scope.ServiceProvider.GetRequiredService<IStepExecutor>();
+            _logger.LogDebug("Starting step {StepName} on workflow {WorkflowId}", step.Name, workflow.Id);
 
-                if (body == null)
+            IStepBody body = step.ConstructBody(scope.ServiceProvider);
+            var stepExecutor = scope.ServiceProvider.GetRequiredService<IStepExecutor>();
+
+            if (body == null)
+            {
+                _logger.LogError("Unable to construct step body {BodyType}", step.BodyType.ToString());
+                pointer.SleepUntil = _datetimeProvider.UtcNow.Add(_options.ErrorRetryInterval);
+                wfResult.Errors.Add(new ExecutionError
                 {
-                    _logger.LogError("Unable to construct step body {BodyType}", step.BodyType.ToString());
-                    pointer.SleepUntil = _datetimeProvider.UtcNow.Add(_options.ErrorRetryInterval);
-                    wfResult.Errors.Add(new ExecutionError
-                    {
-                        WorkflowId = workflow.Id,
-                        ExecutionPointerId = pointer.Id,
-                        ErrorTime = _datetimeProvider.UtcNow,
-                        Message = $"Unable to construct step body {step.BodyType}"
-                    });
+                    WorkflowId = workflow.Id,
+                    ExecutionPointerId = pointer.Id,
+                    ErrorTime = _datetimeProvider.UtcNow,
+                    Message = $"Unable to construct step body {step.BodyType}"
+                });
+                return;
+            }
+
+            foreach (var input in step.Inputs)
+                input.AssignInput(workflow.Data, body, context);
+
+            switch (step.BeforeExecute(wfResult, context, pointer, body))
+            {
+                case ExecutionPipelineDirective.Defer:
                     return;
-                }
+                case ExecutionPipelineDirective.EndWorkflow:
+                    workflow.Status = WorkflowStatus.Complete;
+                    workflow.CompleteTime = _datetimeProvider.UtcNow;
+                    return;
+            }
 
-                foreach (var input in step.Inputs)
-                    input.AssignInput(workflow.Data, body, context);
+            var result = await stepExecutor.ExecuteStep(context, body);
 
-                switch (step.BeforeExecute(wfResult, context, pointer, body))
-                {
-                    case ExecutionPipelineDirective.Defer:
-                        return;
-                    case ExecutionPipelineDirective.EndWorkflow:
-                        workflow.Status = WorkflowStatus.Complete;
-                        workflow.CompleteTime = _datetimeProvider.UtcNow;
-                        return;
-                }
+            if (result.Proceed)
+            {
+                foreach (var output in step.Outputs)
+                    output.AssignOutput(workflow.Data, body, context);
+            }
 
-                var result = await stepExecutor.ExecuteStep(context, body);
+            _executionResultProcessor.ProcessExecutionResult(workflow, def, pointer, step, result, wfResult);
+            step.AfterExecute(wfResult, context, result, pointer);
 
-                if (result.Proceed)
-                {
-                    foreach (var output in step.Outputs)
-                        output.AssignOutput(workflow.Data, body, context);
-                }
-
-                _executionResultProcessor.ProcessExecutionResult(workflow, def, pointer, step, result, wfResult);
-                step.AfterExecute(wfResult, context, result, pointer);
+            if (shouldDisposeScope)
+            {
+                scope.Dispose();
             }
         }
 

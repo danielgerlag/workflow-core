@@ -30,6 +30,9 @@ namespace WorkflowCore.Testing
             PersistenceProvider = serviceProvider.GetService<IPersistenceProvider>();
             Host = serviceProvider.GetService<IWorkflowHost>();
             Host.RegisterWorkflow<TWorkflow, TData>();
+
+            ConfigureWorkflowHost(Host);
+
             Host.OnStepError += Host_OnStepError;
             Host.Start();
         }
@@ -47,6 +50,10 @@ namespace WorkflowCore.Testing
         protected virtual void ConfigureServices(IServiceCollection services)
         {
             services.AddWorkflow(options => options.UsePollInterval(TimeSpan.FromSeconds(3)));
+        }
+
+        protected virtual void ConfigureWorkflowHost(IWorkflowHost host)
+        {
         }
 
         public string StartWorkflow(TData data)

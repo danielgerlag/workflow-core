@@ -37,12 +37,12 @@ namespace WorkflowCore.Services
             _dateTimeProvider = dateTimeProvider;
         }
 
-        public Task<string> StartWorkflow(string workflowId, object data = null, string reference=null)
+        public Task<string> StartWorkflow(string workflowId, object data = null, string reference = null)
         {
             return StartWorkflow(workflowId, null, data, reference);
         }
 
-        public Task<string> StartWorkflow(string workflowId, int? version, object data = null, string reference=null)
+        public Task<string> StartWorkflow(string workflowId, int? version, object data = null, string reference = null)
         {
             return StartWorkflow<object>(workflowId, version, data, reference);
         }
@@ -53,10 +53,37 @@ namespace WorkflowCore.Services
             return StartWorkflow(workflowId, null, data, reference);
         }
 
-        public async Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference=null)
+        public Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference = null)
             where TData : class, new()
         {
+            return StartWorkflowCore(workflowId, version, data, reference);
+        }
 
+        public Task<string> StartWorkflowWithScope(IServiceScope scope, string workflowId, object data = null, string reference = null)
+        {
+            return StartWorkflowWithScope(scope, workflowId, null, data, reference);
+        }
+
+        public Task<string> StartWorkflowWithScope(IServiceScope scope, string workflowId, int? version, object data = null, string reference = null)
+        {
+            return StartWorkflowWithScope<object>(scope, workflowId, version, data, reference);
+        }
+
+        public Task<string> StartWorkflowWithScope<TData>(IServiceScope scope, string workflowId, TData data = null, string reference = null)
+            where TData : class, new()
+        {
+            return StartWorkflowWithScope(scope, workflowId, null, data, reference);
+        }
+
+        public Task<string> StartWorkflowWithScope<TData>(IServiceScope scope, string workflowId, int? version, TData data = null, string reference = null)
+            where TData : class, new()
+        {
+            return StartWorkflowCore(workflowId, version, data, reference, scope);
+        }
+
+        private async Task<string> StartWorkflowCore<TData>(string workflowId, int? version, TData data, string reference, IServiceScope workflowScope = null)
+            where TData : class, new()
+        {
             var def = _registry.GetDefinition(workflowId, version);
             if (def == null)
             {
@@ -72,7 +99,8 @@ namespace WorkflowCore.Services
                 NextExecution = 0,
                 CreateTime = _dateTimeProvider.UtcNow,
                 Status = WorkflowStatus.Runnable,
-                Reference = reference
+                Reference = reference,
+                CurrentServiceScope = workflowScope
             };
 
             if ((def.DataType != null) && (data == null))
