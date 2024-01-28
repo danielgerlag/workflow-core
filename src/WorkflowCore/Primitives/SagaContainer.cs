@@ -1,9 +1,16 @@
-﻿using WorkflowCore.Interface;
+﻿#if NET8_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
+using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
 namespace WorkflowCore.Primitives
 {
-    public class SagaContainer<TStepBody> : WorkflowStep<TStepBody>
+    public class SagaContainer<
+#if NET8_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+        TStepBody> : WorkflowStep<TStepBody>
         where TStepBody : IStepBody
     {
         public override bool ResumeChildrenAfterCompensation => false;

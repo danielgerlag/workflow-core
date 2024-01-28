@@ -8,25 +8,18 @@ namespace WorkflowCore.Primitives
     public class Activity : StepBody
     {
         public string ActivityName { get; set; }
-        
+
         public DateTime EffectiveDate { get; set; }
 
         public object Parameters { get; set; }
-        
+
         public object Result { get; set; }
 
         public override ExecutionResult Run(IStepExecutionContext context)
         {
             if (!context.ExecutionPointer.EventPublished)
             {
-                DateTime effectiveDate = DateTime.MinValue;
-
-                if (EffectiveDate != null)
-                {
-                    effectiveDate = EffectiveDate;
-                }
-
-                return ExecutionResult.WaitForActivity(ActivityName, Parameters, effectiveDate);
+                return ExecutionResult.WaitForActivity(ActivityName, Parameters, EffectiveDate);
             }
 
             if (context.ExecutionPointer.EventData is ActivityResult)

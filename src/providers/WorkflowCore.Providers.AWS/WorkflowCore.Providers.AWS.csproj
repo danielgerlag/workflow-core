@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net6.0;net8.0</TargetFrameworks>
     <Authors>Daniel Gerlag</Authors>
     <Description>AWS providers for Workflow Core
 
@@ -14,11 +14,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.3.11" />
-    <PackageReference Include="AWSSDK.Kinesis" Version="3.7.1.32" />
-    <PackageReference Include="AWSSDK.SQS" Version="3.7.2.33" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" />
+    <PackageReference Include="AWSSDK.Kinesis" />
+    <PackageReference Include="AWSSDK.SQS" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 
   <ItemGroup>

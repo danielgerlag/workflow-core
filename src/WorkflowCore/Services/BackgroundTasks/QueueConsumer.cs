@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ConcurrentCollections;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry.Trace;
 using WorkflowCore.Interface;
@@ -14,17 +14,19 @@ namespace WorkflowCore.Services.BackgroundTasks
 {
     internal abstract class QueueConsumer : IBackgroundTask
     {
-        protected abstract QueueType Queue { get; }
-        protected virtual int MaxConcurrentItems => Math.Max(Environment.ProcessorCount, 2);
-        protected virtual bool EnableSecondPasses => false;
+        private readonly Dictionary<string, EventWaitHandle> _activeTasks;
+        // Refer to  https://github.com/dotnet/runtime/issues/39919#issuecomment-954774092
+        private readonly ConcurrentDictionary<string, byte> _secondPasses;
+        private CancellationTokenSource _cancellationTokenSource;
 
         protected readonly IQueueProvider QueueProvider;
         protected readonly ILogger Logger;
         protected readonly WorkflowOptions Options;
-        protected Task DispatchTask;        
-        private CancellationTokenSource _cancellationTokenSource;
-        private Dictionary<string, EventWaitHandle> _activeTasks;
-        private ConcurrentHashSet<string> _secondPasses;
+        protected Task DispatchTask;
+
+        protected abstract QueueType Queue { get; }
+        protected virtual int MaxConcurrentItems => Math.Max(Environment.ProcessorCount, 2);
+        protected virtual bool EnableSecondPasses => false;
 
         protected QueueConsumer(IQueueProvider queueProvider, ILoggerFactory loggerFactory, WorkflowOptions options)
         {
@@ -33,7 +35,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             Logger = loggerFactory.CreateLogger(GetType());
 
             _activeTasks = new Dictionary<string, EventWaitHandle>();
-            _secondPasses = new ConcurrentHashSet<string>();
+            _secondPasses = new ConcurrentDictionary<string, byte>();
         }
 
         protected abstract Task ProcessItem(string itemId, CancellationToken cancellationToken);
@@ -62,7 +64,7 @@ namespace WorkflowCore.Services.BackgroundTasks
 
         private async Task Execute()
         {
-            var cancelToken = _cancellationTokenSource.Token;            
+            var cancelToken = _cancellationTokenSource.Token;
 
             while (!cancelToken.IsCancellationRequested)
             {
@@ -100,14 +102,14 @@ namespace WorkflowCore.Services.BackgroundTasks
                     }
                     if (hasTask)
                     {
-                        _secondPasses.Add(item);
+                        _secondPasses.TryAdd(item, 0);
                         if (!EnableSecondPasses)
                             await QueueProvider.QueueWork(item, Queue);
                         activity?.Dispose();
                         continue;
                     }
 
-                    _secondPasses.TryRemove(item);
+                    _secondPasses.TryRemove(item, out _);
 
                     var waitHandle = new ManualResetEvent(false);
                     lock (_activeTasks)
@@ -145,9 +147,9 @@ namespace WorkflowCore.Services.BackgroundTasks
             try
             {
                 await ProcessItem(itemId, _cancellationTokenSource.Token);
-                while (EnableSecondPasses && _secondPasses.Contains(itemId))
+                while (EnableSecondPasses && _secondPasses.ContainsKey(itemId))
                 {
-                    _secondPasses.TryRemove(itemId);
+                    _secondPasses.TryRemove(itemId, out _);
                     await ProcessItem(itemId, _cancellationTokenSource.Token);
                 }
             }

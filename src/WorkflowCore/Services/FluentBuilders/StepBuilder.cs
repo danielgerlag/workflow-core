@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections;
+#if NET8_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
 using System.Linq.Expressions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -7,7 +10,11 @@ using WorkflowCore.Primitives;
 
 namespace WorkflowCore.Services
 {
-    public class StepBuilder<TData, TStepBody> : IStepBuilder<TData, TStepBody>, IContainerStepBuilder<TData, TStepBody, TStepBody>
+    public class StepBuilder<TData,
+#if NET8_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+        TStepBody> : IStepBuilder<TData, TStepBody>, IContainerStepBuilder<TData, TStepBody, TStepBody>
         where TStepBody : IStepBody
     {
         public IWorkflowBuilder<TData> WorkflowBuilder { get; private set; }
@@ -32,7 +39,11 @@ namespace WorkflowCore.Services
             return this;
         }
 
-        public IStepBuilder<TData, TStep> Then<TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null)
+        public IStepBuilder<TData, TStep> Then<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null)
             where TStep : IStepBody
         {
             WorkflowStep<TStep> newStep = new WorkflowStep<TStep>();
@@ -50,7 +61,11 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
-        public IStepBuilder<TData, TStep> Then<TStep>(IStepBuilder<TData, TStep> newStep)
+        public IStepBuilder<TData, TStep> Then<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            TStep>(IStepBuilder<TData, TStep> newStep)
             where TStep : IStepBody
         {
             Step.Outcomes.Add(new ValueOutcome { NextStep = newStep.Step.Id });
@@ -101,7 +116,11 @@ namespace WorkflowCore.Services
             return outcomeBuilder;
         }
 
-        public IStepBuilder<TData, TStepBody> Branch<TStep>(object outcomeValue, IStepBuilder<TData, TStep> branch) where TStep : IStepBody
+        public IStepBuilder<TData, TStepBody> Branch<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            TStep>(object outcomeValue, IStepBuilder<TData, TStep> branch) where TStep : IStepBody
         {
             if (branch.WorkflowBuilder.Steps.Count == 0)
                 return this;
@@ -118,7 +137,11 @@ namespace WorkflowCore.Services
             return this;
         }
 
-        public IStepBuilder<TData, TStepBody> Branch<TStep>(Expression<Func<TData, object, bool>> outcomeExpression, IStepBuilder<TData, TStep> branch) where TStep : IStepBody
+        public IStepBuilder<TData, TStepBody> Branch<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            TStep>(Expression<Func<TData, object, bool>> outcomeExpression, IStepBuilder<TData, TStep> branch) where TStep : IStepBody
         {
             if (branch.WorkflowBuilder.Steps.Count == 0)
                 return this;
@@ -207,7 +230,11 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
-        public IStepBuilder<TData, TStep> End<TStep>(string name) where TStep : IStepBody
+        public IStepBuilder<TData, TStep> End<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            TStep>(string name) where TStep : IStepBody
         {
             var ancestor = IterateParents(Step.Id, name);
 
@@ -495,7 +522,11 @@ namespace WorkflowCore.Services
             return this;
         }
 
-        public IStepBuilder<TData, TStepBody> CompensateWith<TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null) where TStep : IStepBody
+        public IStepBuilder<TData, TStepBody> CompensateWith<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null) where TStep : IStepBody
         {
             WorkflowStep<TStep> newStep = new WorkflowStep<TStep>();
             WorkflowBuilder.AddStep(newStep);

@@ -6,6 +6,7 @@ using Xunit;
 namespace WorkflowCore.Tests.PostgreSQL.Scenarios
 {
     [Collection("Postgres collection")]
+    [Obsolete]
     public class PostgresForkScenario : ForkScenario
     {        
         protected override void Configure(IServiceCollection services)

@@ -1,5 +1,7 @@
 ﻿using System;
-using System.Linq;
+#if NET8_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -80,7 +82,7 @@ namespace WorkflowCore.Services
                 if (typeof(TData) == def.DataType)
                     wf.Data = new TData();
                 else
-                    wf.Data = def.DataType.GetConstructor(new Type[0]).Invoke(new object[0]);
+                    wf.Data = def.DataType.GetConstructor(Array.Empty<Type>()).Invoke(Array.Empty<object>());
             }
 
             wf.ExecutionPointers.Add(_pointerFactory.BuildGenesisPointer(def));
@@ -226,14 +228,22 @@ namespace WorkflowCore.Services
             }
         }
 
-        public void RegisterWorkflow<TWorkflow>()
+        public void RegisterWorkflow<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+            TWorkflow>()
             where TWorkflow : IWorkflow
         {
             var wf = ActivatorUtilities.CreateInstance<TWorkflow>(_serviceProvider);
             _registry.RegisterWorkflow(wf);
         }
 
-        public void RegisterWorkflow<TWorkflow, TData>()
+        public void RegisterWorkflow<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+            TWorkflow, TData>()
             where TWorkflow : IWorkflow<TData>
             where TData : new()
         {

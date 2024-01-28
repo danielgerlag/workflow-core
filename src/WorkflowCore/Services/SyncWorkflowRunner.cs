@@ -64,7 +64,7 @@ namespace WorkflowCore.Services
                 if (typeof(TData) == def.DataType)
                     wf.Data = new TData();
                 else
-                    wf.Data = def.DataType.GetConstructor(new Type[0]).Invoke(new object[0]);
+                    wf.Data = def.DataType.GetConstructor(Array.Empty<Type>()).Invoke(Array.Empty<object>());
             }
 
             wf.ExecutionPointers.Add(_pointerFactory.BuildGenesisPointer(def));

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,11 @@ namespace WorkflowCore.Services
 
         public int LastStep => Steps.Max(x => x.Id);
 
-        public IWorkflowBuilder<T> UseData<T>()
+        public IWorkflowBuilder<T> UseData<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            T>()
         {
             IWorkflowBuilder<T> result = new WorkflowBuilder<T>(Steps);
             return result;
@@ -119,12 +124,14 @@ namespace WorkflowCore.Services
 
             Branches.Add(branch);
         }
-
     }
 
-    public class WorkflowBuilder<TData> : WorkflowBuilder, IWorkflowBuilder<TData>
+    public class WorkflowBuilder<
+#if NET8_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+        TData> : WorkflowBuilder, IWorkflowBuilder<TData>
     {
-
         public override WorkflowDefinition Build(string id, int version)
         {
             var result = base.Build(id, version);
@@ -137,7 +144,11 @@ namespace WorkflowCore.Services
             this.Steps.AddRange(steps);
         }
 
-        public IStepBuilder<TData, TStep> StartWith<TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null)
+        public IStepBuilder<TData, TStep> StartWith<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null)
             where TStep : IStepBody
         {
             WorkflowStep<TStep> step = new WorkflowStep<TStep>();
@@ -189,12 +200,20 @@ namespace WorkflowCore.Services
             return result;
         }
 
-        public IStepBuilder<TData, TStep> Then<TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null) where TStep : IStepBody
+        public IStepBuilder<TData, TStep> Then<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null) where TStep : IStepBody
         {
             return Start().Then(stepSetup);
         }
 
-        public IStepBuilder<TData, TStep> Then<TStep>(IStepBuilder<TData, TStep> newStep) where TStep : IStepBody
+        public IStepBuilder<TData, TStep> Then<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            TStep>(IStepBuilder<TData, TStep> newStep) where TStep : IStepBody
         {
             return Start().Then(newStep);
         }
@@ -209,13 +228,17 @@ namespace WorkflowCore.Services
             return Start().Then(body);
         }
 
-        public IStepBuilder<TData, WaitFor> WaitFor(string eventName, Expression<Func<TData, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null,
+        public IStepBuilder<TData, WaitFor> WaitFor(
+            string eventName, Expression<Func<TData, string>> eventKey,
+            Expression<Func<TData, DateTime>> effectiveDate = null,
             Expression<Func<TData, bool>> cancelCondition = null)
         {
             return Start().WaitFor(eventName, eventKey, effectiveDate, cancelCondition);
         }
 
-        public IStepBuilder<TData, WaitFor> WaitFor(string eventName, Expression<Func<TData, IStepExecutionContext, string>> eventKey, Expression<Func<TData, DateTime>> effectiveDate = null,
+        public IStepBuilder<TData, WaitFor> WaitFor(
+            string eventName, Expression<Func<TData, IStepExecutionContext, string>> eventKey,
+            Expression<Func<TData, DateTime>> effectiveDate = null,
             Expression<Func<TData, bool>> cancelCondition = null)
         {
             return Start().WaitFor(eventName, eventKey, effectiveDate, cancelCondition);
@@ -236,12 +259,16 @@ namespace WorkflowCore.Services
             return Start().ForEach(collection);
         }
 
-        public IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IEnumerable>> collection, Expression<Func<TData, bool>> runParallel)
+        public IContainerStepBuilder<TData, Foreach, Foreach> ForEach(
+            Expression<Func<TData, IEnumerable>> collection,
+            Expression<Func<TData, bool>> runParallel)
         {
             return Start().ForEach(collection, runParallel);
         }
 
-        public IContainerStepBuilder<TData, Foreach, Foreach> ForEach(Expression<Func<TData, IStepExecutionContext, IEnumerable>> collection, Expression<Func<TData, bool>> runParallel)
+        public IContainerStepBuilder<TData, Foreach, Foreach> ForEach(
+            Expression<Func<TData, IStepExecutionContext, IEnumerable>> collection,
+            Expression<Func<TData, bool>> runParallel)
         {
             return Start().ForEach(collection, runParallel);
         }
@@ -286,17 +313,25 @@ namespace WorkflowCore.Services
             return Start().Schedule(time);
         }
 
-        public IContainerStepBuilder<TData, Recur, InlineStepBody> Recur(Expression<Func<TData, TimeSpan>> interval, Expression<Func<TData, bool>> until)
+        public IContainerStepBuilder<TData, Recur, InlineStepBody> Recur(
+            Expression<Func<TData, TimeSpan>> interval,
+            Expression<Func<TData, bool>> until)
         {
             return Start().Recur(interval, until);
         }
 
-        public IStepBuilder<TData, Activity> Activity(string activityName, Expression<Func<TData, object>> parameters = null, Expression<Func<TData, DateTime>> effectiveDate = null,
+        public IStepBuilder<TData, Activity> Activity(
+            string activityName, Expression<Func<TData, object>> parameters = null,
+            Expression<Func<TData, DateTime>> effectiveDate = null,
             Expression<Func<TData, bool>> cancelCondition = null)
         {
             return Start().Activity(activityName, parameters, effectiveDate, cancelCondition);
         }
-        public IStepBuilder<TData, Activity> Activity(Expression<Func<TData, IStepExecutionContext, string>> activityName, Expression<Func<TData, object>> parameters = null, Expression<Func<TData, DateTime>> effectiveDate = null, Expression<Func<TData, bool>> cancelCondition = null)
+        public IStepBuilder<TData, Activity> Activity(
+            Expression<Func<TData, IStepExecutionContext, string>> activityName,
+            Expression<Func<TData, object>> parameters = null,
+            Expression<Func<TData, DateTime>> effectiveDate = null,
+            Expression<Func<TData, bool>> cancelCondition = null)
         {
             return Start().Activity(activityName, parameters, effectiveDate, cancelCondition);
         }

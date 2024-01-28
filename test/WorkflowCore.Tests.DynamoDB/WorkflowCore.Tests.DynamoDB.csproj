@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.3.11" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" />
   </ItemGroup>
 
   <ItemGroup>

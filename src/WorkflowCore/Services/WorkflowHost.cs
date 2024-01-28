@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+#if NET8_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -135,13 +137,21 @@ namespace WorkflowCore.Services
             await _lifeCycleEventHub.Stop();
         }
 
-        public void RegisterWorkflow<TWorkflow>()
+        public void RegisterWorkflow<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+            TWorkflow>()
             where TWorkflow : IWorkflow
         {
             _workflowController.RegisterWorkflow<TWorkflow>();
         }
 
-        public void RegisterWorkflow<TWorkflow, TData>()
+        public void RegisterWorkflow<
+#if NET8_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+            TWorkflow, TData>()
             where TWorkflow : IWorkflow<TData>
             where TData : new()
         {

@@ -1,14 +1,20 @@
 ﻿using System;
+#if NET8_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
 using System.Linq.Expressions;
 using WorkflowCore.Models;
 
 namespace WorkflowCore.Interface
 {
-    public interface IStepBuilder<TData, TStepBody> : IWorkflowModifier<TData, TStepBody>
+    public interface IStepBuilder<TData,
+#if NET8_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+        TStepBody> : IWorkflowModifier<TData, TStepBody>
         where TStepBody : IStepBody
     {
-
-        IWorkflowBuilder<TData> WorkflowBuilder { get; }        
+        IWorkflowBuilder<TData> WorkflowBuilder { get; }
 
         WorkflowStep<TStepBody> Step { get; set; }
 
@@ -46,14 +52,22 @@ namespace WorkflowCore.Interface
         /// </summary>
         /// <param name="outcomeValue"></param>
         /// <returns></returns>
-        IStepBuilder<TData, TStepBody> Branch<TStep>(object outcomeValue, IStepBuilder<TData, TStep> branch) where TStep : IStepBody;
+        IStepBuilder<TData, TStepBody> Branch<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            TStep>(object outcomeValue, IStepBuilder<TData, TStep> branch) where TStep : IStepBody;
 
         /// <summary>
         /// Configure an outcome branch for this step, then wire it to another step
         /// </summary>
         /// <param name="outcomeExpression"></param>
         /// <returns></returns>
-        IStepBuilder<TData, TStepBody> Branch<TStep>(Expression<Func<TData, object, bool>> outcomeExpression, IStepBuilder<TData, TStep> branch) where TStep : IStepBody;
+        IStepBuilder<TData, TStepBody> Branch<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            TStep>(Expression<Func<TData, object, bool>> outcomeExpression, IStepBuilder<TData, TStep> branch) where TStep : IStepBody;
 
         /// <summary>
         /// Map properties on the step to properties on the workflow data object before the step executes
@@ -97,7 +111,11 @@ namespace WorkflowCore.Interface
         /// <returns></returns>
         IStepBuilder<TData, TStepBody> Output(Action<TStepBody, TData> action);
 
-        IStepBuilder<TData, TStep> End<TStep>(string name) where TStep : IStepBody;
+        IStepBuilder<TData, TStep> End<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            TStep>(string name) where TStep : IStepBody;
 
         /// <summary>
         /// Configure the behavior when this step throws an unhandled exception
@@ -119,7 +137,11 @@ namespace WorkflowCore.Interface
         /// <typeparam name="TStep">The type of the step to execute</typeparam>
         /// <param name="stepSetup">Configure additional parameters for this step</param>
         /// <returns></returns>
-        IStepBuilder<TData, TStepBody> CompensateWith<TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null) where TStep : IStepBody;
+        IStepBuilder<TData, TStepBody> CompensateWith<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null) where TStep : IStepBody;
 
         /// <summary>
         /// Undo step if unhandled exception is thrown by this step

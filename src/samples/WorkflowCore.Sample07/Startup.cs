@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 
@@ -10,7 +11,6 @@ namespace WorkflowCore.Sample07
 {
     public class Startup
     {
-        
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddLogging();
@@ -18,15 +18,14 @@ namespace WorkflowCore.Sample07
             services.AddMvc();
         }
 
-        
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             //loggerFactory.AddConsole();
 
             //start the workflow host
             var host = app.ApplicationServices.GetService<IWorkflowHost>();
             host.RegisterWorkflow<Sample03.PassingDataWorkflow, Sample03.MyDataClass>();
-            host.RegisterWorkflow<Sample04.EventSampleWorkflow, Sample04.MyDataClass>();            
+            host.RegisterWorkflow<Sample04.EventSampleWorkflow, Sample04.MyDataClass>();
             host.Start();
 
             if (env.IsDevelopment())
@@ -34,7 +33,7 @@ namespace WorkflowCore.Sample07
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseMvc(); 
+            app.UseMvc();
         }
     }
 }

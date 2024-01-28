@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using WorkflowCore.Interface;
 using WorkflowCore.Services;
@@ -93,7 +94,11 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <typeparam name="TMiddleware">The type of middleware.
         /// It must implement <see cref="IWorkflowStepMiddleware"/>.</typeparam>
         /// <returns>The services collection for chaining.</returns>
-        public static IServiceCollection AddWorkflowStepMiddleware<TMiddleware>(
+        public static IServiceCollection AddWorkflowStepMiddleware<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+            TMiddleware>(
             this IServiceCollection services,
             Func<IServiceProvider, TMiddleware> factory = null)
             where TMiddleware : class, IWorkflowStepMiddleware =>
@@ -111,7 +116,11 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <typeparam name="TMiddleware">The type of middleware.
         /// It must implement <see cref="IWorkflowMiddleware"/>.</typeparam>
         /// <returns>The services collection for chaining.</returns>
-        public static IServiceCollection AddWorkflowMiddleware<TMiddleware>(
+        public static IServiceCollection AddWorkflowMiddleware<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+            TMiddleware>(
             this IServiceCollection services,
             Func<IServiceProvider, TMiddleware> factory = null)
             where TMiddleware : class, IWorkflowMiddleware =>
@@ -120,4 +129,3 @@ namespace Microsoft.Extensions.DependencyInjection
                     : services.AddTransient<IWorkflowMiddleware, TMiddleware>(factory);
     }
 }
-

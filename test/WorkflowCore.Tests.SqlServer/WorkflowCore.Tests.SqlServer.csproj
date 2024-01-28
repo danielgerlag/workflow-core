@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="Squadron.SqlServer" Version="0.17.0" />
+    <PackageReference Include="Squadron.SqlServer" />
   </ItemGroup>
 
   <ItemGroup>

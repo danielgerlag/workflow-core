@@ -1,4 +1,7 @@
 ﻿using System;
+#if NET8_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
 using System.Collections.Generic;
 using WorkflowCore.Models;
 using WorkflowCore.Primitives;
@@ -11,7 +14,11 @@ namespace WorkflowCore.Interface
 
         int LastStep { get; }
 
-        IWorkflowBuilder<T> UseData<T>();
+        IWorkflowBuilder<T> UseData<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            T>();
 
         WorkflowDefinition Build(string id, int version);
 
@@ -22,7 +29,11 @@ namespace WorkflowCore.Interface
 
     public interface IWorkflowBuilder<TData> : IWorkflowBuilder, IWorkflowModifier<TData, InlineStepBody>
     {
-        IStepBuilder<TData, TStep> StartWith<TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null) where TStep : IStepBody;
+        IStepBuilder<TData, TStep> StartWith<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null) where TStep : IStepBody;
 
         IStepBuilder<TData, InlineStepBody> StartWith(Func<IStepExecutionContext, ExecutionResult> body);
 

@@ -11,6 +11,7 @@ namespace WorkflowCore.Sample02
 
         public int Version => 1;
 
+        [Obsolete]
         public void Build(IWorkflowBuilder<object> builder)
         {
             builder

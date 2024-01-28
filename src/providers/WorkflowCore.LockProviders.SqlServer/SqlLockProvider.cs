@@ -80,7 +80,7 @@ namespace WorkflowCore.LockProviders.SqlServer
                     catch (Exception ex)
                     {
                         connection.Close();
-                        throw ex;
+                        throw;
                     }
                 }
                 finally

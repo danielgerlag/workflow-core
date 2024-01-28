@@ -1,10 +1,21 @@
 ﻿using System;
+#if NET8_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
 namespace WorkflowCore.Services
 {
-    public class ReturnStepBuilder<TData, TStepBody, TParentStep> : IContainerStepBuilder<TData, TStepBody, TParentStep>
+    public class ReturnStepBuilder<TData,
+#if NET8_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+        TStepBody,
+#if NET8_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+        TParentStep> : IContainerStepBuilder<TData, TStepBody, TParentStep>
         where TStepBody : IStepBody
         where TParentStep : IStepBody
     {
@@ -20,7 +31,7 @@ namespace WorkflowCore.Services
             Step = step;
             _referenceBuilder = referenceBuilder;
         }
-        
+
         public IStepBuilder<TData, TParentStep> Do(Action<IWorkflowBuilder<TData>> builder)
         {
             builder.Invoke(WorkflowBuilder);

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-        <PackageReference Include="coverlet.collector" Version="1.2.0" />
+        <PackageReference Include="coverlet.collector" />
     </ItemGroup>
 
     <ItemGroup>

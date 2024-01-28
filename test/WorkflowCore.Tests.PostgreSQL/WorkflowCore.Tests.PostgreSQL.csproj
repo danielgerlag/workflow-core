@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Squadron.PostgreSql" Version="0.17.0" />
+    <PackageReference Include="Squadron.PostgreSql" />
   </ItemGroup>
 
 </Project>

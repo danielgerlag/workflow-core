@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+#if NET8_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
@@ -10,9 +13,9 @@ namespace WorkflowCore.Services
 {
     public class WorkflowRegistry : IWorkflowRegistry
     {
-        private readonly IServiceProvider _serviceProvider;        
+        private readonly IServiceProvider _serviceProvider;
         private readonly ConcurrentDictionary<string, WorkflowDefinition> _registry = new ConcurrentDictionary<string, WorkflowDefinition>();
-        private readonly ConcurrentDictionary<string, WorkflowDefinition> _lastestVersion = new ConcurrentDictionary<string, WorkflowDefinition>();
+        private readonly ConcurrentDictionary<string, WorkflowDefinition> _latestVersion = new ConcurrentDictionary<string, WorkflowDefinition>();
 
         public WorkflowRegistry(IServiceProvider serviceProvider)
         {
@@ -29,9 +32,9 @@ namespace WorkflowCore.Services
             }
             else
             {
-                if (!_lastestVersion.ContainsKey(workflowId))
+                if (!_latestVersion.ContainsKey(workflowId))
                     return default;
-                return _lastestVersion[workflowId];
+                return _latestVersion[workflowId];
             }
         }
 
@@ -43,13 +46,13 @@ namespace WorkflowCore.Services
             lock (_registry)
             {
                 _registry.TryRemove($"{workflowId}-{version}", out var _);
-                if (_lastestVersion[workflowId].Version == version)
+                if (_latestVersion[workflowId].Version == version)
                 {
-                    _lastestVersion.TryRemove(workflowId, out var _);
+                    _latestVersion.TryRemove(workflowId, out var _);
 
                     var latest = _registry.Values.Where(x => x.Id == workflowId).OrderByDescending(x => x.Version).FirstOrDefault();
                     if (latest != default)
-                        _lastestVersion[workflowId] = latest;
+                        _latestVersion[workflowId] = latest;
                 }
             }
         }
@@ -72,14 +75,14 @@ namespace WorkflowCore.Services
             lock (_registry)
             {
                 _registry[$"{definition.Id}-{definition.Version}"] = definition;
-                if (!_lastestVersion.ContainsKey(definition.Id))
+                if (!_latestVersion.ContainsKey(definition.Id))
                 {
-                    _lastestVersion[definition.Id] = definition;
+                    _latestVersion[definition.Id] = definition;
                     return;
                 }
 
-                if (_lastestVersion[definition.Id].Version <= definition.Version)
-                    _lastestVersion[definition.Id] = definition;
+                if (_latestVersion[definition.Id].Version <= definition.Version)
+                    _latestVersion[definition.Id] = definition;
             }
         }
 

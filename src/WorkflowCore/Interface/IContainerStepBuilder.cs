@@ -1,8 +1,19 @@
 ﻿using System;
+#if NET8_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
 
 namespace WorkflowCore.Interface
 {
-    public interface IContainerStepBuilder<TData, TStepBody, TReturnStep>
+    public interface IContainerStepBuilder<TData,
+#if NET8_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+        TStepBody,
+#if NET8_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+        TReturnStep>
         where TStepBody : IStepBody
         where TReturnStep : IStepBody
     {

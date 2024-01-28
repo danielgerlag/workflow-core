@@ -27,8 +27,8 @@ namespace WorkflowCore.WebAPI.Controllers
             _logger = loggerFactory.CreateLogger<WorkflowsController>();
         }
 
-
         [HttpGet]
+        [Obsolete]
         public async Task<IActionResult> Get(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take)
         {
             var result = await _workflowStore.GetWorkflowInstances(status, type, createdFrom, createdTo, skip, take);

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyTitle>Workflow Core</AssemblyTitle>
     <Authors>Daniel Gerlag</Authors>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.1;netstandard2.1;net6.0;net8.0</TargetFrameworks>
     <AssemblyName>WorkflowCore</AssemblyName>
     <PackageId>WorkflowCore</PackageId>
     <PackageTags>workflow;.NET;Core;state machine</PackageTags>
@@ -13,28 +13,29 @@
     <Description>Workflow Core is a light weight workflow engine targeting .NET Standard.</Description>
   </PropertyGroup>
 
+  <!-- if net8.0, enable trimming -->
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
+    <IsAotCompatible>true</IsAotCompatible>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="ConcurrentHashSet" Version="1.1.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="2.2.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
-    <PackageReference Include="System.Threading.ThreadPool" Version="4.3.0" />
-    <PackageReference Include="System.Reflection" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.7.0" />
-    <PackageReference Include="System.Threading.Thread" Version="4.3.0" />
-    <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
-    <PackageReference Include="OpenTelemetry.Api" Version="1.1.0" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
-	<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-		<_Parameter1>WorkflowCore.IntegrationTests</_Parameter1>
-	</AssemblyAttribute>
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.ObjectPool" />
+    <PackageReference Include="System.Text.Json" />
+    <PackageReference Include="OpenTelemetry.Api" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\DefinitionStorage\" />
+    <InternalsVisibleTo Include="WorkflowCore.IntegrationTests"/>
   </ItemGroup>
 
 </Project>
