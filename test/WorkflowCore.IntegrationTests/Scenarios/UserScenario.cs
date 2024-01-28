@@ -5,6 +5,7 @@ using Xunit;
 using FluentAssertions;
 using System.Linq;
 using WorkflowCore.Testing;
+using System.Threading.Tasks;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
@@ -37,7 +38,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         }
 
         [Fact]
-        public void Scenario()
+        public async Task Scenario()
         {
             var workflowId = StartWorkflow(null);
             var counter = 0;
@@ -50,11 +51,11 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
             var openItems1 = Host.GetOpenUserActions(workflowId).ToList();
 
-            Host.PublishUserAction(openItems1.First().Key, "user1", "yes").Wait();
+            await Host.PublishUserAction(openItems1.First().Key, "user1", "yes");
 
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
-            var openItems2 = Host.GetOpenUserActions(workflowId);        
+            var openItems2 = Host.GetOpenUserActions(workflowId);
 
             ApproveStepTicker.Should().Be(1);
             DisapproveStepTicker.Should().Be(0);

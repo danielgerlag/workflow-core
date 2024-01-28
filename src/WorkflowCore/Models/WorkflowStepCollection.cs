@@ -8,7 +8,7 @@ namespace WorkflowCore.Models
     public class WorkflowStepCollection : ICollection<WorkflowStep>
     {
         private readonly Dictionary<int, WorkflowStep> _dictionary = new Dictionary<int, WorkflowStep>();
-        
+
         public WorkflowStepCollection()
         {
         }
@@ -38,12 +38,9 @@ namespace WorkflowCore.Models
 
         public WorkflowStep FindById(int id)
         {
-            if (!_dictionary.ContainsKey(id))
-                return null;
-
-            return _dictionary[id];
+            return !_dictionary.TryGetValue(id, out WorkflowStep value) ? null : value;
         }
-        
+
         public void Add(WorkflowStep item)
         {
             _dictionary.Add(item.Id, item);

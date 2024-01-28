@@ -1,7 +1,13 @@
 <Project>
-    <PropertyGroup>
-        <TargetFrameworks>net6.0;netcoreapp3.1</TargetFrameworks>
-        <LangVersion>latest</LangVersion>
-        <IsPackable>false</IsPackable>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;netcoreapp3.1</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!-- disable warnings for netcoreapp3.1 -->
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+    <NoWarn>$(NoWarn);NETSDK1138</NoWarn>
+  </PropertyGroup>
 </Project>

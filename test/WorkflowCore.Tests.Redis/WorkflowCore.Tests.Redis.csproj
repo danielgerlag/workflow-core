@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="StackExchange.Redis" Version="2.0.601" />
-    <PackageReference Include="Squadron.Redis" Version="0.17.0" />
+    <PackageReference Include="StackExchange.Redis" />
+    <PackageReference Include="Squadron.Redis" />
   </ItemGroup>
 
   <ItemGroup>

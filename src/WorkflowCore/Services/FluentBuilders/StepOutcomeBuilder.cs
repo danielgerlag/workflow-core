@@ -1,4 +1,7 @@
 ﻿using System;
+#if NET8_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Primitives;
@@ -16,7 +19,11 @@ namespace WorkflowCore.Services
             Outcome = outcome;
         }
 
-        public IStepBuilder<TData, TStep> Then<TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null)
+        public IStepBuilder<TData, TStep> Then<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            TStep>(Action<IStepBuilder<TData, TStep>> stepSetup = null)
             where TStep : IStepBody
         {
             WorkflowStep<TStep> step = new WorkflowStep<TStep>();
@@ -34,7 +41,11 @@ namespace WorkflowCore.Services
             return stepBuilder;
         }
 
-        public IStepBuilder<TData, TStep> Then<TStep>(IStepBuilder<TData, TStep> step)
+        public IStepBuilder<TData, TStep> Then<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+            TStep>(IStepBuilder<TData, TStep> step)
             where TStep : IStepBody
         {
             Outcome.NextStep = step.Step.Id;

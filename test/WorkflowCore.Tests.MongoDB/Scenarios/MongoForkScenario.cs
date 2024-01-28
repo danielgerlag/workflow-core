@@ -6,6 +6,7 @@ using Xunit;
 namespace WorkflowCore.Tests.MongoDB.Scenarios
 {
     [Collection("Mongo collection")]
+    [Obsolete]
     public class MongoForkScenario : ForkScenario
     {        
         protected override void Configure(IServiceCollection services)

@@ -1,5 +1,9 @@
 ﻿using System;
+#if NET8_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WorkflowCore.Interface
 {
@@ -11,8 +15,16 @@ namespace WorkflowCore.Interface
         Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference=null) where TData : class, new();
 
         Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null);
-        void RegisterWorkflow<TWorkflow>() where TWorkflow : IWorkflow;
-        void RegisterWorkflow<TWorkflow, TData>() where TWorkflow : IWorkflow<TData> where TData : new();
+        void RegisterWorkflow<
+#if NET8_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+            TWorkflow>() where TWorkflow : IWorkflow;
+        void RegisterWorkflow<
+#if NET8_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+            TWorkflow, TData>() where TWorkflow : IWorkflow<TData> where TData : new();
 
         /// <summary>
         /// Suspend the execution of a given workflow until .ResumeWorkflow is called
@@ -29,11 +41,10 @@ namespace WorkflowCore.Interface
         Task<bool> ResumeWorkflow(string workflowId);
 
         /// <summary>
-        /// Permanently terminate the exeuction of a given workflow
+        /// Permanently terminate the execution of a given workflow
         /// </summary>
         /// <param name="workflowId"></param>
         /// <returns></returns>
         Task<bool> TerminateWorkflow(string workflowId);
-
     }
 }

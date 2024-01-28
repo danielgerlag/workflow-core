@@ -5,6 +5,7 @@ using System.Security.Cryptography.X509Certificates;
 using WorkflowCore.Persistence.RavenDB.Services;
 using WorkflowCore.Interface;
 using WorkflowCore.Persistence.RavenDB;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -21,7 +22,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
 			options.UsePersistence(sp =>
 			{
-				return new RavendbPersistenceProvider(store);
+				var loggerFactory = sp.GetService<ILoggerFactory>();
+                return new RavendbPersistenceProvider(store, loggerFactory);
 			});
 
 			options.Services.AddTransient<IWorkflowPurger>(sp =>

@@ -1,4 +1,5 @@
-﻿using Raven.Client.Documents;
+﻿using Microsoft.Extensions.Logging;
+using Raven.Client.Documents;
 using Raven.Client.Documents.Linq;
 using Raven.Client.Documents.Operations;
 using Raven.Client.Documents.Session;
@@ -16,15 +17,18 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 	public class RavendbPersistenceProvider : IPersistenceProvider
 	{
 		internal const string WorkflowCollectionName = "wfc.workflows";
+		private static bool indexesCreated = false;
+
 		private readonly IDocumentStore _database;
-		static bool indexesCreated = false;
+		private readonly ILogger _logger;
 
         public bool SupportsScheduledCommands => false;
 
-        public RavendbPersistenceProvider(IDocumentStore database)
+        public RavendbPersistenceProvider(IDocumentStore database, ILoggerFactory loggerFactory)
 		{
 			_database = database;
-			CreateIndexes(this);
+            _logger = loggerFactory.CreateLogger<RavendbPersistenceProvider>();
+            CreateIndexes(this);
 		}
 
 		static void CreateIndexes(RavendbPersistenceProvider instance)
@@ -216,7 +220,8 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 			}
 			catch (Exception e)
 			{
-				return false;
+				_logger.LogError(e, "Failed to set subscription token");
+                return false;
 			}
 		}
 
@@ -240,7 +245,8 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 			}
 			catch (Exception e)
 			{
-				throw e;
+                _logger.LogError(e, "Failed to clear subscription token");
+                throw;
 			}
 		}
 

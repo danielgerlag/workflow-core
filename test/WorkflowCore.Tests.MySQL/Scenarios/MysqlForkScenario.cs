@@ -6,6 +6,7 @@ using Xunit;
 namespace WorkflowCore.Tests.MySQL.Scenarios
 {
     [Collection("Mysql collection")]
+    [Obsolete]
     public class MysqlForkScenario : ForkScenario
     {        
         protected override void Configure(IServiceCollection services)

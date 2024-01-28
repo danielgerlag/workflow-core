@@ -99,14 +99,14 @@ namespace WorkflowCore.Services
         {
             lock (_instances)
             {
-                var result = _instances.AsQueryable();
+                IEnumerable<WorkflowInstance> result = _instances;
 
                 if (status.HasValue)
                 {
                     result = result.Where(x => x.Status == status.Value);
                 }
 
-                if (!String.IsNullOrEmpty(type))
+                if (!string.IsNullOrEmpty(type))
                 {
                     result = result.Where(x => x.WorkflowDefinitionId == type);
                 }

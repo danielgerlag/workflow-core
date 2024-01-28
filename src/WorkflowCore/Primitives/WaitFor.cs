@@ -18,14 +18,7 @@ namespace WorkflowCore.Primitives
         {
             if (!context.ExecutionPointer.EventPublished)
             {
-                DateTime effectiveDate = DateTime.MinValue;
-
-                if (EffectiveDate != null)
-                {
-                    effectiveDate = EffectiveDate;
-                }
-
-                return ExecutionResult.WaitForEvent(EventName, EventKey, effectiveDate);
+                return ExecutionResult.WaitForEvent(EventName, EventKey, EffectiveDate);
             }
 
             EventData = context.ExecutionPointer.EventData;

@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="Squadron.MySql" Version="0.18.0-preview.7" />
+    <PackageReference Include="MySqlConnector" />
+    <PackageReference Include="Squadron.MySql" />
   </ItemGroup>
 
   <ItemGroup>

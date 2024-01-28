@@ -1,11 +1,18 @@
 ﻿using System;
+#if NET8_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Primitives;
 
 namespace WorkflowCore.Services
 {
-    public class ParallelStepBuilder<TData, TStepBody> : IParallelStepBuilder<TData, TStepBody>
+    public class ParallelStepBuilder<TData,
+#if NET8_0_OR_GREATER
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)]
+#endif
+        TStepBody> : IParallelStepBuilder<TData, TStepBody>
         where TStepBody : IStepBody
     {
         private readonly IStepBuilder<TData, Sequence> _referenceBuilder;
@@ -14,7 +21,7 @@ namespace WorkflowCore.Services
         public IWorkflowBuilder<TData> WorkflowBuilder { get; private set; }
 
         public WorkflowStep<TStepBody> Step { get; set; }
-        
+
         public ParallelStepBuilder(IWorkflowBuilder<TData> workflowBuilder, IStepBuilder<TData, TStepBody> stepBuilder, IStepBuilder<TData, Sequence> referenceBuilder)
         {
             WorkflowBuilder = workflowBuilder;
@@ -22,15 +29,15 @@ namespace WorkflowCore.Services
             _stepBuilder = stepBuilder;
             _referenceBuilder = referenceBuilder;
         }
-        
+
         public IParallelStepBuilder<TData, TStepBody> Do(Action<IWorkflowBuilder<TData>> builder)
         {
             var lastStep = WorkflowBuilder.LastStep;
             builder.Invoke(WorkflowBuilder);
-            
+
             if (lastStep == WorkflowBuilder.LastStep)
                 throw new NotSupportedException("Empty Do block not supported");
-            
+
             Step.Children.Add(lastStep + 1); //TODO: make more elegant
 
             return this;

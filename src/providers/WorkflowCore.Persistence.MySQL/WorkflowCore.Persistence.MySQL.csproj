@@ -4,7 +4,7 @@
     <AssemblyTitle>Workflow Core MySQL Persistence Provider</AssemblyTitle>
     <VersionPrefix>1.0.0</VersionPrefix>
     <Authors>Daniel Gerlag</Authors>
-    <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net6.0;net8.0</TargetFrameworks>
     <AssemblyName>WorkflowCore.Persistence.MySQL</AssemblyName>
     <PackageId>WorkflowCore.Persistence.MySQL</PackageId>
     <PackageTags>workflow;.NET;Core;state machine;WorkflowCore;MySQL</PackageTags>
@@ -18,28 +18,12 @@
     <Description>Provides support to persist workflows running on Workflow Core to a MySQL database.</Description>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.2">
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="3.1.1" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.7">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="5.0.1" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.*">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="7.*" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" />
   </ItemGroup>
 
   <ItemGroup>

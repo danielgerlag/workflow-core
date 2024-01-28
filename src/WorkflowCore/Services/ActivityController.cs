@@ -1,16 +1,18 @@
 using System;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using WorkflowCore.Exceptions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
 namespace WorkflowCore.Services
 {
-    public class ActivityController : IActivityController
+    public partial class ActivityController : IActivityController
     {
         private readonly ISubscriptionRepository _subscriptionRepository;
         private readonly IDistributedLockProvider _lockProvider;
@@ -113,8 +115,13 @@ namespace WorkflowCore.Services
 
             public string Encode()
             {
-                var json = JsonConvert.SerializeObject(this);
+#if NET8_0_OR_GREATER
+                var raw = JsonSerializer.SerializeToUtf8Bytes(this, typeof(Token), TokenSerializeContext.Default);
+                return Convert.ToBase64String(raw);
+#else
+                var json = JsonSerializer.Serialize(this);
                 return Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+#endif
             }
 
             public static Token Create(string subscriptionId, string activityName)
@@ -130,9 +137,20 @@ namespace WorkflowCore.Services
             public static Token Decode(string encodedToken)
             {
                 var raw = Convert.FromBase64String(encodedToken);
+#if NET8_0_OR_GREATER
+                return JsonSerializer.Deserialize<Token>(raw, TokenSerializeContext.Default.Token);
+#else
                 var json = Encoding.UTF8.GetString(raw);
-                return JsonConvert.DeserializeObject<Token>(json);
+                return JsonSerializer.Deserialize<Token>(raw);
+#endif
             }
         }
+
+#if NET8_0_OR_GREATER
+        [JsonSerializable(typeof(Token))]
+        partial class TokenSerializeContext : JsonSerializerContext
+        {
+        }
+#endif
     }
 }
