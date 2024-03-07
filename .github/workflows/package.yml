@@ -1,0 +1,31 @@
+name: Deploy (CD)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: package & publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛒 Checkout code
+        uses: actions/checkout@v2
+
+      - name: 🛠 Setup dotnet core 6
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+          source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: 📦 Package library
+        run: |
+          dotnet restore ./Nuget.sln
+          dotnet build -c Release ./Nuget.sln
+          dotnet pack -c Release -o ./dist ./Nuget.sln
+
+      - name: ☁ Publish library
+        run: |
+          echo "☁ pushing packages to Github..."
+          dotnet nuget push ./dist/*.nupkg
