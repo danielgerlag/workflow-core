@@ -8,6 +8,7 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateProgramFile>false</GenerateProgramFile>
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

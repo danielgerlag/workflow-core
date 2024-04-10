@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <TargetFrameworks>net6.0</TargetFrameworks>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Squadron.MySql" Version="0.18.0-preview.7" />
   </ItemGroup>
