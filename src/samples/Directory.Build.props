@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <TargetFrameworks>net6.0;netcoreapp3.1</TargetFrameworks>
+        <TargetFrameworks>net6.0</TargetFrameworks>
         <LangVersion>latest</LangVersion>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
