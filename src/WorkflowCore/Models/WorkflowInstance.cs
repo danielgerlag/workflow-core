@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Linq;
 
 namespace WorkflowCore.Models
@@ -26,6 +27,8 @@ namespace WorkflowCore.Models
         public DateTime CreateTime { get; set; }
 
         public DateTime? CompleteTime { get; set; }
+
+        public IServiceScope CurrentServiceScope { get; set; }
 
         public bool IsBranchComplete(string parentId)
         {
