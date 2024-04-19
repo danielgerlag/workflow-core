@@ -16,7 +16,7 @@ namespace WorkflowCore.Sample09s
             host.Start();
             
             Console.WriteLine("Starting workflow...");
-            string workflowId = host.StartWorkflow("Foreach").Result;
+            string workflowId = host.StartWorkflow("ForeachSync").Result;
 
             
             Console.ReadLine();
