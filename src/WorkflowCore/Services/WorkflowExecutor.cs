@@ -221,6 +221,7 @@ namespace WorkflowCore.Services
 
             if (workflow.Status == WorkflowStatus.Complete)
             {
+                PublishWorkflowCompleted(workflow);
                 return;
             }
 
@@ -265,6 +266,11 @@ namespace WorkflowCore.Services
                 await middlewareRunner.RunPostMiddleware(workflow, def);
             }
 
+            PublishWorkflowCompleted(workflow);
+        }
+
+        private void PublishWorkflowCompleted(WorkflowInstance workflow)
+        {
             _publisher.PublishNotification(new WorkflowCompleted
             {
                 EventTimeUtc = _datetimeProvider.UtcNow,
