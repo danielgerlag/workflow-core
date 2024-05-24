@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Azure.Core;
+using Azure.Storage.Queues;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Queue;
 using WorkflowCore.Interface;
 
 namespace WorkflowCore.Providers.Azure.Services
@@ -13,41 +13,44 @@ namespace WorkflowCore.Providers.Azure.Services
     {
         private readonly ILogger _logger;
         
-        private readonly Dictionary<QueueType, CloudQueue> _queues = new Dictionary<QueueType, CloudQueue>();
+        private readonly Dictionary<QueueType, QueueClient> _queues = new Dictionary<QueueType, QueueClient>();
 
         public bool IsDequeueBlocking => false;
 
         public AzureStorageQueueProvider(string connectionString, ILoggerFactory logFactory)
         {
             _logger = logFactory.CreateLogger<AzureStorageQueueProvider>();
-            var account = CloudStorageAccount.Parse(connectionString);
-            var client = account.CreateCloudQueueClient();
+            var client = new QueueServiceClient(connectionString);
 
-            _queues[QueueType.Workflow] = client.GetQueueReference("workflowcore-workflows");
-            _queues[QueueType.Event] = client.GetQueueReference("workflowcore-events");
-            _queues[QueueType.Index] = client.GetQueueReference("workflowcore-index");
+            _queues[QueueType.Workflow] = client.GetQueueClient("workflowcore-workflows");
+            _queues[QueueType.Event] = client.GetQueueClient("workflowcore-events");
+            _queues[QueueType.Index] = client.GetQueueClient("workflowcore-index");
+        }
+
+        public AzureStorageQueueProvider(Uri queueEndpoint, TokenCredential tokenCredential, ILoggerFactory logFactory)
+        {
+            _logger = logFactory.CreateLogger<AzureStorageQueueProvider>();
+            var client = new QueueServiceClient(queueEndpoint, tokenCredential);
+
+            _queues[QueueType.Workflow] = client.GetQueueClient("workflowcore-workflows");
+            _queues[QueueType.Event] = client.GetQueueClient("workflowcore-events");
+            _queues[QueueType.Index] = client.GetQueueClient("workflowcore-index");
         }
 
         public async Task QueueWork(string id, QueueType queue)
         {
-            var msg = new CloudQueueMessage(id);
-            await _queues[queue].AddMessageAsync(msg);
+            await _queues[queue].SendMessageAsync(id);
         }
 
         public async Task<string> DequeueWork(QueueType queue, CancellationToken cancellationToken)
         {
-            CloudQueue cloudQueue = _queues[queue];
+            var msg = await _queues[queue].ReceiveMessageAsync();
 
-            if (cloudQueue == null)
-                return null;
-            
-            var msg = await cloudQueue.GetMessageAsync();
-
-            if (msg == null)
+            if (msg == null || msg.Value == null)
                 return null;
 
-            await cloudQueue.DeleteMessageAsync(msg);
-            return msg.AsString;
+            await _queues[queue].DeleteMessageAsync(msg.Value.MessageId, msg.Value.PopReceipt);
+            return msg.Value.Body.ToString();
         }
 
         public async Task Start()
