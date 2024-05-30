@@ -135,7 +135,7 @@ namespace WorkflowCore.Providers.Azure.Services
         {
             try
             {
-                await entry.Blob.GetBlobLeaseClient(entry.LeaseId).ReleaseAsync();
+                await entry.Blob.GetBlobLeaseClient(entry.LeaseId).RenewAsync();
             }
             catch (Exception ex)
             {
