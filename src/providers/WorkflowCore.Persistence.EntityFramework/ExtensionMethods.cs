@@ -9,12 +9,16 @@ namespace WorkflowCore.Persistence.EntityFramework
 {
     internal static class ExtensionMethods
     {
-        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
+        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.All,
+            ObjectCreationHandling = ObjectCreationHandling.Replace
+        };
 
         internal static PersistedWorkflow ToPersistable(this WorkflowInstance instance, PersistedWorkflow persistable = null)
         {
-            if (persistable == null)            
-                persistable = new PersistedWorkflow();                        
+            if (persistable == null)
+                persistable = new PersistedWorkflow();
 
             persistable.Data = JsonConvert.SerializeObject(instance.Data, SerializerSettings);
             persistable.Description = instance.Description;
@@ -25,19 +29,19 @@ namespace WorkflowCore.Persistence.EntityFramework
             persistable.WorkflowDefinitionId = instance.WorkflowDefinitionId;
             persistable.Status = instance.Status;
             persistable.CreateTime = instance.CreateTime;
-            persistable.CompleteTime = instance.CompleteTime;            
-            
+            persistable.CompleteTime = instance.CompleteTime;
+
             foreach (var ep in instance.ExecutionPointers)
             {
                 var persistedEP = persistable.ExecutionPointers.FindById(ep.Id);
-                
+
                 if (persistedEP == null)
                 {
                     persistedEP = new PersistedExecutionPointer();
                     persistedEP.Id = ep.Id ?? Guid.NewGuid().ToString();
                     persistable.ExecutionPointers.Add(persistedEP);
-                }                 
-                
+                }
+
                 persistedEP.StepId = ep.StepId;
                 persistedEP.Active = ep.Active;
                 persistedEP.SleepUntil = ep.SleepUntil;
@@ -83,7 +87,7 @@ namespace WorkflowCore.Persistence.EntityFramework
 
         internal static PersistedExecutionError ToPersistable(this ExecutionError instance)
         {
-            var result = new PersistedExecutionError();            
+            var result = new PersistedExecutionError();
             result.ErrorTime = instance.ErrorTime;
             result.Message = instance.Message;
             result.ExecutionPointerId = instance.ExecutionPointerId;
@@ -94,7 +98,7 @@ namespace WorkflowCore.Persistence.EntityFramework
 
         internal static PersistedSubscription ToPersistable(this EventSubscription instance)
         {
-            PersistedSubscription result = new PersistedSubscription();            
+            PersistedSubscription result = new PersistedSubscription();
             result.SubscriptionId = new Guid(instance.Id);
             result.EventKey = instance.EventKey;
             result.EventName = instance.EventName;
@@ -106,7 +110,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.ExternalToken = instance.ExternalToken;
             result.ExternalTokenExpiry = instance.ExternalTokenExpiry;
             result.ExternalWorkerId = instance.ExternalWorkerId;
-            
+
             return result;
         }
 
@@ -152,7 +156,7 @@ namespace WorkflowCore.Persistence.EntityFramework
 
             foreach (var ep in instance.ExecutionPointers)
             {
-                var pointer = new ExecutionPointer();                
+                var pointer = new ExecutionPointer();
 
                 pointer.Id = ep.Id;
                 pointer.StepId = ep.StepId;
