@@ -35,6 +35,20 @@ namespace WorkflowCore.Services
 
             return activity;
         }
+
+        internal static void Enrich(WorkflowInstance workflow, string action)
+        {
+            var activity = Activity.Current;
+            if (activity != null)
+            {
+                activity.DisplayName = $"workflow {action} {workflow.WorkflowDefinitionId}";
+                activity.SetTag("workflow.id", workflow.Id);
+                activity.SetTag("workflow.definition", workflow.WorkflowDefinitionId);
+                activity.SetTag("workflow.status", workflow.Status);
+            }
+        }
+
+
         internal static void Enrich(WorkflowStep workflowStep)
         {
             var activity = Activity.Current;
