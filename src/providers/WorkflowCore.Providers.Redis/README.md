@@ -35,6 +35,6 @@ services.AddWorkflow(cfg =>
     cfg.UseRedisPersistence("localhost:6379", "app-name");
     cfg.UseRedisLocking("localhost:6379");
     cfg.UseRedisQueues("localhost:6379", "app-name");
-    cfg.UseRedisEventHub("localhost:6379", "channel-name")
+    cfg.UseRedisEventHub("localhost:6379", "channel-name");
 });
 ```
