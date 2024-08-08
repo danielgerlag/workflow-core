@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29509.3
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34518.117
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{EF47161E-E399-451C-BDE8-E92AAD3BD761}"
 EndProject
@@ -153,6 +153,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Sample19", "src\samples\WorkflowCore.Sample19\WorkflowCore.Sample19.csproj", "{1223ED47-3E5E-4960-B70D-DFAF550F6666}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorkflowCore.Persistence.RavenDB", "src\providers\WorkflowCore.Persistence.RavenDB\WorkflowCore.Persistence.RavenDB.csproj", "{AF205715-C8B7-42EF-BF14-AFC9E7F27242}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowCore.TestScope", "src\samples\WorkflowCore.TestScope\WorkflowCore.TestScope.csproj", "{5F9E0E2C-BA1E-4F8A-8A46-D52050402B8A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -376,6 +378,10 @@ Global
 		{AF205715-C8B7-42EF-BF14-AFC9E7F27242}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF205715-C8B7-42EF-BF14-AFC9E7F27242}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF205715-C8B7-42EF-BF14-AFC9E7F27242}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F9E0E2C-BA1E-4F8A-8A46-D52050402B8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F9E0E2C-BA1E-4F8A-8A46-D52050402B8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F9E0E2C-BA1E-4F8A-8A46-D52050402B8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F9E0E2C-BA1E-4F8A-8A46-D52050402B8A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -438,6 +444,7 @@ Global
 		{54DE20BA-EBA7-4BF0-9BD9-F03766849716} = {E6CEAD8D-F565-471E-A0DC-676F54EAEDEB}
 		{1223ED47-3E5E-4960-B70D-DFAF550F6666} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
 		{AF205715-C8B7-42EF-BF14-AFC9E7F27242} = {2EEE6ABD-EE9B-473F-AF2D-6DABB85D7BA2}
+		{5F9E0E2C-BA1E-4F8A-8A46-D52050402B8A} = {5080DB09-CBE8-4C45-9957-C3BB7651755E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DC0FA8D3-6449-4FDA-BB46-ECF58FAD23B4}

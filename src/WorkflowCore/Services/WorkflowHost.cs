@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry.Trace;
 using WorkflowCore.Interface;
@@ -49,7 +50,7 @@ namespace WorkflowCore.Services
             _activityController = activityController;
             _lifeCycleEventHub = lifeCycleEventHub;
         }
-        
+
         public Task<string> StartWorkflow(string workflowId, object data = null, string reference=null)
         {
             return _workflowController.StartWorkflow(workflowId, data, reference);
@@ -65,11 +66,33 @@ namespace WorkflowCore.Services
         {
             return _workflowController.StartWorkflow<TData>(workflowId, null, data, reference);
         }
-        
+
         public Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference=null)
             where TData : class, new()
         {
             return _workflowController.StartWorkflow(workflowId, version, data, reference);
+        }
+
+        public Task<string> StartWorkflowWithScope(IServiceScope scope, string workflowId, object data = null, string reference = null)
+        {
+            return _workflowController.StartWorkflowWithScope(scope, workflowId, data, reference);
+        }
+
+        public Task<string> StartWorkflowWithScope(IServiceScope scope, string workflowId, int? version, object data = null, string reference = null)
+        {
+            return _workflowController.StartWorkflowWithScope(scope, workflowId, version, data, reference);
+        }
+
+        public Task<string> StartWorkflowWithScope<TData>(IServiceScope scope, string workflowId, TData data = null, string reference = null)
+            where TData : class, new()
+        {
+            return _workflowController.StartWorkflowWithScope(scope, workflowId, null, data, reference);
+        }
+
+        public Task<string> StartWorkflowWithScope<TData>(IServiceScope scope, string workflowId, int? version, TData data = null, string reference = null)
+            where TData : class, new()
+        {
+            return _workflowController.StartWorkflowWithScope(scope, workflowId, version, data, reference);
         }
 
         public Task PublishEvent(string eventName, string eventKey, object eventData, DateTime? effectiveDate = null)
@@ -81,7 +104,7 @@ namespace WorkflowCore.Services
         {
             StartAsync(CancellationToken.None).Wait();
         }
-        
+
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             var activity = WorkflowActivity.StartHost();
@@ -118,7 +141,7 @@ namespace WorkflowCore.Services
         {
             StopAsync(CancellationToken.None).Wait();
         }
-        
+
         public async Task StopAsync(CancellationToken cancellationToken)
         {
             _shutdown = true;
