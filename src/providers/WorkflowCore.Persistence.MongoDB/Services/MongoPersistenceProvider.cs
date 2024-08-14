@@ -23,7 +23,6 @@ namespace WorkflowCore.Persistence.MongoDB.Services
         public MongoPersistenceProvider(IMongoDatabase database)
         {
             _database = database;
-            CreateIndexes(this);
         }
 
         static MongoPersistenceProvider()
@@ -263,7 +262,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         public void EnsureStoreExists()
         {
-
+            CreateIndexes(this);
         }
 
         public async Task<IEnumerable<EventSubscription>> GetSubscriptions(string eventName, string eventKey, DateTime asOf, CancellationToken cancellationToken = default)
