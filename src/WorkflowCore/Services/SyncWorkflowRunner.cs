@@ -31,14 +31,14 @@ namespace WorkflowCore.Services
         }
 
         public Task<WorkflowInstance> RunWorkflowSync<TData>(string workflowId, int version, TData data,
-            string reference, TimeSpan timeOut, bool persistSate = true)
+            string reference, TimeSpan timeOut, bool persistState = true)
             where TData : new()
         {
             return RunWorkflowSync(workflowId, version, data, reference, new CancellationTokenSource(timeOut).Token,
-                persistSate);
+                persistState);
         }
 
-        public async Task<WorkflowInstance> RunWorkflowSync<TData>(string workflowId, int version, TData data, string reference, CancellationToken token, bool persistSate = true)
+        public async Task<WorkflowInstance> RunWorkflowSync<TData>(string workflowId, int version, TData data, string reference, CancellationToken token, bool persistState = true)
             where TData : new()
         {
             var def = _registry.GetDefinition(workflowId, version);
@@ -71,14 +71,31 @@ namespace WorkflowCore.Services
 
             var id = Guid.NewGuid().ToString();
 
-            if (persistSate)
+            if (persistState)
                 id = await _persistenceStore.CreateNewWorkflow(wf, token);
             else
                 wf.Id = id;
 
+            return await RunWorkflowInstanceSync(wf, token, persistState);
+        }
+
+        public Task<WorkflowInstance> ResumeWorkflowSync(string workflowId, TimeSpan timeOut, bool persistState = true)
+        {
+            return ResumeWorkflowSync(workflowId, new CancellationTokenSource(timeOut).Token, persistState);
+        }
+
+        public async Task<WorkflowInstance> ResumeWorkflowSync(string workflowId, CancellationToken token, bool persistState = true)
+        {
+            WorkflowInstance wf = await _persistenceStore.GetWorkflowInstance(workflowId);
+
+            return await RunWorkflowInstanceSync(wf, token, persistState);
+        }
+
+        private async Task<WorkflowInstance> RunWorkflowInstanceSync(WorkflowInstance wf, CancellationToken token, bool persistState)
+        {
             wf.Status = WorkflowStatus.Runnable;
-            
-            if (!await _lockService.AcquireLock(id, CancellationToken.None))
+
+            if (!await _lockService.AcquireLock(wf.Id, CancellationToken.None))
             {
                 throw new InvalidOperationException();
             }
@@ -88,17 +105,17 @@ namespace WorkflowCore.Services
                 while ((wf.Status == WorkflowStatus.Runnable) && !token.IsCancellationRequested)
                 {
                     await _executor.Execute(wf, token);
-                    if (persistSate)
+                    if (persistState)
                         await _persistenceStore.PersistWorkflow(wf, token);
                 }
             }
             finally
             {
-                await _lockService.ReleaseLock(id);
+                await _lockService.ReleaseLock(wf.Id);
             }
 
-            if (persistSate)
-                await _queueService.QueueWork(id, QueueType.Index);
+            if (persistState)
+                await _queueService.QueueWork(wf.Id, QueueType.Index);
 
             return wf;
         }
