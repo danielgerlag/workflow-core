@@ -70,7 +70,7 @@ namespace WorkflowCore.Services
                     var typeInstance = scope.ServiceProvider.GetService(errorHandlerType);
                     if (typeInstance is IWorkflowMiddlewareErrorHandler handler)
                     {
-                        await handler.HandleAsync(exception);
+                        await handler.HandleAsync(workflow, exception);
                     }
                 }
             }
