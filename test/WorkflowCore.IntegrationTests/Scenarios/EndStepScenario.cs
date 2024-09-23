@@ -2,6 +2,7 @@
 using System;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
+using WorkflowCore.Models.LifeCycleEvents;
 using WorkflowCore.Testing;
 using Xunit;
 
@@ -12,6 +13,8 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         internal static int StartStepCounter = 0;
         internal static int MidStepCounter = 0;
         internal static int EndStepCounter = 0;
+
+        private int workflowCompletedEventTriggered = 0;
 
         public class ScenarioWorkflow : IWorkflow
         {
@@ -49,6 +52,13 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         [Fact]
         public void Scenario()
         {
+            Host.OnLifeCycleEvent += (e) =>
+            {
+                if (e is WorkflowCompleted)
+                {
+                    workflowCompletedEventTriggered++;
+                }
+            };
             var workflowId = StartWorkflow(null);
             WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
 
@@ -56,6 +66,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             StartStepCounter.Should().Be(1);
             MidStepCounter.Should().Be(1);
             EndStepCounter.Should().Be(0);
+            workflowCompletedEventTriggered.Should().Be(1);
         }
     }
 }
