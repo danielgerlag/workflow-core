@@ -5,12 +5,21 @@ using Xunit;
 
 namespace WorkflowCore.Tests.PostgreSQL.Scenarios
 {
-    [Collection("Postgres collection")]
+    [Collection(PostgresCollection.Name)]
     public class PostgresEventScenario : EventScenario
-    {        
+    {
         protected override void ConfigureServices(IServiceCollection services)
         {
             services.AddWorkflow(x => x.UsePostgreSQL(PostgresDockerSetup.ScenarioConnectionString, true, true));
+        }
+    }
+
+    [Collection(PostgresCollection.Name)]
+    public class OptimizedPostgresEventScenario : EventScenario
+    {
+        protected override void ConfigureServices(IServiceCollection services)
+        {
+            services.AddWorkflow(x => x.UsePostgreSQL(PostgresDockerSetup.ScenarioConnectionString, true, true, true));
         }
     }
 }

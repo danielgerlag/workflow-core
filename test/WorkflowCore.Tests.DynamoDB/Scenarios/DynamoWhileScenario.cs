@@ -7,8 +7,8 @@ using Xunit;
 namespace WorkflowCore.Tests.DynamoDB.Scenarios
 {
     [Collection("DynamoDb collection")]
-    public class DynamoWhileScenario : WhileScenario
-    {        
+    public class DynamoWhileScenario : WhileScenario<DynamoWhileScenario>
+    {
         protected override void ConfigureServices(IServiceCollection services)
         {
             var cfg = new AmazonDynamoDBConfig {ServiceURL = DynamoDbDockerSetup.ConnectionString};

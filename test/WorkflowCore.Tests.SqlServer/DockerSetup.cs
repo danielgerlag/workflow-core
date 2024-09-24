@@ -29,8 +29,9 @@ namespace WorkflowCore.Tests.SqlServer
         }
     }
 
-    [CollectionDefinition("SqlServer collection")]
-    public class SqlServerCollection : ICollectionFixture<SqlDockerSetup>
+    [CollectionDefinition(Name)]
+    public sealed class SqlServerCollection : ICollectionFixture<SqlDockerSetup>
     {
+        public const string Name = "SqlServer collection";
     }
 }

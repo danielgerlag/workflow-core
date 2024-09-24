@@ -6,7 +6,7 @@ using Xunit;
 namespace WorkflowCore.Tests.MySQL.Scenarios
 {
     [Collection("Mysql collection")]
-    public class MysqlWhenScenario : WhenScenario
+    public class MysqlWhenScenario : WhenScenario<MysqlWhenScenario>
     {        
         protected override void ConfigureServices(IServiceCollection services)
         {

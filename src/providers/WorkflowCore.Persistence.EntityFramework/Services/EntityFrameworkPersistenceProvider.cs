@@ -32,7 +32,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             {
                 subscription.Id = Guid.NewGuid().ToString();
                 var persistable = subscription.ToPersistable();
-                var result = db.Set<PersistedSubscription>().Add(persistable);
+                _ = db.Set<PersistedSubscription>().Add(persistable);
                 await db.SaveChangesAsync(cancellationToken);
                 return subscription.Id;
             }
@@ -44,7 +44,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             {
                 workflow.Id = Guid.NewGuid().ToString();
                 var persistable = workflow.ToPersistable();
-                var result = db.Set<PersistedWorkflow>().Add(persistable);
+                _ = db.Set<PersistedWorkflow>().Add(persistable);
                 await db.SaveChangesAsync(cancellationToken);
                 return workflow.Id;
             }
@@ -77,7 +77,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 if (status.HasValue)
                     query = query.Where(x => x.Status == status.Value);
 
-                if (!String.IsNullOrEmpty(type))
+                if (!string.IsNullOrEmpty(type))
                     query = query.Where(x => x.WorkflowDefinitionId == type);
 
                 if (createdFrom.HasValue)
@@ -87,12 +87,8 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     query = query.Where(x => x.CreateTime <= createdTo.Value);
 
                 var rawResult = await query.Skip(skip).Take(take).ToListAsync();
-                List<WorkflowInstance> result = new List<WorkflowInstance>();
 
-                foreach (var item in rawResult)
-                    result.Add(item.ToWorkflowInstance());
-
-                return result;
+                return rawResult.Select(item => item.ToWorkflowInstance()).ToList();
             }
         }
 
@@ -147,12 +143,12 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .AsTracking()
                     .FirstAsync(cancellationToken);
 
-                var persistable = workflow.ToPersistable(existingEntity);
+                _ = workflow.ToPersistable(existingEntity);
                 await db.SaveChangesAsync(cancellationToken);
             }
         }
-		
-		public async Task PersistWorkflow(WorkflowInstance workflow, List<EventSubscription> subscriptions, CancellationToken cancellationToken = default)
+
+        public async Task PersistWorkflow(WorkflowInstance workflow, List<EventSubscription> subscriptions, CancellationToken cancellationToken = default)
         {
             using (var db = ConstructDbContext())
             {
@@ -165,7 +161,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .AsTracking()
                     .FirstAsync(cancellationToken);
 
-                var workflowPersistable = workflow.ToPersistable(existingEntity);
+                _ = workflow.ToPersistable(existingEntity);
 
                 foreach (var subscription in subscriptions)
                 {

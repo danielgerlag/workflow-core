@@ -2,14 +2,13 @@
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.IntegrationTests.Scenarios;
 using WorkflowCore.Persistence.Oracle;
-using WorkflowCore.Tests.Oracle;
 
 using Xunit;
 
 namespace WorkflowCore.Tests.Oracle.Scenarios
 {
     [Collection("Oracle collection")]
-    public class OracleUserScenario : UserScenario
+    public class OracleUserScenario : UserScenario<OracleUserScenario>
     {        
         protected override void ConfigureServices(IServiceCollection services)
         {

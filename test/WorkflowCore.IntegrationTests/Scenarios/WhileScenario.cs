@@ -8,7 +8,7 @@ using WorkflowCore.Testing;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
-    public class WhileScenario : WorkflowTest<WhileScenario.WhileWorkflow, WhileScenario.MyDataClass>
+    public class WhileScenario<TSelf> : WorkflowTest<WhileScenario<TSelf>.WhileWorkflow, WhileScenario<TSelf>.MyDataClass>
     {
         internal static int Step1Ticker = 0;
         internal static int Step2Ticker = 0;

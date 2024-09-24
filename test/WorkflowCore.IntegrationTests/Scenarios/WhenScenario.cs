@@ -8,7 +8,7 @@ using WorkflowCore.Testing;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
-    public class WhenScenario : WorkflowTest<WhenScenario.WhenWorkflow, WhenScenario.MyDataClass>
+    public class WhenScenario<TSelf> : WorkflowTest<WhenScenario<TSelf>.WhenWorkflow, WhenScenario<TSelf>.MyDataClass>
     {
         internal static int Case1Ticker = 0;
         internal static int Case2Ticker = 0;

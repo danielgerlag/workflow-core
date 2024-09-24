@@ -6,8 +6,8 @@ using Xunit;
 namespace WorkflowCore.Tests.MySQL.Scenarios
 {
     [Collection("Mysql collection")]
-    public class MysqlForkScenario : ForkScenario
-    {        
+    public class MysqlForkScenario : ForkScenario<MysqlForkScenario>
+    {
         protected override void Configure(IServiceCollection services)
         {
             services.AddWorkflow(x => x.UseMySQL(MysqlDockerSetup.ScenarioConnectionString, true, true));
