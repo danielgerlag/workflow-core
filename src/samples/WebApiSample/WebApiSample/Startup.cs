@@ -44,11 +44,14 @@ namespace WebApiSample
             {
                 app.UseDeveloperExceptionPage();
             }
-                        
+            app.UseRouting();
             app.UseSwagger();            
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1"));
 
-            app.UseMvc();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute("default", "{controller=Workflows}/{action=Get}");
+            });
 
             var host = app.ApplicationServices.GetService<IWorkflowHost>();
             host.RegisterWorkflow<TestWorkflow, MyDataClass>();
