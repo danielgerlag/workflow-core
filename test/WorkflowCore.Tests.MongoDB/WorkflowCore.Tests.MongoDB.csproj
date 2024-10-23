@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="Squadron.Mongo" Version="0.17.0" />
-    <PackageReference Include="MongoDB.Driver" Version="2.19.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.30.0" />
   </ItemGroup>
 
 </Project>
