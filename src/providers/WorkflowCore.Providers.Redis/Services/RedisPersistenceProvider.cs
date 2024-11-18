@@ -92,6 +92,10 @@ namespace WorkflowCore.Providers.Redis.Services
         public async Task<WorkflowInstance> GetWorkflowInstance(string Id, CancellationToken _ = default)
         {
             var raw = await _redis.HashGetAsync($"{_prefix}.{WORKFLOW_SET}", Id);
+            if (!raw.HasValue)
+            {
+                return null;
+            }
             return JsonConvert.DeserializeObject<WorkflowInstance>(raw, _serializerSettings);
         }
 
