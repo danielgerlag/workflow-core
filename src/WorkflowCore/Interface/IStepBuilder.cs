@@ -89,6 +89,7 @@ namespace WorkflowCore.Interface
         /// <param name="value"></param>
         /// <returns></returns>
         IStepBuilder<TData, TStepBody> Output<TOutput>(Expression<Func<TData, TOutput>> dataProperty, Expression<Func<TStepBody, object>> value);
+        IStepBuilder<TData, TStepBody> Output<TOutput>(Expression<Func<TData, IStepExecutionContext, TOutput>> dataProperty, Expression<Func<TStepBody, object>> value);
 
         /// <summary>
         /// Manipulate properties on the data object after the step executes
@@ -96,6 +97,7 @@ namespace WorkflowCore.Interface
         /// <param name="action"></param>
         /// <returns></returns>
         IStepBuilder<TData, TStepBody> Output(Action<TStepBody, TData> action);
+        IStepBuilder<TData, TStepBody> Output(Action<TStepBody, TData, IStepExecutionContext> action);
 
         IStepBuilder<TData, TStep> End<TStep>(string name) where TStep : IStepBody;
 

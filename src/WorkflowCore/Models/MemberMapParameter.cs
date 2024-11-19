@@ -43,8 +43,9 @@ namespace WorkflowCore.Models
             }
 
             var valueExpr = Expression.Convert(Expression.Constant(resolvedValue), targetExpr.ReturnType);
-            var assign = Expression.Lambda(Expression.Assign(targetExpr.Body, valueExpr), targetExpr.Parameters.Single());
-            assign.Compile().DynamicInvoke(targetObject);
+            var assign = Expression.Lambda(Expression.Assign(targetExpr.Body, valueExpr), targetExpr.Parameters);
+			if( targetExpr.Parameters.Count == 1 ) assign.Compile( ).DynamicInvoke( targetObject );
+			else assign.Compile( ).DynamicInvoke( targetObject, context );
         }
 
         public void AssignInput(object data, IStepBody body, IStepExecutionContext context)
