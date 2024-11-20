@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
+using WorkflowCore.Models.LifeCycleEvents;
 using WorkflowCore.Services;
 using Xunit;
 
@@ -403,6 +404,39 @@ namespace WorkflowCore.UnitTests.Services
             A.CallTo(() => CancellationProcessor.ProcessCancellations(instance, A<WorkflowDefinition>.Ignored, A<WorkflowExecutorResult>.Ignored)).MustHaveHappened();
         }
 
+        [Fact(DisplayName = "Should send notification when workflow completes")]
+        public void should_send_notification_when_workflow_completes()
+        {
+            //arrange
+            var param = A.Fake<IStepParameter>();
+
+            // build a fake EndStep
+            WorkflowStep step1 = A.Fake<WorkflowStep>();
+            A.CallTo(() => step1.InitForExecution(A<WorkflowExecutorResult>.Ignored, A<WorkflowDefinition>.Ignored,
+                A<WorkflowInstance>.Ignored, A<ExecutionPointer>.Ignored))
+                .Returns(ExecutionPipelineDirective.EndWorkflow);
+
+            Given1StepWorkflow(step1, "Workflow", 1);
+
+            var instance = new WorkflowInstance
+            {
+                WorkflowDefinitionId = "Workflow",
+                Version = 1,
+                Status = WorkflowStatus.Runnable,
+                NextExecution = 0,
+                Id = "001",
+                ExecutionPointers = new ExecutionPointerCollection(new List<ExecutionPointer>
+                {
+                    new ExecutionPointer { Id = "1", Active = true, StepId = 0 }
+                })
+            };
+
+            //act
+            Subject.Execute(instance);
+
+            //assert
+            A.CallTo(() => EventHub.PublishNotification(A<WorkflowCompleted>.Ignored)).MustHaveHappenedOnceExactly();
+        }
 
         private void Given1StepWorkflow(WorkflowStep step1, string id, int version)
         {
