@@ -6,7 +6,7 @@ using Xunit;
 namespace WorkflowCore.Tests.Redis.Scenarios
 {
     [Collection("Redis collection")]
-    public class RedisIfScenario : IfScenario
+    public class RedisIfScenario : IfScenario<RedisIfScenario>
     {        
         protected override void ConfigureServices(IServiceCollection services)
         {
