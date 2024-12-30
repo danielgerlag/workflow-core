@@ -15,6 +15,11 @@ namespace WorkflowCore.Providers.Azure.Services
             _client = new CosmosClient(connectionString, clientOptions);
         }
 
+        public CosmosClientFactory(CosmosClient client)
+        {
+            _client = client;
+        }
+
         public CosmosClient GetCosmosClient()
         {
             return this._client;
