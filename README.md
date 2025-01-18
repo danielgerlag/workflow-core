@@ -1,6 +1,7 @@
 # Workflow Core
 
 [![Build status](https://ci.appveyor.com/api/projects/status/xnby6p5v4ur04u76?svg=true)](https://ci.appveyor.com/project/danielgerlag/workflow-core)
+[<img src="https://api.gitsponsors.com/api/badge/img?id=73864802" height="20">](https://api.gitsponsors.com/api/badge/link?p=xj6mObb7nZAJGyuABfd8nD5XWf3SE4oUfw0vmCgSiJeIfNlzJAej0FWX8oFdYm6D7bvZpCf6qANVBNPWid4dRQ==)
 
 Workflow Core is a light weight embeddable workflow engine targeting .NET Standard.  Think: long running processes with multiple tasks that need to track state.  It supports pluggable persistence and concurrency providers to allow for multi-node clusters.
 
