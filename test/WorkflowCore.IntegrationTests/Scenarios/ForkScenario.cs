@@ -6,7 +6,7 @@ using FluentAssertions;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
-    public class ForkScenario : BaseScenario<ForkScenario.OutcomeFork, Object>
+    public class ForkScenario<TSelf> : BaseScenario<ForkScenario<TSelf>.OutcomeFork, Object>
     {
         static int TaskATicker = 0;
         static int TaskBTicker = 0;

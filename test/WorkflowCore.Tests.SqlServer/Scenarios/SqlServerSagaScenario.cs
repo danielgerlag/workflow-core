@@ -5,12 +5,21 @@ using Xunit;
 
 namespace WorkflowCore.Tests.SqlServer.Scenarios
 {
-    [Collection("SqlServer collection")]
+    [Collection(SqlServerCollection.Name)]
     public class SqlServerSagaScenario : SagaScenario
-    {        
+    {
         protected override void ConfigureServices(IServiceCollection services)
         {
             services.AddWorkflow(x => x.UseSqlServer(SqlDockerSetup.ScenarioConnectionString, true, true));
+        }
+    }
+
+    [Collection(SqlServerCollection.Name)]
+    public class OptimizedSqlServerSagaScenario : SagaScenario
+    {
+        protected override void ConfigureServices(IServiceCollection services)
+        {
+            services.AddWorkflow(x => x.UseSqlServer(SqlDockerSetup.ScenarioConnectionString, true, true, true));
         }
     }
 }
