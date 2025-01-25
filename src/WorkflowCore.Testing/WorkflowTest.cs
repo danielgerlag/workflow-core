@@ -17,6 +17,7 @@ namespace WorkflowCore.Testing
         protected IWorkflowHost Host;
         protected IPersistenceProvider PersistenceProvider;
         protected List<StepError> UnhandledStepErrors = new List<StepError>();
+        private bool isDisposed;
 
         protected virtual void Setup()
         {
@@ -116,9 +117,22 @@ namespace WorkflowCore.Testing
             return (TData)instance.Data;
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!isDisposed)
+            {
+                if (disposing)
+                {
+                    Host.Stop();
+                }
+                isDisposed = true;
+            }
+        }
+
         public void Dispose()
         {
-            Host.Stop();
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 
