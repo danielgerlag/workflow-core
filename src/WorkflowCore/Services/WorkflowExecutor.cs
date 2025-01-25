@@ -219,50 +219,48 @@ namespace WorkflowCore.Services
             //TODO: move to own class
             workflow.NextExecution = null;
 
-            if (workflow.Status == WorkflowStatus.Complete)
+            if (workflow.Status != WorkflowStatus.Complete)
             {
-                return;
-            }
-
-            foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count == 0))
-            {
-                if (!pointer.SleepUntil.HasValue)
+                foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count == 0))
                 {
-                    workflow.NextExecution = 0;
+                    if (!pointer.SleepUntil.HasValue)
+                    {
+                        workflow.NextExecution = 0;
+                        return;
+                    }
+
+                    var pointerSleep = pointer.SleepUntil.Value.ToUniversalTime().Ticks;
+                    workflow.NextExecution = Math.Min(pointerSleep, workflow.NextExecution ?? pointerSleep);
+                }
+
+                foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count > 0))
+                {
+                    if (!workflow.ExecutionPointers.FindByScope(pointer.Id).All(x => x.EndTime.HasValue))
+                        continue;
+
+                    if (!pointer.SleepUntil.HasValue)
+                    {
+                        workflow.NextExecution = 0;
+                        return;
+                    }
+
+                    var pointerSleep = pointer.SleepUntil.Value.ToUniversalTime().Ticks;
+                    workflow.NextExecution = Math.Min(pointerSleep, workflow.NextExecution ?? pointerSleep);
+                }
+
+                if ((workflow.NextExecution != null) || (workflow.ExecutionPointers.Any(x => x.EndTime == null)))
+                {
                     return;
                 }
 
-                var pointerSleep = pointer.SleepUntil.Value.ToUniversalTime().Ticks;
-                workflow.NextExecution = Math.Min(pointerSleep, workflow.NextExecution ?? pointerSleep);
-            }
+                workflow.Status = WorkflowStatus.Complete;
+                workflow.CompleteTime = _datetimeProvider.UtcNow;
 
-            foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count > 0))
-            {
-                if (!workflow.ExecutionPointers.FindByScope(pointer.Id).All(x => x.EndTime.HasValue))
-                    continue;
-
-                if (!pointer.SleepUntil.HasValue)
+                using (var scope = _serviceProvider.CreateScope())
                 {
-                    workflow.NextExecution = 0;
-                    return;
+                    var middlewareRunner = scope.ServiceProvider.GetRequiredService<IWorkflowMiddlewareRunner>();
+                    await middlewareRunner.RunPostMiddleware(workflow, def);
                 }
-
-                var pointerSleep = pointer.SleepUntil.Value.ToUniversalTime().Ticks;
-                workflow.NextExecution = Math.Min(pointerSleep, workflow.NextExecution ?? pointerSleep);
-            }
-
-            if ((workflow.NextExecution != null) || (workflow.ExecutionPointers.Any(x => x.EndTime == null)))
-            {
-                return;
-            }
-
-            workflow.Status = WorkflowStatus.Complete;
-            workflow.CompleteTime = _datetimeProvider.UtcNow;
-
-            using (var scope = _serviceProvider.CreateScope())
-            {
-                var middlewareRunner = scope.ServiceProvider.GetRequiredService<IWorkflowMiddlewareRunner>();
-                await middlewareRunner.RunPostMiddleware(workflow, def);
             }
 
             _publisher.PublishNotification(new WorkflowCompleted
