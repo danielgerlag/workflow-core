@@ -63,7 +63,7 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
                 var msg = channel.BasicGet(_queueNameProvider.GetQueueName(queue), false);
                 if (msg != null)
                 {
-                    var data = Encoding.UTF8.GetString(msg.Body);
+                    var data = Encoding.UTF8.GetString(msg.Body.ToArray());
                     channel.BasicAck(msg.DeliveryTag, false);
                     return data;
                 }

@@ -1,28 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <AssemblyName>WorkflowCore.Tests.MongoDB</AssemblyName>
-    <PackageId>WorkflowCore.Tests.MongoDB</PackageId>
+	<TargetFrameworks>net6.0</TargetFrameworks>
+    <AssemblyName>WorkflowCore.Tests.Oracle</AssemblyName>
+    <PackageId>WorkflowCore.Tests.Oracle</PackageId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <TargetFrameworks>net6.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\WorkflowCore\WorkflowCore.csproj" />
     <ProjectReference Include="..\WorkflowCore.IntegrationTests\WorkflowCore.IntegrationTests.csproj" />
-    <ProjectReference Include="..\WorkflowCore.TestAssets\WorkflowCore.TestAssets.csproj" />
-    <ProjectReference Include="..\..\src\providers\WorkflowCore.Persistence.MongoDB\WorkflowCore.Persistence.MongoDB.csproj" />
+    <ProjectReference Include="..\..\src\providers\WorkflowCore.Persistence.Oracle\WorkflowCore.Persistence.Oracle.csproj" />
     <ProjectReference Include="..\..\src\WorkflowCore.Testing\WorkflowCore.Testing.csproj" />
-    <ProjectReference Include="..\Docker.Testify\Docker.Testify.csproj" />
     <ProjectReference Include="..\WorkflowCore.UnitTests\WorkflowCore.UnitTests.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Squadron.Mongo" Version="0.17.0" />
-    <PackageReference Include="MongoDB.Driver" Version="2.30.0" />
   </ItemGroup>
 
 </Project>

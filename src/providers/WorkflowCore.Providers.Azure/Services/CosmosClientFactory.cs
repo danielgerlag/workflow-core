@@ -11,9 +11,14 @@ namespace WorkflowCore.Providers.Azure.Services
 
         private CosmosClient _client;
 
-        public CosmosClientFactory(string connectionString)
+        public CosmosClientFactory(string connectionString, CosmosClientOptions clientOptions = null)
         {
-            _client = new CosmosClient(connectionString);
+            _client = new CosmosClient(connectionString, clientOptions);
+        }
+
+        public CosmosClientFactory(CosmosClient client)
+        {
+            _client = client;
         }
 
         public CosmosClientFactory(string accountEndpoint, TokenCredential tokenCredential)
