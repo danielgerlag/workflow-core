@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -13,6 +14,7 @@ namespace WorkflowCore.Providers.Redis.Services
         private readonly ILogger _logger;
         private readonly string _connectionString;
         private readonly string _prefix;
+        private readonly bool _skipTlsVerification;
 
         private IConnectionMultiplexer _multiplexer;
         private IDatabase _redis;
@@ -24,10 +26,11 @@ namespace WorkflowCore.Providers.Redis.Services
             [QueueType.Index] = "index"
         };
 
-        public RedisQueueProvider(string connectionString, string prefix, ILoggerFactory logFactory)
+        public RedisQueueProvider(string connectionString, string prefix, bool skipTlsVerification, ILoggerFactory logFactory)
         {
             _connectionString = connectionString;
             _prefix = prefix;
+            _skipTlsVerification = skipTlsVerification;
             _logger = logFactory.CreateLogger(GetType());
         }
         
@@ -62,7 +65,22 @@ namespace WorkflowCore.Providers.Redis.Services
 
         public async Task Start()
         {
-            _multiplexer = await ConnectionMultiplexer.ConnectAsync(_connectionString);
+            var configOptions = ConfigurationOptions.Parse(_connectionString);
+
+            // Ensure TLS is enabled if specified
+            if (configOptions.Ssl)
+            {
+                configOptions.CertificateValidation += (sender, cert, chain, errors) =>
+                {
+                    if (_skipTlsVerification)
+                    {
+                        return true; // Always accept the certificate
+                    }
+                    return errors == SslPolicyErrors.None;
+                };
+            }
+
+            _multiplexer = await ConnectionMultiplexer.ConnectAsync(configOptions);
             _redis = _multiplexer.GetDatabase();
         }
 

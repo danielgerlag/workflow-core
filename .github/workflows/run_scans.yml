@@ -1,0 +1,13 @@
+name: Run Scans
+
+on:
+  pull_request:
+    types: [opened, synchronize, closed]
+    branches: "*"
+
+jobs:
+  deploy-service:
+    uses: Checkmarx-Containers/containers-github-actions-workflows/.github/workflows/deploy_package.yml@main
+    with:
+      package-name: 'CxContainers.Distributed'
+    secrets: inherit 

@@ -1,0 +1,46 @@
+name: Deploy package
+on:
+    pull_request:
+        types:
+            - closed
+        branches:
+            - master
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Set up .NET Core
+              uses: actions/setup-dotnet@v4
+              with:
+                dotnet-version: '8.0.x'
+
+            - name: Bump version and push tag
+              id: tag_version
+              uses: mathieudutour/github-tag-action@fcfbdceb3093f6d85a3b194740f8c6cec632f4e2
+              with:
+                github_token: ${{ secrets.GITHUB_TOKEN }}
+            - name: Remove first char from version
+              id: adjust_version
+              run: |
+                VERSION=${{ steps.tag_version.outputs.new_tag }}
+                VERSION="${VERSION:1}"
+                echo "ADJUSTED_VERSION=$VERSION" >> $GITHUB_ENV
+
+            - name: Build and pack NuGet package
+              working-directory: src/CxContainers.Distributed
+              run: |
+                if [ -z "${{env.ADJUSTED_VERSION}}" ]; then
+                    echo "Cannot find version"
+                    exit 1
+                fi
+                dotnet build -c Release
+
+                dotnet pack -p:PackageVersion=${{ env.ADJUSTED_VERSION }} -c Release --no-build --output .              
+
+            - name: Publish NuGet package
+              working-directory: src/CxContainers.Distributed
+              run: |
+                dotnet nuget push "CxContainers.Distributed.${{ env.ADJUSTED_VERSION }}.nupkg" --api-key ${{ secrets.JFROG_CI_USERNAME }}:${{ secrets.JFROG_CI_PASSWORD }} --source "https://checkmarx.jfrog.io/artifactory/api/nuget/containers-nuget"

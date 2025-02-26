@@ -1,0 +1,11 @@
+name: Service Scheduled Checkmarx Scan
+
+on:
+  schedule:
+    - cron: '00 00 * * *' # Schedule for daily at midnight
+  workflow_dispatch:
+
+jobs:
+  run-checkmarx-scan:
+    uses: Checkmarx-Containers/containers-github-actions-workflows/.github/workflows/cx-one-scan.yml@main
+    secrets: inherit

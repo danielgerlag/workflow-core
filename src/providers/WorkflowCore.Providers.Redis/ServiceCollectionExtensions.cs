@@ -7,15 +7,15 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
-        public static WorkflowOptions UseRedisQueues(this WorkflowOptions options, string connectionString, string prefix)
+        public static WorkflowOptions UseRedisQueues(this WorkflowOptions options, string connectionString, bool skipTlsVerification, string prefix)
         {
-            options.UseQueueProvider(sp => new RedisQueueProvider(connectionString, prefix, sp.GetService<ILoggerFactory>()));
+            options.UseQueueProvider(sp => new RedisQueueProvider(connectionString, prefix, skipTlsVerification, sp.GetService<ILoggerFactory>()));
             return options;
         }
 
-        public static WorkflowOptions UseRedisLocking(this WorkflowOptions options, string connectionString, string prefix = null)
+        public static WorkflowOptions UseRedisLocking(this WorkflowOptions options, string connectionString, bool skipTlsVerification, string prefix = null)
         {
-            options.UseDistributedLockManager(sp => new RedisLockProvider(connectionString, prefix, sp.GetService<ILoggerFactory>()));
+            options.UseDistributedLockManager(sp => new RedisLockProvider(connectionString, prefix, skipTlsVerification, sp.GetService<ILoggerFactory>()));
             return options;
         }
 
