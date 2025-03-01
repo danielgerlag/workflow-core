@@ -163,7 +163,19 @@ namespace WorkflowCore.Services
             return this;
         }
 
+        public IStepBuilder<TData, TStepBody> Output<TOutput>(Expression<Func<TData, IStepExecutionContext, TOutput>> dataProperty, Expression<Func<TStepBody, object>> value)
+        {
+            Step.Outputs.Add(new MemberMapParameter(value, dataProperty));
+            return this;
+        }
+
         public IStepBuilder<TData, TStepBody> Output(Action<TStepBody, TData> action)
+        {
+            Step.Outputs.Add(new ActionParameter<TStepBody, TData>(action));
+            return this;
+        }
+
+        public IStepBuilder<TData, TStepBody> Output(Action<TStepBody, TData, IStepExecutionContext> action)
         {
             Step.Outputs.Add(new ActionParameter<TStepBody, TData>(action));
             return this;
