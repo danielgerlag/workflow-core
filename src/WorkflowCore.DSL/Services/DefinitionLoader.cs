@@ -405,7 +405,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                         stack.Push(child);
                 }
 
-                stepProperty.SetValue(pStep, destObj);
+                stepProperty.SetValue(pStep, destObj.ToObject(stepProperty.PropertyType));
             }
             return acn;
         }
