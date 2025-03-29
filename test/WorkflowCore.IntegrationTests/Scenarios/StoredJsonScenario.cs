@@ -84,5 +84,23 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             data["Counter6"].Should().Be(1);
             data["Counter10"].Should().Be(1);
         }
+
+
+        [Fact]
+        public void should_execute_json_workflow_with_complex_input_type()
+        {
+            var initialData = new FlowData();
+            var workflowId = StartWorkflow(TestAssets.Utils.GetTestDefinitionJsonComplexInputProperty(), initialData);
+            WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
+            
+            var data = GetData<FlowData>(workflowId);
+            GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
+            UnhandledStepErrors.Count.Should().Be(0);
+            data.Assignee.Should().NotBeNull();
+            data.Assignee.Name.Should().Be("John Doe");
+            data.Assignee.UnitInfo.Should().NotBeNull();
+            data.Assignee.UnitInfo.Name.Should().Be("IT Department");
+            
+        }
     }
 }

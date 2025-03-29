@@ -13,6 +13,7 @@
     <None Remove="stored-definition.yaml" />
     <None Remove="stored-dynamic-definition.json" />
     <None Remove="stored-dynamic-definition.yaml" />
+    <None Remove="def-complex-input-property.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,6 +30,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="stored-def-missing-input-property.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="def-complex-input-property.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>

@@ -39,6 +39,12 @@ namespace WorkflowCore.TestAssets
         {
             return File.ReadAllText("stored-def-missing-input-property.json");
         }
+        
+        
+        public static string GetTestDefinitionJsonComplexInputProperty()
+        {
+            return File.ReadAllText("def-complex-input-property.json");
+        }
     }
 }
 
