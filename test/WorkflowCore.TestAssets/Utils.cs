@@ -45,6 +45,11 @@ namespace WorkflowCore.TestAssets
         {
             return File.ReadAllText("def-complex-input-property.json");
         }
+        
+        public static string GetTestDefinitionJsonListOfComplexInputProperty()
+        {
+            return File.ReadAllText("def-list-of-complex-input-property.json");
+        }
     }
 }
 

@@ -201,9 +201,17 @@ namespace WorkflowCore.Services.DefinitionStorage
                     continue;
                 }
 
-                if ((input.Value is IDictionary<string, object>) || (input.Value is IDictionary<object, object>))
+                if (input.Value is IDictionary<string, object> || input.Value is IDictionary<object, object>)
                 {
                     var acn = BuildObjectInputAction(input, dataParameter, contextParameter, environmentVarsParameter, stepProperty);
+                    step.Inputs.Add(new ActionParameter<IStepBody, object>(acn));
+                    continue;
+                }
+
+                if (input.Value is IEnumerable<object> list)
+                {
+                    var acn = BuildListInputAction(list, dataParameter, contextParameter, environmentVarsParameter,
+                        stepProperty);
                     step.Inputs.Add(new ActionParameter<IStepBody, object>(acn));
                     continue;
                 }
@@ -253,7 +261,7 @@ namespace WorkflowCore.Services.DefinitionStorage
 
                 Action<IStepBody, object> acn = (pStep, pData) =>
                 {
-                    object resolvedValue = sourceExpr.Compile().DynamicInvoke(pStep); ;
+                    object resolvedValue = sourceExpr.Compile().DynamicInvoke(pStep);
                     propertyInfo.SetValue(pData, resolvedValue, new object[] { output.Key });
                 };
 
@@ -306,7 +314,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                     {
                         var targetExpr = Expression.Lambda(memberExpression, dataParameter);
                         object data = targetExpr.Compile().DynamicInvoke(pData);
-                        object resolvedValue = sourceExpr.Compile().DynamicInvoke(pStep); ;
+                        object resolvedValue = sourceExpr.Compile().DynamicInvoke(pStep);
                         propertyInfo.SetValue(data, resolvedValue, new object[] { items[1] });
                     };
 
@@ -376,6 +384,80 @@ namespace WorkflowCore.Services.DefinitionStorage
                         stepProperty.SetValue(pStep, System.Convert.ChangeType(resolvedValue, stepProperty.PropertyType));
                 }
             }
+            return acn;
+        }
+
+        private static Action<IStepBody, object, IStepExecutionContext> BuildListInputAction(
+            IEnumerable<object> input,
+            ParameterExpression dataParameter,
+            ParameterExpression contextParameter,
+            ParameterExpression environmentVarsParameter,
+            PropertyInfo stepProperty)
+        {
+            void acn(IStepBody pStep, object pData, IStepExecutionContext pContext)
+            {
+                if (input == null)
+                    throw new ArgumentNullException(nameof(input));
+
+                var itemType = stepProperty.PropertyType.IsArray
+                    ? stepProperty.PropertyType.GetElementType()
+                    : stepProperty.PropertyType.GetGenericArguments().FirstOrDefault();
+
+                if (itemType == null)
+                    throw new InvalidOperationException("Unable to determine the item type for stepProperty.");
+
+                var processedItems = new List<object>();
+
+                foreach (var item in input)
+                {
+                    var obj = JObject.FromObject(item);
+                    var stack = new Stack<JObject>();
+                    stack.Push(obj);
+
+                    while (stack.Count > 0)
+                    {
+                        var current = stack.Pop();
+                        foreach (var prop in current.Properties().ToList())
+                        {
+                            if (prop.Name.StartsWith("@"))
+                            {
+                                var expr = DynamicExpressionParser.ParseLambda(
+                                    new[] { dataParameter, contextParameter, environmentVarsParameter },
+                                    typeof(object),
+                                    prop.Value.ToString());
+
+                                var resolved = expr.Compile().DynamicInvoke(pData, pContext,
+                                    Environment.GetEnvironmentVariables());
+                                current.Remove(prop.Name);
+                                current.Add(prop.Name.TrimStart('@'), JToken.FromObject(resolved));
+                            }
+                        }
+
+                        foreach (var child in current.Children<JObject>())
+                            stack.Push(child);
+                    }
+
+                    processedItems.Add(obj.ToObject(itemType));
+                }
+
+                if (stepProperty.PropertyType.IsArray)
+                {
+                    var array = Array.CreateInstance(itemType, processedItems.Count);
+                    for (var i = 0; i < processedItems.Count; i++)
+                        array.SetValue(processedItems[i], i);
+                    stepProperty.SetValue(pStep, array);
+                }
+                else
+                {
+                    var listInstance = Activator.CreateInstance(typeof(List<>).MakeGenericType(itemType));
+                    var addMethod = listInstance.GetType().GetMethod("Add");
+                    foreach (var item in processedItems)
+                        addMethod?.Invoke(listInstance, new[] { item });
+
+                    stepProperty.SetValue(pStep, listInstance);
+                }
+            }
+
             return acn;
         }
 
