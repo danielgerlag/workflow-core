@@ -9,8 +9,8 @@ namespace WorkflowCore.TestAssets.Steps;
 
 public class AssignTask : StepBody
 {       
-    public AssigneeInfo? Assignee { get; set; }
-    public List<AssigneeInfo> AssigneeList { get; set; }
+    public AssigneeInfo Assignee { get; set; }
+    public List<AssigneeInfo> AssigneeList { get; set; } = [];
     
     public AssigneeInfo[] AssigneeArray { get; set; } = [];
 
