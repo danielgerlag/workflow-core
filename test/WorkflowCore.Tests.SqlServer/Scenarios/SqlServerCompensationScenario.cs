@@ -6,7 +6,7 @@ using Xunit;
 namespace WorkflowCore.Tests.SqlServer.Scenarios
 {
     [Collection(SqlServerCollection.Name)]
-    public class SqlServerEventScenario : EventScenario
+    public class SqlServerCompensationScenario : CompensationScenario
     {
         protected override void ConfigureServices(IServiceCollection services)
         {
@@ -15,7 +15,7 @@ namespace WorkflowCore.Tests.SqlServer.Scenarios
     }
 
     [Collection(SqlServerCollection.Name)]
-    public class OptimizedSqlServerEventScenario : EventScenario
+    public class OptimizedSqlServerCompensationScenario : CompensationScenario
     {
         protected override void ConfigureServices(IServiceCollection services)
         {
