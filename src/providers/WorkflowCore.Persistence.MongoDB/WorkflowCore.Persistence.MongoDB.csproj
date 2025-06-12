@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyTitle>Workflow Core MongoDB Persistence Provider</AssemblyTitle>
     <Authors>Daniel Gerlag</Authors>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>WorkflowCore.Persistence.MongoDB</AssemblyName>
     <PackageId>WorkflowCore.Persistence.MongoDB</PackageId>
     <PackageTags>workflow;.NET;Core;state machine;WorkflowCore;MongoDB;Mongo</PackageTags>
@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="2.30.0" />
+    <PackageReference Include="MongoDB.Driver" Version="3.4.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 

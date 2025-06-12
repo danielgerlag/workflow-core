@@ -197,7 +197,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take)
         {
-            IMongoQueryable<WorkflowInstance> result = WorkflowInstances.AsQueryable();
+            IQueryable<WorkflowInstance> result = WorkflowInstances.AsQueryable();
 
             if (status.HasValue)
                 result = result.Where(x => x.Status == status.Value);
