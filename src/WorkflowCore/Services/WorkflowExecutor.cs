@@ -156,9 +156,11 @@ namespace WorkflowCore.Services
                 CancellationToken = cancellationToken
             };
 
+            var stepInfo = $"{step.Name ?? step.BodyType.Name} ({step.Id})";
+
             using (var scope = _scopeProvider.CreateScope(context))
             {
-                _logger.LogDebug("Starting step {StepName} on workflow {WorkflowId}", step.Name, workflow.Id);
+                _logger.LogDebug("Starting step {StepName} on workflow {WorkflowDefinitionId} ({WorkflowId})", stepInfo, workflow.WorkflowDefinitionId, workflow.Id);
 
                 IStepBody body = step.ConstructBody(scope.ServiceProvider);
                 var stepExecutor = scope.ServiceProvider.GetRequiredService<IStepExecutor>();
@@ -221,6 +223,7 @@ namespace WorkflowCore.Services
 
             if (workflow.Status == WorkflowStatus.Complete)
             {
+                await OnComplete(workflow, def);
                 return;
             }
 
@@ -236,7 +239,7 @@ namespace WorkflowCore.Services
                 workflow.NextExecution = Math.Min(pointerSleep, workflow.NextExecution ?? pointerSleep);
             }
 
-            foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count > 0))
+            foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && x.HasChildren))
             {
                 if (!workflow.ExecutionPointers.FindByScope(pointer.Id).All(x => x.EndTime.HasValue))
                     continue;
@@ -256,6 +259,11 @@ namespace WorkflowCore.Services
                 return;
             }
 
+            await OnComplete(workflow, def);
+        }
+
+        private async Task OnComplete(WorkflowInstance workflow, WorkflowDefinition def)
+        {
             workflow.Status = WorkflowStatus.Complete;
             workflow.CompleteTime = _datetimeProvider.UtcNow;
 
@@ -264,6 +272,8 @@ namespace WorkflowCore.Services
                 var middlewareRunner = scope.ServiceProvider.GetRequiredService<IWorkflowMiddlewareRunner>();
                 await middlewareRunner.RunPostMiddleware(workflow, def);
             }
+            
+            _logger.LogDebug("Workflow {WorkflowDefinitionId} ({Id}) completed", workflow.WorkflowDefinitionId, workflow.Id);
 
             _publisher.PublishNotification(new WorkflowCompleted
             {

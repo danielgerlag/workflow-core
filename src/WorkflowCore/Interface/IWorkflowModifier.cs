@@ -183,5 +183,15 @@ namespace WorkflowCore.Interface
     /// <returns></returns>
     IStepBuilder<TData, Activity> Activity(Expression<Func<TData, IStepExecutionContext, string>> activityName, Expression<Func<TData, object>> parameters = null,
         Expression<Func<TData, DateTime>> effectiveDate = null, Expression<Func<TData, bool>> cancelCondition = null);
+    
+    /// <summary>
+    /// Execute a sub-workflow
+    /// </summary>
+    /// <param name="subWorkflowId">Id of the sub-workflow to start</param>
+    /// <param name="parameters">The data to pass to the sub-workflow</param>
+    /// <param name="cancelCondition">A condition that when true will cancel this sub-workflow</param>
+    /// <returns></returns>
+    IStepBuilder<TData, SubWorkflowStepBody> SubWorkflow(string subWorkflowId, Expression<Func<TData, object>> parameters = null,
+        Expression<Func<TData, bool>> cancelCondition = null);
     }
 }

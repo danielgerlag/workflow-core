@@ -1,0 +1,118 @@
+using System;
+using FluentAssertions;
+using WorkflowCore.Interface;
+using WorkflowCore.Models;
+using WorkflowCore.Testing;
+using Xunit;
+using Xunit.Abstractions;
+
+namespace WorkflowCore.IntegrationTests.Scenarios;
+
+public class ApprovalScenario : WorkflowTest<ApprovalScenario.ParentWorkflow, ApprovalScenario.ApprovalInput>
+{
+    public class ApprovalInput
+    {
+        public string Id { get; set; }
+        public bool Approved { get; set; }
+        public TimeSpan TimeSpan { get; set; }
+        public string Message { get; set; }
+    }
+
+    public class ParentWorkflow : IWorkflow<ApprovalInput>
+    {
+        public string Id => nameof(ParentWorkflow);
+
+        public int Version => 1;
+        
+        public void Build(IWorkflowBuilder<ApprovalInput> builder)
+        {
+            builder
+                .StartWith(context => ExecutionResult.Next())
+                .SubWorkflow(nameof(ChildWorkflow))
+                .Output(i => i.Approved, step => ((ApprovalInput)step.Result).Approved)
+                /*
+                 * this does throw an exception
+                 .If(data => data.Approved)
+                    .Do(then =>
+                        ExecutionResult.Outcome(1248))*/;
+        }
+    }
+    
+    public class ChildWorkflow : IWorkflow<ApprovalInput>
+    {
+        public string Id => nameof(ChildWorkflow);
+
+        public int Version => 1;
+
+        public void Build(IWorkflowBuilder<ApprovalInput> builder)
+        {
+            builder
+                .StartWith(context => ExecutionResult.Next())
+                .Parallel()
+                .Do(then
+                    => then
+                        .Delay(i => i.TimeSpan)
+                        .Output(i => i.Approved, step => false)
+                        .EndWorkflow()
+                )
+                .Do(then
+                    => then
+                        .WaitFor("Approved", e => e.Id)
+                        .Output(i => i.Approved, step => step.EventData) 
+                        .EndWorkflow()
+                )
+                .Join();
+        }
+    }
+
+    public ApprovalScenario()
+    {
+        Setup();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Scenario(bool approved)
+    {
+        Host.Registry.RegisterWorkflow(new ChildWorkflow());
+        
+        var eventKey = Guid.NewGuid().ToString();
+        var workflowId = StartWorkflow(new ApprovalInput
+        {
+            Id = eventKey, 
+            TimeSpan = TimeSpan.FromMinutes(10)
+        });
+        
+        WaitForEventSubscription("Approved", workflowId, TimeSpan.FromSeconds(5));
+        UnhandledStepErrors.Should().BeEmpty();
+
+        Host.PublishEvent("Approved", workflowId, approved);
+
+        WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(10));
+        
+        System.Threading.Thread.Sleep(2000);
+
+        UnhandledStepErrors.Should().BeEmpty();
+        GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
+        GetData(workflowId).Approved.Should().Be(approved);
+    }
+    
+    [Fact]
+    public void Timeout()
+    {
+        Host.Registry.RegisterWorkflow(new ChildWorkflow());
+        
+        var workflowId = StartWorkflow(new ApprovalInput
+        {
+            Id = Guid.NewGuid().ToString(),
+            TimeSpan = TimeSpan.FromSeconds(5)
+        });
+        WaitForEventSubscription("Approved", workflowId, TimeSpan.FromSeconds(2));
+        WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(10));
+
+        UnhandledStepErrors.Should().BeEmpty();
+        GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
+        GetData(workflowId).Approved.Should().BeFalse();
+    }
+}

@@ -29,12 +29,16 @@ namespace WorkflowCore.Services
 
         public void ProcessExecutionResult(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, ExecutionResult result, WorkflowExecutorResult workflowResult)
         {
+            var stepInfo = $"{step.Name ?? step.BodyType.Name} ({step.Id})";
+
             pointer.PersistenceData = result.PersistenceData;
             pointer.Outcome = result.OutcomeValue;
             if (result.SleepFor.HasValue)
             {
                 pointer.SleepUntil = _datetimeProvider.UtcNow.Add(result.SleepFor.Value);
                 pointer.Status = PointerStatus.Sleeping;
+                _logger.LogDebug("Step {StepName} on workflow {WorkflowDefinitionId} ({WorkflowId}) will sleep for {SleepUntil}",
+                    stepInfo, workflow.WorkflowDefinitionId, workflow.Id, result.SleepFor.Value);
             }
 
             if (!string.IsNullOrEmpty(result.EventName))
@@ -54,6 +58,9 @@ namespace WorkflowCore.Services
                     SubscribeAsOf = result.EventAsOf,
                     SubscriptionData = result.SubscriptionData
                 });
+
+                _logger.LogDebug("Step {StepName} on workflow {WorkflowDefinitionId} ({WorkflowId}) waiting for event {EventName}",
+                    stepInfo, workflow.WorkflowDefinitionId, workflow.Id, pointer.EventName);
             }
 
             if (result.Proceed)
@@ -87,6 +94,9 @@ namespace WorkflowCore.Services
                     WorkflowDefinitionId = workflow.WorkflowDefinitionId,
                     Version = workflow.Version
                 });
+
+                _logger.LogDebug("Step {StepName} on workflow {WorkflowDefinitionId} ({WorkflowId}) completed",
+                    stepInfo, workflow.WorkflowDefinitionId, workflow.Id);
             }
             else
             {

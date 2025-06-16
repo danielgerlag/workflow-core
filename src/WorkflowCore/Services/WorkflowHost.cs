@@ -165,6 +165,12 @@ namespace WorkflowCore.Services
 
         public void HandleLifeCycleEvent(LifeCycleEvent evt)
         {
+            if (evt is WorkflowCompleted completed)
+            {
+                _workflowController.PublishEvent(nameof(WorkflowCompleted), completed.WorkflowInstanceId,
+                    completed.Reference);
+            }
+            
             OnLifeCycleEvent?.Invoke(evt);
         }
 
