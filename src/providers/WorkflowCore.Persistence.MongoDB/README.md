@@ -24,7 +24,7 @@ By default (to maintain backwards compatibility), the state object is serialized
 This approach has some limitations, for example you cannot control which types will be used in MongoDB for particular fields and you cannot use basic types that are not present in JSON (decimal, timestamp, etc).
 
 To eliminate these limitations, you can use a direct object -> BSON serialization and utilize all serialization possibilities that MongoDb driver provides. You can read more in the [MongoDb CSharp documentation](https://mongodb.github.io/mongo-csharp-driver/1.11/serialization/).
-To enable direct serilization you need to register a class map for you state class somewhere in your startup process before you run `WorkflowHost`.
+To enable direct serialization you need to register a class map for you state class somewhere in your startup process before you run `WorkflowHost`.
 
 ```C#
 private void RunWorkflow()
