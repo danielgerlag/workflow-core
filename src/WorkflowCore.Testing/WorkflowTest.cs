@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
+using Xunit.Abstractions;
 
 namespace WorkflowCore.Testing
 {
@@ -18,11 +19,16 @@ namespace WorkflowCore.Testing
         protected IPersistenceProvider PersistenceProvider;
         protected List<StepError> UnhandledStepErrors = new List<StepError>();
 
-        protected virtual void Setup()
+        protected virtual void Setup(ITestOutputHelper testOutputHelper = null)
         {
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
-            services.AddLogging();
+            services.AddLogging(l => l.SetMinimumLevel(LogLevel.Trace));
+            services.AddSingleton<ILoggerProvider>(p => new XUnitLoggerProvider(testOutputHelper));
+            services.Add(ServiceDescriptor.Singleton<ILoggerFactory, LoggerFactory>());
+            services.Add(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(XUnitLogger<>)));
+            services.AddSingleton(sp => testOutputHelper);
+            
             ConfigureServices(services);
 
             var serviceProvider = services.BuildServiceProvider();

@@ -5,12 +5,17 @@ using WorkflowCore.Persistence.Oracle;
 using WorkflowCore.Tests.Oracle;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace WorkflowCore.Tests.Oracle.Scenarios
 {
     [Collection("Oracle collection")]
     public class OracleDelayScenario : DelayScenario
-    {        
+    {
+        public OracleDelayScenario(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        {
+        }
+
         protected override void ConfigureServices(IServiceCollection services)
         {
             services.AddWorkflow(cfg =>
