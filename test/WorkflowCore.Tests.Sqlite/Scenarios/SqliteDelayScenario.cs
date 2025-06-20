@@ -1,15 +1,15 @@
-﻿using System;
+using System;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.IntegrationTests.Scenarios;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace WorkflowCore.Tests.PostgreSQL.Scenarios
+namespace WorkflowCore.Tests.Sqlite.Scenarios
 {
-    [Collection("Postgres collection")]
-    public class PostgresDelayScenario : DelayScenario
+    [Collection("Sqlite collection")]
+    public class SqliteDelayScenario : DelayScenario
     {
-        public PostgresDelayScenario(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+        public SqliteDelayScenario(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
         {
         }
 
@@ -17,9 +17,10 @@ namespace WorkflowCore.Tests.PostgreSQL.Scenarios
         {
             services.AddWorkflow(cfg =>
             {
-                cfg.UsePostgreSQL(PostgresDockerSetup.ScenarioConnectionString, true, true);
+                cfg.UseSqlite($"Data Source=wfc-tests-{DateTime.Now.Ticks}.db;", true);
                 cfg.UsePollInterval(TimeSpan.FromSeconds(2));
             });
         }
     }
 }
+

@@ -19,4 +19,10 @@
     <ProjectReference Include="..\..\src\WorkflowCore\WorkflowCore.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="xunit.abstractions">
+      <HintPath>..\..\..\..\..\.nuget\packages\xunit.abstractions\2.0.3\lib\netstandard2.0\xunit.abstractions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
