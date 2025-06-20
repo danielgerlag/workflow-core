@@ -6,8 +6,8 @@ using Xunit;
 namespace WorkflowCore.Tests.MongoDB.Scenarios
 {
     [Collection("Mongo collection")]
-    public class MongoIfScenario : IfScenario
-    {        
+    public class MongoIfScenario : IfScenario<MongoIfScenario>
+    {
         protected override void ConfigureServices(IServiceCollection services)
         {
             services.AddWorkflow(x => x.UseMongoDB(MongoDockerSetup.ConnectionString, nameof(MongoIfScenario)));

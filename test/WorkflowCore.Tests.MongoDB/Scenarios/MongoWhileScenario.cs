@@ -6,7 +6,7 @@ using Xunit;
 namespace WorkflowCore.Tests.MongoDB.Scenarios
 {
     [Collection("Mongo collection")]
-    public class MongoWhileScenario : WhileScenario
+    public class MongoWhileScenario : WhileScenario<MongoWhileScenario>
     {        
         protected override void ConfigureServices(IServiceCollection services)
         {

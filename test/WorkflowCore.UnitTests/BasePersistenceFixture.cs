@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using WorkflowCore.Interface;
@@ -185,8 +186,8 @@ namespace WorkflowCore.UnitTests
             var current = Subject.GetWorkflowInstance(workflowId).Result;
             current.ShouldBeEquivalentTo(newWorkflow);
         }
-		
-		[Fact]
+
+        [Fact]
         public void PersistWorkflow_with_subscriptions()
         {
             var workflow = new WorkflowInstance
@@ -292,6 +293,43 @@ namespace WorkflowCore.UnitTests
             {
                 action.ShouldNotThrow<InvalidOperationException>();
             });
+        }
+
+        [RunnableInDebugOnly]
+        public void CreateNewWorkflow_should_get_workflow_with_large_data()
+        {
+            var pointerCount = 2_500;
+            var data = Enumerable.Range(0, 20_000).Select(value => new TestData { Value1 = value }).ToArray();
+            var maxDuration = TimeSpan.FromMinutes(1);
+
+            var workflow = new WorkflowInstance
+            {
+                Data = data,
+                Description = "My Description",
+                Status = WorkflowStatus.Runnable,
+                NextExecution = 0,
+                Version = 1,
+                WorkflowDefinitionId = "My Workflow"
+            };
+
+            for (var i = 0; i < pointerCount; i++)
+            {
+                workflow.ExecutionPointers.Add(new ExecutionPointer
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Active = true,
+                    StepId = i
+                });
+            }
+
+            var workflowId = Subject.CreateNewWorkflow(workflow).Result;
+
+            var cts = new CancellationTokenSource();
+            cts.CancelAfter(maxDuration);
+            var exception = Record.Exception(() => _ = Subject.GetWorkflowInstance(workflowId, cts.Token).Result);
+
+            workflowId.Should().NotBeNull();
+            exception.Should().BeNull();
         }
     }
 
