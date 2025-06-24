@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.Interface;
@@ -26,7 +25,10 @@ namespace WorkflowCore.Services
 
         private IWorkflowHost Host => _serviceProvider.GetService<IWorkflowHost>();
 
-        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider, IScopeProvider scopeProvider, IDateTimeProvider datetimeProvider, IExecutionResultProcessor executionResultProcessor, ILifeCycleEventPublisher publisher, ICancellationProcessor cancellationProcessor, WorkflowOptions options, ILoggerFactory loggerFactory)
+        public WorkflowExecutor(IWorkflowRegistry registry, IServiceProvider serviceProvider,
+            IScopeProvider scopeProvider, IDateTimeProvider datetimeProvider,
+            IExecutionResultProcessor executionResultProcessor, ILifeCycleEventPublisher publisher,
+            ICancellationProcessor cancellationProcessor, WorkflowOptions options, ILoggerFactory loggerFactory)
         {
             _serviceProvider = serviceProvider;
             _scopeProvider = scopeProvider;
@@ -39,15 +41,18 @@ namespace WorkflowCore.Services
             _executionResultProcessor = executionResultProcessor;
         }
 
-        public async Task<WorkflowExecutorResult> Execute(WorkflowInstance workflow, CancellationToken cancellationToken = default)
+        public async Task<WorkflowExecutorResult> Execute(WorkflowInstance workflow,
+            CancellationToken cancellationToken = default)
         {
             var wfResult = new WorkflowExecutorResult();
 
-            var exePointers = new List<ExecutionPointer>(workflow.ExecutionPointers.Where(x => x.Active && (!x.SleepUntil.HasValue || x.SleepUntil < _datetimeProvider.UtcNow)));
+            var exePointers = new List<ExecutionPointer>(workflow.ExecutionPointers.Where(x =>
+                x.Active && (!x.SleepUntil.HasValue || x.SleepUntil < _datetimeProvider.UtcNow)));
             var def = _registry.GetDefinition(workflow.WorkflowDefinitionId, workflow.Version);
             if (def == null)
             {
-                _logger.LogError("Workflow {WorkflowDefinitionId} version {Version} is not registered", workflow.WorkflowDefinitionId, workflow.Version);
+                _logger.LogError("Workflow {WorkflowDefinitionId} version {Version} is not registered",
+                    workflow.WorkflowDefinitionId, workflow.Version);
                 return wfResult;
             }
 
@@ -83,7 +88,8 @@ namespace WorkflowCore.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Workflow {WorkflowId} raised error on step {StepId} Message: {Message}", workflow.Id, pointer.StepId, ex.Message);
+                    _logger.LogError(ex, "Workflow {WorkflowId} raised error on step {StepId} Message: {Message}",
+                        workflow.Id, pointer.StepId, ex.Message);
                     wfResult.Errors.Add(new ExecutionError
                     {
                         WorkflowId = workflow.Id,
@@ -95,8 +101,10 @@ namespace WorkflowCore.Services
                     _executionResultProcessor.HandleStepException(workflow, def, pointer, step, ex);
                     Host.ReportStepError(workflow, step, ex);
                 }
+
                 _cancellationProcessor.ProcessCancellations(workflow, def, wfResult);
             }
+
             ProcessAfterExecutionIteration(workflow, def, wfResult);
             await DetermineNextExecutionTime(workflow, def);
 
@@ -109,7 +117,8 @@ namespace WorkflowCore.Services
             return wfResult;
         }
 
-        private bool InitializeStep(WorkflowInstance workflow, WorkflowStep step, WorkflowExecutorResult wfResult, WorkflowDefinition def, ExecutionPointer pointer)
+        private bool InitializeStep(WorkflowInstance workflow, WorkflowStep step, WorkflowExecutorResult wfResult,
+            WorkflowDefinition def, ExecutionPointer pointer)
         {
             switch (step.InitForExecution(wfResult, def, workflow, pointer))
             {
@@ -144,7 +153,8 @@ namespace WorkflowCore.Services
             return true;
         }
 
-        private async Task ExecuteStep(WorkflowInstance workflow, WorkflowStep step, ExecutionPointer pointer, WorkflowExecutorResult wfResult, WorkflowDefinition def, CancellationToken cancellationToken = default)
+        private async Task ExecuteStep(WorkflowInstance workflow, WorkflowStep step, ExecutionPointer pointer,
+            WorkflowExecutorResult wfResult, WorkflowDefinition def, CancellationToken cancellationToken = default)
         {
             IStepExecutionContext context = new StepExecutionContext
             {
@@ -203,7 +213,8 @@ namespace WorkflowCore.Services
             }
         }
 
-        private void ProcessAfterExecutionIteration(WorkflowInstance workflow, WorkflowDefinition workflowDef, WorkflowExecutorResult workflowResult)
+        private void ProcessAfterExecutionIteration(WorkflowInstance workflow, WorkflowDefinition workflowDef,
+            WorkflowExecutorResult workflowResult)
         {
             var pointers = workflow.ExecutionPointers.Where(x => x.EndTime == null);
 
@@ -224,7 +235,8 @@ namespace WorkflowCore.Services
                 return;
             }
 
-            foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count == 0))
+            foreach (var pointer in workflow.ExecutionPointers.Where(x =>
+                         x.Active && (x.Children ?? new List<string>()).Count == 0))
             {
                 if (!pointer.SleepUntil.HasValue)
                 {
@@ -236,7 +248,8 @@ namespace WorkflowCore.Services
                 workflow.NextExecution = Math.Min(pointerSleep, workflow.NextExecution ?? pointerSleep);
             }
 
-            foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count > 0))
+            foreach (var pointer in workflow.ExecutionPointers.Where(x =>
+                         x.Active && (x.Children ?? new List<string>()).Count > 0))
             {
                 if (!workflow.ExecutionPointers.FindByScope(pointer.Id).All(x => x.EndTime.HasValue))
                     continue;

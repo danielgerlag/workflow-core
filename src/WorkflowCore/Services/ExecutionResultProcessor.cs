@@ -17,7 +17,9 @@ namespace WorkflowCore.Services
         private readonly IEnumerable<IWorkflowErrorHandler> _errorHandlers;
         private readonly WorkflowOptions _options;
 
-        public ExecutionResultProcessor(IExecutionPointerFactory pointerFactory, IDateTimeProvider datetimeProvider, ILifeCycleEventPublisher eventPublisher, IEnumerable<IWorkflowErrorHandler> errorHandlers, WorkflowOptions options, ILoggerFactory loggerFactory)
+        public ExecutionResultProcessor(IExecutionPointerFactory pointerFactory, IDateTimeProvider datetimeProvider,
+            ILifeCycleEventPublisher eventPublisher, IEnumerable<IWorkflowErrorHandler> errorHandlers,
+            WorkflowOptions options, ILoggerFactory loggerFactory)
         {
             _pointerFactory = pointerFactory;
             _datetimeProvider = datetimeProvider;
@@ -27,7 +29,8 @@ namespace WorkflowCore.Services
             _logger = loggerFactory.CreateLogger<ExecutionResultProcessor>();
         }
 
-        public void ProcessExecutionResult(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, ExecutionResult result, WorkflowExecutorResult workflowResult)
+        public void ProcessExecutionResult(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer,
+            WorkflowStep step, ExecutionResult result, WorkflowExecutorResult workflowResult)
         {
             pointer.PersistenceData = result.PersistenceData;
             pointer.Outcome = result.OutcomeValue;
@@ -61,9 +64,9 @@ namespace WorkflowCore.Services
                 pointer.Active = false;
                 pointer.EndTime = _datetimeProvider.UtcNow;
                 pointer.Status = PointerStatus.Complete;
-                                
+
                 foreach (var outcomeTarget in step.Outcomes.Where(x => x.Matches(result, workflow.Data)))
-                {                    
+                {
                     workflow.ExecutionPointers.Add(_pointerFactory.BuildNextPointer(def, pointer, outcomeTarget));
                 }
 
@@ -93,14 +96,16 @@ namespace WorkflowCore.Services
                 foreach (var branch in result.BranchValues)
                 {
                     foreach (var childDefId in step.Children)
-                    {   
-                        workflow.ExecutionPointers.Add(_pointerFactory.BuildChildPointer(def, pointer, childDefId, branch));                        
+                    {
+                        workflow.ExecutionPointers.Add(
+                            _pointerFactory.BuildChildPointer(def, pointer, childDefId, branch));
                     }
                 }
             }
         }
 
-        public void HandleStepException(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer, WorkflowStep step, Exception exception)
+        public void HandleStepException(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer pointer,
+            WorkflowStep step, Exception exception)
         {
             _eventPublisher.PublishNotification(new WorkflowError
             {
@@ -114,7 +119,7 @@ namespace WorkflowCore.Services
                 Message = exception.Message
             });
             pointer.Status = PointerStatus.Failed;
-            
+
             var queue = new Queue<ExecutionPointer>();
             queue.Enqueue(pointer);
 
@@ -123,7 +128,8 @@ namespace WorkflowCore.Services
                 var exceptionPointer = queue.Dequeue();
                 var exceptionStep = def.Steps.FindById(exceptionPointer.StepId);
                 var shouldCompensate = ShouldCompensate(workflow, def, exceptionPointer);
-                var errorOption = (exceptionStep.ErrorBehavior ?? (shouldCompensate ? WorkflowErrorHandling.Compensate : def.DefaultErrorBehavior));
+                var errorOption = (exceptionStep.ErrorBehavior ??
+                                   (shouldCompensate ? WorkflowErrorHandling.Compensate : def.DefaultErrorBehavior));
 
                 foreach (var handler in _errorHandlers.Where(x => x.Type == errorOption))
                 {
@@ -131,8 +137,9 @@ namespace WorkflowCore.Services
                 }
             }
         }
-        
-        private bool ShouldCompensate(WorkflowInstance workflow, WorkflowDefinition def, ExecutionPointer currentPointer)
+
+        private bool ShouldCompensate(WorkflowInstance workflow, WorkflowDefinition def,
+            ExecutionPointer currentPointer)
         {
             var scope = new Stack<string>(currentPointer.Scope);
             scope.Push(currentPointer.Id);
