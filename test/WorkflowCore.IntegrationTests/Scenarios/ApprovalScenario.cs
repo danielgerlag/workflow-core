@@ -1,5 +1,6 @@
 using System;
 using FluentAssertions;
+using Newtonsoft.Json.Linq;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Testing;
@@ -58,7 +59,12 @@ public class ApprovalScenario : WorkflowTest<ApprovalScenario.ParentWorkflow, Ap
                 .Do(then
                     => then
                         .WaitFor("Approved", e => e.Id)
-                        .Output(i => i.Approved, step => step.EventData) 
+                        .Output((w, input) =>
+                        {
+                            var j = JObject.FromObject(w.EventData);
+                            input.Approved = j["Approved"].Value<bool>();
+                            input.Message= j["Message"].Value<string>();
+                        })
                         .EndWorkflow()
                 )
                 .Join();
@@ -87,7 +93,11 @@ public class ApprovalScenario : WorkflowTest<ApprovalScenario.ParentWorkflow, Ap
         WaitForEventSubscription("Approved", workflowId, TimeSpan.FromSeconds(5));
         UnhandledStepErrors.Should().BeEmpty();
 
-        Host.PublishEvent("Approved", workflowId, approved);
+        Host.PublishEvent("Approved", workflowId, new
+        {
+            Approved = approved, 
+            Message = "message " + approved 
+        });
 
         WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(10));
         
@@ -95,7 +105,13 @@ public class ApprovalScenario : WorkflowTest<ApprovalScenario.ParentWorkflow, Ap
 
         UnhandledStepErrors.Should().BeEmpty();
         GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
-        GetData(workflowId).Approved.Should().Be(approved);
+        GetData(workflowId).ShouldBeEquivalentTo(new ApprovalInput
+        {
+            Id = eventKey,
+            Approved = approved,
+            Message = "message " + approved,
+            TimeSpan = TimeSpan.FromMinutes(10)
+        });
     }
     
     [Fact]
