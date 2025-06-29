@@ -227,6 +227,12 @@ namespace WorkflowCore.Services
                 return;
             }
 
+            if (workflow.Status == WorkflowStatus.Terminated)
+            {
+                await OnTerminated(workflow, def);
+                return;
+            }
+
             foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count == 0))
             {
                 if (!pointer.SleepUntil.HasValue)
@@ -276,6 +282,29 @@ namespace WorkflowCore.Services
             _logger.LogDebug("Workflow {WorkflowDefinitionId} ({Id}) completed", workflow.WorkflowDefinitionId, workflow.Id);
 
             _publisher.PublishNotification(new WorkflowCompleted
+            {
+                EventTimeUtc = _datetimeProvider.UtcNow,
+                Reference = workflow.Reference,
+                WorkflowInstanceId = workflow.Id,
+                WorkflowDefinitionId = workflow.WorkflowDefinitionId,
+                Version = workflow.Version
+            });
+        }
+        
+        private async Task OnTerminated(WorkflowInstance workflow, WorkflowDefinition def)
+        {
+            workflow.Status = WorkflowStatus.Terminated;
+            workflow.CompleteTime = _datetimeProvider.UtcNow;
+
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var middlewareRunner = scope.ServiceProvider.GetRequiredService<IWorkflowMiddlewareRunner>();
+                await middlewareRunner.RunPostMiddleware(workflow, def);
+            }
+            
+            _logger.LogDebug("Workflow {WorkflowDefinitionId} ({Id}) terminated", workflow.WorkflowDefinitionId, workflow.Id);
+
+            _publisher.PublishNotification(new WorkflowTerminated
             {
                 EventTimeUtc = _datetimeProvider.UtcNow,
                 Reference = workflow.Reference,

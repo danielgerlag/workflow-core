@@ -7,7 +7,7 @@ using Xunit.Abstractions;
 namespace WorkflowCore.Tests.Sqlite.Scenarios
 {
     [Collection("Sqlite collection")]
-    public class SqliteApprovalScenario : ApprovalScenario
+    public class SqliteSubWorkflowScenario : SubWorkflowScenario
     {
         protected override void ConfigureServices(IServiceCollection services)
         {

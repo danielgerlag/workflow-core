@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 namespace WorkflowCore.Tests.SqlServer.Scenarios
 {
     [Collection("SqlServer collection")]
-    public class SqlServerApprovalScenario() : ApprovalScenario()
+    public class SqlServerSubWorkflowScenario() : SubWorkflowScenario()
     {
         protected override void ConfigureServices(IServiceCollection services)
         {

@@ -165,10 +165,13 @@ namespace WorkflowCore.Services
 
         public void HandleLifeCycleEvent(LifeCycleEvent evt)
         {
-            if (evt is WorkflowCompleted completed)
+            switch (evt)
             {
-                _workflowController.PublishEvent(nameof(WorkflowCompleted), completed.WorkflowInstanceId,
-                    completed.Reference);
+                // publish the event as sub workflow lifecycle event
+                case WorkflowCompleted _:
+                case WorkflowTerminated _:
+                    _workflowController.PublishEvent(nameof(SubWorkflowLifeCycleEvent), evt.WorkflowInstanceId, evt.Reference);
+                    break;
             }
             
             OnLifeCycleEvent?.Invoke(evt);

@@ -18,8 +18,6 @@ namespace WorkflowCore.Primitives
 
         public override ExecutionResult Run(IStepExecutionContext context)
         {
-            var eventKey = context.ExecutionPointer.EventKey;
-
             var scope = _scopeProvider.CreateScope(context);
             var workflowController = scope.ServiceProvider.GetRequiredService<IWorkflowController>();
             var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(
@@ -32,19 +30,24 @@ namespace WorkflowCore.Primitives
                 logger.LogDebug("Started sub workflow {Name} with id='{SubId}' from workflow {WorkflowDefinitionId} ({Id})", 
                     SubWorkflowId, result, context.Workflow.WorkflowDefinitionId, context.Workflow.Id);
 
-                logger.LogDebug("Workflow {Name} ({SubId}) is waiting for event WorkflowCompleted with key='{EventKey}'", 
+                logger.LogDebug("Workflow {Name} ({SubId}) is waiting for event SubWorkflowLifeCycleEvent with key='{EventKey}'", 
                     SubWorkflowId, result, result);
 
                 var effectiveDate = DateTime.MinValue;
-                return ExecutionResult.WaitForEvent(nameof(WorkflowCompleted), result, effectiveDate);
+                return ExecutionResult.WaitForEvent(nameof(SubWorkflowLifeCycleEvent), result, effectiveDate);
             }
             
             logger.LogDebug("Sub workflow {Name} ({SubId}) completed", SubWorkflowId, 
                 context.ExecutionPointer.EventKey);
 
             var persistenceProvider = scope.ServiceProvider.GetRequiredService<IPersistenceProvider>();
-
-            Result = persistenceProvider.GetWorkflowInstance(context.ExecutionPointer.EventKey).Result.Data;
+            var workflowInstance = persistenceProvider.GetWorkflowInstance(context.ExecutionPointer.EventKey).Result;
+            if (workflowInstance.Status == WorkflowStatus.Terminated)
+            {
+                throw new NotImplementedException(workflowInstance.Status.ToString());    
+            }
+            
+            Result = workflowInstance.Data;
             return ExecutionResult.Next();
         }
 

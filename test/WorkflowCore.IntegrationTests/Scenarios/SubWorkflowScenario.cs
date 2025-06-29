@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 
 namespace WorkflowCore.IntegrationTests.Scenarios;
 
-public class ApprovalScenario : WorkflowTest<ApprovalScenario.ParentWorkflow, ApprovalScenario.ApprovalInput>
+public class SubWorkflowScenario : WorkflowTest<SubWorkflowScenario.ParentWorkflow, SubWorkflowScenario.ApprovalInput>
 {
     public class ApprovalInput
     {
@@ -28,6 +28,7 @@ public class ApprovalScenario : WorkflowTest<ApprovalScenario.ParentWorkflow, Ap
         public void Build(IWorkflowBuilder<ApprovalInput> builder)
         {
             builder
+                .UseDefaultErrorBehavior(WorkflowErrorHandling.Terminate)
                 .StartWith(context => ExecutionResult.Next())
                 .SubWorkflow(nameof(ChildWorkflow))
                 .Output(i => i.Approved, step => ((ApprovalInput)step.Result).Approved)
@@ -48,6 +49,7 @@ public class ApprovalScenario : WorkflowTest<ApprovalScenario.ParentWorkflow, Ap
         public void Build(IWorkflowBuilder<ApprovalInput> builder)
         {
             builder
+                .UseDefaultErrorBehavior(WorkflowErrorHandling.Terminate)
                 .StartWith(context => ExecutionResult.Next())
                 .Parallel()
                 .Do(then
@@ -71,7 +73,7 @@ public class ApprovalScenario : WorkflowTest<ApprovalScenario.ParentWorkflow, Ap
         }
     }
 
-    public ApprovalScenario()
+    public SubWorkflowScenario()
     {
         Setup();
     }
@@ -112,6 +114,34 @@ public class ApprovalScenario : WorkflowTest<ApprovalScenario.ParentWorkflow, Ap
             Message = "message " + approved,
             TimeSpan = TimeSpan.FromMinutes(10)
         });
+    }
+    
+    [Fact]
+    public void Failure()
+    {
+        Host.Registry.RegisterWorkflow(new ChildWorkflow());
+        
+        var eventKey = Guid.NewGuid().ToString();
+        var workflowId = StartWorkflow(new ApprovalInput
+        {
+            Id = eventKey, 
+            TimeSpan = TimeSpan.FromMinutes(10)
+        });
+        
+        WaitForEventSubscription("Approved", workflowId, TimeSpan.FromSeconds(5));
+        UnhandledStepErrors.Should().BeEmpty();
+
+        Host.PublishEvent("Approved", workflowId, new
+        {
+            Approved = "string" 
+        });
+
+        WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(20));
+        
+        System.Threading.Thread.Sleep(2000);
+
+        UnhandledStepErrors.Should().NotBeEmpty();
+        GetStatus(workflowId).Should().Be(WorkflowStatus.Terminated);
     }
     
     [Fact]
