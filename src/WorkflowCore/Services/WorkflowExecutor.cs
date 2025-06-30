@@ -89,7 +89,7 @@ namespace WorkflowCore.Services
                         WorkflowId = workflow.Id,
                         ExecutionPointerId = pointer.Id,
                         ErrorTime = _datetimeProvider.UtcNow,
-                        Message = ex.Message
+                        Message = ex.ToString()
                     });
 
                     _executionResultProcessor.HandleStepException(workflow, def, pointer, step, ex);
