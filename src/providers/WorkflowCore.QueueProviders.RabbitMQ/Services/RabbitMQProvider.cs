@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using RabbitMQ.Client;
+﻿using RabbitMQ.Client;
 using System;
 using System.Linq;
 using System.Text;
@@ -17,9 +16,8 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
         private readonly IRabbitMqQueueNameProvider _queueNameProvider;
         private readonly RabbitMqConnectionFactory _rabbitMqConnectionFactory;
         private readonly IServiceProvider _serviceProvider;
-        
-        private IConnection _connection = null;
-        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
+
+        private IConnection _connection;
 
         public bool IsDequeueBlocking => false;
 
@@ -37,11 +35,13 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
             if (_connection == null)
                 throw new InvalidOperationException("RabbitMQ provider not running");
 
-            using (var channel = _connection.CreateModel())
+            using (var channel = await _connection.CreateChannelAsync())
             {
-                channel.QueueDeclare(queue: _queueNameProvider.GetQueueName(queue), durable: true, exclusive: false, autoDelete: false, arguments: null);
+                await channel.QueueDeclareAsync(queue: _queueNameProvider.GetQueueName(queue), durable: true, exclusive: false,
+                    autoDelete: false, arguments: null);
                 var body = Encoding.UTF8.GetBytes(id);
-                channel.BasicPublish(exchange: "", routingKey: _queueNameProvider.GetQueueName(queue), basicProperties: null, body: body);
+                
+                await channel.BasicPublishAsync("", _queueNameProvider.GetQueueName(queue), false,body);
             }
         }
 
@@ -50,34 +50,35 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
             if (_connection == null)
                 throw new InvalidOperationException("RabbitMQ provider not running");
 
-            using (var channel = _connection.CreateModel())
+            using (var channel = await _connection.CreateChannelAsync(cancellationToken: cancellationToken))
             {
-                channel.QueueDeclare(queue: _queueNameProvider.GetQueueName(queue),
-                                     durable: true,
-                                     exclusive: false,
-                                     autoDelete: false,
-                                     arguments: null);
+                await channel.QueueDeclareAsync(queue: _queueNameProvider.GetQueueName(queue),
+                    durable: true,
+                    exclusive: false,
+                    autoDelete: false,
+                    arguments: null, cancellationToken: cancellationToken);
 
-                channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
+                await channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false,
+                    cancellationToken: cancellationToken);
 
-                var msg = channel.BasicGet(_queueNameProvider.GetQueueName(queue), false);
-                if (msg != null)
+                var msg = await channel.BasicGetAsync(_queueNameProvider.GetQueueName(queue), false, cancellationToken);
+
+                if (msg == null)
                 {
-                    var data = Encoding.UTF8.GetString(msg.Body.ToArray());
-                    channel.BasicAck(msg.DeliveryTag, false);
-                    return data;
+                    return null;
                 }
-                return null;
+                
+                var data = Encoding.UTF8.GetString(msg.Body.ToArray());
+                await channel.BasicAckAsync(msg.DeliveryTag, false, cancellationToken);
+                return data;
             }
         }
-        
+
         public void Dispose()
         {
-            if (_connection != null)
-            {
-                if (_connection.IsOpen)
-                    _connection.Close();
-            }
+            if (_connection == null) return;
+            if (_connection.IsOpen)
+                _connection.CloseAsync();
         }
 
         public async Task Start()
@@ -89,11 +90,10 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
         {
             if (_connection != null)
             {
-                _connection.Close();
+                await _connection.CloseAsync();
                 _connection = null;
             }
         }
-
     }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 }
