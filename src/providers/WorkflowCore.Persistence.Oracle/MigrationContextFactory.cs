@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-
-using Microsoft.EntityFrameworkCore.Design;
+﻿using Microsoft.EntityFrameworkCore.Design;
 
 namespace WorkflowCore.Persistence.Oracle
 {
