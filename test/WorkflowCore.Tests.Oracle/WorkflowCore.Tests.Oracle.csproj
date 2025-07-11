@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFrameworks>net6.0</TargetFrameworks>
+	<TargetFrameworks>net6.0;net8.0</TargetFrameworks>
     <AssemblyName>WorkflowCore.Tests.Oracle</AssemblyName>
     <PackageId>WorkflowCore.Tests.Oracle</PackageId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
@@ -9,6 +9,10 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Testcontainers.Oracle" Version="3.7.0" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\WorkflowCore\WorkflowCore.csproj" />
