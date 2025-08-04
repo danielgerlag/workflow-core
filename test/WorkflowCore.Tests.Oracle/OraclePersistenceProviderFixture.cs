@@ -13,7 +13,7 @@ namespace WorkflowCore.Tests.Oracle
         private readonly EntityFrameworkPersistenceProvider _subject;
         protected override IPersistenceProvider Subject => _subject;
 
-        public OraclePersistenceProviderFixture(ITestOutputHelper output)
+        public OraclePersistenceProviderFixture(OracleDockerSetup dockerSetup, ITestOutputHelper output)
         {
             output.WriteLine($"Connecting on {OracleDockerSetup.ConnectionString}");
             _subject = new EntityFrameworkPersistenceProvider(new OracleContextFactory(OracleDockerSetup.ConnectionString), true, true);

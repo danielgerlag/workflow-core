@@ -18,7 +18,7 @@ Use the .UseOracle extension method when building your service provider.
 services.AddWorkflow(x => x.UseOracle(@"Server=127.0.0.1;Database=workflow;User=root;Password=password;", true, true));
 ```
 
-You can also add specific database version compability if needed.
+You can also add specific database version compatibility if needed.
 
 ```C#
 services.AddWorkflow(x =>
