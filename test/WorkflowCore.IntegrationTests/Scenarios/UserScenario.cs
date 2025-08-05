@@ -8,7 +8,7 @@ using WorkflowCore.Testing;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
-    public class UserScenario : WorkflowTest<UserScenario.HumanWorkflow, Object>
+    public class UserScenario<TSelf> : WorkflowTest<UserScenario<TSelf>.HumanWorkflow, Object>
     {
         internal static int ApproveStepTicker = 0;
         internal static int DisapproveStepTicker = 0;

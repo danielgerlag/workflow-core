@@ -8,7 +8,7 @@ using WorkflowCore.Testing;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
-    public class IfScenario : WorkflowTest<IfScenario.IfWorkflow, IfScenario.MyDataClass>
+    public class IfScenario<TSelf> : WorkflowTest<IfScenario<TSelf>.IfWorkflow, IfScenario<TSelf>.MyDataClass>
     {
         internal static int Step1Ticker = 0;
         internal static int Step2Ticker = 0;
