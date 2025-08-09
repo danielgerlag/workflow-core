@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 {
     /// <inheritdoc />
-    public partial class ChangeDataTimeTypeForPostgreSQL : Migration
+    public partial class ChangeDateTimeTypeForPostgreSQL : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

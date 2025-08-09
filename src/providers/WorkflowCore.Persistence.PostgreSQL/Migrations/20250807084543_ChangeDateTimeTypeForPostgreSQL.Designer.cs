@@ -12,8 +12,8 @@ using WorkflowCore.Persistence.PostgreSQL;
 namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 {
     [DbContext(typeof(PostgresContext))]
-    [Migration("20250807084543_ChangeDataTimeTypeForPostgreSQL")]
-    partial class ChangeDataTimeTypeForPostgreSQL
+    [Migration("20250807084543_ChangeDateTimeTypeForPostgreSQL")]
+    partial class ChangeDateTimeTypeForPostgreSQL
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
