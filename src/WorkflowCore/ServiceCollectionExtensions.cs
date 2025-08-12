@@ -81,6 +81,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<ISyncWorkflowRunner, SyncWorkflowRunner>();
 
             services.AddTransient<Foreach>();
+            services.AddTransient<SubWorkflowStepBody>();
 
             return services;
         }
