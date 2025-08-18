@@ -25,7 +25,8 @@ namespace WorkflowCore.Primitives
                     effectiveDate = EffectiveDate;
                 }
 
-                return ExecutionResult.WaitForEvent(EventName, EventKey, effectiveDate);
+                var eventKey = context.Workflow.Reference ?? EventKey;
+                return ExecutionResult.WaitForEvent(EventName, eventKey, effectiveDate);
             }
 
             EventData = context.ExecutionPointer.EventData;

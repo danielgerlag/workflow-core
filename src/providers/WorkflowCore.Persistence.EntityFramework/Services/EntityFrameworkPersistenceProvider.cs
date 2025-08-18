@@ -100,6 +100,10 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
         {
             using (var db = ConstructDbContext())
             {
+                if (!Guid.TryParse(Id, out _))
+                {
+                    
+                }
                 var uid = new Guid(Id);
                 var raw = await db.Set<PersistedWorkflow>()
                     .Include(wf => wf.ExecutionPointers)

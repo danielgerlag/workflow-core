@@ -296,9 +296,15 @@ namespace WorkflowCore.Services
         {
             return Start().Activity(activityName, parameters, effectiveDate, cancelCondition);
         }
+        
         public IStepBuilder<TData, Activity> Activity(Expression<Func<TData, IStepExecutionContext, string>> activityName, Expression<Func<TData, object>> parameters = null, Expression<Func<TData, DateTime>> effectiveDate = null, Expression<Func<TData, bool>> cancelCondition = null)
         {
             return Start().Activity(activityName, parameters, effectiveDate, cancelCondition);
+        }
+        
+        public IStepBuilder<TData, SubWorkflowStepBody> SubWorkflow(string subWorkflowId, Expression<Func<TData, object>> parameters = null, Expression<Func<TData, bool>> cancelCondition = null)
+        {
+            return Start().SubWorkflow(subWorkflowId, parameters, cancelCondition);
         }
 
         private IStepBuilder<TData, InlineStepBody> Start()
