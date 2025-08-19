@@ -173,6 +173,16 @@ namespace WorkflowCore.Services
             }
         }
 
+        public Task<EventSubscription> GetFirstOpenSubscription(string eventName, string eventKey, string workflowId, DateTime asOf, CancellationToken _ = default)
+        {
+            lock (_subscriptions)
+            {
+                var result = _subscriptions
+                    .FirstOrDefault(x => x.ExternalToken == null && x.EventName == eventName && x.EventKey == eventKey && x.WorkflowId == workflowId && x.SubscribeAsOf <= asOf);
+                return Task.FromResult(result);
+            }
+        }
+
         public Task<bool> SetSubscriptionToken(string eventSubscriptionId, string token, string workerId, DateTime expiry, CancellationToken _ = default)
         {
             lock (_subscriptions)
