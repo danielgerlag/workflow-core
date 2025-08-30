@@ -26,7 +26,7 @@ namespace WorkflowCore.Sample02
         private static IServiceProvider ConfigureServices()
         {
             //setup dependency injection
-            IServiceCollection services = new ServiceCollection();
+            ServiceCollection services = new();
             services.AddLogging();
             services.AddWorkflow();
             var serviceProvider = services.BuildServiceProvider();
