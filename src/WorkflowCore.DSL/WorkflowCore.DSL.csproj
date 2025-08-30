@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
     <Description>DSL extenstion for Workflow Core provding support for JSON and YAML workflow definitions.</Description>
     <Authors>Daniel Gerlag</Authors>
     <Company />
@@ -9,9 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="SharpYaml" Version="1.6.5" />
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.3.0" />
+    <PackageReference Include="SharpYaml" Version="2.1.3" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.7" />
   </ItemGroup>
 
   <ItemGroup>

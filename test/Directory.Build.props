@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+        <TargetFramework>net9.0</TargetFramework>
         <LangVersion>latest</LangVersion>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
@@ -12,6 +12,6 @@
         <PackageReference Include="FluentAssertions" Version="4.19.4" />
         <PackageReference Include="Moq" Version="4.7.145" />
         <PackageReference Include="FakeItEasy" Version="4.9.2" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.8" />
     </ItemGroup>
 </Project>

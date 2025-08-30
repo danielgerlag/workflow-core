@@ -3,7 +3,6 @@
   <PropertyGroup>
     <AssemblyTitle>Workflow Core RabbitMQ queue provider</AssemblyTitle>
     <Authors>Daniel Gerlag</Authors>
-    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>WorkflowCore.QueueProviders.RabbitMQ</AssemblyName>
     <PackageId>WorkflowCore.QueueProviders.RabbitMQ</PackageId>
     <PackageTags>workflow;.NET;Core;state machine;WorkflowCore;RabbitMQ</PackageTags>
@@ -22,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
   </ItemGroup>
 

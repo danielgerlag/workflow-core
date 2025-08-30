@@ -43,19 +43,19 @@ namespace WorkflowCore.IntegrationTests.Scenarios
                     .Parallel()
                     .Do(then =>
                         then.WaitFor("Event1", data => EVENT_KEY).Then<SomeTask>()
-                            .Input(step => step.Delay, data => TimeSpan.FromMilliseconds(2000)))
+                            .Input(step => step.Delay, data => TimeSpan.FromSeconds(2)))
                     .Do(then =>
                         then.WaitFor("Event2", data => EVENT_KEY).Then<SomeTask>()
-                            .Input(step => step.Delay, data => TimeSpan.FromMilliseconds(2000)))
+                            .Input(step => step.Delay, data => TimeSpan.FromSeconds(2)))
                    .Do(then =>
                         then.WaitFor("Event3", data => EVENT_KEY).Then<SomeTask>()
-                            .Input(step => step.Delay, data => TimeSpan.FromMilliseconds(5000)))
+                            .Input(step => step.Delay, data => TimeSpan.FromSeconds(5)))
                    .Do(then =>
                         then.WaitFor("Event4", data => EVENT_KEY).Then<SomeTask>()
-                            .Input(step => step.Delay, data => TimeSpan.FromMilliseconds(100)))
+                            .Input(step => step.Delay, data => TimeSpan.FromMilliseconds(100, 0)))
                    .Do(then =>
                         then.WaitFor("Event5", data => EVENT_KEY).Then<SomeTask>()
-                            .Input(step => step.Delay, data => TimeSpan.FromMilliseconds(100)))
+                            .Input(step => step.Delay, data => TimeSpan.FromMilliseconds(100, 0)))
                 .Join()
                 .Then(x =>
                 {
