@@ -57,7 +57,7 @@ namespace WorkflowCore.Testing
 
         private static string GetLogLevelString(LogLevel logLevel)
         {
-            return logLevel.ToString().ToUpper();            
+            return logLevel.ToString().ToUpper();
         }
     }
     
