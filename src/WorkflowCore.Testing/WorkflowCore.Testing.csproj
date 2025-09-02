@@ -12,17 +12,11 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.0" />
+    <PackageReference Include="xunit.abstractions" Version="2.0.3" />  
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\WorkflowCore.DSL\WorkflowCore.DSL.csproj" />
     <ProjectReference Include="..\..\src\WorkflowCore\WorkflowCore.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="xunit.abstractions">
-      <HintPath>..\..\..\..\..\.nuget\packages\xunit.abstractions\2.0.3\lib\netstandard2.0\xunit.abstractions.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>
