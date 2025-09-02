@@ -23,12 +23,19 @@ namespace WorkflowCore.Testing
         {
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
-            services.AddLogging(l => l.SetMinimumLevel(LogLevel.Trace));
-            services.AddSingleton<ILoggerProvider>(p => new XUnitLoggerProvider(testOutputHelper));
-            services.Add(ServiceDescriptor.Singleton<ILoggerFactory, LoggerFactory>());
-            services.Add(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(XUnitLogger<>)));
-            services.AddSingleton(sp => testOutputHelper);
-            
+
+            if (testOutputHelper == null)
+            {
+                services.AddLogging();
+            }
+            else
+            {
+                services.AddLogging(loggingBuilder => loggingBuilder
+                    .SetMinimumLevel(LogLevel.Trace)
+                    .ClearProviders()
+                    .AddProvider(new XUnitLoggerProvider(testOutputHelper)));
+            }
+
             ConfigureServices(services);
 
             var serviceProvider = services.BuildServiceProvider();
