@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -10,7 +12,7 @@ using WorkflowCore.QueueProviders.RabbitMQ.Services;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public delegate IConnection RabbitMqConnectionFactory(IServiceProvider sp, string clientProvidedName);
+    public delegate Task<IConnection> RabbitMqConnectionFactory(IServiceProvider sp, string clientProvidedName, CancellationToken cancellationToken = default);
     
     public static class ServiceCollectionExtensions
     {
@@ -20,7 +22,7 @@ namespace Microsoft.Extensions.DependencyInjection
             if (connectionFactory == null) throw new ArgumentNullException(nameof(connectionFactory));
 
             return options
-                .UseRabbitMQ((sp, name) => connectionFactory.CreateConnection(name));
+                .UseRabbitMQ(async (sp, name, cancellationToken) => await connectionFactory.CreateConnectionAsync(name, cancellationToken));
         }
         
         public static WorkflowOptions UseRabbitMQ(this WorkflowOptions options,
@@ -32,7 +34,7 @@ namespace Microsoft.Extensions.DependencyInjection
             if (hostnames == null) throw new ArgumentNullException(nameof(hostnames));
 
             return options
-                .UseRabbitMQ((sp, name) => connectionFactory.CreateConnection(hostnames.ToList(), name));
+                .UseRabbitMQ(async (sp, name, cancellationToken) => await connectionFactory.CreateConnectionAsync(hostnames, name, cancellationToken));
         }
         
         public static WorkflowOptions UseRabbitMQ(this WorkflowOptions options, RabbitMqConnectionFactory rabbitMqConnectionFactory)
