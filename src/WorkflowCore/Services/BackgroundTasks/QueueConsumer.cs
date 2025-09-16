@@ -122,7 +122,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                 catch (Exception ex)
                 {
                     Logger.LogError(ex, ex.Message);
-                    activity?.RecordException(ex);
+                    activity?.AddException(ex);
                 }
                 finally
                 {
@@ -158,7 +158,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             catch (Exception ex)
             {
                 Logger.LogError(default(EventId), ex, $"Error executing item {itemId} - {ex.Message}");
-                activity?.RecordException(ex);
+                activity?.AddException(ex);
             }
             finally
             {
