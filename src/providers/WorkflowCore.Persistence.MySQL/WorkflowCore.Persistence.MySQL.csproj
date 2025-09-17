@@ -43,11 +43,11 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.*">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.*">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.*" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.*" />
   </ItemGroup>
 
   <ItemGroup>
