@@ -86,7 +86,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                                 catch (Exception ex)
                                 {
                                     _logger.LogError(ex, ex.Message);
-                                    activity?.RecordException(ex);
+                                    activity?.AddException(ex);
                                 }
                             }
                             if (_greylist.Contains($"wf:{item}"))
@@ -108,7 +108,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                activity?.RecordException(ex);
+                activity?.AddException(ex);
             }
             finally
             {
@@ -145,7 +145,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                                 catch (Exception ex)
                                 {
                                     _logger.LogError(ex, ex.Message);
-                                    activity?.RecordException(ex);
+                                    activity?.AddException(ex);
                                 }
                             }
                             if (_greylist.Contains($"evt:{item}"))
@@ -167,7 +167,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                activity?.RecordException(ex);
+                activity?.AddException(ex);
             }
             finally
             {
@@ -210,7 +210,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
-                activity?.RecordException(ex);
+                activity?.AddException(ex);
             }
             finally
             {
