@@ -56,6 +56,11 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
         {
             base.OnConfiguring(optionsBuilder);
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            
+            // Suppress pending model changes warning when using newer EF Core versions with older ModelSnapshots
+            // This prevents false positive warnings when the ProductVersion in ModelSnapshot differs from runtime
+            optionsBuilder.ConfigureWarnings(warnings => 
+                warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
         }
     }
 }
