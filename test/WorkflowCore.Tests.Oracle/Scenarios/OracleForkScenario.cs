@@ -1,4 +1,3 @@
-﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.IntegrationTests.Scenarios;
 using WorkflowCore.Persistence.Oracle;

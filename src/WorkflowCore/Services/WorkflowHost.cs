@@ -105,7 +105,7 @@ namespace WorkflowCore.Services
             }
             catch (Exception ex)
             {
-                activity.RecordException(ex);
+                activity.AddException(ex);
                 throw;
             }
             finally

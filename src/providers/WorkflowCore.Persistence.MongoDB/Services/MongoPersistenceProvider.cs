@@ -23,7 +23,6 @@ namespace WorkflowCore.Persistence.MongoDB.Services
         public MongoPersistenceProvider(IMongoDatabase database)
         {
             _database = database;
-            CreateIndexes(this);
         }
 
         static MongoPersistenceProvider()
@@ -198,7 +197,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take)
         {
-            IMongoQueryable<WorkflowInstance> result = WorkflowInstances.AsQueryable();
+            IQueryable<WorkflowInstance> result = WorkflowInstances.AsQueryable();
 
             if (status.HasValue)
                 result = result.Where(x => x.Status == status.Value);
@@ -263,7 +262,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         public void EnsureStoreExists()
         {
-
+            CreateIndexes(this);
         }
 
         public async Task<IEnumerable<EventSubscription>> GetSubscriptions(string eventName, string eventKey, DateTime asOf, CancellationToken cancellationToken = default)

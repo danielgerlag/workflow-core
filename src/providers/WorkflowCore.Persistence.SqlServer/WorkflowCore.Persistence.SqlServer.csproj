@@ -4,7 +4,7 @@
     <AssemblyTitle>Workflow Core SQL Server Persistence Provider</AssemblyTitle>
     <VersionPrefix>1.8.0</VersionPrefix>
     <Authors>Daniel Gerlag</Authors>
-    <TargetFrameworks>netstandard2.1;net6.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net6.0;net8.0;net9.0</TargetFrameworks>
     <AssemblyName>WorkflowCore.Persistence.SqlServer</AssemblyName>
     <PackageId>WorkflowCore.Persistence.SqlServer</PackageId>
     <PackageTags>workflow;.NET;Core;state machine;WorkflowCore</PackageTags>
@@ -35,11 +35,22 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.*">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.*">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.*">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.*">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net9.0' ">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.*">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.*">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

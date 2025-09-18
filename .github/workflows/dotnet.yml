@@ -15,9 +15,9 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: | 
-          3.1.x
           6.0.x
           8.0.x
+          9.0.x
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
@@ -31,10 +31,10 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: |
-            3.1.x
+          dotnet-version: | 
             6.0.x
             8.0.x
+            9.0.x
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
@@ -48,10 +48,10 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: |
-            3.1.x
+          dotnet-version: | 
             6.0.x
             8.0.x
+            9.0.x
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
@@ -65,10 +65,10 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: |
-            3.1.x
+          dotnet-version: | 
             6.0.x
             8.0.x
+            9.0.x
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
@@ -82,10 +82,10 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: |
-            3.1.x
+          dotnet-version: | 
             6.0.x
             8.0.x
+            9.0.x
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
@@ -99,10 +99,10 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: |
-            3.1.x
+          dotnet-version: | 
             6.0.x
             8.0.x
+            9.0.x
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
@@ -112,14 +112,14 @@ jobs:
   SQLServer-Tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: |
-            3.1.x
+          dotnet-version: | 
             6.0.x
             8.0.x
+            9.0.x
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
@@ -133,13 +133,30 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: |
-            3.1.x
+          dotnet-version: | 
             6.0.x
             8.0.x
+            9.0.x
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
         run: dotnet build --no-restore
       - name: Elasticsearch Tests
         run: dotnet test test/WorkflowCore.Tests.Elasticsearch --no-build --verbosity normal -p:ParallelizeTestCollections=false
+  Oracle-Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: | 
+            6.0.x
+            8.0.x
+            9.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Oracle Tests
+        run: dotnet test test/WorkflowCore.Tests.Oracle --no-build --verbosity normal -p:ParallelizeTestCollections=false

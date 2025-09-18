@@ -1,40 +1,50 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <AssemblyTitle>Workflow Core Oracle Persistence Provider</AssemblyTitle>
-    <VersionPrefix>1.0.0</VersionPrefix>
-    <Authors>Christian Jundt</Authors>
-    <TargetFrameworks>net6.0</TargetFrameworks>
-    <AssemblyName>WorkflowCore.Persistence.Oracle</AssemblyName>
-    <PackageId>WorkflowCore.Persistence.Oracle</PackageId>
-    <PackageTags>workflow;.NET;Core;state machine;WorkflowCore;Oracle</PackageTags>
-    <PackageProjectUrl>https://github.com/danielgerlag/workflow-core</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/danielgerlag/workflow-core/blob/master/LICENSE.md</PackageLicenseUrl>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/danielgerlag/workflow-core.git</RepositoryUrl>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Description>Provides support to persist workflows running on Workflow Core to a Oracle database.</Description>
-  </PropertyGroup>
+	<PropertyGroup>
+		<AssemblyTitle>Workflow Core Oracle Persistence Provider</AssemblyTitle>
+		<VersionPrefix>1.0.0</VersionPrefix>
+		<Authors>Christian Jundt</Authors>
+		<TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+		<AssemblyName>WorkflowCore.Persistence.Oracle</AssemblyName>
+		<PackageId>WorkflowCore.Persistence.Oracle</PackageId>
+		<PackageTags>workflow;.NET;Core;state machine;WorkflowCore;Oracle</PackageTags>
+		<PackageProjectUrl>https://github.com/danielgerlag/workflow-core</PackageProjectUrl>
+		<PackageLicenseUrl>https://github.com/danielgerlag/workflow-core/blob/master/LICENSE.md</PackageLicenseUrl>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/danielgerlag/workflow-core.git</RepositoryUrl>
+		<GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+		<GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+		<GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+		<Description>Provides support to persist workflows running on Workflow Core to a Oracle database.</Description>
+	</PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.*" />
-	  <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.*">
-		  <PrivateAssets>All</PrivateAssets>
-	  </PackageReference>
-	  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.*">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	  </PackageReference>
-    <PackageReference Include="Oracle.EntityFrameworkCore">
-        <Version>7.21.13</Version>
-    </PackageReference>
-  </ItemGroup>  
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.*">
+			<PrivateAssets>All</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.*">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Oracle.EntityFrameworkCore" Version="9.*" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\WorkflowCore\WorkflowCore.csproj" />
-    <ProjectReference Include="..\WorkflowCore.Persistence.EntityFramework\WorkflowCore.Persistence.EntityFramework.csproj" />
-  </ItemGroup>
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.*">
+			<PrivateAssets>All</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.*">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Oracle.EntityFrameworkCore">
+			<Version>7.21.13</Version>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\WorkflowCore\WorkflowCore.csproj" />
+		<ProjectReference Include="..\WorkflowCore.Persistence.EntityFramework\WorkflowCore.Persistence.EntityFramework.csproj" />
+	</ItemGroup>
 
 </Project>
