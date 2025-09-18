@@ -1,3 +1,5 @@
+﻿using System;
+using System.Linq;
 using WorkflowCore.Interface;
 using WorkflowCore.Persistence.EntityFramework.Services;
 using WorkflowCore.Persistence.SqlServer;
@@ -7,11 +9,11 @@ using Xunit;
 namespace WorkflowCore.Tests.SqlServer
 {
     [Collection(SqlServerCollection.Name)]
-    public class SqlServerPersistenceProviderFixture : BasePersistenceFixture
+    public class SqlServerOptimizedPersistenceProviderFixture : BasePersistenceFixture
     {
         private readonly string _connectionString;
 
-        public SqlServerPersistenceProviderFixture(SqlDockerSetup setup)
+        public SqlServerOptimizedPersistenceProviderFixture(SqlDockerSetup setup)
         {
             _connectionString = SqlDockerSetup.ConnectionString;
         }
@@ -20,7 +22,7 @@ namespace WorkflowCore.Tests.SqlServer
         {
             get
             {
-                var db = new EntityFrameworkPersistenceProvider(new SqlContextFactory(_connectionString), true, true);
+                var db = new LargeDataOptimizedEntityFrameworkPersistenceProvider(new SqlContextFactory(_connectionString), true, true);
                 db.EnsureStoreExists();
                 return db;
             }

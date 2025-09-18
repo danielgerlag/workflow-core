@@ -30,8 +30,9 @@ namespace WorkflowCore.Tests.PostgreSQL
         }
     }
 
-    [CollectionDefinition("Postgres collection")]
+    [CollectionDefinition(Name)]
     public class PostgresCollection : ICollectionFixture<PostgresDockerSetup>
     {
+        public const string Name = "Postgres collection";
     }
 }
