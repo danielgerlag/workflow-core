@@ -140,6 +140,7 @@ There are several persistence providers available as separate Nuget packages.
 * [Sqlite](src/providers/WorkflowCore.Persistence.Sqlite)
 * [MySQL](src/providers/WorkflowCore.Persistence.MySQL)
 * [Redis](src/providers/WorkflowCore.Providers.Redis)
+* [Oracle](src/providers/WorkflowCore.Persistence.Oracle)
 
 ## Search
 

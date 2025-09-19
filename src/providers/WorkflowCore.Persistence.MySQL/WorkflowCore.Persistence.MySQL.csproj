@@ -4,7 +4,7 @@
     <AssemblyTitle>Workflow Core MySQL Persistence Provider</AssemblyTitle>
     <VersionPrefix>1.0.0</VersionPrefix>
     <Authors>Daniel Gerlag</Authors>
-    <TargetFrameworks>netstandard2.1;net6.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;net6.0;net8.0</TargetFrameworks>
     <AssemblyName>WorkflowCore.Persistence.MySQL</AssemblyName>
     <PackageId>WorkflowCore.Persistence.MySQL</PackageId>
     <PackageTags>workflow;.NET;Core;state machine;WorkflowCore;MySQL</PackageTags>
@@ -40,6 +40,14 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="7.*" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.*">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.*" />
   </ItemGroup>
 
   <ItemGroup>
