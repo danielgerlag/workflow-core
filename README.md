@@ -185,11 +185,11 @@ These are also available as separate Nuget packages.
 
 * [Deferred execution & re-entrant steps](src/samples/WorkflowCore.Sample05)
 
+* [Human(User) Workflow](src/samples/WorkflowCore.Sample08)
+
 * [Looping](src/samples/WorkflowCore.Sample02)
 
 * [Exposing a REST API](src/samples/WebApiSample)
-
-* [Human(User) Workflow](src/samples/WorkflowCore.Sample08)
 
 * [Testing](src/samples/WorkflowCore.TestSample01)
 
