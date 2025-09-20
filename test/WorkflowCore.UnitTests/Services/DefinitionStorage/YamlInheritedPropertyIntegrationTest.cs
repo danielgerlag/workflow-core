@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using FakeItEasy;
 using WorkflowCore.Interface;
 using WorkflowCore.Services.DefinitionStorage;
 using Xunit;
@@ -16,7 +16,7 @@ namespace WorkflowCore.UnitTests.Services.DefinitionStorage
         public void ShouldBindInheritedPropertiesInYamlDefinition()
         {
             // Arrange
-            var registry = new WorkflowRegistry();
+            var registry = A.Fake<IWorkflowRegistry>();
             var loader = new DefinitionLoader(registry, new TypeResolver());
 
             // This YAML definition uses a custom step (IterateListStep) that inherits from Foreach
@@ -48,7 +48,7 @@ Steps:
         public void ShouldStillThrowForUnknownProperties()
         {
             // Arrange
-            var registry = new WorkflowRegistry();
+            var registry = A.Fake<IWorkflowRegistry>();
             var loader = new DefinitionLoader(registry, new TypeResolver());
 
             var yamlWithUnknownProperty = @"
