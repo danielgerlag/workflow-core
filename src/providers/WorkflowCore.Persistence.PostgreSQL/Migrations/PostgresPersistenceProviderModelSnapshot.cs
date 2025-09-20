@@ -17,7 +17,15 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.19")
+#if NETSTANDARD2_1
+                .HasAnnotation("ProductVersion", "5.0.1")
+#elif NET6_0  
+                .HasAnnotation("ProductVersion", "7.0.0")
+#elif NET8_0
+                .HasAnnotation("ProductVersion", "9.0.9")
+#else
+                .HasAnnotation("ProductVersion", "9.0.9")
+#endif
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);

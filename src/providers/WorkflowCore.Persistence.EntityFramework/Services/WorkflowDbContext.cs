@@ -56,16 +56,6 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
         {
             base.OnConfiguring(optionsBuilder);
             optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-            
-            // Configure warning handling for PendingModelChangesWarning
-            // This warning can be triggered by:
-            // 1. ProductVersion mismatch (false positive when using EF Core 9.x with older snapshots)
-            // 2. Legitimate model changes that need migrations
-            // 
-            // We convert the warning to a log message so developers can still see it in logs
-            // but it won't throw an exception that prevents application startup
-            optionsBuilder.ConfigureWarnings(warnings => 
-                warnings.Log(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
         }
     }
 }
