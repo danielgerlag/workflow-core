@@ -51,6 +51,10 @@ namespace WorkflowCore.Models
             get => _scope;
             set => _scope = new List<string>(value);
         }
+
+        public bool IsComplete => Status == PointerStatus.Complete;
+        
+        public bool HasChildren => Children?.Count > 0;
     }
 
     public enum PointerStatus
