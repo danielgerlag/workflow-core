@@ -27,6 +27,12 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         static MongoPersistenceProvider()
         {
+            // Register ObjectSerializer to allow deserialization of WorkflowCore types and user types
+            // This matches the pattern used in MongoDB tests which resolves serialization issues
+            BsonSerializer.TryRegisterSerializer(new ObjectSerializer(type =>
+                ObjectSerializer.DefaultAllowedTypes(type) || 
+                type.FullName?.StartsWith("WorkflowCore") == true));
+
             ConventionRegistry.Register(
                 "workflow.conventions",
                 new ConventionPack
