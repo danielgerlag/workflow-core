@@ -7,7 +7,7 @@ using Xunit;
 namespace WorkflowCore.Tests.Oracle.Scenarios
 {
     [Collection("Oracle collection")]
-    public class OracleIfScenario : IfScenario
+    public class OracleIfScenario : IfScenario<OracleIfScenario>
     {
         protected override void ConfigureServices(IServiceCollection services)
         {

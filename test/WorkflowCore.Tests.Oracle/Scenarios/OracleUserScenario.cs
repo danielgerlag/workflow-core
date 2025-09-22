@@ -7,8 +7,8 @@ using Xunit;
 namespace WorkflowCore.Tests.Oracle.Scenarios
 {
     [Collection("Oracle collection")]
-    public class OracleUserScenario : UserScenario
-    {
+    public class OracleUserScenario : UserScenario<OracleUserScenario>
+    {        
         protected override void ConfigureServices(IServiceCollection services)
         {
             services.AddWorkflow(x => x.UseOracle(OracleDockerSetup.ConnectionString, true, true));
