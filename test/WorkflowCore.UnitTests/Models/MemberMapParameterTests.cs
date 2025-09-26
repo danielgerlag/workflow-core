@@ -44,6 +44,23 @@ namespace WorkflowCore.UnitTests
 
             data.Value1.Should().Be(step.Value1);
         }
+        [Fact]
+        public void should_assign_output_with_context()
+        {
+            Expression<Func<MyData, object>> memberExpr = (x => x.Value2);
+            Expression<Func<MyStep, StepExecutionContext, object>> valueExpr = ((step, context) => ((string[])step.Value2)[(int)context.Item]);
+            var subject = new MemberMapParameter(valueExpr, memberExpr);
+            var data = new MyData();
+            var step = new MyStep {
+                Value2 = new []{"A", "B", "C", "D"}
+            };
+
+            var context = new StepExecutionContext {Item = 2};
+
+            subject.AssignOutput(data, step, context);
+
+            data.Value2.Should().Be("C");
+        }
 
         [Fact]
         public void should_convert_input()
