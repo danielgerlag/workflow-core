@@ -222,7 +222,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                 var dataParameter = Expression.Parameter(dataType, "data");
                 var contextParameter = Expression.Parameter(typeof(IStepExecutionContext), "context");
                 var environmentVarsParameter = Expression.Parameter(typeof(IDictionary), "environment");
-                var stepProperty = stepType.GetProperty(input.Key);
+                var stepProperty = stepType.GetProperty(input.Key, BindingFlags.Public | BindingFlags.Instance);
 
                 if (stepProperty == null)
                 {
