@@ -33,7 +33,7 @@ jobs:
         reporter: dotnet-trx
         fail-on-error: false
     - name: Upload Test Results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: unit-test-results
@@ -64,7 +64,7 @@ jobs:
           reporter: dotnet-trx
           fail-on-error: false
       - name: Upload Test Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: integration-test-results
@@ -95,7 +95,7 @@ jobs:
           reporter: dotnet-trx
           fail-on-error: false
       - name: Upload Test Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: mongodb-test-results
@@ -126,7 +126,7 @@ jobs:
           reporter: dotnet-trx
           fail-on-error: false
       - name: Upload Test Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: mysql-test-results
@@ -157,7 +157,7 @@ jobs:
           reporter: dotnet-trx
           fail-on-error: false
       - name: Upload Test Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: postgresql-test-results
@@ -188,7 +188,7 @@ jobs:
           reporter: dotnet-trx
           fail-on-error: false
       - name: Upload Test Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: redis-test-results
@@ -219,7 +219,7 @@ jobs:
           reporter: dotnet-trx
           fail-on-error: false
       - name: Upload Test Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: sqlserver-test-results
@@ -250,7 +250,7 @@ jobs:
           reporter: dotnet-trx
           fail-on-error: false
       - name: Upload Test Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: elasticsearch-test-results
@@ -281,7 +281,7 @@ jobs:
           reporter: dotnet-trx
           fail-on-error: false
       - name: Upload Test Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: oracle-test-results
