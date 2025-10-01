@@ -1,0 +1,23 @@
+{
+  "Id": "FlowWithComplexInputType",
+  "Version": 1,
+  "DataType": "WorkflowCore.TestAssets.DataTypes.FlowData, WorkflowCore.TestAssets",
+  "Steps": [
+    {
+      "Id": "AssignTask",
+      "StepType": "WorkflowCore.TestAssets.Steps.AssignTask, WorkflowCore.TestAssets",
+      "Inputs": {
+        "Assignee": {
+          "id": 1,
+          "name": "John Doe",
+          "memberType": 1,
+          "unitInfo": {
+            "id": 1,
+            "name": "IT Department",
+            "unitType": 1
+          }
+        }
+      }      
+    }
+  ]
+}

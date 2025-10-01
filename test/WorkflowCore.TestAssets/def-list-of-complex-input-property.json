@@ -1,0 +1,57 @@
+{
+  "Id": "FlowWithListOfComplexInputType",
+  "Version": 1,
+  "DataType": "WorkflowCore.TestAssets.DataTypes.FlowData, WorkflowCore.TestAssets",
+  "Steps": [
+    {
+      "Id": "AssignTask",
+      "StepType": "WorkflowCore.TestAssets.Steps.AssignTask, WorkflowCore.TestAssets",
+      "Inputs": {
+        "AssigneeList": [
+          {
+            "id": 1,
+            "name": "Nurlan Mikayilov",
+            "memberType": 1,
+            "unitInfo": {
+              "id": 2,
+              "name": "IT Department",
+              "unitType": 1
+            }
+          },
+          {
+            "id": 2,
+            "name": "Jala Mammadova",
+            "memberType": 2,
+            "unitInfo": {
+              "id": 1,
+              "name": "General Department",
+              "unitType": 1
+            }
+          }
+        ],
+        "AssigneeArray": [
+          {
+            "id": 3,
+            "name": "Amin Nabiyev",
+            "memberType": 1,
+            "unitInfo": {
+              "id": 2,
+              "name": "IT Department",
+              "unitType": 1
+            }
+          }
+        ],
+        "Assignee": {
+          "id": 1,
+          "name": "John Doe",
+          "memberType": 1,
+          "unitInfo": {
+            "id": 1,
+            "name": "IT Department",
+            "unitType": 1
+          }
+        }
+      }
+    }
+  ]
+}
