@@ -23,7 +23,21 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Unit Tests
-      run: dotnet test test/WorkflowCore.UnitTests --no-build --verbosity normal -p:ParallelizeTestCollections=false
+      run: dotnet test test/WorkflowCore.UnitTests --no-build --verbosity detailed --logger "trx;LogFileName=UnitTests.trx" --logger "console;verbosity=detailed" --results-directory ./test-results -p:ParallelizeTestCollections=false
+    - name: Publish Test Results
+      uses: dorny/test-reporter@v1
+      if: success() || failure()
+      with:
+        name: Unit Test Results
+        path: test-results/*.trx
+        reporter: dotnet-trx
+        fail-on-error: false
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: unit-test-results
+        path: test-results/
   Integration-Tests:
     runs-on: ubuntu-latest
     steps:
@@ -40,7 +54,21 @@ jobs:
       - name: Build
         run: dotnet build --no-restore
       - name: Integration Tests
-        run: dotnet test test/WorkflowCore.IntegrationTests --no-build --verbosity normal -p:ParallelizeTestCollections=false
+        run: dotnet test test/WorkflowCore.IntegrationTests --no-build --verbosity detailed --logger "trx;LogFileName=IntegrationTests.trx" --logger "console;verbosity=detailed" --results-directory ./test-results -p:ParallelizeTestCollections=false
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: Integration Test Results
+          path: test-results/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-results
+          path: test-results/
   MongoDB-Tests:
     runs-on: ubuntu-latest
     steps:
@@ -57,7 +85,21 @@ jobs:
       - name: Build
         run: dotnet build --no-restore
       - name: MongoDB Tests
-        run: dotnet test test/WorkflowCore.Tests.MongoDB --no-build --verbosity normal -p:ParallelizeTestCollections=false
+        run: dotnet test test/WorkflowCore.Tests.MongoDB --no-build --verbosity detailed --logger "trx;LogFileName=MongoDBTests.trx" --logger "console;verbosity=detailed" --results-directory ./test-results -p:ParallelizeTestCollections=false
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: MongoDB Test Results
+          path: test-results/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mongodb-test-results
+          path: test-results/
   MySQL-Tests:
     runs-on: ubuntu-latest
     steps:
@@ -74,7 +116,21 @@ jobs:
       - name: Build
         run: dotnet build --no-restore
       - name: MySQL Tests
-        run: dotnet test test/WorkflowCore.Tests.MySQL --no-build --verbosity normal -p:ParallelizeTestCollections=false
+        run: dotnet test test/WorkflowCore.Tests.MySQL --no-build --verbosity detailed --logger "trx;LogFileName=MySQLTests.trx" --logger "console;verbosity=detailed" --results-directory ./test-results -p:ParallelizeTestCollections=false
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: MySQL Test Results
+          path: test-results/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mysql-test-results
+          path: test-results/
   PostgreSQL-Tests:
     runs-on: ubuntu-latest
     steps:
@@ -91,7 +147,21 @@ jobs:
       - name: Build
         run: dotnet build --no-restore
       - name: PostgreSQL Tests
-        run: dotnet test test/WorkflowCore.Tests.PostgreSQL --no-build --verbosity normal -p:ParallelizeTestCollections=false
+        run: dotnet test test/WorkflowCore.Tests.PostgreSQL --no-build --verbosity detailed --logger "trx;LogFileName=PostgreSQLTests.trx" --logger "console;verbosity=detailed" --results-directory ./test-results -p:ParallelizeTestCollections=false
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: PostgreSQL Test Results
+          path: test-results/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: postgresql-test-results
+          path: test-results/
   Redis-Tests:
     runs-on: ubuntu-latest
     steps:
@@ -108,7 +178,21 @@ jobs:
       - name: Build
         run: dotnet build --no-restore
       - name: Redis Tests
-        run: dotnet test test/WorkflowCore.Tests.Redis --no-build --verbosity normal -p:ParallelizeTestCollections=false
+        run: dotnet test test/WorkflowCore.Tests.Redis --no-build --verbosity detailed --logger "trx;LogFileName=RedisTests.trx" --logger "console;verbosity=detailed" --results-directory ./test-results -p:ParallelizeTestCollections=false
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: Redis Test Results
+          path: test-results/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: redis-test-results
+          path: test-results/
   SQLServer-Tests:
     runs-on: ubuntu-latest
     steps:
@@ -125,7 +209,21 @@ jobs:
       - name: Build
         run: dotnet build --no-restore
       - name: SQL Server Tests
-        run: dotnet test test/WorkflowCore.Tests.SqlServer --no-build --verbosity normal -p:ParallelizeTestCollections=false
+        run: dotnet test test/WorkflowCore.Tests.SqlServer --no-build --verbosity detailed --logger "trx;LogFileName=SQLServerTests.trx" --logger "console;verbosity=detailed" --results-directory ./test-results -p:ParallelizeTestCollections=false
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: SQL Server Test Results
+          path: test-results/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sqlserver-test-results
+          path: test-results/
   Elasticsearch-Tests:
     runs-on: ubuntu-latest
     steps:
@@ -142,7 +240,21 @@ jobs:
       - name: Build
         run: dotnet build --no-restore
       - name: Elasticsearch Tests
-        run: dotnet test test/WorkflowCore.Tests.Elasticsearch --no-build --verbosity normal -p:ParallelizeTestCollections=false
+        run: dotnet test test/WorkflowCore.Tests.Elasticsearch --no-build --verbosity detailed --logger "trx;LogFileName=ElasticsearchTests.trx" --logger "console;verbosity=detailed" --results-directory ./test-results -p:ParallelizeTestCollections=false
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: Elasticsearch Test Results
+          path: test-results/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: elasticsearch-test-results
+          path: test-results/
   Oracle-Tests:
     runs-on: ubuntu-latest
     steps:
@@ -159,4 +271,18 @@ jobs:
       - name: Build
         run: dotnet build --no-restore
       - name: Oracle Tests
-        run: dotnet test test/WorkflowCore.Tests.Oracle --no-build --verbosity normal -p:ParallelizeTestCollections=false
+        run: dotnet test test/WorkflowCore.Tests.Oracle --no-build --verbosity detailed --logger "trx;LogFileName=OracleTests.trx" --logger "console;verbosity=detailed" --results-directory ./test-results -p:ParallelizeTestCollections=false
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: Oracle Test Results
+          path: test-results/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oracle-test-results
+          path: test-results/
