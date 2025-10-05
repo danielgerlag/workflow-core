@@ -27,31 +27,6 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
         static MongoPersistenceProvider()
         {
-            // Register ObjectSerializer to allow deserialization of user types while maintaining security
-            // Allows all default types plus user-defined types (excluding system/framework types)
-            BsonSerializer.TryRegisterSerializer(new ObjectSerializer(type =>
-            {
-                // Allow all default MongoDB allowed types (primitives, collections, etc.)
-                if (ObjectSerializer.DefaultAllowedTypes(type))
-                    return true;
-                    
-                // Allow WorkflowCore types (for backward compatibility)
-                if (type.FullName?.StartsWith("WorkflowCore") == true)
-                    return true;
-                    
-                // Allow user types by excluding system/framework types
-                // This prevents security issues while allowing user data classes
-                var fullName = type.FullName ?? "";
-                if (fullName.StartsWith("System.") ||
-                    fullName.StartsWith("Microsoft.") ||
-                    fullName.StartsWith("System,") ||
-                    fullName.StartsWith("Microsoft,"))
-                    return false;
-                    
-                // Allow all other types (user-defined types)
-                return true;
-            }));
-
             ConventionRegistry.Register(
                 "workflow.conventions",
                 new ConventionPack
