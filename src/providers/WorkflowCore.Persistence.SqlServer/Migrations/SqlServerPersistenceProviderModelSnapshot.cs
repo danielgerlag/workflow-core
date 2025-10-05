@@ -16,7 +16,15 @@ namespace WorkflowCore.Persistence.SqlServer.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.8")
+#if NETSTANDARD2_1
+                .HasAnnotation("ProductVersion", "5.0.1")
+#elif NET6_0  
+                .HasAnnotation("ProductVersion", "7.0.0")
+#elif NET8_0 || NET9_0
+                .HasAnnotation("ProductVersion", "9.0.9")
+#else
+                .HasAnnotation("ProductVersion", "9.0.9")
+#endif
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedEvent", b =>
