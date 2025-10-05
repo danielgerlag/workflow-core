@@ -588,5 +588,34 @@ namespace WorkflowCore.Services
             Step.Outcomes.Add(new ValueOutcome { NextStep = newStep.Id });
             return stepBuilder;
         }
+
+        public IStepBuilder<TData, SubWorkflowStepBody> SubWorkflow(
+            string subWorkflowId, 
+            Expression<Func<TData, object>> parameters = null,
+            Expression<Func<TData, bool>> cancelCondition = null)
+        {
+            var newStep = new WorkflowStep<SubWorkflowStepBody>();
+            newStep.CancelCondition = cancelCondition;
+
+            WorkflowBuilder.AddStep(newStep);
+            var stepBuilder = new StepBuilder<TData, SubWorkflowStepBody>(WorkflowBuilder, newStep);
+            stepBuilder.Input((step) => step.SubWorkflowId, (data) => subWorkflowId);
+
+            if (parameters != null)
+                stepBuilder.Input((step) => step.Parameters, parameters);
+            
+            // use the result of the sub workflow as an output
+            // merge it with parent workflow data
+            stepBuilder.Output((body, data) =>
+            {
+                foreach (var prop in typeof(TData).GetProperties())
+                {
+                    prop.SetValue(data, prop.GetValue(body.Result));
+                }
+            });
+
+            Step.Outcomes.Add(new ValueOutcome { NextStep = newStep.Id });
+            return stepBuilder;
+        }
     }
 }

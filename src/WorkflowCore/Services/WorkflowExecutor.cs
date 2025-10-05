@@ -89,7 +89,7 @@ namespace WorkflowCore.Services
                         WorkflowId = workflow.Id,
                         ExecutionPointerId = pointer.Id,
                         ErrorTime = _datetimeProvider.UtcNow,
-                        Message = ex.Message
+                        Message = ex.ToString()
                     });
 
                     _executionResultProcessor.HandleStepException(workflow, def, pointer, step, ex);
@@ -156,9 +156,11 @@ namespace WorkflowCore.Services
                 CancellationToken = cancellationToken
             };
 
+            var stepInfo = $"{step.Name ?? step.BodyType.Name} ({step.Id})";
+
             using (var scope = _scopeProvider.CreateScope(context))
             {
-                _logger.LogDebug("Starting step {StepName} on workflow {WorkflowId}", step.Name, workflow.Id);
+                _logger.LogDebug("Starting step {StepName} on workflow {WorkflowDefinitionId} ({WorkflowId})", stepInfo, workflow.WorkflowDefinitionId, workflow.Id);
 
                 IStepBody body = step.ConstructBody(scope.ServiceProvider);
                 var stepExecutor = scope.ServiceProvider.GetRequiredService<IStepExecutor>();
@@ -221,6 +223,13 @@ namespace WorkflowCore.Services
 
             if (workflow.Status == WorkflowStatus.Complete)
             {
+                await OnComplete(workflow, def);
+                return;
+            }
+
+            if (workflow.Status == WorkflowStatus.Terminated)
+            {
+                await OnTerminated(workflow, def);
                 return;
             }
 
@@ -236,7 +245,7 @@ namespace WorkflowCore.Services
                 workflow.NextExecution = Math.Min(pointerSleep, workflow.NextExecution ?? pointerSleep);
             }
 
-            foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count > 0))
+            foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && x.HasChildren))
             {
                 if (!workflow.ExecutionPointers.FindByScope(pointer.Id).All(x => x.EndTime.HasValue))
                     continue;
@@ -256,6 +265,11 @@ namespace WorkflowCore.Services
                 return;
             }
 
+            await OnComplete(workflow, def);
+        }
+
+        private async Task OnComplete(WorkflowInstance workflow, WorkflowDefinition def)
+        {
             workflow.Status = WorkflowStatus.Complete;
             workflow.CompleteTime = _datetimeProvider.UtcNow;
 
@@ -264,8 +278,33 @@ namespace WorkflowCore.Services
                 var middlewareRunner = scope.ServiceProvider.GetRequiredService<IWorkflowMiddlewareRunner>();
                 await middlewareRunner.RunPostMiddleware(workflow, def);
             }
+            
+            _logger.LogDebug("Workflow {WorkflowDefinitionId} ({Id}) completed", workflow.WorkflowDefinitionId, workflow.Id);
 
             _publisher.PublishNotification(new WorkflowCompleted
+            {
+                EventTimeUtc = _datetimeProvider.UtcNow,
+                Reference = workflow.Reference,
+                WorkflowInstanceId = workflow.Id,
+                WorkflowDefinitionId = workflow.WorkflowDefinitionId,
+                Version = workflow.Version
+            });
+        }
+        
+        private async Task OnTerminated(WorkflowInstance workflow, WorkflowDefinition def)
+        {
+            workflow.Status = WorkflowStatus.Terminated;
+            workflow.CompleteTime = _datetimeProvider.UtcNow;
+
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var middlewareRunner = scope.ServiceProvider.GetRequiredService<IWorkflowMiddlewareRunner>();
+                await middlewareRunner.RunPostMiddleware(workflow, def);
+            }
+            
+            _logger.LogDebug("Workflow {WorkflowDefinitionId} ({Id}) terminated", workflow.WorkflowDefinitionId, workflow.Id);
+
+            _publisher.PublishNotification(new WorkflowTerminated
             {
                 EventTimeUtc = _datetimeProvider.UtcNow,
                 Reference = workflow.Reference,
