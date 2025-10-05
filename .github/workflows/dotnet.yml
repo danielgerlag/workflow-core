@@ -294,6 +294,7 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: | 
+            6.0.x
             8.0.x
             9.0.x
       - name: Restore dependencies
