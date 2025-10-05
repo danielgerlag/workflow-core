@@ -31,7 +31,7 @@ Steps:
     StepType: WorkflowCore.TestAssets.Steps.IterateListStep, WorkflowCore.TestAssets
     Inputs:
       Collection: ""data.DataList""
-      RunParallel: false
+      RunParallel: ""false""
 ";
 
             // Act & Assert
