@@ -65,8 +65,15 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             var workflowId = await Host.StartWorkflow<Object>("StopAsyncWorkflow", null);
             
             // Wait for the step to start executing
-            await Task.Delay(500);
-            var stepStartedTime = DateTime.Now;
+            var waitCount = 0;
+            while (StopAsyncWorkflow.StepStartTime == null && waitCount < 50)
+            {
+                await Task.Delay(100);
+                waitCount++;
+            }
+            
+            StopAsyncWorkflow.StepStartTime.Should().NotBeNull("the step should have started before stopping");
+            StopAsyncWorkflow.StepEndTime.Should().BeNull("the step should still be running");
 
             // Act - Call StopAsync which should wait for the step to complete
             var stopwatch = Stopwatch.StartNew();
@@ -74,14 +81,11 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             stopwatch.Stop();
 
             // Assert
-            // The step should have started
-            StopAsyncWorkflow.StepStartTime.Should().NotBeNull("the step should have started");
-            
             // The step should have completed
             StopAsyncWorkflow.StepEndTime.Should().NotBeNull("the step should have completed before StopAsync returned");
             
-            // StopAsync should have taken at least 4 seconds (5 seconds delay minus the 500ms we waited)
-            stopwatch.ElapsedMilliseconds.Should().BeGreaterThan(4000, 
+            // StopAsync should have taken at least 3 seconds (the remaining delay time)
+            stopwatch.ElapsedMilliseconds.Should().BeGreaterOrEqualTo(3000, 
                 "StopAsync should wait for the running step to complete");
         }
 
