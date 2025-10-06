@@ -24,6 +24,8 @@ namespace WorkflowCore.Services.BackgroundTasks
         protected Task DispatchTask;        
         private CancellationTokenSource _cancellationTokenSource;
         private Dictionary<string, EventWaitHandle> _activeTasks;
+        private List<Task> _runningTasks;
+        private readonly object _runningTasksLock = new object();
         private ConcurrentHashSet<string> _secondPasses;
 
         protected QueueConsumer(IQueueProvider queueProvider, ILoggerFactory loggerFactory, WorkflowOptions options)
@@ -33,6 +35,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             Logger = loggerFactory.CreateLogger(GetType());
 
             _activeTasks = new Dictionary<string, EventWaitHandle>();
+            _runningTasks = new List<Task>();
             _secondPasses = new ConcurrentHashSet<string>();
         }
 
@@ -115,6 +118,10 @@ namespace WorkflowCore.Services.BackgroundTasks
                         _activeTasks.Add(item, waitHandle);
                     }
                     var task = ExecuteItem(item, waitHandle, activity);
+                    lock (_runningTasksLock)
+                    {
+                        _runningTasks.Add(task);
+                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -138,6 +145,25 @@ namespace WorkflowCore.Services.BackgroundTasks
 
             foreach (var handle in toComplete)
                 handle.WaitOne();
+
+            // Also await all running tasks to ensure proper async completion
+            Task[] tasksToAwait;
+            lock (_runningTasksLock)
+            {
+                tasksToAwait = _runningTasks.ToArray();
+            }
+
+            if (tasksToAwait.Length > 0)
+            {
+                try
+                {
+                    await Task.WhenAll(tasksToAwait);
+                }
+                catch
+                {
+                    // Individual task exceptions are already logged in ExecuteItem
+                }
+            }
         }
 
         private async Task ExecuteItem(string itemId, EventWaitHandle waitHandle, Activity activity)
