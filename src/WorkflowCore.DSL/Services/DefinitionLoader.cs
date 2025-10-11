@@ -252,7 +252,18 @@ namespace WorkflowCore.Services.DefinitionStorage
                         if (stepProperty.PropertyType.IsAssignableFrom(primitiveValue.GetType()))
                             stepProperty.SetValue(pStep, primitiveValue);
                         else
-                            stepProperty.SetValue(pStep, System.Convert.ChangeType(primitiveValue, stepProperty.PropertyType));
+                            try
+                            {
+                                stepProperty.SetValue(pStep, System.Convert.ChangeType(primitiveValue, stepProperty.PropertyType));
+                            }
+                            catch (InvalidCastException ex)
+                            {
+                                throw new ArgumentException($"Failed to convert input '{input.Key}' for step '{source.Id}' to type '{stepProperty.PropertyType.Name}'.", ex);
+                            }
+                            catch (FormatException ex)
+                            {
+                                throw new ArgumentException($"Failed to convert input '{input.Key}' for step '{source.Id}' to type '{stepProperty.PropertyType.Name}'.", ex);
+                            }
                     }
                     step.Inputs.Add(new ActionParameter<IStepBody, object>(primitiveAction));
                     continue;
