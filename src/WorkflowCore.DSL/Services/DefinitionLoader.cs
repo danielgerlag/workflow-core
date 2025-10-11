@@ -244,7 +244,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                 }
 
                 // Handle primitive values (bool, int, etc.) directly
-                if (input.Value != null && (input.Value.GetType().IsPrimitive || input.Value is bool || input.Value is int || input.Value is long || input.Value is double || input.Value is decimal))
+                if (input.Value != null && (input.Value.GetType().IsPrimitive || input.Value is decimal))
                 {
                     var primitiveValue = input.Value;
                     void primitiveAction(IStepBody pStep, object pData)
