@@ -222,7 +222,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                 var dataParameter = Expression.Parameter(dataType, "data");
                 var contextParameter = Expression.Parameter(typeof(IStepExecutionContext), "context");
                 var environmentVarsParameter = Expression.Parameter(typeof(IDictionary), "environment");
-                var stepProperty = stepType.GetProperty(input.Key);
+                var stepProperty = stepType.GetProperty(input.Key, BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
 
                 if (stepProperty == null)
                 {
@@ -240,6 +240,32 @@ namespace WorkflowCore.Services.DefinitionStorage
                 {
                     var acn = BuildObjectInputAction(input, dataParameter, contextParameter, environmentVarsParameter, stepProperty);
                     step.Inputs.Add(new ActionParameter<IStepBody, object>(acn));
+                    continue;
+                }
+
+                // Handle primitive values (bool, int, etc.) directly
+                if (input.Value != null && (input.Value.GetType().IsPrimitive || input.Value is decimal))
+                {
+                    var primitiveValue = input.Value;
+                    void primitiveAction(IStepBody pStep, object pData)
+                    {
+                        if (stepProperty.PropertyType.IsAssignableFrom(primitiveValue.GetType()))
+                            stepProperty.SetValue(pStep, primitiveValue);
+                        else
+                            try
+                            {
+                                stepProperty.SetValue(pStep, System.Convert.ChangeType(primitiveValue, stepProperty.PropertyType));
+                            }
+                            catch (InvalidCastException ex)
+                            {
+                                throw new ArgumentException($"Failed to convert input '{input.Key}' for step '{source.Id}' to type '{stepProperty.PropertyType.Name}'.", ex);
+                            }
+                            catch (FormatException ex)
+                            {
+                                throw new ArgumentException($"Failed to convert input '{input.Key}' for step '{source.Id}' to type '{stepProperty.PropertyType.Name}'.", ex);
+                            }
+                    }
+                    step.Inputs.Add(new ActionParameter<IStepBody, object>(primitiveAction));
                     continue;
                 }
 
