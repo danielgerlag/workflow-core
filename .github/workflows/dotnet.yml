@@ -286,3 +286,33 @@ jobs:
         with:
           name: oracle-test-results
           path: test-results/
+  Azure-Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: | 
+            8.0.x
+            9.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Azure Tests
+        run: dotnet test test/WorkflowCore.Tests.Azure --no-build --verbosity detailed --logger "trx;LogFileName=AzureTests.trx" --logger "console;verbosity=detailed" --results-directory ./test-results -p:ParallelizeTestCollections=false
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: Azure Test Results
+          path: test-results/*.trx
+          reporter: dotnet-trx
+          fail-on-error: false
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: azure-test-results
+          path: test-results/

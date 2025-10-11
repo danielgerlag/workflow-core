@@ -3,6 +3,7 @@
         <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
         <LangVersion>latest</LangVersion>
         <IsPackable>false</IsPackable>
+        <IsTestProject>true</IsTestProject>
     </PropertyGroup>
 
     <ItemGroup>
