@@ -10,7 +10,7 @@ namespace WorkflowCore.Tests.Sqlite
 
     public class SqliteSetup : IDisposable
     {
-        public string ConnectionString { get; set; }
+        public static string ConnectionString { get; set; }
 
         public SqliteSetup()
         {
