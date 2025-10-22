@@ -4,6 +4,7 @@
 * Provides Queueing support  on [Workflow Core](../../README.md) using Azure Storage queues.
 * Provides event hub support on [Workflow Core](../../README.md) backed by Azure Service Bus.
 * Provides persistence on [Workflow Core](../../README.md) backed by Azure Cosmos DB.
+* Provides persistence on [Workflow Core](../../README.md) backed by Azure Table Storage.
 
 This makes it possible to have a cluster of nodes processing your workflows.
 
@@ -32,5 +33,36 @@ services.AddWorkflow(options =>
 	options.UseAzureSynchronization("azure storage connection string");
 	options.UseAzureServiceBusEventHub("service bus connection string", "topic name", "subscription name");
 	options.UseCosmosDbPersistence("connection string");
+});
+```
+
+### Azure Table Storage Persistence
+
+For cost-effective workflow persistence using Azure Table Storage:
+
+```C#
+services.AddWorkflow(options => 
+{
+	options.UseAzureTableStoragePersistence("azure storage connection string");
+});
+```
+
+You can also specify a custom table name prefix:
+
+```C#
+services.AddWorkflow(options => 
+{
+	options.UseAzureTableStoragePersistence("azure storage connection string", "MyWorkflows");
+});
+```
+
+Or use with managed identity:
+
+```C#
+services.AddWorkflow(options => 
+{
+	var tableServiceUri = new Uri("https://mystorageaccount.table.core.windows.net");
+	var credential = new DefaultAzureCredential();
+	options.UseAzureTableStoragePersistence(tableServiceUri, credential);
 });
 ```
