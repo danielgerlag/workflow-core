@@ -95,7 +95,8 @@ public class SubWorkflowScenario : WorkflowTest<SubWorkflowScenario.ParentWorkfl
         WaitForEventSubscription("Approved", workflowId, TimeSpan.FromSeconds(5));
         UnhandledStepErrors.Should().BeEmpty();
 
-        Host.PublishEvent("Approved", workflowId, new
+        // sub workflow is waiting for an approved event, the key is the id from the input 
+        Host.PublishEvent("Approved", eventKey, new
         {
             Approved = approved, 
             Message = "message " + approved 
@@ -131,7 +132,7 @@ public class SubWorkflowScenario : WorkflowTest<SubWorkflowScenario.ParentWorkfl
         WaitForEventSubscription("Approved", workflowId, TimeSpan.FromSeconds(5));
         UnhandledStepErrors.Should().BeEmpty();
 
-        Host.PublishEvent("Approved", workflowId, new
+        Host.PublishEvent("Approved", eventKey, new
         {
             Approved = "string" 
         });
