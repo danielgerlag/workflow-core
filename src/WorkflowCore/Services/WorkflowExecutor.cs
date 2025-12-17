@@ -245,7 +245,7 @@ namespace WorkflowCore.Services
                 workflow.NextExecution = Math.Min(pointerSleep, workflow.NextExecution ?? pointerSleep);
             }
 
-            foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && x.HasChildren))
+            foreach (var pointer in workflow.ExecutionPointers.Where(x => x.Active && (x.Children ?? new List<string>()).Count > 0))
             {
                 if (!workflow.ExecutionPointers.FindByScope(pointer.Id).All(x => x.EndTime.HasValue))
                     continue;
@@ -279,8 +279,6 @@ namespace WorkflowCore.Services
                 await middlewareRunner.RunPostMiddleware(workflow, def);
             }
             
-            _logger.LogDebug("Workflow {WorkflowDefinitionId} ({Id}) completed", workflow.WorkflowDefinitionId, workflow.Id);
-
             _publisher.PublishNotification(new WorkflowCompleted
             {
                 EventTimeUtc = _datetimeProvider.UtcNow,
