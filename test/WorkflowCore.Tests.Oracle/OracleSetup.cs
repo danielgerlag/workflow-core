@@ -1,26 +1,34 @@
-﻿using System;
-using System.Threading.Tasks;
-
+﻿using System.Threading.Tasks;
+using Testcontainers.Oracle;
 using Xunit;
 
 namespace WorkflowCore.Tests.Oracle
 {
     public class OracleDockerSetup : IAsyncLifetime
     {
-        public static string ConnectionString => "Data Source=(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = localhost)(PORT = 1521)) ) (CONNECT_DATA = (SERVICE_NAME = ORCLPDB1) ) );User ID=TEST_WF;Password=test;";
+        private readonly OracleContainer _oracleContainer;
+
+        public static string ConnectionString { get; private set; }
+
+        public OracleDockerSetup()
+        {
+            _oracleContainer = new OracleBuilder()
+                .WithImage("gvenzl/oracle-free:latest")
+                .WithUsername("TEST_WF")
+                .WithPassword("test")
+                .Build();
+        }
 
         public async Task InitializeAsync()
         {
+            await _oracleContainer.StartAsync();
+            // Build connection string manually since TestContainers might not provide Oracle-specific format
+            ConnectionString = $"Data Source=localhost:{_oracleContainer.GetMappedPublicPort(1521)}/FREEPDB1;User Id=TEST_WF;Password=test;";
         }
 
-        public Task DisposeAsync()
-        {
-            return Task.CompletedTask;
-        }
+        public async Task DisposeAsync() => await _oracleContainer.DisposeAsync();
     }
 
     [CollectionDefinition("Oracle collection")]
-    public class OracleCollection : ICollectionFixture<OracleDockerSetup>
-    {
-    }
+    public class OracleCollection : ICollectionFixture<OracleDockerSetup> { }
 }

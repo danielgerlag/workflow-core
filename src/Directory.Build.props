@@ -4,10 +4,10 @@
     <PackageLicenseUrl>https://github.com/danielgerlag/workflow-core/blob/master/LICENSE.md</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/danielgerlag/workflow-core.git</RepositoryUrl>
-    <Version>3.13.0</Version>
-    <AssemblyVersion>3.13.0.0</AssemblyVersion>
-    <FileVersion>3.13.0.0</FileVersion>
+    <Version>3.17.0</Version>
+    <AssemblyVersion>3.17.0.0</AssemblyVersion>
+    <FileVersion>3.17.0.0</FileVersion>
     <PackageIconUrl>https://github.com/danielgerlag/workflow-core/raw/master/src/logo.png</PackageIconUrl>
-    <PackageVersion>3.13.0</PackageVersion>
+    <PackageVersion>3.17.0</PackageVersion>
   </PropertyGroup>
 </Project>

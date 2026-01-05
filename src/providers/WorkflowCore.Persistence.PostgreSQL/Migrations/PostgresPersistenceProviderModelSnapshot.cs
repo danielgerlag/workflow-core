@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WorkflowCore.Persistence.PostgreSQL;
 
+#nullable disable
+
 namespace WorkflowCore.Persistence.PostgreSQL.Migrations
 {
     [DbContext(typeof(PostgresContext))]
@@ -15,16 +17,26 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.8")
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+#if NETSTANDARD2_1
+                .HasAnnotation("ProductVersion", "5.0.1")
+#elif NET6_0  
+                .HasAnnotation("ProductVersion", "7.0.0")
+#elif NET8_0
+                .HasAnnotation("ProductVersion", "9.0.9")
+#else
+                .HasAnnotation("ProductVersion", "9.0.9")
+#endif
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("WorkflowCore.Persistence.EntityFramework.Models.PersistedEvent", b =>
                 {
                     b.Property<long>("PersistenceId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("PersistenceId"));
 
                     b.Property<string>("EventData")
                         .HasColumnType("text");
@@ -41,7 +53,7 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<DateTime>("EventTime")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsProcessed")
                         .HasColumnType("boolean");
@@ -64,11 +76,12 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                 {
                     b.Property<long>("PersistenceId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("PersistenceId"));
 
                     b.Property<DateTime>("ErrorTime")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ExecutionPointerId")
                         .HasMaxLength(100)
@@ -90,8 +103,9 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                 {
                     b.Property<long>("PersistenceId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("PersistenceId"));
 
                     b.Property<bool>("Active")
                         .HasColumnType("boolean");
@@ -103,7 +117,7 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("EndTime")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("EventData")
                         .HasColumnType("text");
@@ -140,10 +154,10 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("SleepUntil")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("StartTime")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -169,8 +183,9 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                 {
                     b.Property<long>("PersistenceId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("PersistenceId"));
 
                     b.Property<string>("AttributeKey")
                         .HasMaxLength(100)
@@ -193,8 +208,9 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                 {
                     b.Property<long>("PersistenceId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("PersistenceId"));
 
                     b.Property<string>("CommandName")
                         .HasMaxLength(200)
@@ -221,8 +237,9 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                 {
                     b.Property<long>("PersistenceId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("PersistenceId"));
 
                     b.Property<string>("EventKey")
                         .HasMaxLength(200)
@@ -241,7 +258,7 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<DateTime?>("ExternalTokenExpiry")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ExternalWorkerId")
                         .HasMaxLength(200)
@@ -251,7 +268,7 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("SubscribeAsOf")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("SubscriptionData")
                         .HasColumnType("text");
@@ -280,14 +297,15 @@ namespace WorkflowCore.Persistence.PostgreSQL.Migrations
                 {
                     b.Property<long>("PersistenceId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("PersistenceId"));
 
                     b.Property<DateTime?>("CompleteTime")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("CreateTime")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Data")
                         .HasColumnType("text");

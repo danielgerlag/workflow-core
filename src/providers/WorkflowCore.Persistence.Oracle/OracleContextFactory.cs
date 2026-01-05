@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Linq;
-
-using Microsoft.EntityFrameworkCore.Infrastructure;
 
 using Oracle.EntityFrameworkCore.Infrastructure;
 

@@ -8,6 +8,11 @@ using WorkflowCore.Models;
 
 namespace WorkflowCore.Services.BackgroundTasks
 {
+    /// <summary>
+    /// Background task responsible for consuming workflow items from the queue and processing them.
+    /// This consumer ensures that workflows are removed from the greylist after processing,
+    /// regardless of their status, to prevent workflows from getting stuck in "Pending" state.
+    /// </summary>
     internal class WorkflowConsumer : QueueConsumer, IBackgroundTask
     {
         private readonly IDistributedLockProvider _lockProvider;
@@ -57,12 +62,25 @@ namespace WorkflowCore.Services.BackgroundTasks
                         WorkflowActivity.Enrich(result);
                         await _persistenceStore.PersistWorkflow(workflow, result?.Subscriptions, cancellationToken);
                         await QueueProvider.QueueWork(itemId, QueueType.Index);
-                        _greylist.Remove($"wf:{itemId}");
                     }
                 }
+                else
+                {
+                    Logger.LogDebug("Workflow {ItemId} is not runnable, status: {Status}", itemId, workflow.Status);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error processing workflow {ItemId}", itemId);
+                throw;
             }
             finally
             {
+                // Always remove from greylist regardless of workflow status
+                // This prevents workflows from being stuck in greylist when they can't be processed
+                Logger.LogDebug("Removing workflow {ItemId} from greylist", itemId);
+                _greylist.Remove($"wf:{itemId}");
+                
                 await _lockProvider.ReleaseLock(itemId);
                 if ((workflow != null) && (result != null))
                 {

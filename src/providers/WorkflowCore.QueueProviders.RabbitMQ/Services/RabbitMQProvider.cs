@@ -37,11 +37,16 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
             if (_connection == null)
                 throw new InvalidOperationException("RabbitMQ provider not running");
 
-            using (var channel = _connection.CreateModel())
+            var channel = await _connection.CreateChannelAsync(new CreateChannelOptions(publisherConfirmationsEnabled: false, publisherConfirmationTrackingEnabled: false), CancellationToken.None);
+            try
             {
-                channel.QueueDeclare(queue: _queueNameProvider.GetQueueName(queue), durable: true, exclusive: false, autoDelete: false, arguments: null);
-                var body = Encoding.UTF8.GetBytes(id);
-                channel.BasicPublish(exchange: "", routingKey: _queueNameProvider.GetQueueName(queue), basicProperties: null, body: body);
+                await channel.QueueDeclareAsync(queue: _queueNameProvider.GetQueueName(queue), durable: true, exclusive: false, autoDelete: false, arguments: null, passive: false, noWait: false, CancellationToken.None);
+                var body = new ReadOnlyMemory<byte>(Encoding.UTF8.GetBytes(id));
+                await channel.BasicPublishAsync(exchange: "", routingKey: _queueNameProvider.GetQueueName(queue), mandatory: false, basicProperties: new BasicProperties(), body: body, CancellationToken.None);
+            }
+            finally
+            {
+                await channel.CloseAsync(200, "OK", abort: false, CancellationToken.None);
             }
         }
 
@@ -50,24 +55,32 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
             if (_connection == null)
                 throw new InvalidOperationException("RabbitMQ provider not running");
 
-            using (var channel = _connection.CreateModel())
+            var channel = await _connection.CreateChannelAsync(new CreateChannelOptions(publisherConfirmationsEnabled: false, publisherConfirmationTrackingEnabled: false), CancellationToken.None);
+            try
             {
-                channel.QueueDeclare(queue: _queueNameProvider.GetQueueName(queue),
-                                     durable: true,
-                                     exclusive: false,
-                                     autoDelete: false,
-                                     arguments: null);
+                await channel.QueueDeclareAsync(queue: _queueNameProvider.GetQueueName(queue),
+                                         durable: true,
+                                         exclusive: false,
+                                         autoDelete: false,
+                                         arguments: null,
+                                         passive: false,
+                                         noWait: false,
+                                         CancellationToken.None);
 
-                channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
+                await channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false, CancellationToken.None);
 
-                var msg = channel.BasicGet(_queueNameProvider.GetQueueName(queue), false);
+                var msg = await channel.BasicGetAsync(_queueNameProvider.GetQueueName(queue), autoAck: false, CancellationToken.None);
                 if (msg != null)
                 {
                     var data = Encoding.UTF8.GetString(msg.Body.ToArray());
-                    channel.BasicAck(msg.DeliveryTag, false);
+                    await channel.BasicAckAsync(msg.DeliveryTag, multiple: false, CancellationToken.None);
                     return data;
                 }
                 return null;
+            }
+            finally
+            {
+                await channel.CloseAsync(200, "OK", abort: false, CancellationToken.None);
             }
         }
         
@@ -76,20 +89,20 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
             if (_connection != null)
             {
                 if (_connection.IsOpen)
-                    _connection.Close();
+                    _connection.CloseAsync(200, "OK", TimeSpan.FromSeconds(10), abort: false, CancellationToken.None).GetAwaiter().GetResult();
             }
         }
 
         public async Task Start()
         {
-            _connection = _rabbitMqConnectionFactory(_serviceProvider, "Workflow-Core");
+            _connection = await _rabbitMqConnectionFactory(_serviceProvider, "Workflow-Core");
         }
 
         public async Task Stop()
         {
             if (_connection != null)
             {
-                _connection.Close();
+                await _connection.CloseAsync(200, "OK", TimeSpan.FromSeconds(10), abort: false, CancellationToken.None);
                 _connection = null;
             }
         }

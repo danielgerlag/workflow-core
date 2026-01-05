@@ -389,7 +389,7 @@ namespace WorkflowCore.Providers.AWS.Services
                 {
                     { "id", new AttributeValue(id) }
                 },
-                UpdateExpression = "ADD not_processed = :n",
+                UpdateExpression = "ADD not_processed :n",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
                     { ":n" , new AttributeValue { N = 1.ToString() } }

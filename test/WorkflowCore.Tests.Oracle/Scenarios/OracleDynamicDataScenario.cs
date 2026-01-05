@@ -1,8 +1,6 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using WorkflowCore.IntegrationTests.Scenarios;
 using WorkflowCore.Persistence.Oracle;
-using WorkflowCore.Tests.Oracle;
 
 using Xunit;
 

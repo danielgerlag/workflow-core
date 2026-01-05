@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Azure.Core;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Specialized;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
 using WorkflowCore.Interface;
 using WorkflowCore.Providers.Azure.Models;
 
@@ -13,11 +15,11 @@ namespace WorkflowCore.Providers.Azure.Services
 {
     public class AzureLockManager: IDistributedLockProvider
     {
-        private readonly CloudBlobClient _client;        
+        private readonly BlobServiceClient _client;
         private readonly ILogger _logger;
         private readonly List<ControlledLock> _locks = new List<ControlledLock>();
         private readonly AutoResetEvent _mutex = new AutoResetEvent(true);
-        private CloudBlobContainer _container;
+        private BlobContainerClient _container;
         private Timer _renewTimer;
         private TimeSpan LockTimeout => TimeSpan.FromMinutes(1);
         private TimeSpan RenewInterval => TimeSpan.FromSeconds(45);
@@ -25,26 +27,31 @@ namespace WorkflowCore.Providers.Azure.Services
         public AzureLockManager(string connectionString, ILoggerFactory logFactory)
         {
             _logger = logFactory.CreateLogger<AzureLockManager>();
-            var account = CloudStorageAccount.Parse(connectionString);
-            _client = account.CreateCloudBlobClient();
+            _client = new BlobServiceClient(connectionString);
+        }
+
+        public AzureLockManager(Uri blobEndpoint, TokenCredential tokenCredential, ILoggerFactory logFactory)
+        {
+            _logger = logFactory.CreateLogger<AzureLockManager>();
+            _client = new BlobServiceClient(blobEndpoint, tokenCredential);
         }
 
         public async Task<bool> AcquireLock(string Id, CancellationToken cancellationToken)
         {
-            var blob = _container.GetBlockBlobReference(Id);
+            var blob = _container.GetBlockBlobClient(Id);
 
             if (!await blob.ExistsAsync())
-                await blob.UploadTextAsync(string.Empty);
+                await blob.UploadAsync(new MemoryStream());
 
             if (_mutex.WaitOne())
             {
                 try
                 {
-                    var leaseId = await blob.AcquireLeaseAsync(LockTimeout);
-                    _locks.Add(new ControlledLock(Id, leaseId, blob));                    
+                    var lease = await blob.GetBlobLeaseClient().AcquireAsync(LockTimeout);
+                    _locks.Add(new ControlledLock(Id, lease.Value.LeaseId, blob));
                     return true;
                 }
-                catch (StorageException ex)
+                catch (Exception ex)
                 {
                     _logger.LogDebug($"Failed to acquire lock {Id} - {ex.Message}");
                     return false;
@@ -69,7 +76,7 @@ namespace WorkflowCore.Providers.Azure.Services
                     {
                         try
                         {
-                            await entry.Blob.ReleaseLeaseAsync(AccessCondition.GenerateLeaseCondition(entry.LeaseId));
+                            await entry.Blob.GetBlobLeaseClient(entry.LeaseId).ReleaseAsync();
                         }
                         catch (Exception ex)
                         {
@@ -87,7 +94,7 @@ namespace WorkflowCore.Providers.Azure.Services
 
         public async Task Start()
         {
-            _container = _client.GetContainerReference("workflowcore-locks");
+            _container = _client.GetBlobContainerClient("workflowcore-locks");
             await _container.CreateIfNotExistsAsync();
             _renewTimer = new Timer(RenewLeases, null, RenewInterval, RenewInterval);
         }
@@ -128,7 +135,7 @@ namespace WorkflowCore.Providers.Azure.Services
         {
             try
             {
-                await entry.Blob.RenewLeaseAsync(AccessCondition.GenerateLeaseCondition(entry.LeaseId));
+                await entry.Blob.GetBlobLeaseClient(entry.LeaseId).RenewAsync();
             }
             catch (Exception ex)
             {

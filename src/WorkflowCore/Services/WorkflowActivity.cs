@@ -83,7 +83,6 @@ namespace WorkflowCore.Services
 
                 if (result?.Errors?.Count > 0)
                 {
-                    activity.SetStatus(Status.Error);
                     activity.SetStatus(ActivityStatusCode.Error);
                 }
             }

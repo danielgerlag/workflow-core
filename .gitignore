@@ -247,3 +247,4 @@ ModelManifest.xml
 .idea/.idea.WorkflowCore/.idea
 riderModule.iml
 .DS_Store
+test-results/

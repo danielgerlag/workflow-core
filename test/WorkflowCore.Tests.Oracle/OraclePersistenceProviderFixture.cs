@@ -1,8 +1,6 @@
-﻿using System;
-using WorkflowCore.Interface;
+﻿using WorkflowCore.Interface;
 using WorkflowCore.Persistence.EntityFramework.Services;
 using WorkflowCore.Persistence.Oracle;
-using WorkflowCore.Tests.Oracle;
 using WorkflowCore.UnitTests;
 using Xunit;
 using Xunit.Abstractions;
@@ -12,7 +10,7 @@ namespace WorkflowCore.Tests.Oracle
     [Collection("Oracle collection")]
     public class OraclePersistenceProviderFixture : BasePersistenceFixture
     {
-        private readonly IPersistenceProvider _subject;
+        private readonly EntityFrameworkPersistenceProvider _subject;
         protected override IPersistenceProvider Subject => _subject;
 
         public OraclePersistenceProviderFixture(OracleDockerSetup dockerSetup, ITestOutputHelper output)
