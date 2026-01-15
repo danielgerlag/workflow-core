@@ -287,12 +287,18 @@ namespace WorkflowCore.Services
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Purges only completed or terminated workflows; other status values are rejected.
+        /// </summary>
+        /// <remarks>
+        /// Workflows without a <see cref="WorkflowInstance.CompleteTime"/> value are not eligible for purge.
+        /// </remarks>
         public Task PurgeWorkflows(WorkflowStatus status, DateTime olderThan, CancellationToken cancellationToken = default)
         {
             var olderThanUtc = olderThan.ToUniversalTime();
             if (status != WorkflowStatus.Complete && status != WorkflowStatus.Terminated)
             {
-                return Task.CompletedTask;
+                throw new ArgumentOutOfRangeException(nameof(status), status, "Only complete or terminated workflows can be purged.");
             }
 
             lock (_instances)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using FluentAssertions;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -16,7 +17,7 @@ namespace WorkflowCore.UnitTests.Services
         private IWorkflowPurger Purger => (IWorkflowPurger)_subject;
 
         [Fact]
-        public void PurgeWorkflows_should_remove_terminated_instances()
+        public async Task PurgeWorkflows_should_remove_terminated_instances()
         {
             var terminatedWorkflow = new WorkflowInstance
             {
@@ -34,17 +35,17 @@ namespace WorkflowCore.UnitTests.Services
                 WorkflowDefinitionId = "active"
             };
 
-            var terminatedId = _subject.CreateNewWorkflow(terminatedWorkflow).Result;
-            var activeId = _subject.CreateNewWorkflow(activeWorkflow).Result;
+            var terminatedId = await _subject.CreateNewWorkflow(terminatedWorkflow);
+            var activeId = await _subject.CreateNewWorkflow(activeWorkflow);
 
-            Purger.PurgeWorkflows(WorkflowStatus.Terminated, DateTime.UtcNow.AddDays(-1)).Wait();
+            await Purger.PurgeWorkflows(WorkflowStatus.Terminated, DateTime.UtcNow.AddDays(-1));
 
-            var remaining = _subject.GetWorkflowInstances(new[] { terminatedId, activeId }).Result;
+            var remaining = await _subject.GetWorkflowInstances(new[] { terminatedId, activeId });
             remaining.Should().ContainSingle(x => x.Id == activeId);
         }
 
         [Fact]
-        public void PurgeWorkflows_should_remove_completed_instances()
+        public async Task PurgeWorkflows_should_remove_completed_instances()
         {
             var completedWorkflow = new WorkflowInstance
             {
@@ -62,12 +63,12 @@ namespace WorkflowCore.UnitTests.Services
                 WorkflowDefinitionId = "active"
             };
 
-            var completedId = _subject.CreateNewWorkflow(completedWorkflow).Result;
-            var activeId = _subject.CreateNewWorkflow(activeWorkflow).Result;
+            var completedId = await _subject.CreateNewWorkflow(completedWorkflow);
+            var activeId = await _subject.CreateNewWorkflow(activeWorkflow);
 
-            Purger.PurgeWorkflows(WorkflowStatus.Complete, DateTime.UtcNow.AddDays(-2)).Wait();
+            await Purger.PurgeWorkflows(WorkflowStatus.Complete, DateTime.UtcNow.AddDays(-2));
 
-            var remaining = _subject.GetWorkflowInstances(new[] { completedId, activeId }).Result;
+            var remaining = await _subject.GetWorkflowInstances(new[] { completedId, activeId });
             remaining.Should().ContainSingle(x => x.Id == activeId);
         }
     }
