@@ -17,7 +17,7 @@ namespace WorkflowCore.Services
     /// <summary>
     /// In-memory implementation of IPersistenceProvider for demo and testing purposes
     /// </summary>
-    public class MemoryPersistenceProvider : ISingletonMemoryProvider
+    public class MemoryPersistenceProvider : ISingletonMemoryProvider, IWorkflowPurger
     {
         private readonly List<WorkflowInstance> _instances = new List<WorkflowInstance>();
         private readonly List<EventSubscription> _subscriptions = new List<EventSubscription>();
@@ -285,6 +285,24 @@ namespace WorkflowCore.Services
         public Task ProcessCommands(DateTimeOffset asOf, Func<ScheduledCommand, Task> action, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
+        }
+
+        public Task PurgeWorkflows(WorkflowStatus status, DateTime olderThan, CancellationToken cancellationToken = default)
+        {
+            var olderThanUtc = olderThan.ToUniversalTime();
+            if (status != WorkflowStatus.Complete && status != WorkflowStatus.Terminated)
+            {
+                return Task.CompletedTask;
+            }
+
+            lock (_instances)
+            {
+                _instances.RemoveAll(x => x.Status == status
+                    && x.CompleteTime.HasValue
+                    && x.CompleteTime.Value < olderThanUtc);
+            }
+
+            return Task.CompletedTask;
         }
     }
 
