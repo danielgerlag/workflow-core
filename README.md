@@ -150,6 +150,7 @@ These are also available as separate Nuget packages.
 
 ## Extensions
 
+* [Azure AI Foundry](src/extensions/WorkflowCore.AI.AzureFoundry)
 * [User (human) workflows](src/extensions/WorkflowCore.Users)
 
 
