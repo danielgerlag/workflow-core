@@ -103,10 +103,12 @@ namespace WorkflowCore.UnitTests.Services
             var step1Body = A.Fake<IStepBody>();
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
             WorkflowStep step1 = BuildFakeStep(step1Body);
+            A.CallTo(() => step1.InitForExecution(A<WorkflowExecutorResult>.Ignored, A<WorkflowDefinition>.Ignored, A<WorkflowInstance>.Ignored, A<ExecutionPointer>.Ignored))
+                .Returns(ExecutionPipelineDirective.EndWorkflow);
             Given1StepWorkflow(step1, "Workflow", 1);
 
             //act
-            await Subject.RunWorkflowSync("Workflow", 1, new { }, "Test", TimeSpan.FromMilliseconds(1));
+            await Subject.RunWorkflowSync("Workflow", 1, new { }, "Test", TimeSpan.FromSeconds(5));
 
             //assert
             A.CallTo(() => MiddlewareRunner.RunPreMiddleware(A<WorkflowInstance>.Ignored, A<WorkflowDefinition>.Ignored)).MustHaveHappened();
