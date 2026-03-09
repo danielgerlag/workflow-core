@@ -60,7 +60,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     finally
                     {
                         WorkflowActivity.Enrich(result);
-                        await _persistenceStore.PersistWorkflow(workflow, result?.Subscriptions, cancellationToken);
+                        await _persistenceStore.PersistWorkflow(workflow, result?.Subscriptions);
                         await QueueProvider.QueueWork(itemId, QueueType.Index);
                     }
                 }
