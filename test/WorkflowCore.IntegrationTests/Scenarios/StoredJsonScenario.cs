@@ -84,5 +84,53 @@ namespace WorkflowCore.IntegrationTests.Scenarios
             data["Counter6"].Should().Be(1);
             data["Counter10"].Should().Be(1);
         }
+
+
+        [Fact]
+        public void should_execute_json_workflow_with_complex_input_type()
+        {
+            var initialData = new FlowData();
+            var workflowId = StartWorkflow(TestAssets.Utils.GetTestDefinitionJsonComplexInputProperty(), initialData);
+            WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
+            
+            var data = GetData<FlowData>(workflowId);
+            GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
+            UnhandledStepErrors.Count.Should().Be(0);
+            data.Assignee.Should().NotBeNull();
+            data.Assignee.Name.Should().Be("John Doe");
+            data.Assignee.UnitInfo.Should().NotBeNull();
+            data.Assignee.UnitInfo.Name.Should().Be("IT Department");
+            
+        }
+        
+        [Fact]
+        public void should_execute_json_workflow_with_list_of_complex_input_type()
+        {
+            var initialData = new FlowData();
+            var workflowId = StartWorkflow(TestAssets.Utils.GetTestDefinitionJsonListOfComplexInputProperty(), initialData);
+            WaitForWorkflowToComplete(workflowId, TimeSpan.FromSeconds(30));
+            
+            var data = GetData<FlowData>(workflowId);
+            GetStatus(workflowId).Should().Be(WorkflowStatus.Complete);
+            UnhandledStepErrors.Count.Should().Be(0);
+            
+            data.AssigneeList.Should().NotBeNullOrEmpty();
+            data.AssigneeList.Count.Should().Be(2);
+
+            data.Assignee.Should().NotBeNull();
+            data.Assignee.Name.Should().Be("John Doe");
+            data.Assignee.UnitInfo?.Name.Should().Be("IT Department");
+
+            data.AssigneeList[0]?.Name.Should().Be(@"Nurlan Mikayilov");
+            data.AssigneeList[0]?.UnitInfo?.Name.Should().Be("IT Department");
+
+            data.AssigneeList[1]?.Name.Should().Be(@"Jala Mammadova");
+            data.AssigneeList[1]?.UnitInfo?.Name.Should().Be("General Department");
+            
+            data.AssigneeArray[0]?.Name.Should().Be(@"Amin Nabiyev");
+            data.AssigneeArray[0]?.UnitInfo?.Name.Should().Be("IT Department");
+            
+            
+        }
     }
 }
