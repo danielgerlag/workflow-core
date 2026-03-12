@@ -23,7 +23,7 @@ namespace WorkflowCore.AI.AzureFoundry.Services
 
         public ToolRegistry(IServiceProvider serviceProvider)
         {
-            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _serviceProvider = serviceProvider;
         }
 
         public void Register(IAgentTool tool)
@@ -39,6 +39,8 @@ namespace WorkflowCore.AI.AzureFoundry.Services
 
         public void Register<T>() where T : IAgentTool
         {
+            if (_serviceProvider == null)
+                throw new InvalidOperationException("ServiceProvider is required to register tools by type. Provide a non-null IServiceProvider in the constructor.");
             var tool = _serviceProvider.GetRequiredService<T>();
             Register(tool);
             _toolTypes[tool.Name] = typeof(T);
@@ -51,6 +53,8 @@ namespace WorkflowCore.AI.AzureFoundry.Services
 
             if (_toolTypes.TryGetValue(name, out var type))
             {
+                if (_serviceProvider == null)
+                    throw new InvalidOperationException("ServiceProvider is required to resolve tools by type.");
                 tool = (IAgentTool)_serviceProvider.GetRequiredService(type);
                 _tools[name] = tool;
                 return tool;
