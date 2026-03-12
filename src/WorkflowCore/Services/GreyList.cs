@@ -36,7 +36,7 @@ namespace WorkflowCore.Services
             var result = start > (_dateTimeProvider.Now.AddMinutes(-1 * TTL));
 
             if (!result)
-                _list.TryRemove(id, out var _);
+                _list.TryRemove(id, out var _); // Benign race: entry may have been refreshed between check and remove
 
             return result;
         }
