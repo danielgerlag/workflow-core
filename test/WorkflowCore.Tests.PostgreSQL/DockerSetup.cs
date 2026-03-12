@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Squadron;
 using Xunit;
 
@@ -13,7 +12,6 @@ namespace WorkflowCore.Tests.PostgreSQL
 
         public PostgresDockerSetup()
         {
-            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             _postgreSqlResource = new PostgreSqlResource();
         }
 
