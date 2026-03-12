@@ -58,7 +58,10 @@ namespace WorkflowCore.Services.BackgroundTasks
             _cancellationTokenSource.Cancel();
             if (DispatchTask != null)
             {
-                DispatchTask.Wait();
+                if (!DispatchTask.Wait(TimeSpan.FromSeconds(30)))
+                {
+                    Logger.LogWarning("Dispatch task did not complete within 30 seconds during shutdown");
+                }
                 DispatchTask = null;
             }
         }
@@ -89,6 +92,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     if (item == null)
                     {
                         activity?.Dispose();
+                        activity = null;
                         if (!QueueProvider.IsDequeueBlocking)
                             await Task.Delay(Options.IdleTime, cancelToken);
                         continue;
@@ -107,6 +111,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                         if (!EnableSecondPasses)
                             await QueueProvider.QueueWork(item, Queue);
                         activity?.Dispose();
+                        activity = null;
                         continue;
                     }
 
@@ -159,9 +164,9 @@ namespace WorkflowCore.Services.BackgroundTasks
                 {
                     await Task.WhenAll(tasksToAwait);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Individual task exceptions are already logged in ExecuteItem
+                    Logger.LogWarning(ex, "One or more queued tasks failed");
                 }
             }
         }

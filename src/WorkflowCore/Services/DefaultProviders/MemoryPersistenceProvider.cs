@@ -78,7 +78,7 @@ namespace WorkflowCore.Services
         {
             lock (_instances)
             {
-                return _instances.First(x => x.Id == Id);
+                return _instances.FirstOrDefault(x => x.Id == Id);
             }
         }
 
@@ -149,7 +149,7 @@ namespace WorkflowCore.Services
         {
             lock (_subscriptions)
             {
-                var sub = _subscriptions.Single(x => x.Id == eventSubscriptionId);
+                var sub = _subscriptions.SingleOrDefault(x => x.Id == eventSubscriptionId);
                 _subscriptions.Remove(sub);
             }
         }
@@ -158,7 +158,7 @@ namespace WorkflowCore.Services
         {
             lock (_subscriptions)
             {
-                var sub = _subscriptions.Single(x => x.Id == eventSubscriptionId);
+                var sub = _subscriptions.SingleOrDefault(x => x.Id == eventSubscriptionId);
                 return Task.FromResult(sub);
             }
         }
@@ -177,7 +177,7 @@ namespace WorkflowCore.Services
         {
             lock (_subscriptions)
             {
-                var sub = _subscriptions.Single(x => x.Id == eventSubscriptionId);
+                var sub = _subscriptions.SingleOrDefault(x => x.Id == eventSubscriptionId);
                 sub.ExternalToken = token;
                 sub.ExternalWorkerId = workerId;
                 sub.ExternalTokenExpiry = expiry;
@@ -190,7 +190,7 @@ namespace WorkflowCore.Services
         {
             lock (_subscriptions)
             {
-                var sub = _subscriptions.Single(x => x.Id == eventSubscriptionId);
+                var sub = _subscriptions.SingleOrDefault(x => x.Id == eventSubscriptionId);
                 if (sub.ExternalToken != token)
                     throw new InvalidOperationException();
                 sub.ExternalToken = null;
@@ -271,7 +271,7 @@ namespace WorkflowCore.Services
 
         public async Task PersistErrors(IEnumerable<ExecutionError> errors, CancellationToken _ = default)
         {
-            lock (errors)
+            lock (_errors)
             {
                 _errors.AddRange(errors);
             }
