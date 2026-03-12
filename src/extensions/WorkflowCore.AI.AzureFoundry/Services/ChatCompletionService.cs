@@ -136,17 +136,21 @@ namespace WorkflowCore.AI.AzureFoundry.Services
         }
 
         /// <summary>
-        /// Ensures tool call ID is valid (max 40 characters per API requirement)
+        /// Ensures tool call ID is valid (max 40 characters per API requirement).
+        /// Warning: truncation may cause mismatched tool call IDs between request and response.
         /// </summary>
-        private static string EnsureValidToolCallId(string id)
+        private string EnsureValidToolCallId(string id)
         {
             if (string.IsNullOrEmpty(id))
             {
-                return "call_" + Guid.NewGuid().ToString("N").Substring(0, 24);
+                var generated = "call_" + Guid.NewGuid().ToString("N").Substring(0, 24);
+                _logger.LogWarning("Tool call ID was null or empty, generated replacement: {GeneratedId}", generated);
+                return generated;
             }
             
             if (id.Length > 40)
             {
+                _logger.LogWarning("Tool call ID truncated from {OriginalLength} to 40 characters: {OriginalId}", id.Length, id);
                 return id.Substring(0, 40);
             }
             

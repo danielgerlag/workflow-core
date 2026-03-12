@@ -85,6 +85,9 @@ namespace WorkflowCore.AI.AzureFoundry.Services
 
             if (!string.IsNullOrEmpty(filter))
             {
+                // Basic OData filter validation - reject suspicious patterns
+                if (filter.Contains("--") || filter.Contains(";") || filter.Contains("/*"))
+                    throw new ArgumentException("Filter contains invalid characters.", nameof(filter));
                 searchOptions.Filter = filter;
             }
 
