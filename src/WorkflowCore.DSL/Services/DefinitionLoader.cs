@@ -62,7 +62,15 @@ namespace WorkflowCore.Services.DefinitionStorage
 
         public WorkflowDefinition LoadDefinition(string source, Func<string, DefinitionSourceV1> deserializer)
         {
+            if (string.IsNullOrWhiteSpace(source))
+                throw new ArgumentNullException(nameof(source));
+            if (deserializer == null)
+                throw new ArgumentNullException(nameof(deserializer));
+
             var sourceObj = deserializer(source);
+            if (sourceObj == null)
+                throw new InvalidOperationException("Deserialization returned null.");
+
             var def = Convert(sourceObj);
             _registry.RegisterWorkflow(def);
             return def;

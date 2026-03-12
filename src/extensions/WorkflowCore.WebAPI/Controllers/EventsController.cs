@@ -23,6 +23,11 @@ namespace WorkflowCore.WebAPI.Controllers
         [HttpPost("{eventName}/{eventKey}")]
         public async Task<IActionResult> Post(string eventName, string eventKey, [FromBody]object eventData)
         {
+            if (string.IsNullOrEmpty(eventName))
+                return BadRequest("Event name is required");
+            if (string.IsNullOrEmpty(eventKey))
+                return BadRequest("Event key is required");
+
             await _workflowHost.PublishEvent(eventName, eventKey, eventData);
             return Ok();
         }

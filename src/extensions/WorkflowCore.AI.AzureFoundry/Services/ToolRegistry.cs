@@ -23,7 +23,7 @@ namespace WorkflowCore.AI.AzureFoundry.Services
 
         public ToolRegistry(IServiceProvider serviceProvider)
         {
-            _serviceProvider = serviceProvider;
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         }
 
         public void Register(IAgentTool tool)
