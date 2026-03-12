@@ -122,19 +122,20 @@ namespace WorkflowCore.Providers.AWS.Services
 
             _cancellationTokenSource = new CancellationTokenSource();
 
-            _heartbeatTask = new Task(SendHeartbeat);
-            _heartbeatTask.Start();
+            _heartbeatTask = Task.Run(() => SendHeartbeat());
         }
 
-        public Task Stop()
+        public async Task Stop()
         {
             _cancellationTokenSource.Cancel();
-            _heartbeatTask.Wait();
-            _heartbeatTask = null;
-            return Task.CompletedTask;
+            if (_heartbeatTask != null)
+            {
+                await _heartbeatTask;
+                _heartbeatTask = null;
+            }
         }
 
-        private async void SendHeartbeat()
+        private async Task SendHeartbeat()
         {
             while (!_cancellationTokenSource.IsCancellationRequested)
             {

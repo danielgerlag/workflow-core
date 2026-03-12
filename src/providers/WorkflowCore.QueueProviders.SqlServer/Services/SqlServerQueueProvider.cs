@@ -74,7 +74,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
 
         public void Dispose()
         {
-            Stop().Wait();
+            Stop().GetAwaiter().GetResult();
         }
 
         /// <inheritdoc />
