@@ -86,6 +86,7 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
         
         public void Dispose()
         {
+            // GetAwaiter().GetResult() is the best available sync-over-async pattern for IDisposable.Dispose()
             if (_connection != null)
             {
                 if (_connection.IsOpen)
