@@ -17,7 +17,8 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 	{
 		internal const string WorkflowCollectionName = "wfc.workflows";
 		private readonly IDocumentStore _database;
-		static bool indexesCreated = false;
+		private static bool indexesCreated = false;
+		private static readonly object _indexLock = new object();
 
         public bool SupportsScheduledCommands => false;
 
@@ -29,16 +30,19 @@ namespace WorkflowCore.Persistence.RavenDB.Services
 
 		static void CreateIndexes(RavendbPersistenceProvider instance)
 		{
-			if (!indexesCreated)
+			lock (_indexLock)
 			{
-				/*
-				// create the indexes here based on assemby of classes in the file 'RavenDbIndexes.cs'
-				IndexCreation.CreateIndexes(typeof(WorkflowInstances_Id).Assembly, instance._database);
-				IndexCreation.CreateIndexes(typeof(EventSubscriptions_Id).Assembly, instance._database);
-				IndexCreation.CreateIndexes(typeof(Events_Id).Assembly, instance._database);
-				IndexCreation.CreateIndexes(typeof(ExecutionErrors_Id).Assembly, instance._database);
-				*/
-				indexesCreated = true;
+				if (!indexesCreated)
+				{
+					/*
+					// create the indexes here based on assemby of classes in the file 'RavenDbIndexes.cs'
+					IndexCreation.CreateIndexes(typeof(WorkflowInstances_Id).Assembly, instance._database);
+					IndexCreation.CreateIndexes(typeof(EventSubscriptions_Id).Assembly, instance._database);
+					IndexCreation.CreateIndexes(typeof(Events_Id).Assembly, instance._database);
+					IndexCreation.CreateIndexes(typeof(ExecutionErrors_Id).Assembly, instance._database);
+					*/
+					indexesCreated = true;
+				}
 			}
 		}
 

@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 using System;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -23,7 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 configureClient?.Invoke(mongoClientSettings);
                 var client = new MongoClient(mongoClientSettings);
                 var db = client.GetDatabase(databaseName);
-                return new MongoPersistenceProvider(db);
+                return new MongoPersistenceProvider(db, sp.GetRequiredService<ILoggerFactory>());
             });
             options.Services.AddTransient<IWorkflowPurger>(sp =>
             {
@@ -49,7 +50,7 @@ namespace Microsoft.Extensions.DependencyInjection
             options.UsePersistence(sp =>
             {
                 var db = createDatabase(sp);
-                return new MongoPersistenceProvider(db);
+                return new MongoPersistenceProvider(db, sp.GetRequiredService<ILoggerFactory>());
             });
             options.Services.AddTransient<IWorkflowPurger>(sp =>
             {
