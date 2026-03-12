@@ -32,9 +32,9 @@ namespace Docker.Testify
         protected DockerSetup()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-    			docker = new DockerClientConfiguration(new Uri("npipe://./pipe/docker_engine")).CreateClient();
+    			docker = new DockerClientConfiguration(new Uri("npipe://./pipe/docker_engine")).CreateClient(new System.Version(1, 45));
     		else
-    			docker = new DockerClientConfiguration(new Uri("unix:///var/run/docker.sock")).CreateClient();
+    			docker = new DockerClientConfiguration(new Uri("unix:///var/run/docker.sock")).CreateClient(new System.Version(1, 45));
 
             ExternalPort = GetFreePort();
 
