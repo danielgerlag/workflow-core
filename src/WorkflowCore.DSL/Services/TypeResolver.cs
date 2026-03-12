@@ -9,7 +9,14 @@ namespace WorkflowCore.Services.DefinitionStorage
     {
         public Type FindType(string name)
         {
-            return Type.GetType(name, true, true);
+            try
+            {
+                return Type.GetType(name, true, true);
+            }
+            catch (TypeLoadException ex)
+            {
+                throw new InvalidOperationException($"Could not resolve type '{name}'. Ensure the type exists and the assembly is referenced.", ex);
+            }
         }
     }
 }
