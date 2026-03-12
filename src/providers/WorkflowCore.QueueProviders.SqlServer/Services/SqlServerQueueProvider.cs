@@ -89,8 +89,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             if (string.IsNullOrEmpty(id))
                 throw new ArgumentNullException(nameof(id), "Param id must not be null");
 
-            SqlConnection cn = new SqlConnection(_connectionString);
-            try
+            using (var cn = new SqlConnection(_connectionString))
             {
                 await cn.OpenAsync();
                 var par = _config.GetByQueue(queue);
@@ -103,10 +102,6 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                     new SqlParameter("@RequestMessage", id)
                     );
             }
-            finally
-            {
-                cn.Close();
-            }
         }
 
         /// <inheritdoc />
@@ -118,21 +113,24 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
         /// <returns>Next id from queue, null if no message arrives in one second.</returns>
         public async Task<string> DequeueWork(QueueType queue, CancellationToken cancellationToken)
         {
-            SqlConnection cn = new SqlConnection(_connectionString);
-            try
+            using (var cn = new SqlConnection(_connectionString))
             {
                 await cn.OpenAsync(cancellationToken);
 
                 var par = _config.GetByQueue(queue);
-                var sql = _dequeueWorkCommand.Replace("{queueName}", par.QueueName);
+                var sql = _dequeueWorkCommand.Replace("{queueName}", SanitizeIdentifier(par.QueueName));
                 var msg = await _sqlCommandExecutor.ExecuteScalarAsync<object>(cn, null, sql);
                 return msg is DBNull ? null : (string)msg;
+            }
+        }
 
-            }
-            finally
-            {
-                cn.Close();
-            }
+        private static string SanitizeIdentifier(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Queue name cannot be null or empty.", nameof(name));
+            if (!System.Text.RegularExpressions.Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z0-9_/]*$"))
+                throw new ArgumentException($"Queue name '{name}' contains invalid characters.", nameof(name));
+            return name;
         }
     }
 }
