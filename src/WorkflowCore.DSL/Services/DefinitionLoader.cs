@@ -153,7 +153,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                     }
                     catch (Exception ex) when (ex is System.Linq.Dynamic.Core.Exceptions.ParseException || ex is InvalidOperationException)
                     {
-                        throw new WorkflowDefinitionLoadException($"Error parsing cancel condition expression '{nextStep.CancelCondition}' for step '{nextStep.Id}': {ex.Message}");
+                        throw new WorkflowDefinitionLoadException($"Error parsing cancel condition expression '{nextStep.CancelCondition}' for step '{nextStep.Id}': {ex.Message}", ex);
                     }
                 }
 
@@ -283,7 +283,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                 }
                 catch (Exception ex) when (ex is System.Linq.Dynamic.Core.Exceptions.ParseException || ex is InvalidOperationException)
                 {
-                    throw new WorkflowDefinitionLoadException($"Error parsing output expression '{output.Value}': {ex.Message}");
+                    throw new WorkflowDefinitionLoadException($"Error parsing output expression '{output.Value}': {ex.Message}", ex);
                 }
 
                 var dataParameter = Expression.Parameter(dataType, "data");
@@ -442,7 +442,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                 }
                 catch (Exception ex) when (ex is System.Linq.Dynamic.Core.Exceptions.ParseException || ex is InvalidOperationException)
                 {
-                    throw new WorkflowDefinitionLoadException($"Error parsing select next step expression '{nextStep.Value}': {ex.Message}");
+                    throw new WorkflowDefinitionLoadException($"Error parsing select next step expression '{nextStep.Value}': {ex.Message}", ex);
                 }
                 Expression<Func<object, object, bool>> sourceExpr = (data, outcome) => System.Convert.ToBoolean(sourceDelegate.DynamicInvoke(data, outcome));
                 step.Outcomes.Add(new ExpressionOutcome<object>(sourceExpr)
@@ -467,7 +467,7 @@ namespace WorkflowCore.Services.DefinitionStorage
             }
             catch (Exception ex) when (ex is System.Linq.Dynamic.Core.Exceptions.ParseException || ex is InvalidOperationException)
             {
-                throw new WorkflowDefinitionLoadException($"Error parsing input expression '{expr}' for property '{input.Key}': {ex.Message}");
+                throw new WorkflowDefinitionLoadException($"Error parsing input expression '{expr}' for property '{input.Key}': {ex.Message}", ex);
             }
 
             void acn(IStepBody pStep, object pData, IStepExecutionContext pContext)

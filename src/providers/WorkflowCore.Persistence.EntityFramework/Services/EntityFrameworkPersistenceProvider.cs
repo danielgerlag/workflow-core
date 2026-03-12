@@ -145,7 +145,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .ThenInclude(ep => ep.ExtensionAttributes)
                     .Include(wf => wf.ExecutionPointers)
                     .AsTracking()
-                    .FirstOrDefaultAsync(cancellationToken);
+                    .FirstAsync(cancellationToken);
 
                 var persistable = workflow.ToPersistable(existingEntity);
                 await db.SaveChangesAsync(cancellationToken);
@@ -163,7 +163,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .ThenInclude(ep => ep.ExtensionAttributes)
                     .Include(wf => wf.ExecutionPointers)
                     .AsTracking()
-                    .FirstOrDefaultAsync(cancellationToken);
+                    .FirstAsync(cancellationToken);
 
                 var workflowPersistable = workflow.ToPersistable(existingEntity);
 
@@ -183,7 +183,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             using (var db = ConstructDbContext())
             {
                 var uid = new Guid(eventSubscriptionId);
-                var existing = await db.Set<PersistedSubscription>().FirstOrDefaultAsync(x => x.SubscriptionId == uid, cancellationToken);
+                var existing = await db.Set<PersistedSubscription>().FirstAsync(x => x.SubscriptionId == uid, cancellationToken);
                 db.Set<PersistedSubscription>().Remove(existing);
                 await db.SaveChangesAsync(cancellationToken);
             }
@@ -273,6 +273,9 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .AsTracking()
                     .FirstOrDefaultAsync(cancellationToken);
 
+                if (existingEntity == null)
+                    return;
+
                 existingEntity.IsProcessed = true;
                 await db.SaveChangesAsync(cancellationToken);
             }
@@ -306,6 +309,9 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .Where(x => x.EventId == uid)
                     .AsTracking()
                     .FirstOrDefaultAsync(cancellationToken);
+
+                if (existingEntity == null)
+                    return;
 
                 existingEntity.IsProcessed = false;
                 await db.SaveChangesAsync(cancellationToken);
@@ -363,7 +369,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 var existingEntity = await db.Set<PersistedSubscription>()
                     .Where(x => x.SubscriptionId == uid)
                     .AsTracking()
-                    .FirstOrDefaultAsync(cancellationToken);
+                    .FirstAsync(cancellationToken);
 
                 existingEntity.ExternalToken = token;
                 existingEntity.ExternalWorkerId = workerId;
@@ -382,7 +388,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 var existingEntity = await db.Set<PersistedSubscription>()
                     .Where(x => x.SubscriptionId == uid)
                     .AsTracking()
-                    .FirstOrDefaultAsync(cancellationToken);
+                    .FirstAsync(cancellationToken);
                 
                 if (existingEntity.ExternalToken != token)
                     throw new InvalidOperationException();

@@ -128,9 +128,8 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Queue name cannot be null or empty.", nameof(name));
-            if (!System.Text.RegularExpressions.Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z0-9_/]*$"))
-                throw new ArgumentException($"Queue name '{name}' contains invalid characters.", nameof(name));
-            return name;
+            // Escape any ']' characters to prevent breaking out of the delimited identifier
+            return name.Replace("]", "]]");
         }
     }
 }

@@ -18,9 +18,9 @@ namespace WorkflowCore.Services
             _logger = loggerFactory.CreateLogger<SingleNodeEventHub>();
         }
 
-        public async Task PublishNotification(LifeCycleEvent evt)
+        public Task PublishNotification(LifeCycleEvent evt)
         {
-            await Task.Run(() =>
+            Task.Run(() =>
             {
                 foreach (var subscriber in _subscribers.ToArray())
                 {
@@ -34,6 +34,7 @@ namespace WorkflowCore.Services
                     }
                 }
             });
+            return Task.CompletedTask;
         }
 
         public void Subscribe(Action<LifeCycleEvent> action)

@@ -56,7 +56,7 @@ namespace WorkflowCore.WebAPI.Controllers
             string workflowId = null;            
             var def = _registry.GetDefinition(id, version);
             if (def == null)
-                return NotFound(String.Format("Workflow defintion of {0} not found", id));
+                return NotFound(String.Format("Workflow definition of {0} not found", id));
             if ((data != null) && (def.DataType != null))
             {
                 var dataStr = JsonConvert.SerializeObject(data);

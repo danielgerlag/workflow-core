@@ -178,6 +178,8 @@ namespace WorkflowCore.Services
             lock (_subscriptions)
             {
                 var sub = _subscriptions.SingleOrDefault(x => x.Id == eventSubscriptionId);
+                if (sub == null)
+                    return Task.FromResult(false);
                 sub.ExternalToken = token;
                 sub.ExternalWorkerId = workerId;
                 sub.ExternalTokenExpiry = expiry;
@@ -191,6 +193,8 @@ namespace WorkflowCore.Services
             lock (_subscriptions)
             {
                 var sub = _subscriptions.SingleOrDefault(x => x.Id == eventSubscriptionId);
+                if (sub == null)
+                    throw new InvalidOperationException($"Subscription {eventSubscriptionId} not found.");
                 if (sub.ExternalToken != token)
                     throw new InvalidOperationException();
                 sub.ExternalToken = null;

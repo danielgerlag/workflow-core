@@ -55,7 +55,7 @@ namespace WorkflowCore.Services
                     Token = token.Encode(),
                     ActivityName = subscription.EventKey,
                     Parameters = subscription.SubscriptionData,
-                    TokenExpiry = DateTime.MaxValue
+                    TokenExpiry = DateTime.SpecifyKind(DateTime.MaxValue, DateTimeKind.Utc)
                 };
 
                 if (!await _subscriptionRepository.SetSubscriptionToken(subscription.Id, result.Token, workerId, result.TokenExpiry))

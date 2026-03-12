@@ -38,7 +38,22 @@ namespace WorkflowCore.AI.AzureFoundry.Services
                 return thread.Id;
             });
 
-            return Task.FromResult(_threads[threadId]);
+            if (_threads.TryGetValue(threadId, out var existingThread))
+            {
+                return Task.FromResult(existingThread);
+            }
+
+            // The thread was removed or the mapping is stale; recreate and update the mapping.
+            var newThread = new ConversationThread
+            {
+                WorkflowInstanceId = workflowInstanceId,
+                ExecutionPointerId = executionPointerId
+            };
+
+            _threads[newThread.Id] = newThread;
+            _workflowThreadMap[key] = newThread.Id;
+
+            return Task.FromResult(newThread);
         }
 
         public Task SaveThreadAsync(ConversationThread thread)
