@@ -110,8 +110,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static WorkflowOptions UseCosmosDbPersistence(
             this WorkflowOptions options,
             string databaseId,
-            CosmosDbStorageOptions cosmosDbStorageOptions = null,
-            CosmosClientOptions clientOptions = null)
+            CosmosDbStorageOptions cosmosDbStorageOptions = null)
         {
             if (cosmosDbStorageOptions == null)
             {
