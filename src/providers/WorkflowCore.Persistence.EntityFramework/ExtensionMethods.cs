@@ -141,6 +141,8 @@ namespace WorkflowCore.Persistence.EntityFramework
         {
             if (dateTime.Kind == DateTimeKind.Local)
                 return dateTime.ToUniversalTime();
+            if (dateTime.Kind == DateTimeKind.Utc)
+                return dateTime;
             return DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
         }
 
