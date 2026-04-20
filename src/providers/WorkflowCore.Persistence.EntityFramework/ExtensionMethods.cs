@@ -224,7 +224,8 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.SubscribeAsOf = EnsureUtc(instance.SubscribeAsOf);
             result.SubscriptionData = JsonConvert.DeserializeObject(instance.SubscriptionData, SerializerSettings);
             result.ExternalToken = instance.ExternalToken;
-            result.ExternalTokenExpiry = instance.ExternalTokenExpiry;
+            if (instance.ExternalTokenExpiry.HasValue)
+                result.ExternalTokenExpiry = EnsureUtc(instance.ExternalTokenExpiry.Value);
             result.ExternalWorkerId = instance.ExternalWorkerId;
 
             return result;
