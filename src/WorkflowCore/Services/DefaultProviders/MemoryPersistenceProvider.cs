@@ -150,7 +150,8 @@ namespace WorkflowCore.Services
             lock (_subscriptions)
             {
                 var sub = _subscriptions.SingleOrDefault(x => x.Id == eventSubscriptionId);
-                _subscriptions.Remove(sub);
+                if (sub != null)
+                    _subscriptions.Remove(sub);
             }
         }
 

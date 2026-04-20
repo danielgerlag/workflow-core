@@ -74,7 +74,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             if (!string.IsNullOrEmpty(existing))
                 return;
 
-            await _sqlCommandExecutor.ExecuteCommandAsync(cn, tx, $"CREATE SERVICE [{name}] ON QUEUE [{queueName}]([{contractName}]);");
+            await _sqlCommandExecutor.ExecuteCommandAsync(cn, tx, $"CREATE SERVICE [{SanitizeIdentifier(name)}] ON QUEUE [{SanitizeIdentifier(queueName)}]([{SanitizeIdentifier(contractName)}]);");
         }
 
         private async Task CreateQueue(SqlConnection cn, SqlTransaction tx, string queueName)
@@ -85,7 +85,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             if (!string.IsNullOrEmpty(existing))
                 return;
 
-            await _sqlCommandExecutor.ExecuteCommandAsync(cn, tx, $"CREATE QUEUE [{queueName}];");
+            await _sqlCommandExecutor.ExecuteCommandAsync(cn, tx, $"CREATE QUEUE [{SanitizeIdentifier(queueName)}];");
         }
 
         private async Task CreateContract(SqlConnection cn, SqlTransaction tx, string contractName, string messageName)
@@ -96,7 +96,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             if (!string.IsNullOrEmpty(existing))
                 return;
 
-            await _sqlCommandExecutor.ExecuteCommandAsync(cn, tx, $"CREATE CONTRACT [{contractName}] ( [{messageName}] SENT BY INITIATOR);");
+            await _sqlCommandExecutor.ExecuteCommandAsync(cn, tx, $"CREATE CONTRACT [{SanitizeIdentifier(contractName)}] ( [{SanitizeIdentifier(messageName)}] SENT BY INITIATOR);");
         }
 
         private async Task CreateMessageType(SqlConnection cn, SqlTransaction tx, string message)
@@ -107,10 +107,17 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             if (!string.IsNullOrEmpty(existing))
                 return;
 
-            await _sqlCommandExecutor.ExecuteCommandAsync(cn, tx, $"CREATE MESSAGE TYPE [{message}] VALIDATION = NONE;");
+            await _sqlCommandExecutor.ExecuteCommandAsync(cn, tx, $"CREATE MESSAGE TYPE [{SanitizeIdentifier(message)}] VALIDATION = NONE;");
         }
 
         #endregion
+
+        private static string SanitizeIdentifier(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Identifier cannot be null or empty.", nameof(name));
+            return name.Replace("]", "]]");
+        }
 
         public async Task CreateDbAsync()
         {
@@ -155,7 +162,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                 var tx = cn.BeginTransaction();
                 try
                 {
-                    await _sqlCommandExecutor.ExecuteCommandAsync(cn, tx, $"ALTER DATABASE [{db}] SET ENABLE_BROKER;");
+                    await _sqlCommandExecutor.ExecuteCommandAsync(cn, tx, $"ALTER DATABASE [{SanitizeIdentifier(db)}] SET ENABLE_BROKER;");
                     tx.Commit();
                 }
                 catch

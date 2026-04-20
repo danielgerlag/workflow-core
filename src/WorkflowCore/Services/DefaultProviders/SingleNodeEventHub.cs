@@ -20,7 +20,7 @@ namespace WorkflowCore.Services
 
         public Task PublishNotification(LifeCycleEvent evt)
         {
-            Task.Run(() =>
+            return Task.Run(() =>
             {
                 foreach (var subscriber in _subscribers.ToArray())
                 {
@@ -34,7 +34,6 @@ namespace WorkflowCore.Services
                     }
                 }
             });
-            return Task.CompletedTask;
         }
 
         public void Subscribe(Action<LifeCycleEvent> action)
