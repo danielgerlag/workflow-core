@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,8 +24,9 @@ namespace WorkflowCore.Services
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _logger;
         private readonly IDateTimeProvider _dateTimeProvider;
+        private readonly IWorkflowInstanceCloner _cloner;
 
-        public WorkflowController(IPersistenceProvider persistenceStore, IDistributedLockProvider lockProvider, IWorkflowRegistry registry, IQueueProvider queueProvider, IExecutionPointerFactory pointerFactory, ILifeCycleEventHub eventHub, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IDateTimeProvider dateTimeProvider)
+        public WorkflowController(IPersistenceProvider persistenceStore, IDistributedLockProvider lockProvider, IWorkflowRegistry registry, IQueueProvider queueProvider, IExecutionPointerFactory pointerFactory, ILifeCycleEventHub eventHub, ILoggerFactory loggerFactory, IServiceProvider serviceProvider, IDateTimeProvider dateTimeProvider, IWorkflowInstanceCloner cloner)
         {
             _persistenceStore = persistenceStore;
             _lockProvider = lockProvider;
@@ -35,6 +37,7 @@ namespace WorkflowCore.Services
             _serviceProvider = serviceProvider;
             _logger = loggerFactory.CreateLogger<WorkflowController>();
             _dateTimeProvider = dateTimeProvider;
+            _cloner = cloner;
         }
 
         public Task<string> StartWorkflow(string workflowId, object data = null, string reference=null)
@@ -239,6 +242,52 @@ namespace WorkflowCore.Services
         {
             var wf = ActivatorUtilities.CreateInstance<TWorkflow>(_serviceProvider);
             _registry.RegisterWorkflow(wf);
+        }
+
+        public async Task<string> ForkWorkflow(string workflowId, Action<object> dataMutator = null)
+        {
+            if (!await _lockProvider.AcquireLock(workflowId, new CancellationToken()))
+            {
+                throw new InvalidOperationException("Could not acquire lock on workflow instance.");
+            }
+
+            try
+            {
+                var wf = await _persistenceStore.GetWorkflowInstance(workflowId);
+
+                if (wf.Status != WorkflowStatus.Runnable && wf.Status != WorkflowStatus.Suspended)
+                {
+                    throw new InvalidOperationException($"Cannot fork a workflow instance with status {wf.Status}.");
+                }
+
+                var (clone, subscriptions) = _cloner.CloneForFork(wf, dataMutator);
+
+                string forkId = await _persistenceStore.CreateNewWorkflow(clone);
+
+                foreach (var sub in subscriptions)
+                {
+                    sub.WorkflowId = forkId;
+                    await _persistenceStore.CreateEventSubscription(sub);
+                }
+
+                await _queueProvider.QueueWork(forkId, QueueType.Workflow);
+                await _queueProvider.QueueWork(forkId, QueueType.Index);
+                await _eventHub.PublishNotification(new WorkflowForked
+                {
+                    EventTimeUtc = _dateTimeProvider.UtcNow,
+                    Reference = clone.Reference,
+                    WorkflowInstanceId = forkId,
+                    WorkflowDefinitionId = clone.WorkflowDefinitionId,
+                    Version = clone.Version,
+                    SourceWorkflowInstanceId = workflowId
+                });
+
+                return forkId;
+            }
+            finally
+            {
+                await _lockProvider.ReleaseLock(workflowId);
+            }
         }
     }
 }

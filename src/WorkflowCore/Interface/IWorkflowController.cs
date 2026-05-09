@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace WorkflowCore.Interface
@@ -34,6 +35,15 @@ namespace WorkflowCore.Interface
         /// <param name="workflowId"></param>
         /// <returns></returns>
         Task<bool> TerminateWorkflow(string workflowId);
+
+        /// <summary>
+        /// Fork a running workflow instance, creating a new independent instance
+        /// that continues from the same active step(s).
+        /// </summary>
+        /// <param name="workflowId">The ID of the workflow instance to fork.</param>
+        /// <param name="dataMutator">Optional callback to mutate the data on the forked instance.</param>
+        /// <returns>The ID of the newly created forked workflow instance.</returns>
+        Task<string> ForkWorkflow(string workflowId, Action<object> dataMutator = null);
 
     }
 }

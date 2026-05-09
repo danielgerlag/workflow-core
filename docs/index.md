@@ -32,3 +32,9 @@ public class MyWorkflow : IWorkflow
     }
 }
 ```
+
+## Feature Guides
+
+- [Control Structures](control-structures.md)
+- [External Events](external-events.md)
+- [Forking Workflows](forking-workflows.md)

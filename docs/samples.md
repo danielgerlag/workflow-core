@@ -36,6 +36,8 @@
 
 [Workflow Middleware](https://github.com/danielgerlag/workflow-core/tree/master/src/samples/WorkflowCore.Sample19)
 
+[Forking Workflows](https://github.com/danielgerlag/workflow-core/tree/master/src/samples/WorkflowCore.Sample20)
+
 ## AI & Agentic Workflow Samples
 
 [Azure AI Foundry - Chat, Agents & Tools](https://github.com/danielgerlag/workflow-core/tree/master/src/samples/WorkflowCore.Sample.AzureFoundry) - Interactive sample demonstrating:

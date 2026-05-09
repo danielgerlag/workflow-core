@@ -163,6 +163,11 @@ namespace WorkflowCore.Services
             return _workflowController.TerminateWorkflow(workflowId);
         }
 
+        public Task<string> ForkWorkflow(string workflowId, Action<object> dataMutator = null)
+        {
+            return _workflowController.ForkWorkflow(workflowId, dataMutator);
+        }
+
         public void HandleLifeCycleEvent(LifeCycleEvent evt)
         {
             OnLifeCycleEvent?.Invoke(evt);
