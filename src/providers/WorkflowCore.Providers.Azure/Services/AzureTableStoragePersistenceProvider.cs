@@ -53,6 +53,15 @@ namespace WorkflowCore.Providers.Azure.Services
         /// <summary>Escapes single quotes in OData string literals by doubling them.</summary>
         private static string EscapeOData(string value) => value?.Replace("'", "''") ?? string.Empty;
 
+        /// <summary>
+        /// Safely converts a DateTime to UTC. If Kind is Unspecified, assumes UTC
+        /// rather than local time (avoids failures with DateTime.MinValue).
+        /// </summary>
+        private static DateTime SafeToUtc(DateTime dt) =>
+            dt.Kind == DateTimeKind.Utc ? dt :
+            dt.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(dt, DateTimeKind.Utc) :
+            dt.ToUniversalTime();
+
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken = default)
         {
             workflow.Id = Guid.NewGuid().ToString();
@@ -79,7 +88,7 @@ namespace WorkflowCore.Providers.Azure.Services
 
         public async Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt, CancellationToken cancellationToken = default)
         {
-            var utcTicks = asAt.ToUniversalTime().Ticks;
+            var utcTicks = SafeToUtc(asAt).Ticks;
             var query = _workflowTable.Value.QueryAsync<WorkflowTableEntity>(
                 filter: $"PartitionKey eq 'workflow' and Status eq {(int)WorkflowStatus.Runnable} and NextExecution le {utcTicks}",
                 cancellationToken: cancellationToken);
@@ -144,10 +153,10 @@ namespace WorkflowCore.Providers.Azure.Services
                 filter += $" and WorkflowDefinitionId eq '{EscapeOData(type)}'";
 
             if (createdFrom.HasValue)
-                filter += $" and CreateTime ge datetime'{createdFrom.Value.ToUniversalTime():yyyy-MM-ddTHH:mm:ss.fffffffZ}'";
+                filter += $" and CreateTime ge datetime'{SafeToUtc(createdFrom.Value):yyyy-MM-ddTHH:mm:ss.fffffffZ}'";
 
             if (createdTo.HasValue)
-                filter += $" and CreateTime le datetime'{createdTo.Value.ToUniversalTime():yyyy-MM-ddTHH:mm:ss.fffffffZ}'";
+                filter += $" and CreateTime le datetime'{SafeToUtc(createdTo.Value):yyyy-MM-ddTHH:mm:ss.fffffffZ}'";
 
             var query = _workflowTable.Value.QueryAsync<WorkflowTableEntity>(filter: filter);
             var entities = new List<WorkflowTableEntity>();
@@ -195,7 +204,7 @@ namespace WorkflowCore.Providers.Azure.Services
 
         public async Task<IEnumerable<string>> GetRunnableEvents(DateTime asAt, CancellationToken cancellationToken = default)
         {
-            var utcAsAt = asAt.ToUniversalTime();
+            var utcAsAt = SafeToUtc(asAt);
             var query = _eventTable.Value.QueryAsync<EventTableEntity>(
                 filter: $"PartitionKey eq 'event' and IsProcessed eq false and EventTime le datetime'{utcAsAt:yyyy-MM-ddTHH:mm:ss.fffffffZ}'",
                 cancellationToken: cancellationToken);
@@ -222,7 +231,7 @@ namespace WorkflowCore.Providers.Azure.Services
 
         public async Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf, CancellationToken cancellationToken = default)
         {
-            var utcAsOf = asOf.ToUniversalTime();
+            var utcAsOf = SafeToUtc(asOf);
             var filter = $"PartitionKey eq 'event' and EventName eq '{EscapeOData(eventName)}' and EventKey eq '{EscapeOData(eventKey)}' and EventTime ge datetime'{utcAsOf:yyyy-MM-ddTHH:mm:ss.fffffffZ}'";
 
             var query = _eventTable.Value.QueryAsync<EventTableEntity>(filter: filter, cancellationToken: cancellationToken);
@@ -285,7 +294,7 @@ namespace WorkflowCore.Providers.Azure.Services
 
         public async Task<IEnumerable<EventSubscription>> GetSubscriptions(string eventName, string eventKey, DateTime asOf, CancellationToken cancellationToken = default)
         {
-            var utcAsOf = asOf.ToUniversalTime();
+            var utcAsOf = SafeToUtc(asOf);
             var filter = $"PartitionKey eq 'subscription' and EventName eq '{EscapeOData(eventName)}' and EventKey eq '{EscapeOData(eventKey)}' and SubscribeAsOf le datetime'{utcAsOf:yyyy-MM-ddTHH:mm:ss.fffffffZ}'";
 
             var query = _subscriptionTable.Value.QueryAsync<SubscriptionTableEntity>(filter: filter, cancellationToken: cancellationToken);
