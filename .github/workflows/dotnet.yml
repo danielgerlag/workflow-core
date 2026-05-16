@@ -83,6 +83,7 @@ jobs:
             8.0.x
             9.0.x
             10.0.x
+      - name: Restore dependencies
         run: dotnet restore
       - name: Build
         run: dotnet build --no-restore
