@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Azure;
 using Azure.Data.Tables;
+using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Providers.Azure.Models;
@@ -14,6 +15,7 @@ namespace WorkflowCore.Providers.Azure.Services
     public class AzureTableStoragePersistenceProvider : IPersistenceProvider
     {
         private readonly TableServiceClient _tableServiceClient;
+        private readonly ILogger _logger;
         private readonly string _workflowTableName;
         private readonly string _eventTableName;
         private readonly string _subscriptionTableName;
@@ -28,9 +30,11 @@ namespace WorkflowCore.Providers.Azure.Services
 
         public AzureTableStoragePersistenceProvider(
             TableServiceClient tableServiceClient,
-            string tableNamePrefix = "WorkflowCore")
+            string tableNamePrefix = "WorkflowCore",
+            ILoggerFactory loggerFactory = null)
         {
             _tableServiceClient = tableServiceClient;
+            _logger = loggerFactory?.CreateLogger<AzureTableStoragePersistenceProvider>();
             _workflowTableName = $"{tableNamePrefix}Workflows";
             _eventTableName = $"{tableNamePrefix}Events";
             _subscriptionTableName = $"{tableNamePrefix}Subscriptions";
@@ -413,9 +417,9 @@ namespace WorkflowCore.Providers.Azure.Services
                             await action(command);
                             await _commandTable.Value.DeleteEntityAsync(entity.PartitionKey, entity.RowKey, cancellationToken: cancellationToken);
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
-                            //TODO: add logger
+                            _logger?.LogError(ex, "Error processing scheduled command {CommandName}", entity.CommandName);
                         }
                     }
                 }

@@ -114,7 +114,7 @@ namespace Microsoft.Extensions.DependencyInjection
             string tableNamePrefix = "WorkflowCore")
         {
             options.Services.AddSingleton<TableServiceClient>(sp => new TableServiceClient(connectionString));
-            options.UsePersistence(sp => new AzureTableStoragePersistenceProvider(sp.GetService<TableServiceClient>(), tableNamePrefix));
+            options.UsePersistence(sp => new AzureTableStoragePersistenceProvider(sp.GetService<TableServiceClient>(), tableNamePrefix, sp.GetService<ILoggerFactory>()));
             return options;
         }
 
@@ -124,7 +124,7 @@ namespace Microsoft.Extensions.DependencyInjection
             string tableNamePrefix = "WorkflowCore")
         {
             options.Services.AddSingleton(tableServiceClient);
-            options.UsePersistence(sp => new AzureTableStoragePersistenceProvider(sp.GetService<TableServiceClient>(), tableNamePrefix));
+            options.UsePersistence(sp => new AzureTableStoragePersistenceProvider(sp.GetService<TableServiceClient>(), tableNamePrefix, sp.GetService<ILoggerFactory>()));
             return options;
         }
 
@@ -135,7 +135,7 @@ namespace Microsoft.Extensions.DependencyInjection
             string tableNamePrefix = "WorkflowCore")
         {
             options.Services.AddSingleton<TableServiceClient>(sp => new TableServiceClient(serviceUri, tokenCredential));
-            options.UsePersistence(sp => new AzureTableStoragePersistenceProvider(sp.GetService<TableServiceClient>(), tableNamePrefix));
+            options.UsePersistence(sp => new AzureTableStoragePersistenceProvider(sp.GetService<TableServiceClient>(), tableNamePrefix, sp.GetService<ILoggerFactory>()));
             return options;
         }
     }
