@@ -9,6 +9,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver.Linq;
+using Microsoft.Extensions.Logging;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using System.Threading;
@@ -19,10 +20,12 @@ namespace WorkflowCore.Persistence.MongoDB.Services
     {
         internal const string WorkflowCollectionName = "wfc.workflows";
         private readonly IMongoDatabase _database;
+        private readonly ILogger _logger;
 
-        public MongoPersistenceProvider(IMongoDatabase database)
+        public MongoPersistenceProvider(IMongoDatabase database, ILoggerFactory logFactory)
         {
             _database = database;
+            _logger = logFactory.CreateLogger<MongoPersistenceProvider>();
         }
 
         static MongoPersistenceProvider()
@@ -86,9 +89,12 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                 .SetIgnoreExtraElements(true);
         }
 
-        static bool indexesCreated = false;
+        private static bool indexesCreated = false;
+        private static readonly object _indexLock = new object();
         static void CreateIndexes(MongoPersistenceProvider instance)
         {
+            lock (_indexLock)
+            {
             if (!indexesCreated)
             {
                 instance.WorkflowInstances.Indexes.CreateOne(new CreateIndexModel<WorkflowInstance>(
@@ -128,6 +134,7 @@ namespace WorkflowCore.Persistence.MongoDB.Services
 
                 indexesCreated = true;
             }
+            }
         }
 
         private IMongoCollection<WorkflowInstance> WorkflowInstances => _database.GetCollection<WorkflowInstance>(WorkflowCollectionName);
@@ -162,9 +169,17 @@ namespace WorkflowCore.Persistence.MongoDB.Services
             using (var session = await _database.Client.StartSessionAsync(cancellationToken: cancellationToken))
             {
                 session.StartTransaction();
-                await PersistWorkflow(workflow, cancellationToken);
-                await EventSubscriptions.InsertManyAsync(subscriptions, cancellationToken: cancellationToken);
-                await session.CommitTransactionAsync(cancellationToken);
+                try
+                {
+                    await PersistWorkflow(workflow, cancellationToken);
+                    await EventSubscriptions.InsertManyAsync(subscriptions, cancellationToken: cancellationToken);
+                    await session.CommitTransactionAsync(cancellationToken);
+                }
+                catch
+                {
+                    await session.AbortTransactionAsync(cancellationToken);
+                    throw;
+                }
             }
         }
 
@@ -360,9 +375,9 @@ namespace WorkflowCore.Persistence.MongoDB.Services
                         await action(command);
                         await ScheduledCommands.DeleteOneAsync(x => x.CommandName == command.CommandName && x.Data == command.Data);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        //TODO: add logger
+                        _logger.LogError(ex, "Error processing scheduled command {CommandName}", command.CommandName);
                     }
                 }
             }

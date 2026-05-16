@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="StackExchange.Redis" Version="2.0.601" />
-    <PackageReference Include="Squadron.Redis" Version="0.17.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.37" />
+    <PackageReference Include="Squadron.Redis" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>

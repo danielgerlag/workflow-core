@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace WorkflowCore.Services.BackgroundTasks
         private readonly ISearchIndex _searchIndex;
         private readonly ObjectPool<IPersistenceProvider> _persistenceStorePool;
         private readonly ILogger _logger;
-        private readonly Dictionary<string, int> _errorCounts = new Dictionary<string, int>();
+        private readonly ConcurrentDictionary<string, int> _errorCounts = new ConcurrentDictionary<string, int>();
 
         protected override QueueType Queue => QueueType.Index;
         protected override bool EnableSecondPasses => true;
@@ -35,23 +36,12 @@ namespace WorkflowCore.Services.BackgroundTasks
                 
                 WorkflowActivity.Enrich(workflow, "index");
                 await _searchIndex.IndexWorkflow(workflow);
-                lock (_errorCounts)
-                {
-                    _errorCounts.Remove(itemId);
-                }
+                _errorCounts.TryRemove(itemId, out _);
             }
             catch (Exception e)
             {
                 Logger.LogWarning(default(EventId), $"Error indexing workfow - {itemId} - {e.Message}");
-                var errCount = 0;
-                lock (_errorCounts)
-                {
-                    if (!_errorCounts.ContainsKey(itemId))
-                        _errorCounts.Add(itemId, 0);
-
-                    _errorCounts[itemId]++;
-                    errCount = _errorCounts[itemId];
-                }
+                var errCount = _errorCounts.AddOrUpdate(itemId, 1, (key, count) => count + 1);
                 
                 if (errCount < 5)
                 {
@@ -65,10 +55,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     return;
                 }
 
-                lock (_errorCounts)
-                {
-                    _errorCounts.Remove(itemId);
-                }
+                _errorCounts.TryRemove(itemId, out _);
 
                 Logger.LogError(default(EventId), e, $"Unable to index workfow - {itemId} - {e.Message}");
             }

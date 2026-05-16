@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using Microsoft.Extensions.Logging;
+using MongoDB.Driver;
 using System;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -12,15 +13,18 @@ namespace Microsoft.Extensions.DependencyInjection
             this WorkflowOptions options, 
             string mongoUrl, 
             string databaseName, 
-            Action<MongoClientSettings> configureClient = default)
+            Action<MongoClientSettings> configureClient = default,
+            Func<Type, bool> serializerTypeFilter = null)
         {
+            RegisterObjectSerializer(serializerTypeFilter);
+            
             options.UsePersistence(sp =>
             {
                 var mongoClientSettings = MongoClientSettings.FromConnectionString(mongoUrl);
                 configureClient?.Invoke(mongoClientSettings);
                 var client = new MongoClient(mongoClientSettings);
                 var db = client.GetDatabase(databaseName);
-                return new MongoPersistenceProvider(db);
+                return new MongoPersistenceProvider(db, sp.GetRequiredService<ILoggerFactory>());
             });
             options.Services.AddTransient<IWorkflowPurger>(sp =>
             {
@@ -35,15 +39,18 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static WorkflowOptions UseMongoDB(
             this WorkflowOptions options, 
-            Func<IServiceProvider, IMongoDatabase> createDatabase)
+            Func<IServiceProvider, IMongoDatabase> createDatabase,
+            Func<Type, bool> serializerTypeFilter = null)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
             if (createDatabase == null) throw new ArgumentNullException(nameof(createDatabase));
 
+            RegisterObjectSerializer(serializerTypeFilter);
+            
             options.UsePersistence(sp =>
             {
                 var db = createDatabase(sp);
-                return new MongoPersistenceProvider(db);
+                return new MongoPersistenceProvider(db, sp.GetRequiredService<ILoggerFactory>());
             });
             options.Services.AddTransient<IWorkflowPurger>(sp =>
             {
@@ -52,6 +59,15 @@ namespace Microsoft.Extensions.DependencyInjection
             });
 
             return options;
+        }
+        
+        private static void RegisterObjectSerializer(Func<Type, bool> serializerTypeFilter)
+        {
+            if (serializerTypeFilter != null)
+            {
+                MongoDB.Bson.Serialization.BsonSerializer.TryRegisterSerializer(
+                    new MongoDB.Bson.Serialization.Serializers.ObjectSerializer(serializerTypeFilter));
+            }
         }
     }
 }

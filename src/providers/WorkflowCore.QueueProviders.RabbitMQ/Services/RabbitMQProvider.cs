@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using RabbitMQ.Client;
+﻿using RabbitMQ.Client;
 using System;
 using System.Linq;
 using System.Text;
@@ -19,7 +18,6 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
         private readonly IServiceProvider _serviceProvider;
         
         private IConnection _connection = null;
-        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
 
         public bool IsDequeueBlocking => false;
 
@@ -46,7 +44,7 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
             }
             finally
             {
-                await channel.CloseAsync(200, "OK", abort: false, CancellationToken.None);
+                await channel.DisposeAsync();
             }
         }
 
@@ -80,12 +78,13 @@ namespace WorkflowCore.QueueProviders.RabbitMQ.Services
             }
             finally
             {
-                await channel.CloseAsync(200, "OK", abort: false, CancellationToken.None);
+                await channel.DisposeAsync();
             }
         }
         
         public void Dispose()
         {
+            // GetAwaiter().GetResult() is the best available sync-over-async pattern for IDisposable.Dispose()
             if (_connection != null)
             {
                 if (_connection.IsOpen)

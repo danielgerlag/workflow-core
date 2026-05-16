@@ -1,12 +1,12 @@
 ﻿#region using
 
 using System;
-using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 
 using WorkflowCore.Interface;
 using WorkflowCore.QueueProviders.SqlServer.Interfaces;
@@ -74,7 +74,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
 
         public void Dispose()
         {
-            Stop().Wait();
+            Stop().GetAwaiter().GetResult();
         }
 
         /// <inheritdoc />
@@ -89,8 +89,7 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             if (string.IsNullOrEmpty(id))
                 throw new ArgumentNullException(nameof(id), "Param id must not be null");
 
-            SqlConnection cn = new SqlConnection(_connectionString);
-            try
+            using (var cn = new SqlConnection(_connectionString))
             {
                 await cn.OpenAsync();
                 var par = _config.GetByQueue(queue);
@@ -103,10 +102,6 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
                     new SqlParameter("@RequestMessage", id)
                     );
             }
-            finally
-            {
-                cn.Close();
-            }
         }
 
         /// <inheritdoc />
@@ -118,21 +113,23 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
         /// <returns>Next id from queue, null if no message arrives in one second.</returns>
         public async Task<string> DequeueWork(QueueType queue, CancellationToken cancellationToken)
         {
-            SqlConnection cn = new SqlConnection(_connectionString);
-            try
+            using (var cn = new SqlConnection(_connectionString))
             {
                 await cn.OpenAsync(cancellationToken);
 
-                var par = _config.GetByQueue(queue);                
-                var sql = _dequeueWorkCommand.Replace("{queueName}", par.QueueName);
+                var par = _config.GetByQueue(queue);
+                var sql = _dequeueWorkCommand.Replace("{queueName}", SanitizeIdentifier(par.QueueName));
                 var msg = await _sqlCommandExecutor.ExecuteScalarAsync<object>(cn, null, sql);
                 return msg is DBNull ? null : (string)msg;
-                
             }
-            finally
-            {
-                cn.Close();
-            }
+        }
+
+        private static string SanitizeIdentifier(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Queue name cannot be null or empty.", nameof(name));
+            // Escape any ']' characters to prevent breaking out of the delimited identifier
+            return name.Replace("]", "]]");
         }
     }
 }

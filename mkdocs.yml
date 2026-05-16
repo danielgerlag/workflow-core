@@ -15,5 +15,6 @@ nav:
     - Elasticsearch plugin: elastic-search.md
     - Test helpers: test-helpers.md
     - Extensions: extensions.md
+    - Azure AI Foundry: azure-ai-foundry.md
     - Samples: samples.md
 theme: readthedocs

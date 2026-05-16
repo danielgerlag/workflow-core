@@ -2,9 +2,9 @@
 
 using System;
 using System.Data.Common;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 using WorkflowCore.QueueProviders.SqlServer.Interfaces;
 
 #endregion
@@ -18,11 +18,11 @@ namespace WorkflowCore.QueueProviders.SqlServer.Services
             using (var cmd = cn.CreateCommand())
             {
                 cmd.Transaction = tx;
-                cmd.CommandText = cmdtext;                
+                cmd.CommandText = cmdtext;
 
                 foreach (var param in parameters)
                     cmd.Parameters.Add(param);
-                
+
                 return (TResult)await cmd.ExecuteScalarAsync();
             }
         }

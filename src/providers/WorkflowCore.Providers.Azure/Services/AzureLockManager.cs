@@ -110,7 +110,12 @@ namespace WorkflowCore.Providers.Azure.Services
             return Task.CompletedTask;
         }
 
-        private async void RenewLeases(object state)
+        private void RenewLeases(object state)
+        {
+            _ = RenewLeasesAsync();
+        }
+
+        private async Task RenewLeasesAsync()
         {
             _logger.LogDebug("Renewing active leases");
             if (_mutex.WaitOne())

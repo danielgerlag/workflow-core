@@ -99,8 +99,8 @@ namespace WorkflowCore.Services.ErrorHandlers
                                 nextCompensationPointer.Active = false;
                                 nextCompensationPointer.Status = PointerStatus.PendingPredecessor;
                                 nextCompensationPointer.PredecessorId = compensationPointer.Id;
-                                compensationPointer = nextCompensationPointer;
                             }
+                            compensationPointer = nextCompensationPointer;
                             workflow.ExecutionPointers.Add(nextCompensationPointer);
 
                             siblingPointer.Status = PointerStatus.Compensated;

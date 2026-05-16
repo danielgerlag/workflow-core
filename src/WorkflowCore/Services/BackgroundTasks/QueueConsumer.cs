@@ -24,6 +24,8 @@ namespace WorkflowCore.Services.BackgroundTasks
         protected Task DispatchTask;        
         private CancellationTokenSource _cancellationTokenSource;
         private Dictionary<string, EventWaitHandle> _activeTasks;
+        private List<Task> _runningTasks;
+        private readonly object _runningTasksLock = new object();
         private ConcurrentHashSet<string> _secondPasses;
 
         protected QueueConsumer(IQueueProvider queueProvider, ILoggerFactory loggerFactory, WorkflowOptions options)
@@ -33,6 +35,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             Logger = loggerFactory.CreateLogger(GetType());
 
             _activeTasks = new Dictionary<string, EventWaitHandle>();
+            _runningTasks = new List<Task>();
             _secondPasses = new ConcurrentHashSet<string>();
         }
 
@@ -55,7 +58,10 @@ namespace WorkflowCore.Services.BackgroundTasks
             _cancellationTokenSource.Cancel();
             if (DispatchTask != null)
             {
-                DispatchTask.Wait();
+                if (!DispatchTask.Wait(TimeSpan.FromSeconds(30)))
+                {
+                    Logger.LogWarning("Dispatch task did not complete within 30 seconds during shutdown");
+                }
                 DispatchTask = null;
             }
         }
@@ -86,6 +92,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     if (item == null)
                     {
                         activity?.Dispose();
+                        activity = null;
                         if (!QueueProvider.IsDequeueBlocking)
                             await Task.Delay(Options.IdleTime, cancelToken);
                         continue;
@@ -104,6 +111,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                         if (!EnableSecondPasses)
                             await QueueProvider.QueueWork(item, Queue);
                         activity?.Dispose();
+                        activity = null;
                         continue;
                     }
 
@@ -115,6 +123,10 @@ namespace WorkflowCore.Services.BackgroundTasks
                         _activeTasks.Add(item, waitHandle);
                     }
                     var task = ExecuteItem(item, waitHandle, activity);
+                    lock (_runningTasksLock)
+                    {
+                        _runningTasks.Add(task);
+                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -138,6 +150,25 @@ namespace WorkflowCore.Services.BackgroundTasks
 
             foreach (var handle in toComplete)
                 handle.WaitOne();
+
+            // Also await all running tasks to ensure proper async completion
+            Task[] tasksToAwait;
+            lock (_runningTasksLock)
+            {
+                tasksToAwait = _runningTasks.ToArray();
+            }
+
+            if (tasksToAwait.Length > 0)
+            {
+                try
+                {
+                    await Task.WhenAll(tasksToAwait);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogWarning(ex, "One or more queued tasks failed");
+                }
+            }
         }
 
         private async Task ExecuteItem(string itemId, EventWaitHandle waitHandle, Activity activity)

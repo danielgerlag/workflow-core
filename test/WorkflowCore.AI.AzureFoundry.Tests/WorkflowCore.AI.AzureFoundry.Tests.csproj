@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>WorkflowCore.AI.AzureFoundry.Tests</AssemblyName>
+    <PackageId>WorkflowCore.AI.AzureFoundry.Tests</PackageId>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <!-- Override Directory.Build.props TargetFrameworks -->
+    <TargetFrameworks></TargetFrameworks>
+    <TargetFramework>net8.0</TargetFramework>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\extensions\WorkflowCore.AI.AzureFoundry\WorkflowCore.AI.AzureFoundry.csproj" />
+    <ProjectReference Include="..\..\src\WorkflowCore\WorkflowCore.csproj" />
+  </ItemGroup>
+
+</Project>

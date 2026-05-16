@@ -8,5 +8,10 @@ namespace WorkflowCore.Exceptions
             : base (message)
         {            
         }
+
+        public WorkflowDefinitionLoadException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
     }
 }

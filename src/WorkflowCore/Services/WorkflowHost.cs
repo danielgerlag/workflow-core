@@ -79,7 +79,7 @@ namespace WorkflowCore.Services
 
         public void Start()
         {
-            StartAsync(CancellationToken.None).Wait();
+            StartAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
         
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -116,7 +116,7 @@ namespace WorkflowCore.Services
 
         public void Stop()
         {
-            StopAsync(CancellationToken.None).Wait();
+            StopAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
         
         public async Task StopAsync(CancellationToken cancellationToken)

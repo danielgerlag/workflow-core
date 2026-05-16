@@ -31,6 +31,10 @@ namespace WorkflowCore.WebAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take)
         {
+            if (skip < 0) skip = 0;
+            if (take <= 0) take = 10;
+            if (take > 1000) take = 1000;
+
             var result = await _workflowStore.GetWorkflowInstances(status, type, createdFrom, createdTo, skip, take);
             return Json(result.ToList());
         }
@@ -38,6 +42,9 @@ namespace WorkflowCore.WebAPI.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(string id)
         {
+            if (string.IsNullOrEmpty(id))
+                return BadRequest("Workflow id is required");
+
             var result = await _workflowStore.GetWorkflowInstance(id);
             return Json(result);
         }
@@ -49,7 +56,7 @@ namespace WorkflowCore.WebAPI.Controllers
             string workflowId = null;            
             var def = _registry.GetDefinition(id, version);
             if (def == null)
-                return BadRequest(String.Format("Workflow defintion {0} for version {1} not found", id, version));
+                return NotFound(String.Format("Workflow definition of {0} not found", id));
             if ((data != null) && (def.DataType != null))
             {
                 var dataStr = JsonConvert.SerializeObject(data);

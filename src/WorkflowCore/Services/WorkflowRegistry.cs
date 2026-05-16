@@ -23,32 +23,29 @@ namespace WorkflowCore.Services
         {
             if (version.HasValue)
             {
-                if (!_registry.ContainsKey($"{workflowId}-{version}"))
-                    return default;
-                return _registry[$"{workflowId}-{version}"];
+                _registry.TryGetValue($"{workflowId}-{version}", out var result);
+                return result;
             }
             else
             {
-                if (!_lastestVersion.ContainsKey(workflowId))
-                    return default;
-                return _lastestVersion[workflowId];
+                _lastestVersion.TryGetValue(workflowId, out var result);
+                return result;
             }
         }
 
         public void DeregisterWorkflow(string workflowId, int version)
         {
-            if (!_registry.ContainsKey($"{workflowId}-{version}"))
-                return;
-
             lock (_registry)
             {
-                _registry.TryRemove($"{workflowId}-{version}", out var _);
-                if (_lastestVersion[workflowId].Version == version)
+                if (!_registry.TryRemove($"{workflowId}-{version}", out var _))
+                    return;
+                if (_lastestVersion.TryGetValue(workflowId, out var current) && current.Version == version)
                 {
                     _lastestVersion.TryRemove(workflowId, out var _);
-
-                    var latest = _registry.Values.Where(x => x.Id == workflowId).OrderByDescending(x => x.Version).FirstOrDefault();
-                    if (latest != default)
+                    var latest = _registry.Values.Where(x => x.Id == workflowId)
+                        .OrderByDescending(x => x.Version)
+                        .FirstOrDefault();
+                    if (latest != null)
                         _lastestVersion[workflowId] = latest;
                 }
             }
