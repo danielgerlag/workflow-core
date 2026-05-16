@@ -26,10 +26,16 @@ namespace WorkflowCore.Services
 
         public void PublishNotification(LifeCycleEvent evt)
         {
-            if (_outbox.IsAddingCompleted || !_workflowOptions.EnableLifeCycleEventsPublisher)
+            if (!_workflowOptions.EnableLifeCycleEventsPublisher)
                 return;
 
-            _outbox.Add(evt);
+            try
+            {
+                _outbox.TryAdd(evt);
+            }
+            catch (ObjectDisposedException)
+            {
+            }
         }
 
         public void Start()
@@ -44,8 +50,7 @@ namespace WorkflowCore.Services
                 _outbox = new BlockingCollection<LifeCycleEvent>();
             }
 
-            _dispatchTask = new Task(Execute);
-            _dispatchTask.Start();
+            _dispatchTask = Task.Run(Execute);
         }
 
         public void Stop()
@@ -57,21 +62,35 @@ namespace WorkflowCore.Services
 
         public void Dispose()
         {
+            if (_dispatchTask != null)
+            {
+                if (!_outbox.IsAddingCompleted)
+                    _outbox.CompleteAdding();
+                if (!_dispatchTask.Wait(TimeSpan.FromSeconds(30)))
+                    _logger.LogWarning("Lifecycle event publisher did not stop within timeout");
+                _dispatchTask = null;
+            }
             _outbox.Dispose();
         }
 
-        private async void Execute()
+        private async Task Execute()
         {
-            foreach (var evt in _outbox.GetConsumingEnumerable())
+            try
             {
-                try
+                foreach (var evt in _outbox.GetConsumingEnumerable())
                 {
-                    await _eventHub.PublishNotification(evt);
+                    try
+                    {
+                        await _eventHub.PublishNotification(evt);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(default(EventId), ex, ex.Message);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(default(EventId), ex, ex.Message);
-                }
+            }
+            catch (ObjectDisposedException)
+            {
             }
         }
     }
