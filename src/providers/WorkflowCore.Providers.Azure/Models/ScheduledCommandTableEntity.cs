@@ -19,12 +19,12 @@ namespace WorkflowCore.Providers.Azure.Models
 
         private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
 
-        public static ScheduledCommandTableEntity FromInstance(ScheduledCommand instance)
+        public static ScheduledCommandTableEntity FromInstance(ScheduledCommand instance, string rowKey = null)
         {
             return new ScheduledCommandTableEntity
             {
                 PartitionKey = "command",
-                RowKey = Guid.NewGuid().ToString(),
+                RowKey = rowKey ?? Guid.NewGuid().ToString(),
                 CommandName = instance.CommandName,
                 Data = instance.Data,
                 ExecuteTime = instance.ExecuteTime,

@@ -1,4 +1,3 @@
-using System;
 using Azure.Data.Tables;
 using WorkflowCore.Interface;
 using WorkflowCore.Providers.Azure.Services;
@@ -10,12 +9,10 @@ namespace WorkflowCore.Tests.Azure
     [Collection("AzureTableStorage collection")]
     public class AzureTableStoragePersistenceProviderFixture : BasePersistenceFixture
     {
-        private readonly AzureTableStorageDockerSetup _dockerSetup;
         private IPersistenceProvider _subject;
 
         public AzureTableStoragePersistenceProviderFixture(AzureTableStorageDockerSetup dockerSetup)
         {
-            _dockerSetup = dockerSetup;
         }
 
         protected override IPersistenceProvider Subject

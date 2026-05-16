@@ -46,6 +46,9 @@ namespace WorkflowCore.Providers.Azure.Services
 
         public bool SupportsScheduledCommands => true;
 
+        /// <summary>Escapes single quotes in OData string literals by doubling them.</summary>
+        private static string EscapeOData(string value) => value?.Replace("'", "''") ?? string.Empty;
+
         public async Task<string> CreateNewWorkflow(WorkflowInstance workflow, CancellationToken cancellationToken = default)
         {
             workflow.Id = Guid.NewGuid().ToString();
@@ -64,7 +67,6 @@ namespace WorkflowCore.Providers.Azure.Services
         {
             await PersistWorkflow(workflow, cancellationToken);
 
-            // Handle subscriptions
             foreach (var subscription in subscriptions)
             {
                 await CreateEventSubscription(subscription, cancellationToken);
@@ -73,8 +75,9 @@ namespace WorkflowCore.Providers.Azure.Services
 
         public async Task<IEnumerable<string>> GetRunnableInstances(DateTime asAt, CancellationToken cancellationToken = default)
         {
+            var utcTicks = asAt.ToUniversalTime().Ticks;
             var query = _workflowTable.Value.QueryAsync<WorkflowTableEntity>(
-                filter: $"PartitionKey eq 'workflow' and Status eq {(int)WorkflowStatus.Runnable} and NextExecution le {asAt.Ticks}",
+                filter: $"PartitionKey eq 'workflow' and Status eq {(int)WorkflowStatus.Runnable} and NextExecution le {utcTicks}",
                 cancellationToken: cancellationToken);
 
             var result = new List<string>();
@@ -112,6 +115,9 @@ namespace WorkflowCore.Providers.Azure.Services
 
         public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(IEnumerable<string> ids, CancellationToken cancellationToken = default)
         {
+            if (ids == null)
+                return Enumerable.Empty<WorkflowInstance>();
+
             var result = new List<WorkflowInstance>();
             foreach (var id in ids)
             {
@@ -126,22 +132,22 @@ namespace WorkflowCore.Providers.Azure.Services
         public async Task<IEnumerable<WorkflowInstance>> GetWorkflowInstances(WorkflowStatus? status, string type, DateTime? createdFrom, DateTime? createdTo, int skip, int take)
         {
             var filter = "PartitionKey eq 'workflow'";
-            
+
             if (status.HasValue)
                 filter += $" and Status eq {(int)status.Value}";
-            
+
             if (!string.IsNullOrEmpty(type))
-                filter += $" and WorkflowDefinitionId eq '{type}'";
-            
+                filter += $" and WorkflowDefinitionId eq '{EscapeOData(type)}'";
+
             if (createdFrom.HasValue)
-                filter += $" and CreateTime ge datetime'{createdFrom.Value:yyyy-MM-ddTHH:mm:ssZ}'";
-            
+                filter += $" and CreateTime ge datetime'{createdFrom.Value.ToUniversalTime():yyyy-MM-ddTHH:mm:ss.fffffffZ}'";
+
             if (createdTo.HasValue)
-                filter += $" and CreateTime le datetime'{createdTo.Value:yyyy-MM-ddTHH:mm:ssZ}'";
+                filter += $" and CreateTime le datetime'{createdTo.Value.ToUniversalTime():yyyy-MM-ddTHH:mm:ss.fffffffZ}'";
 
             var query = _workflowTable.Value.QueryAsync<WorkflowTableEntity>(filter: filter);
             var entities = new List<WorkflowTableEntity>();
-            
+
             var pages = query.AsPages();
             var enumerator = pages.GetAsyncEnumerator();
             try
@@ -185,8 +191,9 @@ namespace WorkflowCore.Providers.Azure.Services
 
         public async Task<IEnumerable<string>> GetRunnableEvents(DateTime asAt, CancellationToken cancellationToken = default)
         {
+            var utcAsAt = asAt.ToUniversalTime();
             var query = _eventTable.Value.QueryAsync<EventTableEntity>(
-                filter: $"PartitionKey eq 'event' and IsProcessed eq false and EventTime le datetime'{asAt:yyyy-MM-ddTHH:mm:ssZ}'",
+                filter: $"PartitionKey eq 'event' and IsProcessed eq false and EventTime le datetime'{utcAsAt:yyyy-MM-ddTHH:mm:ss.fffffffZ}'",
                 cancellationToken: cancellationToken);
 
             var result = new List<string>();
@@ -211,14 +218,12 @@ namespace WorkflowCore.Providers.Azure.Services
 
         public async Task<IEnumerable<string>> GetEvents(string eventName, string eventKey, DateTime asOf, CancellationToken cancellationToken = default)
         {
-            var filter = $"PartitionKey eq 'event' and EventName eq '{eventName}' and EventTime le datetime'{asOf:yyyy-MM-ddTHH:mm:ssZ}'";
-            
-            if (!string.IsNullOrEmpty(eventKey))
-                filter += $" and EventKey eq '{eventKey}'";
+            var utcAsOf = asOf.ToUniversalTime();
+            var filter = $"PartitionKey eq 'event' and EventName eq '{EscapeOData(eventName)}' and EventKey eq '{EscapeOData(eventKey)}' and EventTime ge datetime'{utcAsOf:yyyy-MM-ddTHH:mm:ss.fffffffZ}'";
 
             var query = _eventTable.Value.QueryAsync<EventTableEntity>(filter: filter, cancellationToken: cancellationToken);
             var result = new List<string>();
-            
+
             var pages = query.AsPages();
             var enumerator = pages.GetAsyncEnumerator(cancellationToken);
             try
@@ -242,14 +247,28 @@ namespace WorkflowCore.Providers.Azure.Services
         {
             var entity = await _eventTable.Value.GetEntityAsync<EventTableEntity>("event", id, cancellationToken: cancellationToken);
             entity.Value.IsProcessed = true;
-            await _eventTable.Value.UpdateEntityAsync(entity.Value, entity.Value.ETag, cancellationToken: cancellationToken);
+            try
+            {
+                await _eventTable.Value.UpdateEntityAsync(entity.Value, entity.Value.ETag, cancellationToken: cancellationToken);
+            }
+            catch (RequestFailedException ex) when (ex.Status == 412)
+            {
+                // Another worker already updated this entity; it is already marked processed.
+            }
         }
 
         public async Task MarkEventUnprocessed(string id, CancellationToken cancellationToken = default)
         {
             var entity = await _eventTable.Value.GetEntityAsync<EventTableEntity>("event", id, cancellationToken: cancellationToken);
             entity.Value.IsProcessed = false;
-            await _eventTable.Value.UpdateEntityAsync(entity.Value, entity.Value.ETag, cancellationToken: cancellationToken);
+            try
+            {
+                await _eventTable.Value.UpdateEntityAsync(entity.Value, entity.Value.ETag, cancellationToken: cancellationToken);
+            }
+            catch (RequestFailedException ex) when (ex.Status == 412)
+            {
+                // Concurrent update; the entity may already be in the desired state.
+            }
         }
 
         public async Task<string> CreateEventSubscription(EventSubscription subscription, CancellationToken cancellationToken = default)
@@ -262,14 +281,12 @@ namespace WorkflowCore.Providers.Azure.Services
 
         public async Task<IEnumerable<EventSubscription>> GetSubscriptions(string eventName, string eventKey, DateTime asOf, CancellationToken cancellationToken = default)
         {
-            var filter = $"PartitionKey eq 'subscription' and EventName eq '{eventName}' and SubscribeAsOf le datetime'{asOf:yyyy-MM-ddTHH:mm:ssZ}'";
-            
-            if (!string.IsNullOrEmpty(eventKey))
-                filter += $" and EventKey eq '{eventKey}'";
+            var utcAsOf = asOf.ToUniversalTime();
+            var filter = $"PartitionKey eq 'subscription' and EventName eq '{EscapeOData(eventName)}' and EventKey eq '{EscapeOData(eventKey)}' and SubscribeAsOf le datetime'{utcAsOf:yyyy-MM-ddTHH:mm:ss.fffffffZ}'";
 
             var query = _subscriptionTable.Value.QueryAsync<SubscriptionTableEntity>(filter: filter, cancellationToken: cancellationToken);
             var result = new List<EventSubscription>();
-            
+
             var pages = query.AsPages();
             var enumerator = pages.GetAsyncEnumerator(cancellationToken);
             try
@@ -318,19 +335,20 @@ namespace WorkflowCore.Providers.Azure.Services
             try
             {
                 var entity = await _subscriptionTable.Value.GetEntityAsync<SubscriptionTableEntity>("subscription", eventSubscriptionId, cancellationToken: cancellationToken);
-                
+
                 if (!string.IsNullOrEmpty(entity.Value.ExternalToken))
                     return false;
 
                 entity.Value.ExternalToken = token;
                 entity.Value.ExternalWorkerId = workerId;
                 entity.Value.ExternalTokenExpiry = expiry;
-                
+
                 await _subscriptionTable.Value.UpdateEntityAsync(entity.Value, entity.Value.ETag, cancellationToken: cancellationToken);
                 return true;
             }
-            catch (RequestFailedException ex) when (ex.Status == 404)
+            catch (RequestFailedException ex) when (ex.Status == 404 || ex.Status == 412)
             {
+                // 404: subscription gone; 412: another worker acquired the token concurrently.
                 return false;
             }
         }
@@ -338,21 +356,41 @@ namespace WorkflowCore.Providers.Azure.Services
         public async Task ClearSubscriptionToken(string eventSubscriptionId, string token, CancellationToken cancellationToken = default)
         {
             var entity = await _subscriptionTable.Value.GetEntityAsync<SubscriptionTableEntity>("subscription", eventSubscriptionId, cancellationToken: cancellationToken);
-            
+
             if (entity.Value.ExternalToken != token)
                 throw new InvalidOperationException();
-            
+
             entity.Value.ExternalToken = null;
             entity.Value.ExternalWorkerId = null;
             entity.Value.ExternalTokenExpiry = null;
-            
-            await _subscriptionTable.Value.UpdateEntityAsync(entity.Value, entity.Value.ETag, cancellationToken: cancellationToken);
+
+            try
+            {
+                await _subscriptionTable.Value.UpdateEntityAsync(entity.Value, entity.Value.ETag, cancellationToken: cancellationToken);
+            }
+            catch (RequestFailedException ex) when (ex.Status == 412)
+            {
+                // Concurrent update; token already cleared by another worker.
+            }
         }
 
         public async Task ScheduleCommand(ScheduledCommand command)
         {
-            var entity = ScheduledCommandTableEntity.FromInstance(command);
-            await _commandTable.Value.AddEntityAsync(entity);
+            // Use a deterministic RowKey derived from CommandName+Data to deduplicate commands.
+            // Hash to ensure the key is always a safe Azure Table Storage RowKey.
+            var rowKey = ComputeCommandRowKey(command.CommandName, command.Data);
+            var entity = ScheduledCommandTableEntity.FromInstance(command, rowKey);
+            await _commandTable.Value.UpsertEntityAsync(entity, TableUpdateMode.Replace);
+        }
+
+        private static string ComputeCommandRowKey(string commandName, string data)
+        {
+            var input = $"{commandName}_{data}";
+            using (var md5 = System.Security.Cryptography.MD5.Create())
+            {
+                var hash = md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(input));
+                return new Guid(hash).ToString("N");
+            }
         }
 
         public async Task ProcessCommands(DateTimeOffset asOf, Func<ScheduledCommand, Task> action, CancellationToken cancellationToken = default)
@@ -377,7 +415,7 @@ namespace WorkflowCore.Providers.Azure.Services
                         }
                         catch (Exception)
                         {
-                            // Log error but continue processing other commands
+                            //TODO: add logger
                         }
                     }
                 }
@@ -399,14 +437,13 @@ namespace WorkflowCore.Providers.Azure.Services
                     ["ErrorTime"] = error.ErrorTime,
                     ["Message"] = error.Message
                 };
-                
+
                 await _errorTable.Value.AddEntityAsync(entity, cancellationToken);
             }
         }
 
         public void EnsureStoreExists()
         {
-            // Create tables if they don't exist
             _tableServiceClient.CreateTableIfNotExists(_workflowTableName);
             _tableServiceClient.CreateTableIfNotExists(_eventTableName);
             _tableServiceClient.CreateTableIfNotExists(_subscriptionTableName);

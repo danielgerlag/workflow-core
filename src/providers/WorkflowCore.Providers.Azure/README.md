@@ -26,6 +26,8 @@ dotnet add package WorkflowCore.Providers.Azure
 Use the `IServiceCollection` extension methods when building your service provider
 * .UseAzureSynchronization
 * .UseAzureServiceBusEventHub
+* .UseCosmosDbPersistence
+* .UseAzureTableStoragePersistence
 
 ```C#
 services.AddWorkflow(options => 

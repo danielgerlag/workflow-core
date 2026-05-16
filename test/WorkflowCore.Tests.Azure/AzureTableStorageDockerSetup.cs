@@ -1,41 +1,36 @@
-using System;
-using Azure.Data.Tables;
-using Docker.Testify;
+using System.Threading.Tasks;
+using Testcontainers.Azurite;
 using Xunit;
 
 namespace WorkflowCore.Tests.Azure
-{    
-    public class AzureTableStorageDockerSetup : DockerSetup
+{
+    public class AzureTableStorageDockerSetup : IAsyncLifetime
     {
-        public static string ConnectionString { get; set; } = "UseDevelopmentStorage=true";
+        private readonly AzuriteContainer _azuriteContainer;
 
-        public override string ImageName => @"mcr.microsoft.com/azure-storage/azurite";
-        public override int InternalPort => 10002; // Table storage port
-        public override TimeSpan TimeOut => TimeSpan.FromSeconds(120);
+        public static string ConnectionString { get; private set; }
 
-        public override void PublishConnectionInfo()
+        public AzureTableStorageDockerSetup()
         {
-            // Default to development storage for now
-            ConnectionString = "UseDevelopmentStorage=true";
+            _azuriteContainer = new AzuriteBuilder()
+                .WithInMemoryPersistence()
+                .Build();
         }
 
-        public override bool TestReady()
+        public async Task InitializeAsync()
         {
-            try
-            {
-                // For now, just return true to avoid Docker dependency issues
-                // In a real environment, this would test Azurite connection
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            await _azuriteContainer.StartAsync();
+            ConnectionString = _azuriteContainer.GetConnectionString();
+        }
+
+        public async Task DisposeAsync()
+        {
+            await _azuriteContainer.DisposeAsync();
         }
     }
 
     [CollectionDefinition("AzureTableStorage collection")]
     public class AzureTableStorageCollection : ICollectionFixture<AzureTableStorageDockerSetup>
-    {        
+    {
     }
 }

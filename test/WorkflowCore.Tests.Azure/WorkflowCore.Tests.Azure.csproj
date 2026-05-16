@@ -5,12 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Data.Tables" Version="12.8.3" />
+    <PackageReference Include="Testcontainers.Azurite" Version="4.8.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\providers\WorkflowCore.Providers.Azure\WorkflowCore.Providers.Azure.csproj" />
-    <ProjectReference Include="..\Docker.Testify\Docker.Testify.csproj" />
     <ProjectReference Include="..\WorkflowCore.IntegrationTests\WorkflowCore.IntegrationTests.csproj" />
     <ProjectReference Include="..\WorkflowCore.UnitTests\WorkflowCore.UnitTests.csproj" />
   </ItemGroup>
