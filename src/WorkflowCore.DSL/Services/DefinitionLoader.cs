@@ -318,12 +318,14 @@ namespace WorkflowCore.Services.DefinitionStorage
                 propertyInfo = dataType.GetProperty("Item");
                 targetProperty = Expression.Property(dataParameter, propertyInfo, Expression.Constant(output.Key));
 
+                var compiledSourceExpr = sourceExpr.Compile();
+
                 Action<IStepBody, object> acn = (pStep, pData) =>
                 {
                     object resolvedValue;
                     try
                     {
-                        resolvedValue = sourceExpr.Compile().DynamicInvoke(pStep);
+                        resolvedValue = compiledSourceExpr.DynamicInvoke(pStep);
                     }
                     catch (TargetInvocationException ex)
                     {
@@ -377,13 +379,16 @@ namespace WorkflowCore.Services.DefinitionStorage
                     }
                     propertyInfo = ((PropertyInfo)memberExpression.Member).PropertyType.GetProperty("Item");
 
+                    var targetExpr = Expression.Lambda(memberExpression, dataParameter);
+                    var compiledTargetExpr = targetExpr.Compile();
+                    var compiledSourceExpr = sourceExpr.Compile();
+
                     Action<IStepBody, object> acn = (pStep, pData) =>
                     {
-                        var targetExpr = Expression.Lambda(memberExpression, dataParameter);
                         object data;
                         try
                         {
-                            data = targetExpr.Compile().DynamicInvoke(pData);
+                            data = compiledTargetExpr.DynamicInvoke(pData);
                         }
                         catch (TargetInvocationException ex)
                         {
@@ -392,7 +397,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                         object resolvedValue;
                         try
                         {
-                            resolvedValue = sourceExpr.Compile().DynamicInvoke(pStep);
+                            resolvedValue = compiledSourceExpr.DynamicInvoke(pStep);
                         }
                         catch (TargetInvocationException ex)
                         {
@@ -470,12 +475,14 @@ namespace WorkflowCore.Services.DefinitionStorage
                 throw new WorkflowDefinitionLoadException($"Error parsing input expression '{expr}' for property '{input.Key}': {ex.Message}", ex);
             }
 
+            var compiledExpr = sourceExpr.Compile();
+
             void acn(IStepBody pStep, object pData, IStepExecutionContext pContext)
             {
                 object resolvedValue;
                 try
                 {
-                    resolvedValue = sourceExpr.Compile().DynamicInvoke(pData, pContext, Environment.GetEnvironmentVariables());
+                    resolvedValue = compiledExpr.DynamicInvoke(pData, pContext, Environment.GetEnvironmentVariables());
                 }
                 catch (TargetInvocationException ex)
                 {
@@ -505,6 +512,40 @@ namespace WorkflowCore.Services.DefinitionStorage
 
         private static Action<IStepBody, object, IStepExecutionContext> BuildObjectInputAction(KeyValuePair<string, object> input, ParameterExpression dataParameter, ParameterExpression contextParameter, ParameterExpression environmentVarsParameter, PropertyInfo stepProperty)
         {
+            // Pre-compile all @-prefixed property expressions at definition load time
+            var compiledExpressions = new Dictionary<string, Delegate>();
+            var templateObj = JObject.FromObject(input.Value);
+            var scanStack = new Stack<JObject>();
+            scanStack.Push(templateObj);
+
+            while (scanStack.Count > 0)
+            {
+                var subobj = scanStack.Pop();
+                foreach (var prop in subobj.Properties())
+                {
+                    if (prop.Name.StartsWith("@"))
+                    {
+                        var exprText = prop.Value.ToString();
+                        if (!compiledExpressions.ContainsKey(exprText))
+                        {
+                            LambdaExpression sourceExpr;
+                            try
+                            {
+                                sourceExpr = DynamicExpressionParser.ParseLambda(ParsingConfig, false, new[] { dataParameter, contextParameter, environmentVarsParameter }, typeof(object), TransformExpression(exprText));
+                            }
+                            catch (Exception ex) when (ex is System.Linq.Dynamic.Core.Exceptions.ParseException || ex is InvalidOperationException)
+                            {
+                                throw new WorkflowDefinitionLoadException($"Error parsing input expression '{exprText}': {ex.Message}", ex);
+                            }
+                            compiledExpressions[exprText] = sourceExpr.Compile();
+                        }
+                    }
+                }
+
+                foreach (var child in subobj.Children<JObject>())
+                    scanStack.Push(child);
+            }
+
             void acn(IStepBody pStep, object pData, IStepExecutionContext pContext)
             {
                 var stack = new Stack<JObject>();
@@ -518,11 +559,11 @@ namespace WorkflowCore.Services.DefinitionStorage
                     {
                         if (prop.Name.StartsWith("@"))
                         {
-                            var sourceExpr = DynamicExpressionParser.ParseLambda(ParsingConfig, false, new[] { dataParameter, contextParameter, environmentVarsParameter }, typeof(object), TransformExpression(prop.Value.ToString()));
+                            var exprText = prop.Value.ToString();
                             object resolvedValue;
                             try
                             {
-                                resolvedValue = sourceExpr.Compile().DynamicInvoke(pData, pContext, Environment.GetEnvironmentVariables());
+                                resolvedValue = compiledExpressions[exprText].DynamicInvoke(pData, pContext, Environment.GetEnvironmentVariables());
                             }
                             catch (TargetInvocationException ex)
                             {
