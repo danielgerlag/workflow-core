@@ -29,11 +29,14 @@ namespace WorkflowCore.Providers.Azure.Models
                 RowKey = instance.Id,
                 EventName = instance.EventName,
                 EventKey = instance.EventKey,
-                EventTime = instance.EventTime,
+                EventTime = EnsureUtc(instance.EventTime),
                 IsProcessed = instance.IsProcessed,
                 EventData = JsonConvert.SerializeObject(instance.EventData, SerializerSettings),
             };
         }
+
+        private static DateTime EnsureUtc(DateTime dt) =>
+            dt.Kind == DateTimeKind.Utc ? dt : DateTime.SpecifyKind(dt, DateTimeKind.Utc);
 
         public static Event ToInstance(EventTableEntity entity)
         {

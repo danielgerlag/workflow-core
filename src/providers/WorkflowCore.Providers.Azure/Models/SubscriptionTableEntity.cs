@@ -37,13 +37,16 @@ namespace WorkflowCore.Providers.Azure.Models
                 ExecutionPointerId = instance.ExecutionPointerId,
                 EventName = instance.EventName,
                 EventKey = instance.EventKey,
-                SubscribeAsOf = instance.SubscribeAsOf,
+                SubscribeAsOf = EnsureUtc(instance.SubscribeAsOf),
                 ExternalToken = instance.ExternalToken,
                 ExternalWorkerId = instance.ExternalWorkerId,
-                ExternalTokenExpiry = instance.ExternalTokenExpiry,
+                ExternalTokenExpiry = instance.ExternalTokenExpiry.HasValue ? EnsureUtc(instance.ExternalTokenExpiry.Value) : (DateTime?)null,
                 SubscriptionData = JsonConvert.SerializeObject(instance.SubscriptionData, SerializerSettings),
             };
         }
+
+        private static DateTime EnsureUtc(DateTime dt) =>
+            dt.Kind == DateTimeKind.Utc ? dt : DateTime.SpecifyKind(dt, DateTimeKind.Utc);
 
         public static EventSubscription ToInstance(SubscriptionTableEntity entity)
         {

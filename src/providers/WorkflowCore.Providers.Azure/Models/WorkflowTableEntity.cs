@@ -38,12 +38,15 @@ namespace WorkflowCore.Providers.Azure.Models
                 Reference = instance.Reference,
                 NextExecution = instance.NextExecution,
                 Status = (int)instance.Status,
-                CreateTime = instance.CreateTime,
-                CompleteTime = instance.CompleteTime,
+                CreateTime = EnsureUtc(instance.CreateTime),
+                CompleteTime = instance.CompleteTime.HasValue ? EnsureUtc(instance.CompleteTime.Value) : (DateTime?)null,
                 Data = JsonConvert.SerializeObject(instance.Data, SerializerSettings),
                 ExecutionPointers = JsonConvert.SerializeObject(instance.ExecutionPointers, SerializerSettings),
             };
         }
+
+        private static DateTime EnsureUtc(DateTime dt) =>
+            dt.Kind == DateTimeKind.Utc ? dt : DateTime.SpecifyKind(dt, DateTimeKind.Utc);
 
         public static WorkflowInstance ToInstance(WorkflowTableEntity entity)
         {
