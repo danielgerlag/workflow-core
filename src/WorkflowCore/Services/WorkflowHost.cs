@@ -101,11 +101,14 @@ namespace WorkflowCore.Services
                 Logger.LogInformation("Starting background tasks");
 
                 foreach (var task in _backgroundTasks)
-                    task.Start();
+                {
+                    if (task != null)
+                        task.Start();
+                }
             }
             catch (Exception ex)
             {
-                activity.AddException(ex);
+                activity?.AddException(ex);
                 throw;
             }
             finally
@@ -125,7 +128,10 @@ namespace WorkflowCore.Services
 
             Logger.LogInformation("Stopping background tasks");
             foreach (var th in _backgroundTasks)
-                th.Stop();
+            {
+                if (th != null)
+                    th.Stop();
+            }
 
             Logger.LogInformation("Worker tasks stopped");
 
