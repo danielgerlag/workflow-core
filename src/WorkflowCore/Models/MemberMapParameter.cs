@@ -9,6 +9,7 @@ namespace WorkflowCore.Models
     {
         private readonly LambdaExpression _source;
         private readonly LambdaExpression _target;
+        private readonly Delegate _compiledSource;
      
         public MemberMapParameter(LambdaExpression source, LambdaExpression target)
         {
@@ -17,19 +18,20 @@ namespace WorkflowCore.Models
 
             _source = source;
             _target = target;
+            _compiledSource = source.Compile();
         }
 
-        private void Assign(object sourceObject, LambdaExpression sourceExpr, object targetObject, LambdaExpression targetExpr, IStepExecutionContext context)
+        private void Assign(object sourceObject, object targetObject, IStepExecutionContext context)
         {
             object resolvedValue = null;
 
-            switch (sourceExpr.Parameters.Count)
+            switch (_source.Parameters.Count)
             {
                 case 1:
-                    resolvedValue = sourceExpr.Compile().DynamicInvoke(sourceObject);
+                    resolvedValue = _compiledSource.DynamicInvoke(sourceObject);
                     break;
                 case 2:
-                    resolvedValue = sourceExpr.Compile().DynamicInvoke(sourceObject, context);
+                    resolvedValue = _compiledSource.DynamicInvoke(sourceObject, context);
                     break;
                 default:
                     throw new ArgumentException();
@@ -37,24 +39,24 @@ namespace WorkflowCore.Models
 
             if (resolvedValue == null)
             {
-                var defaultAssign = Expression.Lambda(Expression.Assign(targetExpr.Body, Expression.Default(targetExpr.ReturnType)), targetExpr.Parameters.Single());
+                var defaultAssign = Expression.Lambda(Expression.Assign(_target.Body, Expression.Default(_target.ReturnType)), _target.Parameters.Single());
                 defaultAssign.Compile().DynamicInvoke(targetObject);
                 return;
             }
 
-            var valueExpr = Expression.Convert(Expression.Constant(resolvedValue), targetExpr.ReturnType);
-            var assign = Expression.Lambda(Expression.Assign(targetExpr.Body, valueExpr), targetExpr.Parameters.Single());
+            var valueExpr = Expression.Convert(Expression.Constant(resolvedValue), _target.ReturnType);
+            var assign = Expression.Lambda(Expression.Assign(_target.Body, valueExpr), _target.Parameters.Single());
             assign.Compile().DynamicInvoke(targetObject);
         }
 
         public void AssignInput(object data, IStepBody body, IStepExecutionContext context)
         {
-            Assign(data, _source, body, _target, context);
+            Assign(data, body, context);
         }
 
         public void AssignOutput(object data, IStepBody body, IStepExecutionContext context)
         {
-            Assign(body, _source, data, _target, context);
+            Assign(body, data, context);
         }
     }
 }
