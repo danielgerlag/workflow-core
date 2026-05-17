@@ -4,6 +4,7 @@ using WorkflowCore.Models;
 using Xunit;
 using FluentAssertions;
 using WorkflowCore.Testing;
+using Xunit.Abstractions;
 
 namespace WorkflowCore.IntegrationTests.Scenarios
 {
@@ -31,9 +32,9 @@ namespace WorkflowCore.IntegrationTests.Scenarios
 
     public class DelayScenario : WorkflowTest<DelayWorkflow, DelayWorkflow.MyDataClass>
     {   
-        public DelayScenario()
+        public DelayScenario(ITestOutputHelper testOutputHelper)
         {
-            Setup();
+            Setup(testOutputHelper);
         }
 
         [Fact]
