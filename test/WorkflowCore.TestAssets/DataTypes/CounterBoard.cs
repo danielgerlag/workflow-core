@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace WorkflowCore.TestAssets.DataTypes
 {
@@ -17,5 +18,6 @@ namespace WorkflowCore.TestAssets.DataTypes
         public bool Flag1 { get; set; }
         public bool Flag2 { get; set; }
         public bool Flag3 { get; set; }
+        public List<string> DataList { get; set; } = new List<string> { "item1", "item2", "item3" };
     }
 }
