@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following
@@ -16,3 +17,5 @@ using System.Runtime.InteropServices;
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("fe54ad67-817a-4cc6-a9ef-c9f7a5122ca4")]
+
+[assembly: InternalsVisibleTo("WorkflowCore.Tests.Sqlite")]
