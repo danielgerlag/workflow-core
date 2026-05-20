@@ -20,6 +20,10 @@ namespace Microsoft.Extensions.DependencyInjection
             var options = new WorkflowOptions(services);
             setupAction?.Invoke(options);
             services.AddSingleton<ISingletonMemoryProvider, MemoryPersistenceProvider>();
+            if (!services.Any(x => x.ServiceType == typeof(IWorkflowPurger)))
+            {
+                services.AddSingleton<IWorkflowPurger>(sp => (IWorkflowPurger)sp.GetService<ISingletonMemoryProvider>());
+            }
             services.AddTransient<IPersistenceProvider>(options.PersistenceFactory);
             services.AddTransient<IWorkflowRepository>(options.PersistenceFactory);
             services.AddTransient<ISubscriptionRepository>(options.PersistenceFactory);
@@ -120,4 +124,3 @@ namespace Microsoft.Extensions.DependencyInjection
                     : services.AddTransient<IWorkflowMiddleware, TMiddleware>(factory);
     }
 }
-
