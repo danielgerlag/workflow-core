@@ -83,8 +83,26 @@
     {
       "Id": "Step4",
       "StepType": "WorkflowCore.TestAssets.Steps.Counter, WorkflowCore.TestAssets",
+      "NextStepId": "Step5",
       "Inputs": { "Value": "data[\"Counter6\"]" },
       "Outputs": { "Counter6": "step.Value" }
+    },
+    {
+      "Id": "Step5",
+      "StepType": "WorkflowCore.TestAssets.Steps.DynamicDataStep, WorkflowCore.TestAssets",
+      "Inputs": {
+        "DynamicData": {
+          "ComplexObject": {
+            "@Integer": "data[\"Counter1\"]",
+            "Array": [
+              {
+                "@Computed": "data[\"Counter6\"]"
+              },
+              "string"
+            ]
+          }
+        }
+      }
     }
   ]
 }
