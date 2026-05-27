@@ -50,7 +50,7 @@ namespace WorkflowCore.IntegrationTests.Scenarios
         public void Scenario()
         {
             var workflowId = StartWorkflow(new MyDataClass { ActivityInput = new ActivityInput { Value1 = "a", Value2 = 1 } });
-            var activity = Host.GetPendingActivity("act-1", "worker1", TimeSpan.FromSeconds(30)).Result;
+            var activity = Host.GetPendingActivity("act-1", workflowId, "worker1", TimeSpan.FromSeconds(30)).Result;
 
             if (activity != null)
             {

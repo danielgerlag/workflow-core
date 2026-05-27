@@ -20,7 +20,7 @@ namespace WorkflowCore.Sample18
 
             var workflowId = host.StartWorkflow("activity-sample", new MyData { Request = "Spend $1,000,000" }).Result;
 
-            var approval = host.GetPendingActivity("get-approval", "worker1", TimeSpan.FromMinutes(1)).Result;
+            var approval = host.GetPendingActivity("get-approval", workflowId, "worker1", TimeSpan.FromMinutes(1)).Result;
 
             if (approval != null)
             {                
@@ -37,8 +37,8 @@ namespace WorkflowCore.Sample18
             //setup dependency injection
             IServiceCollection services = new ServiceCollection();
             //services.AddWorkflow();
-            services.AddWorkflow(x => x.UseMongoDB(@"mongodb://localhost:27017", "workflow"));
-            //services.AddWorkflow(x => x.UseSqlServer(@"Server=.;Database=WorkflowCore;Trusted_Connection=True;", true, true));
+            //services.AddWorkflow(x => x.UseMongoDB(@"mongodb://localhost:27017", "workflow"));
+            services.AddWorkflow(x => x.UseSqlServer(@"Server=.\\SqlExpress;Database=WFCore;Trusted_Connection=True;", true, true));
             //services.AddWorkflow(x => x.UsePostgreSQL(@"Server=127.0.0.1;Port=5432;Database=workflow;User Id=postgres;", true, true));
             services.AddLogging(cfg => 
             {

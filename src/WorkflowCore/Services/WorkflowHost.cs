@@ -184,6 +184,11 @@ namespace WorkflowCore.Services
             return _activityController.GetPendingActivity(activityName, workerId, timeout);
         }
 
+        public Task<PendingActivity> GetPendingActivity(string activityName, string workflowId, string workerId, TimeSpan? timeout = null)
+        {
+            return _activityController.GetPendingActivity(activityName, workflowId, workerId, timeout);
+        }
+
         public Task ReleaseActivityToken(string token)
         {
             return _activityController.ReleaseActivityToken(token);
