@@ -49,7 +49,7 @@ namespace WorkflowCore.Services
             _activityController = activityController;
             _lifeCycleEventHub = lifeCycleEventHub;
         }
-        
+
         public Task<string> StartWorkflow(string workflowId, object data = null, string reference=null)
         {
             return _workflowController.StartWorkflow(workflowId, data, reference);
@@ -65,7 +65,7 @@ namespace WorkflowCore.Services
         {
             return _workflowController.StartWorkflow<TData>(workflowId, null, data, reference);
         }
-        
+
         public Task<string> StartWorkflow<TData>(string workflowId, int? version, TData data = null, string reference=null)
             where TData : class, new()
         {
@@ -81,7 +81,7 @@ namespace WorkflowCore.Services
         {
             StartAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
-        
+
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             var activity = WorkflowActivity.StartHost();
@@ -105,7 +105,7 @@ namespace WorkflowCore.Services
             }
             catch (Exception ex)
             {
-                activity.AddException(ex);
+                activity?.AddException(ex);
                 throw;
             }
             finally
@@ -118,7 +118,7 @@ namespace WorkflowCore.Services
         {
             StopAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
-        
+
         public async Task StopAsync(CancellationToken cancellationToken)
         {
             _shutdown = true;
