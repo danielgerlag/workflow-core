@@ -137,6 +137,15 @@ namespace WorkflowCore.Persistence.EntityFramework
             return result;
         }
 
+        private static DateTime EnsureUtc(DateTime dateTime)
+        {
+            if (dateTime.Kind == DateTimeKind.Local)
+                return dateTime.ToUniversalTime();
+            if (dateTime.Kind == DateTimeKind.Utc)
+                return dateTime;
+            return DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+        }
+
         internal static WorkflowInstance ToWorkflowInstance(this PersistedWorkflow instance)
         {
             WorkflowInstance result = new WorkflowInstance();
@@ -148,9 +157,9 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.Version = instance.Version;
             result.WorkflowDefinitionId = instance.WorkflowDefinitionId;
             result.Status = instance.Status;
-            result.CreateTime = DateTime.SpecifyKind(instance.CreateTime, DateTimeKind.Utc);
+            result.CreateTime = EnsureUtc(instance.CreateTime);
             if (instance.CompleteTime.HasValue)
-                result.CompleteTime = DateTime.SpecifyKind(instance.CompleteTime.Value, DateTimeKind.Utc);
+                result.CompleteTime = EnsureUtc(instance.CompleteTime.Value);
 
             result.ExecutionPointers = new ExecutionPointerCollection(instance.ExecutionPointers.Count + 8);
 
@@ -163,15 +172,15 @@ namespace WorkflowCore.Persistence.EntityFramework
                 pointer.Active = ep.Active;
 
                 if (ep.SleepUntil.HasValue)
-                    pointer.SleepUntil = DateTime.SpecifyKind(ep.SleepUntil.Value, DateTimeKind.Utc);
+                    pointer.SleepUntil = EnsureUtc(ep.SleepUntil.Value);
 
                 pointer.PersistenceData = JsonConvert.DeserializeObject(ep.PersistenceData ?? string.Empty, SerializerSettings);
 
                 if (ep.StartTime.HasValue)
-                    pointer.StartTime = DateTime.SpecifyKind(ep.StartTime.Value, DateTimeKind.Utc);
+                    pointer.StartTime = EnsureUtc(ep.StartTime.Value);
 
                 if (ep.EndTime.HasValue)
-                    pointer.EndTime = DateTime.SpecifyKind(ep.EndTime.Value, DateTimeKind.Utc);
+                    pointer.EndTime = EnsureUtc(ep.EndTime.Value);
 
                 pointer.StepName = ep.StepName;
 
@@ -212,10 +221,11 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.StepId = instance.StepId;
             result.ExecutionPointerId = instance.ExecutionPointerId;
             result.WorkflowId = instance.WorkflowId;
-            result.SubscribeAsOf = DateTime.SpecifyKind(instance.SubscribeAsOf, DateTimeKind.Utc);
+            result.SubscribeAsOf = EnsureUtc(instance.SubscribeAsOf);
             result.SubscriptionData = JsonConvert.DeserializeObject(instance.SubscriptionData, SerializerSettings);
             result.ExternalToken = instance.ExternalToken;
-            result.ExternalTokenExpiry = instance.ExternalTokenExpiry;
+            if (instance.ExternalTokenExpiry.HasValue)
+                result.ExternalTokenExpiry = EnsureUtc(instance.ExternalTokenExpiry.Value);
             result.ExternalWorkerId = instance.ExternalWorkerId;
 
             return result;
@@ -227,7 +237,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.Id = instance.EventId.ToString();
             result.EventKey = instance.EventKey;
             result.EventName = instance.EventName;
-            result.EventTime = DateTime.SpecifyKind(instance.EventTime, DateTimeKind.Utc);
+            result.EventTime = EnsureUtc(instance.EventTime);
             result.IsProcessed = instance.IsProcessed;
             result.EventData = JsonConvert.DeserializeObject(instance.EventData, SerializerSettings);
 
