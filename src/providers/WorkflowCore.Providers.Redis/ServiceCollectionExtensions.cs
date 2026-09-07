@@ -9,7 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static WorkflowOptions UseRedisQueues(this WorkflowOptions options, string connectionString, string prefix)
         {
-            options.UseQueueProvider(sp => new RedisQueueProvider(connectionString, prefix, sp.GetService<ILoggerFactory>()));
+            options.UseQueueProvider(sp => new RedisQueueProvider(connectionString, prefix, sp.GetService<WorkflowOptions>(), sp.GetService<ILoggerFactory>()));
             return options;
         }
 
