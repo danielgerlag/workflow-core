@@ -5,12 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Squadron.Elasticsearch" Version="1.0.1" />
+    <PackageReference Include="Testcontainers" Version="4.8.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\providers\WorkflowCore.Providers.Elasticsearch\WorkflowCore.Providers.Elasticsearch.csproj" />
-    <ProjectReference Include="..\Docker.Testify\Docker.Testify.csproj" />
     <ProjectReference Include="..\WorkflowCore.IntegrationTests\WorkflowCore.IntegrationTests.csproj" />
   </ItemGroup>
 

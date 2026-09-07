@@ -247,6 +247,8 @@ jobs:
         run: dotnet restore
       - name: Build
         run: dotnet build --no-restore
+      - name: Allow Elasticsearch mmap
+        run: sudo sysctl -w vm.max_map_count=262144
       - name: Elasticsearch Tests
         run: dotnet test test/WorkflowCore.Tests.Elasticsearch --no-build --verbosity detailed --logger "trx;LogFileName=ElasticsearchTests.trx" --logger "console;verbosity=detailed" --results-directory ./test-results -p:ParallelizeTestCollections=false
       - name: Publish Test Results

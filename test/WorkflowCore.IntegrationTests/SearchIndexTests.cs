@@ -20,6 +20,11 @@ namespace WorkflowCore.IntegrationTests
 
             foreach (var item in BuildTestData())
                 Subject.IndexWorkflow(item).Wait();
+            WaitUntilSearchable();
+        }
+
+        protected virtual void WaitUntilSearchable()
+        {
             System.Threading.Thread.Sleep(1000);
         }
 
