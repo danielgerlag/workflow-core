@@ -2,6 +2,7 @@
 using FluentAssertions;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using WorkflowCore.Interface;
 using WorkflowCore.Models;
@@ -112,6 +113,87 @@ namespace WorkflowCore.UnitTests.Services.DefinitionStorage
 
             body.MessageId.Should().Be("msg-42");
             body.Status.Should().Be("waits-for-batching");
+        }
+
+        // Regression test for issue #1375: YAML (and JSON) deserializers emit
+        // unquoted scalars as CLR primitives. Those must bind to step properties,
+        // including properties inherited from built-in steps such as Foreach.
+        [Fact(DisplayName = "Should assign unquoted YAML primitives on inherited Foreach properties")]
+        public void ShouldAssignUnquotedYamlPrimitivesOnInheritedForeachProperties()
+        {
+            var yaml =
+                "Id: Issue1375\n" +
+                "Version: 1\n" +
+                "DataType: WorkflowCore.TestAssets.DataTypes.IterateListData, WorkflowCore.TestAssets\n" +
+                "Steps:\n" +
+                "  - Id: IterateList\n" +
+                "    StepType: WorkflowCore.TestAssets.Steps.IterateListStep, WorkflowCore.TestAssets\n" +
+                "    Inputs:\n" +
+                "      Collection: data.DataList\n" +
+                "      RunParallel: false\n";
+
+            var def = _subject.LoadDefinition(yaml, Deserializers.Yaml);
+
+            var step = def.Steps.Single(s => s.ExternalId == "IterateList");
+            step.Inputs.Count.Should().Be(2);
+
+            var body = new IterateListStep();
+            var data = new IterateListData { DataList = new List<string> { "item1", "item2" } };
+
+            foreach (var input in step.Inputs)
+                input.AssignInput(data, body, null);
+
+            body.RunParallel.Should().BeFalse();
+            body.Collection.Should().BeEquivalentTo(data.DataList);
+        }
+
+        [Fact(DisplayName = "Should assign unquoted JSON primitives on inherited Foreach properties")]
+        public void ShouldAssignUnquotedJsonPrimitivesOnInheritedForeachProperties()
+        {
+            var json =
+                "{" +
+                "\"Id\": \"Issue1375Json\", \"Version\": 1," +
+                "\"DataType\": \"WorkflowCore.TestAssets.DataTypes.IterateListData, WorkflowCore.TestAssets\"," +
+                "\"Steps\": [{" +
+                    "\"Id\": \"IterateList\"," +
+                    "\"StepType\": \"WorkflowCore.TestAssets.Steps.IterateListStep, WorkflowCore.TestAssets\"," +
+                    "\"Inputs\": {" +
+                        "\"Collection\": \"data.DataList\"," +
+                        "\"RunParallel\": false" +
+                    "}" +
+                "}]}";
+
+            var def = _subject.LoadDefinition(json, Deserializers.Json);
+
+            var step = def.Steps.Single(s => s.ExternalId == "IterateList");
+            var body = new IterateListStep();
+            var data = new IterateListData { DataList = new List<string> { "item1" } };
+
+            foreach (var input in step.Inputs)
+                input.AssignInput(data, body, null);
+
+            body.RunParallel.Should().BeFalse();
+            body.Collection.Should().BeEquivalentTo(data.DataList);
+        }
+
+        [Fact(DisplayName = "Should still throw for unknown YAML input properties")]
+        public void ShouldStillThrowForUnknownYamlInputProperties()
+        {
+            var yaml =
+                "Id: Issue1375Unknown\n" +
+                "Version: 1\n" +
+                "DataType: WorkflowCore.TestAssets.DataTypes.IterateListData, WorkflowCore.TestAssets\n" +
+                "Steps:\n" +
+                "  - Id: IterateList\n" +
+                "    StepType: WorkflowCore.TestAssets.Steps.IterateListStep, WorkflowCore.TestAssets\n" +
+                "    Inputs:\n" +
+                "      Collection: data.DataList\n" +
+                "      NonExistentProperty: false\n";
+
+            var exception = Assert.Throws<ArgumentException>(() =>
+                _subject.LoadDefinition(yaml, Deserializers.Yaml));
+
+            exception.Message.Should().Contain("Unknown property for input NonExistentProperty");
         }
 
         private bool MatchTestDefinition(WorkflowDefinition def)
