@@ -17,8 +17,9 @@ namespace WorkflowCore.Services
         private readonly IExecutionPointerFactory _pointerFactory;
         private readonly IQueueProvider _queueService;
         private readonly IDateTimeProvider _dateTimeProvider;
+        private readonly IWorkflowMiddlewareRunner _middlewareRunner;
 
-        public SyncWorkflowRunner(IWorkflowHost host, IWorkflowExecutor executor, IDistributedLockProvider lockService, IWorkflowRegistry registry, IPersistenceProvider persistenceStore, IExecutionPointerFactory pointerFactory, IQueueProvider queueService, IDateTimeProvider dateTimeProvider)
+        public SyncWorkflowRunner(IWorkflowHost host, IWorkflowExecutor executor, IDistributedLockProvider lockService, IWorkflowRegistry registry, IPersistenceProvider persistenceStore, IExecutionPointerFactory pointerFactory, IQueueProvider queueService, IDateTimeProvider dateTimeProvider, IWorkflowMiddlewareRunner middlewareRunner)
         {
             _host = host;
             _executor = executor;
@@ -28,6 +29,7 @@ namespace WorkflowCore.Services
             _pointerFactory = pointerFactory;
             _queueService = queueService;
             _dateTimeProvider = dateTimeProvider;
+            _middlewareRunner = middlewareRunner;
         }
 
         public Task<WorkflowInstance> RunWorkflowSync<TData>(string workflowId, int version, TData data,
@@ -67,7 +69,10 @@ namespace WorkflowCore.Services
                     wf.Data = def.DataType.GetConstructor(new Type[0]).Invoke(new object[0]);
             }
 
-            wf.ExecutionPointers.Add(_pointerFactory.BuildGenesisPointer(def));
+            var genPointer = _pointerFactory.BuildGenesisPointer(def);
+            wf.ExecutionPointers.Add(genPointer);
+
+            await _middlewareRunner.RunPreMiddleware(wf, def);
 
             var id = Guid.NewGuid().ToString();
 
