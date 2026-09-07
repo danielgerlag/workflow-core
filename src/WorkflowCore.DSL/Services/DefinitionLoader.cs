@@ -275,7 +275,7 @@ namespace WorkflowCore.Services.DefinitionStorage
                         if (stepProperty.PropertyType.IsAssignableFrom(primitiveValue.GetType()))
                             stepProperty.SetValue(pStep, primitiveValue);
                         else
-                            stepProperty.SetValue(pStep, Convert.ChangeType(primitiveValue, stepProperty.PropertyType));
+                            stepProperty.SetValue(pStep, System.Convert.ChangeType(primitiveValue, stepProperty.PropertyType));
                     }
                     step.Inputs.Add(new ActionParameter<IStepBody, object>(primitiveAction));
                     continue;
