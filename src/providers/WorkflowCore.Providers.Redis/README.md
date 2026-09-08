@@ -38,3 +38,5 @@ services.AddWorkflow(cfg =>
     cfg.UseRedisEventHub("localhost:6379", "channel-name");
 });
 ```
+
+`UseRedisQueues` stores pending work in a Redis sorted set (ZSET) on `{prefix}-workflows`, `{prefix}-events`, and `{prefix}-index`. Those keys previously held LISTs; the types cannot share a key. Stop every host, then start the new build — `Start()` migrates any leftover LIST in place (first occurrence kept). Mixed old/new queue providers on the same keys are not supported. Dequeue uses atomic `ZRANGE` + `ZREM` (a `ZPOPMIN` equivalent) and does not require Redis 5+.
