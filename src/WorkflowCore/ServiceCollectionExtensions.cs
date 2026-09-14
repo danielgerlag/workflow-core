@@ -53,7 +53,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 services.AddTransient<IBackgroundTask, RunnablePoller>();
             }
 
-            services.AddTransient<IBackgroundTask>(sp => sp.GetService<ILifeCycleEventPublisher>());
+            services.AddTransient<IBackgroundTask>(sp => sp.GetRequiredService<ILifeCycleEventPublisher>());
 
             services.AddTransient<IWorkflowErrorHandler, CompensateHandler>();
             services.AddTransient<IWorkflowErrorHandler, RetryHandler>();
