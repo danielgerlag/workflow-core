@@ -17,12 +17,23 @@ namespace WorkflowCore.Tests.Redis
 
         public async Task InitializeAsync()
         {
+            // Optional: point at an already-running Redis (e.g. CI without Docker).
+            var fromEnv = Environment.GetEnvironmentVariable("WORKFLOWCORE_REDIS");
+            if (!string.IsNullOrEmpty(fromEnv))
+            {
+                ConnectionString = fromEnv;
+                return;
+            }
+
             await _redisResource.InitializeAsync();
             ConnectionString = _redisResource.ConnectionString;
         }
 
         public Task DisposeAsync()
         {
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WORKFLOWCORE_REDIS")))
+                return Task.CompletedTask;
+
             return _redisResource.DisposeAsync();
         }
     }
