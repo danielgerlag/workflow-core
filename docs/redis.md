@@ -19,7 +19,8 @@ dotnet add package WorkflowCore.Providers.Redis
 
 ## Configuration
 
-Use the `IServiceCollection` extension methods when building your service provider
+Use the `IServiceCollection` extension methods when building your service provider:
+
 * `.UseRedisPersistence`
 * `.UseRedisQueues`
 * `.UseRedisLocking`
