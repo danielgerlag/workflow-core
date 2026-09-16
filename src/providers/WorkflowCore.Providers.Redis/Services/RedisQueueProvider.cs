@@ -28,13 +28,15 @@ namespace WorkflowCore.Providers.Redis.Services
     /// key-type cutover.
     /// </para>
     /// <para>
-    /// <see cref="RedisQueueStorage.SortedSet"/> uses <c>ZADD NX</c> with a Redis
-    /// <c>TIME</c> microsecond score. Re-queue while pending is a no-op (score and
+    /// <see cref="RedisQueueStorage.SortedSet"/> requires Redis 3.0.2+ (<c>ZADD NX</c>;
+    /// Lua 2.6+ is not enough). Scores are Redis <c>TIME</c> microseconds; same-µs
+    /// members are ordered lexicographically by id, so FIFO is slightly weaker than
+    /// LIST under burst enqueue. Re-queue while pending is a no-op (score and
     /// position are unchanged). After dequeue, the same id may be added again with a
     /// new score. Dequeue is atomic Lua <c>ZRANGE</c> + <c>ZREM</c> (ZPOPMIN
     /// equivalent) so Redis 5+ is not required. <see cref="Start"/> migrates an
-    /// existing LIST (first occurrence kept, FIFO head = lowest score) only in this
-    /// mode.
+    /// existing LIST in one Lua <c>EVAL</c> (first occurrence kept, FIFO head =
+    /// lowest score); a huge backlog can briefly block Redis.
     /// </para>
     /// </remarks>
     public class RedisQueueProvider : IQueueProvider
@@ -55,10 +57,10 @@ return 0
 ";
 
         /// <summary>
-        /// Unique enqueue on a ZSET: ZADD NX with Redis server TIME as the sort
-        /// score (µs since epoch). Single-key so it is Redis Cluster safe. TIME is
-        /// the Redis process clock, not the client, so application-node clock skew
-        /// does not affect FIFO.
+        /// Unique enqueue on a ZSET: ZADD NX (Redis 3.0.2+) with Redis server TIME
+        /// as the sort score (µs since epoch). Same-µs members sort lexicographically
+        /// by id. Single-key so it is Redis Cluster safe. TIME is the Redis process
+        /// clock, not the client, so application-node clock skew does not affect FIFO.
         /// </summary>
         private const string SortedSetUniqueEnqueueScript = @"
 local t = redis.call('TIME')
@@ -81,8 +83,9 @@ return items[1]
 
         /// <summary>
         /// LIST → ZSET conversion used only when <see cref="RedisQueueStorage.SortedSet"/>
-        /// is selected. First LIST occurrence wins (ZADD NX); later duplicates are
-        /// dropped. Migrated scores are 1..n so they dequeue before any later
+        /// is selected. Loads the whole LIST into one EVAL (can briefly block Redis
+        /// on a huge backlog). First LIST occurrence wins (ZADD NX); later duplicates
+        /// are dropped. Migrated scores are 1..n so they dequeue before any later
         /// TIME-based enqueue.
         /// </summary>
         private const string MigrateListScript = @"
