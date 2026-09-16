@@ -32,9 +32,9 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </param>
         /// <param name="storage">
         /// <see cref="RedisQueueStorage.List"/> (default) keeps LIST keys with atomic
-        /// Lua uniqueness and is rolling-upgrade friendly.
-        /// <see cref="RedisQueueStorage.SortedSet"/> uses ZSET uniqueness;
-        /// <see cref="RedisQueueProvider.Start"/> migrates leftover LIST items.
+        /// Lua uniqueness (Lua 2.6+ / LINSERT 2.2+) and is rolling-upgrade friendly.
+        /// <see cref="RedisQueueStorage.SortedSet"/> uses ZSET uniqueness (Redis 3.0.2+);
+        /// <see cref="RedisQueueProvider.Start"/> migrates leftover LIST items in one EVAL.
         /// Mixing modes on the same prefix causes <c>WRONGTYPE</c> or split work.
         /// </param>
         public static WorkflowOptions UseRedisQueues(this WorkflowOptions options, string connectionString, string prefix, RedisQueueStorage storage)

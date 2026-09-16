@@ -18,8 +18,9 @@ namespace WorkflowCore.Providers.Redis.Services
         List = 0,
 
         /// <summary>
-        /// Redis sorted set (ZSET) with <c>ZADD NX</c> and Redis <c>TIME</c> scores.
-        /// <see cref="RedisQueueProvider.Start"/> migrates leftover LIST items in place.
+        /// Redis sorted set (ZSET) with <c>ZADD NX</c> (Redis 3.0.2+) and Redis
+        /// <c>TIME</c> microsecond scores. Same-µs members sort lexicographically by id.
+        /// <see cref="RedisQueueProvider.Start"/> migrates leftover LIST items in one Lua EVAL.
         /// </summary>
         SortedSet = 1
     }
