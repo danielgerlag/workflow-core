@@ -11,7 +11,7 @@ There are several persistence providers available as separate Nuget packages.
 * [Amazon DynamoDB](https://github.com/danielgerlag/workflow-core/tree/master/src/providers/WorkflowCore.Providers.AWS)
 * [Cosmos DB](https://github.com/danielgerlag/workflow-core/tree/master/src/providers/WorkflowCore.Providers.Azure)
 * [Azure Table Storage](https://github.com/danielgerlag/workflow-core/tree/master/src/providers/WorkflowCore.Providers.Azure)
-* [Redis](https://github.com/danielgerlag/workflow-core/tree/master/src/providers/WorkflowCore.Providers.Redis)
+* [Redis](redis.md)
 * [Oracle](https://github.com/danielgerlag/workflow-core/tree/master/src/providers/WorkflowCore.Persistence.Oracle)
 
 ## Implementing a custom persistence provider
