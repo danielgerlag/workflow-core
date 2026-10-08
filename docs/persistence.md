@@ -14,6 +14,38 @@ There are several persistence providers available as separate Nuget packages.
 * [Redis](https://github.com/danielgerlag/workflow-core/tree/master/src/providers/WorkflowCore.Providers.Redis)
 * [Oracle](https://github.com/danielgerlag/workflow-core/tree/master/src/providers/WorkflowCore.Persistence.Oracle)
 
+## Restricting deserialized types (Entity Framework providers)
+
+The Entity Framework based providers (SQL Server, PostgreSQL, MySQL, Sqlite, Oracle) store workflow data as JSON with `TypeNameHandling.All`, so the type of each object is read from the stored data.
+As a defense-in-depth measure, you can supply a `SerializationBinder` that only allows the types your workflows use, so that a tampered row cannot instantiate arbitrary types.
+
+```csharp
+public class AllowListBinder : DefaultSerializationBinder
+{
+    private static readonly HashSet<Type> Allowed = new HashSet<Type> { typeof(MyData) };
+
+    public override Type BindToType(string assemblyName, string typeName)
+    {
+        var type = base.BindToType(assemblyName, typeName);
+        if (!Allowed.Contains(type) && type.Assembly != typeof(IWorkflowHost).Assembly)
+            throw new JsonSerializationException($"Type '{typeName}' is not allowed.");
+
+        return type;
+    }
+}
+
+services.AddWorkflow(x =>
+{
+    x.UseSqlite(@"Data Source=database.db;", true);
+    x.UsePersistence(sp => new EntityFrameworkPersistenceProvider(new SqliteContextFactory(@"Data Source=database.db;"), true, false,
+        settings => settings.SerializationBinder = new AllowListBinder()));
+});
+```
+
+The binder must allow every non-primitive type that is persisted, including collection types such as `List<T>` and their generic arguments, as well as any types stored in step outcomes, event data or extension attributes.
+Workflow Core's own types (e.g. step persistence data) live in the `WorkflowCore` assembly, which the example above allows.
+Changing `TypeNameHandling` or other settings that affect the JSON format may make existing persisted data unreadable.
+
 ## Implementing a custom persistence provider
 
 To implement a custom persistence provider, create a class that implements `IPersistenceProvider` interface:

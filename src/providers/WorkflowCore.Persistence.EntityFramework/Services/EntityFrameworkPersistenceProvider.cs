@@ -8,6 +8,7 @@ using WorkflowCore.Persistence.EntityFramework.Models;
 using WorkflowCore.Models;
 using WorkflowCore.Persistence.EntityFramework.Interfaces;
 using System.Threading;
+using Newtonsoft.Json;
 
 namespace WorkflowCore.Persistence.EntityFramework.Services
 {
@@ -17,13 +18,25 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
         private readonly bool _canMigrateDB;
         private readonly IWorkflowDbContextFactory _contextFactory;
 
+        internal JsonSerializerSettings SerializerSettings { get; }
+
         public bool SupportsScheduledCommands => true;
 
         public EntityFrameworkPersistenceProvider(IWorkflowDbContextFactory contextFactory, bool canCreateDB, bool canMigrateDB)
+            : this(contextFactory, canCreateDB, canMigrateDB, null)
+        {
+        }
+
+        /// <param name="configureSerializer">
+        /// Customizes the JSON serializer settings used for workflow data, e.g. to set a <see cref="JsonSerializerSettings.SerializationBinder"/> that restricts which types can be deserialized.
+        /// Changing <see cref="JsonSerializerSettings.TypeNameHandling"/> may make existing persisted data unreadable.
+        /// </param>
+        public EntityFrameworkPersistenceProvider(IWorkflowDbContextFactory contextFactory, bool canCreateDB, bool canMigrateDB, Action<JsonSerializerSettings> configureSerializer)
         {
             _contextFactory = contextFactory;
             _canCreateDB = canCreateDB;
             _canMigrateDB = canMigrateDB;
+            SerializerSettings = ExtensionMethods.CreateSerializerSettings(configureSerializer);
         }
 
         public async Task<string> CreateEventSubscription(EventSubscription subscription, CancellationToken cancellationToken = default)
@@ -31,7 +44,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             using (var db = ConstructDbContext())
             {
                 subscription.Id = Guid.NewGuid().ToString();
-                var persistable = subscription.ToPersistable();
+                var persistable = subscription.ToPersistable(SerializerSettings);
                 var result = db.Set<PersistedSubscription>().Add(persistable);
                 await db.SaveChangesAsync(cancellationToken);
                 return subscription.Id;
@@ -43,7 +56,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             using (var db = ConstructDbContext())
             {
                 workflow.Id = Guid.NewGuid().ToString();
-                var persistable = workflow.ToPersistable();
+                var persistable = workflow.ToPersistable(SerializerSettings);
                 var result = db.Set<PersistedWorkflow>().Add(persistable);
                 await db.SaveChangesAsync(cancellationToken);
                 return workflow.Id;
@@ -90,7 +103,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 List<WorkflowInstance> result = new List<WorkflowInstance>();
 
                 foreach (var item in rawResult)
-                    result.Add(item.ToWorkflowInstance());
+                    result.Add(item.ToWorkflowInstance(SerializerSettings));
 
                 return result;
             }
@@ -110,7 +123,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 if (raw == null)
                     return null;
 
-                return raw.ToWorkflowInstance();
+                return raw.ToWorkflowInstance(SerializerSettings);
             }
         }
 
@@ -130,7 +143,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .Include(wf => wf.ExecutionPointers)
                     .Where(x => uids.Contains(x.InstanceId));
 
-                return (await raw.ToListAsync(cancellationToken)).Select(i => i.ToWorkflowInstance());
+                return (await raw.ToListAsync(cancellationToken)).Select(i => i.ToWorkflowInstance(SerializerSettings));
             }
         }
 
@@ -147,7 +160,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .AsTracking()
                     .FirstAsync(cancellationToken);
 
-                var persistable = workflow.ToPersistable(existingEntity);
+                var persistable = workflow.ToPersistable(SerializerSettings, existingEntity);
                 await db.SaveChangesAsync(cancellationToken);
             }
         }
@@ -165,12 +178,12 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .AsTracking()
                     .FirstAsync(cancellationToken);
 
-                var workflowPersistable = workflow.ToPersistable(existingEntity);
+                var workflowPersistable = workflow.ToPersistable(SerializerSettings, existingEntity);
 
                 foreach (var subscription in subscriptions)
                 {
                     subscription.Id = Guid.NewGuid().ToString();
-                    var subscriptionPersistable = subscription.ToPersistable();
+                    var subscriptionPersistable = subscription.ToPersistable(SerializerSettings);
                     db.Set<PersistedSubscription>().Add(subscriptionPersistable);
                 }
 
@@ -216,7 +229,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .Where(x => x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf)
                     .ToListAsync(cancellationToken);
 
-                return raw.Select(item => item.ToEventSubscription()).ToList();
+                return raw.Select(item => item.ToEventSubscription(SerializerSettings)).ToList();
             }
         }
 
@@ -225,7 +238,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             using (var db = ConstructDbContext())
             {
                 newEvent.Id = Guid.NewGuid().ToString();
-                var persistable = newEvent.ToPersistable();
+                var persistable = newEvent.ToPersistable(SerializerSettings);
                 var result = db.Set<PersistedEvent>().Add(persistable);
                 await db.SaveChangesAsync(cancellationToken);
                 return newEvent.Id;
@@ -243,7 +256,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 if (raw == null)
                     return null;
 
-                return raw.ToEvent();
+                return raw.ToEvent(SerializerSettings);
             }
         }
 
@@ -347,7 +360,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                 var uid = new Guid(eventSubscriptionId);
                 var raw = await db.Set<PersistedSubscription>().FirstOrDefaultAsync(x => x.SubscriptionId == uid, cancellationToken);
 
-                return raw?.ToEventSubscription();
+                return raw?.ToEventSubscription(SerializerSettings);
             }
         }
 
@@ -357,7 +370,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
             {
                 var raw = await db.Set<PersistedSubscription>().FirstOrDefaultAsync(x => x.EventName == eventName && x.EventKey == eventKey && x.SubscribeAsOf <= asOf && x.ExternalToken == null, cancellationToken);
 
-                return raw?.ToEventSubscription();
+                return raw?.ToEventSubscription(SerializerSettings);
             }
         }
 
