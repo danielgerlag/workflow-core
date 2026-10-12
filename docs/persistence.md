@@ -41,7 +41,9 @@ public class AllowListBinder : DefaultSerializationBinder
     public override Type BindToType(string assemblyName, string typeName)
     {
         var type = base.BindToType(assemblyName, typeName);
-        if (!Allowed.Contains(type) && type.Assembly != typeof(IWorkflowHost).Assembly)
+        // Generic and array types are excluded because their type arguments come from outside the assembly
+        var isEngineType = type.Assembly == typeof(IWorkflowHost).Assembly && !type.IsGenericType && !type.IsArray;
+        if (!Allowed.Contains(type) && !isEngineType)
             throw new JsonSerializationException($"Type '{typeName}' is not allowed.");
 
         return type;
@@ -62,7 +64,9 @@ Persistence providers are registered as transient, so the configure action runs 
 Create the binder once, outside the lambda, so its type cache is reused; the shared instance must be thread-safe.
 
 The binder must allow every non-primitive type that is persisted, including collection types such as `List<T>` and their generic arguments, as well as any types stored in step outcomes, event data or extension attributes.
-Workflow Core's own types (e.g. step persistence data) live in the `WorkflowCore` assembly, which the example above allows.
+Workflow Core's own types (e.g. step persistence data) live in the `WorkflowCore` assembly, whose non-generic types the example above allows.
+Allowing types by assembly also trusts the concrete types their members declare, since those are created without consulting the binder.
+Where practical, list the specific types your application persists instead.
 Changing `TypeNameHandling` or other settings that affect the JSON format may make existing persisted data unreadable.
 
 ## Implementing a custom persistence provider
