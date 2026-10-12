@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using WorkflowCore.Interface;
 using WorkflowCore.Models;
 using WorkflowCore.Persistence.EntityFramework;
 using WorkflowCore.Persistence.EntityFramework.Models;
@@ -39,10 +40,12 @@ namespace WorkflowCore.Tests.Sqlite
             json.Should().Be(JsonConvert.SerializeObject(data, previousSettings));
         }
 
-        [Fact]
-        public async Task Configured_binder_should_round_trip_allowed_type()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task Configured_binder_should_round_trip_allowed_type(bool largeDataOptimized)
         {
-            var subject = BuildProvider(s => s.SerializationBinder = new AllowListBinder());
+            var subject = BuildProvider(s => s.SerializationBinder = new AllowListBinder(), largeDataOptimized);
             var workflowId = await subject.CreateNewWorkflow(BuildWorkflow());
 
             var retrieved = await subject.GetWorkflowInstance(workflowId);
@@ -50,10 +53,12 @@ namespace WorkflowCore.Tests.Sqlite
             retrieved.Data.Should().BeOfType<AllowedData>().Which.Value.Should().Be(7);
         }
 
-        [Fact]
-        public async Task Configured_binder_should_reject_disallowed_type()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task Configured_binder_should_reject_disallowed_type(bool largeDataOptimized)
         {
-            var subject = BuildProvider(s => s.SerializationBinder = new AllowListBinder());
+            var subject = BuildProvider(s => s.SerializationBinder = new AllowListBinder(), largeDataOptimized);
             var workflowId = await subject.CreateNewWorkflow(BuildWorkflow());
             OverwriteData(workflowId, new DisallowedData());
 
@@ -63,7 +68,7 @@ namespace WorkflowCore.Tests.Sqlite
         [Fact]
         public async Task Default_settings_should_not_restrict_types()
         {
-            var subject = BuildProvider(null);
+            var subject = BuildProvider(null, false);
             var workflowId = await subject.CreateNewWorkflow(BuildWorkflow());
             OverwriteData(workflowId, new DisallowedData());
 
@@ -72,9 +77,13 @@ namespace WorkflowCore.Tests.Sqlite
             retrieved.Data.Should().BeOfType<DisallowedData>();
         }
 
-        private EntityFrameworkPersistenceProvider BuildProvider(Action<JsonSerializerSettings> configureSerializer)
+        // Calls go through IPersistenceProvider because LargeDataOptimizedEntityFrameworkPersistenceProvider hides the base methods with 'new'
+        private IPersistenceProvider BuildProvider(Action<JsonSerializerSettings> configureSerializer, bool largeDataOptimized)
         {
-            var provider = new EntityFrameworkPersistenceProvider(new SqliteContextFactory(_connectionString), true, false, configureSerializer);
+            var contextFactory = new SqliteContextFactory(_connectionString);
+            IPersistenceProvider provider = largeDataOptimized
+                ? new LargeDataOptimizedEntityFrameworkPersistenceProvider(contextFactory, true, false, configureSerializer)
+                : new EntityFrameworkPersistenceProvider(contextFactory, true, false, configureSerializer);
             provider.EnsureStoreExists();
             return provider;
         }

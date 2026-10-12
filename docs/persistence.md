@@ -20,9 +20,23 @@ The Entity Framework based providers (SQL Server, PostgreSQL, MySQL, Sqlite, Ora
 As a defense-in-depth measure, you can supply a `SerializationBinder` that only allows the types your workflows use, so that a tampered row cannot instantiate arbitrary types.
 
 ```csharp
+using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using WorkflowCore.Interface;
+using WorkflowCore.Persistence.EntityFramework.Services;
+using WorkflowCore.Persistence.Sqlite;
+
+public class MyData
+{
+    public List<string> Tags { get; set; }
+}
+
 public class AllowListBinder : DefaultSerializationBinder
 {
-    private static readonly HashSet<Type> Allowed = new HashSet<Type> { typeof(MyData) };
+    // MyData.Tags is stored with its own type name, so List<string> must be allowed too
+    private static readonly HashSet<Type> Allowed = new HashSet<Type> { typeof(MyData), typeof(List<string>) };
 
     public override Type BindToType(string assemblyName, string typeName)
     {
@@ -34,13 +48,18 @@ public class AllowListBinder : DefaultSerializationBinder
     }
 }
 
+var binder = new AllowListBinder();
+
 services.AddWorkflow(x =>
 {
     x.UseSqlite(@"Data Source=database.db;", true);
     x.UsePersistence(sp => new EntityFrameworkPersistenceProvider(new SqliteContextFactory(@"Data Source=database.db;"), true, false,
-        settings => settings.SerializationBinder = new AllowListBinder()));
+        settings => settings.SerializationBinder = binder));
 });
 ```
+
+Persistence providers are registered as transient, so the configure action runs every time a provider is resolved.
+Create the binder once, outside the lambda, so its type cache is reused; the shared instance must be thread-safe.
 
 The binder must allow every non-primitive type that is persisted, including collection types such as `List<T>` and their generic arguments, as well as any types stored in step outcomes, event data or extension attributes.
 Workflow Core's own types (e.g. step persistence data) live in the `WorkflowCore` assembly, which the example above allows.
