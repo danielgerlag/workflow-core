@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,6 +21,7 @@ namespace WorkflowCore.Services.BackgroundTasks
         private readonly IPersistenceProvider _persistenceStore;
         private readonly IWorkflowExecutor _executor;
         private readonly IGreyList _greylist;
+        private readonly ConcurrentDictionary<string, int> _loadFailures = new ConcurrentDictionary<string, int>();
 
         protected override int MaxConcurrentItems => Options.MaxConcurrentWorkflows;
         protected override QueueType Queue => QueueType.Workflow;
@@ -36,6 +38,13 @@ namespace WorkflowCore.Services.BackgroundTasks
 
         protected override async Task ProcessItem(string itemId, CancellationToken cancellationToken)
         {
+            if (IsQuarantined(itemId))
+            {
+                Logger.LogDebug("Skipping quarantined workflow {ItemId}", itemId);
+                _greylist.Add($"wf:{itemId}");
+                return;
+            }
+
             if (!await _lockProvider.AcquireLock(itemId, cancellationToken))
             {
                 Logger.LogInformation("Workflow locked {ItemId}", itemId);
@@ -48,7 +57,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             try
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                workflow = await _persistenceStore.GetWorkflowInstance(itemId, cancellationToken);
+                workflow = await LoadWorkflow(itemId, cancellationToken);
 
                 WorkflowActivity.Enrich(workflow, "process");
                 if (workflow.Status == WorkflowStatus.Runnable)
@@ -78,8 +87,16 @@ namespace WorkflowCore.Services.BackgroundTasks
             {
                 // Always remove from greylist regardless of workflow status
                 // This prevents workflows from being stuck in greylist when they can't be processed
-                Logger.LogDebug("Removing workflow {ItemId} from greylist", itemId);
-                _greylist.Remove($"wf:{itemId}");
+                if (IsQuarantined(itemId))
+                {
+                    // Keep it greylisted so the poller stops re-queuing it
+                    _greylist.Add($"wf:{itemId}");
+                }
+                else
+                {
+                    Logger.LogDebug("Removing workflow {ItemId} from greylist", itemId);
+                    _greylist.Remove($"wf:{itemId}");
+                }
                 
                 await _lockProvider.ReleaseLock(itemId);
                 if ((workflow != null) && (result != null))
@@ -114,6 +131,30 @@ namespace WorkflowCore.Services.BackgroundTasks
                 }
             }
 
+        }
+
+        private bool IsQuarantined(string itemId)
+        {
+            return _loadFailures.TryGetValue(itemId, out var failures) && failures >= Options.MaxWorkflowLoadAttempts;
+        }
+
+        private async Task<WorkflowInstance> LoadWorkflow(string itemId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var workflow = await _persistenceStore.GetWorkflowInstance(itemId, cancellationToken);
+                _loadFailures.TryRemove(itemId, out _);
+                return workflow;
+            }
+            catch (Exception ex) when (!(ex is OperationCanceledException))
+            {
+                var failures = _loadFailures.AddOrUpdate(itemId, 1, (key, count) => count + 1);
+                if (failures >= Options.MaxWorkflowLoadAttempts)
+                {
+                    Logger.LogError(ex, "Workflow {ItemId} failed to load {Failures} times in a row and is quarantined on this node until restart. Its stored state is unchanged.", itemId, failures);
+                }
+                throw;
+            }
         }
 
         private async Task TryProcessSubscription(EventSubscription subscription, IPersistenceProvider persistenceStore, CancellationToken cancellationToken)
