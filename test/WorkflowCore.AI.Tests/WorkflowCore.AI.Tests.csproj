@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>WorkflowCore.AI.Tests</AssemblyName>
+    <PackageId>WorkflowCore.AI.Tests</PackageId>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\extensions\WorkflowCore.AI\WorkflowCore.AI.csproj" />
+    <ProjectReference Include="..\..\src\WorkflowCore\WorkflowCore.csproj" />
+    <ProjectReference Include="..\..\src\WorkflowCore.Testing\WorkflowCore.Testing.csproj" />
+  </ItemGroup>
+
+</Project>
