@@ -104,11 +104,19 @@ namespace WorkflowCore.UnitTests.Services
             A.CallTo(() => step1Body.RunAsync(A<IStepExecutionContext>.Ignored)).Returns(ExecutionResult.Next());
             WorkflowStep step1 = BuildFakeStep(step1Body);
             Given1StepWorkflow(step1, "Workflow", 1);
+            A.CallTo(() => ResultProcesser.ProcessExecutionResult(A<WorkflowInstance>._, A<WorkflowDefinition>._, A<ExecutionPointer>._, A<WorkflowStep>._, A<ExecutionResult>._, A<WorkflowExecutorResult>._))
+                .Invokes(call =>
+                {
+                    var pointer = call.GetArgument<ExecutionPointer>(2);
+                    pointer.Active = false;
+                    pointer.EndTime = DateTime.UtcNow;
+                });
 
             //act
-            await Subject.RunWorkflowSync("Workflow", 1, new { }, "Test", TimeSpan.FromMilliseconds(1));
+            var result = await Subject.RunWorkflowSync("Workflow", 1, new { }, "Test", TimeSpan.FromSeconds(30));
 
             //assert
+            result.Status.Should().Be(WorkflowStatus.Complete);
             A.CallTo(() => MiddlewareRunner.RunPreMiddleware(A<WorkflowInstance>.Ignored, A<WorkflowDefinition>.Ignored)).MustHaveHappened();
         }
 
