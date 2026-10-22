@@ -9,6 +9,7 @@ using WorkflowCore.Models;
 using WorkflowCore.Persistence.EntityFramework.Interfaces;
 using System.Threading;
 using WorkflowCore.Interface;
+using Newtonsoft.Json;
 
 namespace WorkflowCore.Persistence.EntityFramework.Services
 {
@@ -17,7 +18,13 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
         private readonly IWorkflowDbContextFactory _contextFactory;
 
         public LargeDataOptimizedEntityFrameworkPersistenceProvider(IWorkflowDbContextFactory contextFactory, bool canCreateDb, bool canMigrateDb)
-            : base(contextFactory, canCreateDb, canMigrateDb)
+            : this(contextFactory, canCreateDb, canMigrateDb, null)
+        {
+        }
+
+        /// <inheritdoc cref="EntityFrameworkPersistenceProvider(IWorkflowDbContextFactory, bool, bool, Action{JsonSerializerSettings})"/>
+        public LargeDataOptimizedEntityFrameworkPersistenceProvider(IWorkflowDbContextFactory contextFactory, bool canCreateDb, bool canMigrateDb, Action<JsonSerializerSettings> configureSerializer)
+            : base(contextFactory, canCreateDb, canMigrateDb, configureSerializer)
         {
             _contextFactory = contextFactory;
         }
@@ -60,7 +67,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
 
                 foreach (var item in rawResult)
                 {
-                    result.Add(item.ToWorkflowInstance());
+                    result.Add(item.ToWorkflowInstance(SerializerSettings));
                 }
 
                 return result;
@@ -80,7 +87,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .AsSplitQuery()
                     .FirstAsync(x => x.InstanceId == uid, cancellationToken);
 
-                return raw?.ToWorkflowInstance();
+                return raw?.ToWorkflowInstance(SerializerSettings);
             }
         }
 
@@ -104,7 +111,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
 
                 var persistedWorkflows = await raw.ToListAsync(cancellationToken);
 
-                return persistedWorkflows.Select(i => i.ToWorkflowInstance());
+                return persistedWorkflows.Select(i => i.ToWorkflowInstance(SerializerSettings));
             }
         }
 
@@ -124,7 +131,7 @@ namespace WorkflowCore.Persistence.EntityFramework.Services
                     .AsTracking()
                     .FirstAsync(cancellationToken);
 
-                _ = workflow.ToPersistable(existingEntity);
+                _ = workflow.ToPersistable(SerializerSettings, existingEntity);
 
                 await db.SaveChangesAsync(cancellationToken);
 

@@ -17,7 +17,7 @@ namespace WorkflowCore.Tests.Sqlite
 
             var persisted = BuildPersistedWorkflow(createTime: localTime);
 
-            var instance = persisted.ToWorkflowInstance();
+            var instance = persisted.ToWorkflowInstance(ExtensionMethods.CreateSerializerSettings());
 
             instance.CreateTime.Should().Be(expectedUtc);
             instance.CreateTime.Kind.Should().Be(DateTimeKind.Utc);
@@ -30,7 +30,7 @@ namespace WorkflowCore.Tests.Sqlite
 
             var persisted = BuildPersistedWorkflow(createTime: utcTime);
 
-            var instance = persisted.ToWorkflowInstance();
+            var instance = persisted.ToWorkflowInstance(ExtensionMethods.CreateSerializerSettings());
 
             instance.CreateTime.Should().Be(utcTime);
             instance.CreateTime.Kind.Should().Be(DateTimeKind.Utc);
@@ -43,7 +43,7 @@ namespace WorkflowCore.Tests.Sqlite
 
             var persisted = BuildPersistedWorkflow(createTime: unspecifiedTime);
 
-            var instance = persisted.ToWorkflowInstance();
+            var instance = persisted.ToWorkflowInstance(ExtensionMethods.CreateSerializerSettings());
 
             instance.CreateTime.Should().Be(DateTime.SpecifyKind(unspecifiedTime, DateTimeKind.Utc));
             instance.CreateTime.Kind.Should().Be(DateTimeKind.Utc);
@@ -70,7 +70,7 @@ namespace WorkflowCore.Tests.Sqlite
                 Outcome = "null"
             });
 
-            var instance = persisted.ToWorkflowInstance();
+            var instance = persisted.ToWorkflowInstance(ExtensionMethods.CreateSerializerSettings());
 
             var pointer = instance.ExecutionPointers.FindById("ep1");
             pointer.SleepUntil.Should().Be(expectedUtc);

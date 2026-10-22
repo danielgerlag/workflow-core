@@ -9,18 +9,23 @@ namespace WorkflowCore.Persistence.EntityFramework
 {
     internal static class ExtensionMethods
     {
-        private static JsonSerializerSettings SerializerSettings = new JsonSerializerSettings
+        internal static JsonSerializerSettings CreateSerializerSettings(Action<JsonSerializerSettings> configure = null)
         {
-            TypeNameHandling = TypeNameHandling.All,
-            ObjectCreationHandling = ObjectCreationHandling.Replace
-        };
+            var settings = new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.All,
+                ObjectCreationHandling = ObjectCreationHandling.Replace
+            };
+            configure?.Invoke(settings);
+            return settings;
+        }
 
-        internal static PersistedWorkflow ToPersistable(this WorkflowInstance instance, PersistedWorkflow persistable = null)
+        internal static PersistedWorkflow ToPersistable(this WorkflowInstance instance, JsonSerializerSettings serializerSettings, PersistedWorkflow persistable = null)
         {
             if (persistable == null)
                 persistable = new PersistedWorkflow();
 
-            persistable.Data = JsonConvert.SerializeObject(instance.Data, SerializerSettings);
+            persistable.Data = JsonConvert.SerializeObject(instance.Data, serializerSettings);
             persistable.Description = instance.Description;
             persistable.Reference = instance.Reference;
             persistable.InstanceId = new Guid(instance.Id);
@@ -45,13 +50,13 @@ namespace WorkflowCore.Persistence.EntityFramework
                 persistedEP.StepId = ep.StepId;
                 persistedEP.Active = ep.Active;
                 persistedEP.SleepUntil = ep.SleepUntil;
-                persistedEP.PersistenceData = JsonConvert.SerializeObject(ep.PersistenceData, SerializerSettings);
+                persistedEP.PersistenceData = JsonConvert.SerializeObject(ep.PersistenceData, serializerSettings);
                 persistedEP.StartTime = ep.StartTime;
                 persistedEP.EndTime = ep.EndTime;
                 persistedEP.StepName = ep.StepName;
                 persistedEP.RetryCount = ep.RetryCount;
                 persistedEP.PredecessorId = ep.PredecessorId;
-                persistedEP.ContextItem = JsonConvert.SerializeObject(ep.ContextItem, SerializerSettings);
+                persistedEP.ContextItem = JsonConvert.SerializeObject(ep.ContextItem, serializerSettings);
                 persistedEP.Children = string.Empty;
 
                 foreach (var child in ep.Children)
@@ -60,8 +65,8 @@ namespace WorkflowCore.Persistence.EntityFramework
                 persistedEP.EventName = ep.EventName;
                 persistedEP.EventKey = ep.EventKey;
                 persistedEP.EventPublished = ep.EventPublished;
-                persistedEP.EventData = JsonConvert.SerializeObject(ep.EventData, SerializerSettings);
-                persistedEP.Outcome = JsonConvert.SerializeObject(ep.Outcome, SerializerSettings);
+                persistedEP.EventData = JsonConvert.SerializeObject(ep.EventData, serializerSettings);
+                persistedEP.Outcome = JsonConvert.SerializeObject(ep.Outcome, serializerSettings);
                 persistedEP.Status = ep.Status;
 
                 persistedEP.Scope = string.Empty;
@@ -78,7 +83,7 @@ namespace WorkflowCore.Persistence.EntityFramework
                     }
 
                     persistedAttr.AttributeKey = attr.Key;
-                    persistedAttr.AttributeValue = JsonConvert.SerializeObject(attr.Value, SerializerSettings);
+                    persistedAttr.AttributeValue = JsonConvert.SerializeObject(attr.Value, serializerSettings);
                 }
             }
 
@@ -96,7 +101,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             return result;
         }
 
-        internal static PersistedSubscription ToPersistable(this EventSubscription instance)
+        internal static PersistedSubscription ToPersistable(this EventSubscription instance, JsonSerializerSettings serializerSettings)
         {
             PersistedSubscription result = new PersistedSubscription();
             result.SubscriptionId = new Guid(instance.Id);
@@ -106,7 +111,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.ExecutionPointerId = instance.ExecutionPointerId;
             result.WorkflowId = instance.WorkflowId;
             result.SubscribeAsOf = DateTime.SpecifyKind(instance.SubscribeAsOf, DateTimeKind.Utc);
-            result.SubscriptionData = JsonConvert.SerializeObject(instance.SubscriptionData, SerializerSettings);
+            result.SubscriptionData = JsonConvert.SerializeObject(instance.SubscriptionData, serializerSettings);
             result.ExternalToken = instance.ExternalToken;
             result.ExternalTokenExpiry = instance.ExternalTokenExpiry;
             result.ExternalWorkerId = instance.ExternalWorkerId;
@@ -114,7 +119,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             return result;
         }
 
-        internal static PersistedEvent ToPersistable(this Event instance)
+        internal static PersistedEvent ToPersistable(this Event instance, JsonSerializerSettings serializerSettings)
         {
             PersistedEvent result = new PersistedEvent();
             result.EventId = new Guid(instance.Id);
@@ -122,7 +127,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.EventName = instance.EventName;
             result.EventTime = DateTime.SpecifyKind(instance.EventTime, DateTimeKind.Utc);
             result.IsProcessed = instance.IsProcessed;
-            result.EventData = JsonConvert.SerializeObject(instance.EventData, SerializerSettings);
+            result.EventData = JsonConvert.SerializeObject(instance.EventData, serializerSettings);
 
             return result;
         }
@@ -146,10 +151,10 @@ namespace WorkflowCore.Persistence.EntityFramework
             return DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
         }
 
-        internal static WorkflowInstance ToWorkflowInstance(this PersistedWorkflow instance)
+        internal static WorkflowInstance ToWorkflowInstance(this PersistedWorkflow instance, JsonSerializerSettings serializerSettings)
         {
             WorkflowInstance result = new WorkflowInstance();
-            result.Data = JsonConvert.DeserializeObject(instance.Data, SerializerSettings);
+            result.Data = JsonConvert.DeserializeObject(instance.Data, serializerSettings);
             result.Description = instance.Description;
             result.Reference = instance.Reference;
             result.Id = instance.InstanceId.ToString();
@@ -174,7 +179,7 @@ namespace WorkflowCore.Persistence.EntityFramework
                 if (ep.SleepUntil.HasValue)
                     pointer.SleepUntil = EnsureUtc(ep.SleepUntil.Value);
 
-                pointer.PersistenceData = JsonConvert.DeserializeObject(ep.PersistenceData ?? string.Empty, SerializerSettings);
+                pointer.PersistenceData = JsonConvert.DeserializeObject(ep.PersistenceData ?? string.Empty, serializerSettings);
 
                 if (ep.StartTime.HasValue)
                     pointer.StartTime = EnsureUtc(ep.StartTime.Value);
@@ -186,7 +191,7 @@ namespace WorkflowCore.Persistence.EntityFramework
 
                 pointer.RetryCount = ep.RetryCount;
                 pointer.PredecessorId = ep.PredecessorId;
-                pointer.ContextItem = JsonConvert.DeserializeObject(ep.ContextItem ?? string.Empty, SerializerSettings);
+                pointer.ContextItem = JsonConvert.DeserializeObject(ep.ContextItem ?? string.Empty, serializerSettings);
 
                 if (!string.IsNullOrEmpty(ep.Children))
                     pointer.Children = ep.Children.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
@@ -194,8 +199,8 @@ namespace WorkflowCore.Persistence.EntityFramework
                 pointer.EventName = ep.EventName;
                 pointer.EventKey = ep.EventKey;
                 pointer.EventPublished = ep.EventPublished;
-                pointer.EventData = JsonConvert.DeserializeObject(ep.EventData ?? string.Empty, SerializerSettings);
-                pointer.Outcome = JsonConvert.DeserializeObject(ep.Outcome ?? string.Empty, SerializerSettings);
+                pointer.EventData = JsonConvert.DeserializeObject(ep.EventData ?? string.Empty, serializerSettings);
+                pointer.Outcome = JsonConvert.DeserializeObject(ep.Outcome ?? string.Empty, serializerSettings);
                 pointer.Status = ep.Status;
 
                 if (!string.IsNullOrEmpty(ep.Scope))
@@ -203,7 +208,7 @@ namespace WorkflowCore.Persistence.EntityFramework
 
                 foreach (var attr in ep.ExtensionAttributes)
                 {
-                    pointer.ExtensionAttributes[attr.AttributeKey] = JsonConvert.DeserializeObject(attr.AttributeValue, SerializerSettings);
+                    pointer.ExtensionAttributes[attr.AttributeKey] = JsonConvert.DeserializeObject(attr.AttributeValue, serializerSettings);
                 }
 
                 result.ExecutionPointers.Add(pointer);
@@ -212,7 +217,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             return result;
         }
 
-        internal static EventSubscription ToEventSubscription(this PersistedSubscription instance)
+        internal static EventSubscription ToEventSubscription(this PersistedSubscription instance, JsonSerializerSettings serializerSettings)
         {
             EventSubscription result = new EventSubscription();
             result.Id = instance.SubscriptionId.ToString();
@@ -222,7 +227,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.ExecutionPointerId = instance.ExecutionPointerId;
             result.WorkflowId = instance.WorkflowId;
             result.SubscribeAsOf = EnsureUtc(instance.SubscribeAsOf);
-            result.SubscriptionData = JsonConvert.DeserializeObject(instance.SubscriptionData, SerializerSettings);
+            result.SubscriptionData = JsonConvert.DeserializeObject(instance.SubscriptionData, serializerSettings);
             result.ExternalToken = instance.ExternalToken;
             if (instance.ExternalTokenExpiry.HasValue)
                 result.ExternalTokenExpiry = EnsureUtc(instance.ExternalTokenExpiry.Value);
@@ -231,7 +236,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             return result;
         }
 
-        internal static Event ToEvent(this PersistedEvent instance)
+        internal static Event ToEvent(this PersistedEvent instance, JsonSerializerSettings serializerSettings)
         {
             Event result = new Event();
             result.Id = instance.EventId.ToString();
@@ -239,7 +244,7 @@ namespace WorkflowCore.Persistence.EntityFramework
             result.EventName = instance.EventName;
             result.EventTime = EnsureUtc(instance.EventTime);
             result.IsProcessed = instance.IsProcessed;
-            result.EventData = JsonConvert.DeserializeObject(instance.EventData, SerializerSettings);
+            result.EventData = JsonConvert.DeserializeObject(instance.EventData, serializerSettings);
 
             return result;
         }
