@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -120,8 +121,11 @@ namespace WorkflowCore.Services.BackgroundTasks
         {
             if (subscription.EventName != Event.EventTypeActivity)
             {
-                var events = await persistenceStore.GetEvents(subscription.EventName, subscription.EventKey, subscription.SubscribeAsOf, cancellationToken);
+                var events = (await persistenceStore.GetEvents(subscription.EventName, subscription.EventKey, subscription.SubscribeAsOf, cancellationToken)).ToList();
 
+                // Unprocess the whole set before queueing any of them. Otherwise a later event can
+                // be dequeued while earlier siblings are still marked processed (from an earlier
+                // empty-subscriber pass), and SeedSubscription will skip the ordering guard.
                 foreach (var evt in events)
                 {
                     var eventKey = $"evt:{evt}";
@@ -134,28 +138,27 @@ namespace WorkflowCore.Services.BackgroundTasks
                         {
                             await Task.Delay(Options.IdleTime, cancellationToken);
                             acquiredLock = await _lockProvider.AcquireLock(eventKey, cancellationToken);
-
                             attempt++;
                         }
 
                         if (!acquiredLock)
-                        {
                             Logger.LogWarning($"Failed to lock {evt}");
-                        }
                         else
                         {
                             _greylist.Remove(eventKey);
                             await persistenceStore.MarkEventUnprocessed(evt, cancellationToken);
-                            await QueueProvider.QueueWork(evt, QueueType.Event);
                         }
                     }
                     finally
                     {
                         if (acquiredLock)
-                        {
                             await _lockProvider.ReleaseLock(eventKey);
-                        }
                     }
+                }
+
+                foreach (var evt in events)
+                {
+                    await QueueProvider.QueueWork(evt, QueueType.Event);
                 }
             }
         }
