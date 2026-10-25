@@ -125,6 +125,7 @@ namespace WorkflowCore.Services.BackgroundTasks
                     var task = ExecuteItem(item, waitHandle, activity);
                     lock (_runningTasksLock)
                     {
+                        _runningTasks.RemoveAll(t => t.IsCompleted);
                         _runningTasks.Add(task);
                     }
                 }
