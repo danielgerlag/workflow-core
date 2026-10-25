@@ -10,8 +10,24 @@ namespace WorkflowCore.Models
     {
         public static IEnumerable<OpenUserAction> GetOpenUserActions(this WorkflowInstance workflow)
         {
-            List<OpenUserAction> result = new List<OpenUserAction>();
-            var pointers = workflow.ExecutionPointers.Where(x => !x.EventPublished && x.EventName == UserTask.EventName).ToList();
+            // ExecutionPointers can be mutated by the host while callers poll open actions.
+            // Snapshot with a short retry so concurrent Add/Remove does not throw.
+            List<ExecutionPointer> pointers = null;
+            for (var attempt = 0; ; attempt++)
+            {
+                try
+                {
+                    pointers = workflow.ExecutionPointers
+                        .Where(x => !x.EventPublished && x.EventName == UserTask.EventName)
+                        .ToList();
+                    break;
+                }
+                catch (InvalidOperationException) when (attempt < 5)
+                {
+                }
+            }
+
+            var result = new List<OpenUserAction>();
             foreach (var pointer in pointers)
             {
                 var item = new OpenUserAction
@@ -20,7 +36,7 @@ namespace WorkflowCore.Models
                     Prompt = Convert.ToString(pointer.ExtensionAttributes[UserTask.ExtPrompt]),
                     AssignedPrincipal = Convert.ToString(pointer.ExtensionAttributes[UserTask.ExtAssignPrincipal]),
                     Options = (pointer.ExtensionAttributes[UserTask.ExtUserOptions] as Dictionary<string, string>)
-                };                                
+                };
 
                 result.Add(item);
             }

@@ -69,10 +69,20 @@ namespace WorkflowCore.Services.BackgroundTasks
                         subs = await _subscriptionRepository.GetSubscriptions(evt.EventName, evt.EventKey, evt.EventTime, cancellationToken);
                     }
 
+                    var subList = subs.ToList();
+                    if (subList.Count == 0)
+                    {
+                        // No subscriber yet — leave the event unprocessed so a later WaitFor can
+                        // claim it in EventTime order. Greylist avoids a tight poller requeue loop
+                        // until TryProcessSubscription clears it when a subscription appears.
+                        _greylist.Add($"evt:{evt.Id}");
+                        return;
+                    }
+
                     var toQueue = new HashSet<string>();
                     var complete = true;
 
-                    foreach (var sub in subs.ToList())
+                    foreach (var sub in subList)
                         complete = complete && await SeedSubscription(evt, sub, toQueue, cancellationToken);
 
                     if (complete)
@@ -96,15 +106,22 @@ namespace WorkflowCore.Services.BackgroundTasks
         
         private async Task<bool> SeedSubscription(Event evt, EventSubscription sub, HashSet<string> toQueue, CancellationToken cancellationToken)
         {
+            var siblings = new List<Event>();
             foreach (var eventId in await _eventRepository.GetEvents(sub.EventName, sub.EventKey, sub.SubscribeAsOf, cancellationToken))
             {
-                if (eventId == evt.Id)
+                var siblingEvent = await _eventRepository.GetEvent(eventId, cancellationToken);
+                if (siblingEvent != null)
+                    siblings.Add(siblingEvent);
+            }
+
+            foreach (var siblingEvent in siblings.OrderBy(e => e.EventTime).ThenBy(e => e.Id))
+            {
+                if (siblingEvent.Id == evt.Id)
                     continue;
 
-                var siblingEvent = await _eventRepository.GetEvent(eventId, cancellationToken);
                 if ((!siblingEvent.IsProcessed) && (siblingEvent.EventTime < evt.EventTime))
                 {
-                    await QueueProvider.QueueWork(eventId, QueueType.Event);
+                    await QueueProvider.QueueWork(siblingEvent.Id, QueueType.Event);
                     return false;
                 }
 
