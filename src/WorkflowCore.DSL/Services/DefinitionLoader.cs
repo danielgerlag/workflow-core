@@ -267,6 +267,20 @@ namespace WorkflowCore.Services.DefinitionStorage
                     continue;
                 }
 
+                if (input.Value != null && (input.Value.GetType().IsPrimitive || input.Value is decimal))
+                {
+                    var primitiveValue = input.Value;
+                    void primitiveAction(IStepBody pStep, object pData)
+                    {
+                        if (stepProperty.PropertyType.IsAssignableFrom(primitiveValue.GetType()))
+                            stepProperty.SetValue(pStep, primitiveValue);
+                        else
+                            stepProperty.SetValue(pStep, System.Convert.ChangeType(primitiveValue, stepProperty.PropertyType));
+                    }
+                    step.Inputs.Add(new ActionParameter<IStepBody, object>(primitiveAction));
+                    continue;
+                }
+
                 throw new ArgumentException($"Unknown type for input {input.Key} on {source.Id}");
             }
         }
