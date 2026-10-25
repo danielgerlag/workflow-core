@@ -33,7 +33,13 @@ namespace WorkflowCore.Services.BackgroundTasks
             try
             {
                 var workflow = await FetchWorkflow(itemId);
-                
+                if (workflow == null)
+                {
+                    Logger.LogWarning("Workflow {ItemId} was not found and will not be indexed", itemId);
+                    _errorCounts.TryRemove(itemId, out _);
+                    return;
+                }
+
                 WorkflowActivity.Enrich(workflow, "index");
                 await _searchIndex.IndexWorkflow(workflow);
                 _errorCounts.TryRemove(itemId, out _);

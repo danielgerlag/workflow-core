@@ -49,6 +49,11 @@ namespace WorkflowCore.Services.BackgroundTasks
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 workflow = await _persistenceStore.GetWorkflowInstance(itemId, cancellationToken);
+                if (workflow == null)
+                {
+                    Logger.LogWarning("Workflow {ItemId} was not found and will not be processed", itemId);
+                    return;
+                }
 
                 WorkflowActivity.Enrich(workflow, "process");
                 if (workflow.Status == WorkflowStatus.Runnable)

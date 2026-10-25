@@ -194,6 +194,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             finally
             {
                 waitHandle.Set();
+                _secondPasses.TryRemove(itemId);
                 lock (_activeTasks)
                 {
                     _activeTasks.Remove(itemId);
