@@ -11,6 +11,7 @@ nav:
     - Persistence: persistence.md
     - Middleware: workflow-middleware.md
     - Multi-node clusters: multi-node-clusters.md
+    - Redis providers: redis.md
     - ASP.NET Core: using-with-aspnet-core.md
     - Elasticsearch plugin: elastic-search.md
     - Test helpers: test-helpers.md
