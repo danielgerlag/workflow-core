@@ -1,1 +1,7 @@
 * @danielgerlag @glucaci
+
+# Sensitive paths: Daniel tier (see .github/MAINTAINING.md)
+/.github/ @danielgerlag
+/src/Directory.Build.props @danielgerlag
+*.csproj @danielgerlag
+/src/WorkflowCore/Interface/ @danielgerlag

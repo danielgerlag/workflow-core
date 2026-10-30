@@ -1,0 +1,19 @@
+# Documentation only (not synced automatically). See MAINTAINING.md.
+- {name: "type:bug", color: d73a4a}
+- {name: "type:feature", color: a2eeef}
+- {name: "type:question", color: d876e3}
+- {name: "type:docs", color: 0075ca}
+- {name: needs-repro, color: fbca04}
+- {name: needs-daniel, color: b60205}
+- {name: "bot:proposed", color: c5def5}
+- {name: good first issue, color: 7057ff}
+- {name: "area:redis", color: 1d76db}
+- {name: "area:postgres", color: 1d76db}
+- {name: "area:sqlserver", color: 1d76db}
+- {name: "area:mysql", color: 1d76db}
+- {name: "area:mongodb", color: 1d76db}
+- {name: "area:elasticsearch", color: 1d76db}
+- {name: "area:azure", color: 1d76db}
+- {name: "area:oracle", color: 1d76db}
+- {name: "area:ef", color: 1d76db}
+- {name: "area:dsl", color: 1d76db}
