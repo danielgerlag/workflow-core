@@ -45,6 +45,7 @@ allowed (at most 2 re-runs), and every flake found must get an issue labelled `t
 |---|---|
 | `type:bug` / `type:feature` / `type:question` / `type:docs` | Kind of item |
 | `area:redis`, `area:postgres`, `area:sqlserver`, `area:mysql`, `area:mongodb`, `area:elasticsearch`, `area:azure`, `area:oracle`, `area:ef`, `area:dsl` | Affected provider or area |
+| `flaky` | Intermittently failing test or CI job |
 | `needs-repro` | Waiting on the reporter for a minimal repro |
 | `needs-daniel` | A Daniel-tier decision is required |
 | `bot:proposed` | The bot proposed an action (shadow mode) and is waiting for confirmation |

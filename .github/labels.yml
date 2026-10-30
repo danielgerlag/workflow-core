@@ -17,3 +17,4 @@
 - {name: "area:oracle", color: 1d76db}
 - {name: "area:ef", color: 1d76db}
 - {name: "area:dsl", color: 1d76db}
+- {name: flaky, color: e99695}
