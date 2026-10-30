@@ -17,6 +17,7 @@ namespace WorkflowCore.Models
         internal TimeSpan IdleTime;
         internal TimeSpan ErrorRetryInterval;
         internal int MaxConcurrentWorkflows = Math.Max(Environment.ProcessorCount, 4);
+        internal int MaxWorkflowLoadAttempts = 5;
 
         public IServiceCollection Services { get; private set; }
 
@@ -83,6 +84,17 @@ namespace WorkflowCore.Models
         public void UseMaxConcurrentWorkflows(int maxConcurrentWorkflows)
         {
             MaxConcurrentWorkflows = maxConcurrentWorkflows;
+        }
+
+        /// <summary>
+        /// Number of consecutive times a workflow instance may fail to load from persistence
+        /// before this node stops retrying it until the host restarts.
+        /// </summary>
+        public void UseMaxWorkflowLoadAttempts(int maxWorkflowLoadAttempts)
+        {
+            if (maxWorkflowLoadAttempts < 1)
+                throw new ArgumentOutOfRangeException(nameof(maxWorkflowLoadAttempts));
+            MaxWorkflowLoadAttempts = maxWorkflowLoadAttempts;
         }
     }
         
