@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyTitle>Workflow Core extensions for Microsoft.Extensions.AI</AssemblyTitle>
+    <Authors>Daniel Gerlag</Authors>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>WorkflowCore.AI</AssemblyName>
+    <PackageId>WorkflowCore.AI</PackageId>
+    <PackageTags>workflow;.NET;Core;WorkflowCore;AI;LLM;IChatClient;Microsoft.Extensions.AI</PackageTags>
+    <PackageProjectUrl>https://github.com/danielgerlag/workflow-core</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/danielgerlag/workflow-core/blob/master/LICENSE.md</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/danielgerlag/workflow-core.git</RepositoryUrl>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <Description>A Workflow Core step that calls any model through the Microsoft.Extensions.AI IChatClient abstraction.</Description>
+    <LangVersion>8.0</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\WorkflowCore\WorkflowCore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.10.1" />
+  </ItemGroup>
+
+</Project>

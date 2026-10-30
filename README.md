@@ -149,6 +149,7 @@ These are also available as separate Nuget packages.
 
 ## Extensions
 
+* [Microsoft.Extensions.AI (IChatClient)](src/extensions/WorkflowCore.AI)
 * [Azure AI Foundry](src/extensions/WorkflowCore.AI.AzureFoundry)
 * [User (human) workflows](src/extensions/WorkflowCore.Users)
 
