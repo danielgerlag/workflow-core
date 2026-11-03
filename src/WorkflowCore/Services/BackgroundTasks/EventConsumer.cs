@@ -72,9 +72,16 @@ namespace WorkflowCore.Services.BackgroundTasks
                     var subList = subs.ToList();
                     if (subList.Count == 0)
                     {
-                        // No subscriber yet — leave the event unprocessed so a later WaitFor can
-                        // claim it in EventTime order. Greylist avoids a tight poller requeue loop
-                        // until TryProcessSubscription clears it when a subscription appears.
+                        // No subscriber yet. Within the retention window, leave the event unprocessed
+                        // so a later WaitFor can claim it in EventTime order (greylisted to avoid a
+                        // requeue loop). Once older than UnmatchedEventRetention, mark it processed
+                        // so it stops being polled (TimeSpan.Zero = pre-3.22 behaviour).
+                        if (_datetimeProvider.UtcNow - evt.EventTime >= Options.UnmatchedEventRetention)
+                        {
+                            Logger.LogDebug($"No subscriptions for event {evt.Id} after retention window, marking processed");
+                            await _eventRepository.MarkEventProcessed(itemId, cancellationToken);
+                            return;
+                        }
                         _greylist.Add($"evt:{evt.Id}");
                         return;
                     }
