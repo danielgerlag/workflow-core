@@ -116,7 +116,7 @@ namespace WorkflowCore.Services.BackgroundTasks
             }
         }
 
-        private async Task PollEvents()
+        internal async Task PollEvents()
         {
             var activity = WorkflowActivity.StartPoll("events");
             try
@@ -130,6 +130,14 @@ namespace WorkflowCore.Services.BackgroundTasks
                         var events = await _persistenceStore.GetRunnableEvents(_dateTimeProvider.Now);
                         foreach (var item in events.ToList())
                         {
+                            if (_greylist.Contains($"evt:{item}"))
+                            {
+                                _logger.LogDebug($"Got greylisted event {item}");
+                                continue;
+                            }
+                            _logger.LogDebug($"Got unprocessed event {item}");
+                            _greylist.Add($"evt:{item}");
+
                             if (_persistenceStore.SupportsScheduledCommands)
                             {
                                 try
@@ -148,13 +156,6 @@ namespace WorkflowCore.Services.BackgroundTasks
                                     activity?.AddException(ex);
                                 }
                             }
-                            if (_greylist.Contains($"evt:{item}"))
-                            {
-                                _logger.LogDebug($"Got greylisted event {item}");
-                                continue;
-                            }
-                            _logger.LogDebug($"Got unprocessed event {item}");
-                            _greylist.Add($"evt:{item}");
                             await _queueProvider.QueueWork(item, QueueType.Event);
                         }
                     }
