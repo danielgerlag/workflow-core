@@ -105,6 +105,14 @@ namespace WorkflowCore.Services.BackgroundTasks
                         await QueueProvider.QueueWork(eventId, QueueType.Event);
                 }
             }
+            catch (Exception ex) when (!(ex is OperationCanceledException))
+            {
+                // The poller greylists an event before enqueueing it. If processing fails
+                // transiently, clear that entry so the next poll retries it instead of waiting
+                // out the greylist TTL. Unmatched events return above and stay greylisted.
+                _greylist.Remove($"evt:{itemId}");
+                throw;
+            }
             finally
             {
                 await _lockProvider.ReleaseLock($"evt:{itemId}");

@@ -93,6 +93,63 @@ namespace WorkflowCore.UnitTests.Services.BackgroundTasks
             scheduled.MustHaveHappenedOnceExactly();
         }
 
+        [Fact(DisplayName = "Transient processing failure clears the greylist entry so the next poll retries")]
+        public async Task failure_clears_greylist()
+        {
+            _greylist.Add($"evt:{EventId}");
+            A.CallTo(() => _persistence.GetEvent(EventId, A<CancellationToken>._)).Throws(new TimeoutException("db down"));
+
+            await Assert.ThrowsAsync<TimeoutException>(() => Consumer().Process(EventId));
+
+            Assert.False(_greylist.Contains($"evt:{EventId}"));
+        }
+
+        [Fact(DisplayName = "Subscription lookup failure clears the greylist entry")]
+        public async Task subscription_failure_clears_greylist()
+        {
+            _greylist.Add($"evt:{EventId}");
+            GivenEventAged(TimeSpan.FromMinutes(1));
+            A.CallTo(() => _persistence.GetSubscriptions(A<string>._, A<string>._, A<DateTime>._, A<CancellationToken>._))
+                .Throws(new TimeoutException("db down"));
+
+            await Assert.ThrowsAsync<TimeoutException>(() => Consumer().Process(EventId));
+
+            Assert.False(_greylist.Contains($"evt:{EventId}"));
+        }
+
+        [Fact(DisplayName = "Unmatched event polled by a scheduled-command provider stays greylisted within retention")]
+        public async Task unmatched_stays_greylisted_after_poll()
+        {
+            A.CallTo(() => _persistence.SupportsScheduledCommands).Returns(true);
+            A.CallTo(() => _persistence.GetRunnableEvents(A<DateTime>._, A<CancellationToken>._)).Returns(new[] { EventId });
+            GivenEventAged(TimeSpan.FromMinutes(1));
+            var poller = new RunnablePoller(_persistence, _queue, new LoggerFactory(), A.Fake<IServiceProvider>(), A.Fake<IWorkflowRegistry>(),
+                new SingleNodeLockProvider(), _greylist, _clock, _options);
+
+            await poller.PollEvents();
+            await Consumer().Process(EventId);
+            await poller.PollEvents();
+
+            Assert.True(_greylist.Contains($"evt:{EventId}"));
+            A.CallTo(() => _persistence.ScheduleCommand(A<ScheduledCommand>._)).MustHaveHappenedOnceExactly();
+        }
+
+        [Fact(DisplayName = "After a processing failure a scheduled-command provider reschedules the event on the next poll")]
+        public async Task failure_reschedules_on_next_poll()
+        {
+            A.CallTo(() => _persistence.SupportsScheduledCommands).Returns(true);
+            A.CallTo(() => _persistence.GetRunnableEvents(A<DateTime>._, A<CancellationToken>._)).Returns(new[] { EventId });
+            A.CallTo(() => _persistence.GetEvent(EventId, A<CancellationToken>._)).Throws(new TimeoutException("db down"));
+            var poller = new RunnablePoller(_persistence, _queue, new LoggerFactory(), A.Fake<IServiceProvider>(), A.Fake<IWorkflowRegistry>(),
+                new SingleNodeLockProvider(), _greylist, _clock, _options);
+
+            await poller.PollEvents();
+            await Assert.ThrowsAsync<TimeoutException>(() => Consumer().Process(EventId));
+            await poller.PollEvents();
+
+            A.CallTo(() => _persistence.ScheduleCommand(A<ScheduledCommand>._)).MustHaveHappenedTwiceExactly();
+        }
+
         private class TestableEventConsumer : EventConsumer
         {
             public TestableEventConsumer(IPersistenceProvider p, IQueueProvider q, WorkflowOptions o, IDateTimeProvider c, IGreyList g)
