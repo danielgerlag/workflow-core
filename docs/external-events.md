@@ -26,6 +26,16 @@ host.PublishEvent("MyEvent", "0", "hello");
 You can also specify an effective date when waiting for events, which allows you to respond to events that may have already occurred in the past, or only ones that occur after the effective date.
 
 
+## Events with no waiting workflow
+
+If an event is published and no workflow is waiting for it yet, it is kept unprocessed for a short window so that a workflow which starts waiting shortly afterwards can still receive it. After that window it is marked processed. The default is 5 minutes; set `TimeSpan.Zero` to mark such events processed immediately (the behaviour before 3.22.0).
+
+```C#
+services.AddWorkflow(options => options.UseUnmatchedEventRetention(TimeSpan.FromMinutes(1)));
+```
+
+The event is re-checked when the poller next picks it up, so in practice it is marked processed within a few minutes after the window ends.
+
 ## JSON / YAML API
 
 The `.WaitFor` can be implemented using inputs as follows

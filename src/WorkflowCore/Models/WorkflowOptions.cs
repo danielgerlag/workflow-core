@@ -18,6 +18,7 @@ namespace WorkflowCore.Models
         internal TimeSpan ErrorRetryInterval;
         internal int MaxConcurrentWorkflows = Math.Max(Environment.ProcessorCount, 4);
         internal int MaxWorkflowLoadAttempts = 5;
+        internal TimeSpan UnmatchedEventRetention = TimeSpan.FromMinutes(5);
 
         public IServiceCollection Services { get; private set; }
 
@@ -95,6 +96,19 @@ namespace WorkflowCore.Models
             if (maxWorkflowLoadAttempts < 1)
                 throw new ArgumentOutOfRangeException(nameof(maxWorkflowLoadAttempts));
             MaxWorkflowLoadAttempts = maxWorkflowLoadAttempts;
+        }
+
+        /// <summary>
+        /// How long a published event with no matching subscription is kept unprocessed so that a
+        /// workflow which starts waiting for it shortly afterwards can still consume it.
+        /// After this window the event is marked processed. TimeSpan.Zero marks it processed
+        /// immediately (behaviour prior to 3.22.0). Default is 5 minutes.
+        /// </summary>
+        public void UseUnmatchedEventRetention(TimeSpan retention)
+        {
+            if (retention < TimeSpan.Zero)
+                throw new ArgumentOutOfRangeException(nameof(retention));
+            UnmatchedEventRetention = retention;
         }
     }
         
